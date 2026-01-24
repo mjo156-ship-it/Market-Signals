@@ -2,9 +2,8 @@ name: Signal Monitor
 
 on:
   schedule:
-    # Runs at 9:35 PM UTC (4:35 PM Eastern) every weekday
     - cron: '35 21 * * 1-5'
-  workflow_dispatch:  # Allows manual trigger for testing
+  workflow_dispatch:
 
 jobs:
   check-signals:
