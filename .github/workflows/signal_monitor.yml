@@ -1,0 +1,31 @@
+name: Signal Monitor
+
+on:
+  schedule:
+    # Runs at 9:35 PM UTC (4:35 PM Eastern) every weekday
+    - cron: '35 21 * * 1-5'
+  workflow_dispatch:  # Allows manual trigger for testing
+
+jobs:
+  check-signals:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install yfinance pandas numpy
+    
+    - name: Run signal monitor
+      env:
+        SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+        SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+        RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+      run: python signal_monitor.py
