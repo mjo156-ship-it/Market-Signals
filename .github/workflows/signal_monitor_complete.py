@@ -21,6 +21,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import smtplib
+import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
@@ -29,9 +30,9 @@ from datetime import datetime, timedelta
 # CONFIGURATION - EDIT THESE
 # =============================================================================
 
-SENDER_EMAIL = "your.email@gmail.com"       # Your Gmail address
-SENDER_PASSWORD = "xxxx xxxx xxxx xxxx"     # Gmail App Password
-RECIPIENT_EMAIL = "your.email@gmail.com"    # Where to receive alerts
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL', '')
+SENDER_PASSWORD = os.environ.get('SENDER_PASSWORD', '')
+RECIPIENT_EMAIL = os.environ.get('RECIPIENT_EMAIL', '')
 
 # Optional SMS (leave empty to skip)
 PHONE_EMAIL = ""  # e.g., "5551234567@vtext.com"
