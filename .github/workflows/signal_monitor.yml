@@ -59,7 +59,7 @@ jobs:
           PHONE_EMAIL: ${{ secrets.PHONE_EMAIL }}
         run: |
           if [ "${{ steps.mode.outputs.mode }}" == "preclose" ]; then
-            python signal_monitor_v2.py preclose
+            python .github/workflows/signal_monitor_complete.py preclose
           else
-            python signal_monitor_v2.py
+            python .github/workflows/signal_monitor_complete.py
           fi
