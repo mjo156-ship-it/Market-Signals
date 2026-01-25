@@ -1,46 +1,49 @@
 #!/usr/bin/env python3
 """
-Quantitative Signal Monitor
-Complete monitoring of all backtested trading signals
+Comprehensive Market Signal Monitor v2.0
+========================================
+Monitors all backtested trading signals and sends alerts.
 
-Signals included:
-- SOXL long-term accumulation (days below SMA200, RSI50)
-- SOXL/SMH top signals (% above SMA200, death cross)
-- Defensive rotation (XLP/XLU/XLV overbought → TQQQ)
-- Volatility hedge (QQQ/SPY overbought → UVXY/VIXY)
-- Dip-buy signals (QQQ/SMH oversold → TQQQ/SOXL)
-- Credit signals (LQD/HYG overbought → TQQQ)
-- Oil shorts (UCO overbought → SCO)
-- EM/China signals (EDC/YINN overbought → UVXY)
-- Gold oversold (GLD → TQQQ)
+SCHEDULE: Two emails daily (weekdays)
+- 3:15 PM ET: Pre-close preview
+- 4:05 PM ET: Market close confirmation
 
-Setup instructions at bottom of file
+Signals monitored:
+- SOXL/SMH long-term accumulation & exit signals
+- GLD/USDU combo (TQQQ, UPRO, AMD, NVDA)
+- Triple signal: GLD + USDU + XLP
+- Defensive rotation signals
+- Volatility hedge signals
+- SOXS short signals
+- BTC signals
+- UPRO entry/exit signals
 """
 
+import os
 import yfinance as yf
 import pandas as pd
 import numpy as np
 import smtplib
-import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
+import sys
 
 # =============================================================================
-# CONFIGURATION - EDIT THESE
+# CONFIGURATION - Read from environment variables
 # =============================================================================
-
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL', '')
 SENDER_PASSWORD = os.environ.get('SENDER_PASSWORD', '')
 RECIPIENT_EMAIL = os.environ.get('RECIPIENT_EMAIL', '')
+PHONE_EMAIL = os.environ.get('PHONE_EMAIL', '')  # Optional SMS
 
-# Optional SMS (leave empty to skip)
-PHONE_EMAIL = ""  # e.g., "5551234567@vtext.com"
+# Check if this is pre-close (3:15) or post-close (4:05) run
+# Pass 'preclose' as command line argument for 3:15 run
+IS_PRECLOSE = len(sys.argv) > 1 and sys.argv[1] == 'preclose'
 
 # =============================================================================
 # CALCULATIONS
 # =============================================================================
-
 def calculate_rsi_wilder(prices, period):
     """Calculate Wilder's RSI"""
     delta = prices.diff()
@@ -52,412 +55,460 @@ def calculate_rsi_wilder(prices, period):
     return 100 - (100 / (1 + rs))
 
 def calculate_sma(prices, period):
+    """Calculate Simple Moving Average"""
     return prices.rolling(window=period).mean()
 
 def calculate_ema(prices, period):
+    """Calculate Exponential Moving Average"""
     return prices.ewm(span=period, adjust=False).mean()
 
-def get_data():
-    """Download all required data"""
-    tickers = [
-        'SMH', 'QQQ', 'SPY', 'IWM',           # Equity indexes
-        'XLP', 'XLU', 'XLV',                   # Defensive sectors
-        'HYG', 'LQD', 'TLT',                   # Credit/Bonds
-        'UCO', 'GLD',                          # Commodities
-        'EDC', 'YINN',                         # EM/China
-        '^VIX'                                 # Volatility
-    ]
-    
+def download_data(tickers, period='2y'):
+    """Download data for multiple tickers"""
     data = {}
     for ticker in tickers:
         try:
-            df = yf.download(ticker, period="2y", progress=False)
-            if not df.empty:
-                df.columns = df.columns.get_level_values(0)
-                data[ticker.replace('^', '')] = df['Close']
-        except:
-            pass
-    
-    return pd.DataFrame(data)
+            df = yf.download(ticker, period=period, progress=False)
+            if len(df) > 0:
+                data[ticker] = df
+        except Exception as e:
+            print(f"Error downloading {ticker}: {e}")
+    return data
 
-def analyze_signals(df):
-    """Analyze all signals and return alerts"""
-    
+# =============================================================================
+# SIGNAL CHECKS
+# =============================================================================
+def check_signals(data):
+    """Check all signals and return alerts"""
     alerts = []
-    status_lines = []
+    status = {}
     
-    # Calculate indicators for each ticker
+    # Calculate indicators for all tickers
     indicators = {}
-    
-    for ticker in df.columns:
-        prices = df[ticker].dropna()
-        if len(prices) < 200:
+    for ticker, df in data.items():
+        if len(df) < 200:
             continue
+        close = df['Close']
+        indicators[ticker] = {
+            'price': close.iloc[-1],
+            'rsi10': calculate_rsi_wilder(close, 10).iloc[-1],
+            'rsi50': calculate_rsi_wilder(close, 50).iloc[-1],
+            'sma200': calculate_sma(close, 200).iloc[-1],
+            'sma50': calculate_sma(close, 50).iloc[-1],
+            'ema21': calculate_ema(close, 21).iloc[-1],
+        }
+        # Calculate % above SMA200
+        if indicators[ticker]['sma200'] > 0:
+            indicators[ticker]['pct_above_sma200'] = (close.iloc[-1] / indicators[ticker]['sma200'] - 1) * 100
+        else:
+            indicators[ticker]['pct_above_sma200'] = 0
+    
+    # Store indicators for status report
+    status['indicators'] = indicators
+    
+    # =========================================================================
+    # SIGNAL GROUP 1: SOXL/SMH Long-Term Signals
+    # =========================================================================
+    if 'SMH' in indicators:
+        smh = indicators['SMH']
+        
+        # EXIT Signals
+        if smh['pct_above_sma200'] >= 40:
+            alerts.append(('🔴 SOXL EXIT', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - SELL SOXL", 'exit'))
+        elif smh['pct_above_sma200'] >= 35:
+            alerts.append(('🟡 SOXL WARNING', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - Approaching sell zone", 'warning'))
+        elif smh['pct_above_sma200'] >= 30:
+            alerts.append(('🟡 SOXL TRIM', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - Consider trimming 25-50%", 'warning'))
+        
+        # Death Cross
+        if smh['sma50'] < smh['sma200']:
+            alerts.append(('🔴 DEATH CROSS', f"SMH SMA(50) below SMA(200) - Bearish trend", 'exit'))
+        
+        # BUY Signals - Days below SMA200
+        if 'SMH' in data:
+            smh_df = data['SMH']
+            close = smh_df['Close']
+            sma200 = calculate_sma(close, 200)
+            below_sma = close < sma200
             
-        ind = {}
-        ind['price'] = prices.iloc[-1]
-        ind['prev_price'] = prices.iloc[-2]
-        
-        # RSI
-        ind['RSI5'] = calculate_rsi_wilder(prices, 5).iloc[-1]
-        ind['RSI10'] = calculate_rsi_wilder(prices, 10).iloc[-1]
-        ind['RSI14'] = calculate_rsi_wilder(prices, 14).iloc[-1]
-        ind['RSI50'] = calculate_rsi_wilder(prices, 50).iloc[-1]
-        
-        # Moving averages
-        ind['SMA50'] = calculate_sma(prices, 50).iloc[-1]
-        ind['SMA200'] = calculate_sma(prices, 200).iloc[-1]
-        ind['EMA21'] = calculate_ema(prices, 21).iloc[-1]
-        
-        # Percent from SMA200
-        ind['pct_SMA200'] = (ind['price'] / ind['SMA200'] - 1) * 100
-        ind['pct_EMA21'] = (ind['price'] / ind['EMA21'] - 1) * 100
-        
-        # Days below/above SMA200
-        below_sma = (prices < calculate_sma(prices, 200)).astype(int)
-        days_below = 0
-        for val in below_sma.iloc[::-1]:
-            if val == 1:
-                days_below += 1
-            else:
-                break
-        ind['days_below_SMA200'] = days_below
-        
-        above_sma = (prices > calculate_sma(prices, 200)).astype(int)
-        days_above = 0
-        for val in above_sma.iloc[::-1]:
-            if val == 1:
-                days_above += 1
-            else:
-                break
-        ind['days_above_SMA200'] = days_above
-        
-        # Death cross check
-        sma50_series = calculate_sma(prices, 50)
-        sma200_series = calculate_sma(prices, 200)
-        ind['death_cross'] = (sma50_series.iloc[-1] < sma200_series.iloc[-1]) and \
-                            (sma50_series.iloc[-2] >= sma200_series.iloc[-2])
-        ind['golden_cross'] = (sma50_series.iloc[-1] > sma200_series.iloc[-1]) and \
-                             (sma50_series.iloc[-2] <= sma200_series.iloc[-2])
-        ind['below_SMA200'] = ind['price'] < ind['SMA200']
-        
-        indicators[ticker] = ind
+            # Count consecutive days below
+            days_below = 0
+            for i in range(len(below_sma)-1, -1, -1):
+                if below_sma.iloc[i]:
+                    days_below += 1
+                else:
+                    break
+            
+            if days_below >= 100:
+                if smh['rsi50'] < 45:
+                    alerts.append(('🟢 SOXL STRONG BUY', f"SMH {days_below} days below SMA(200) + RSI(50)={smh['rsi50']:.1f} < 45 | 97% win, +81% avg", 'buy'))
+                else:
+                    alerts.append(('🟢 SOXL ACCUMULATE', f"SMH {days_below} days below SMA(200) | 85% win, +54% avg", 'buy'))
+            
+            status['smh_days_below_sma200'] = days_below
     
     # =========================================================================
-    # TIER 1: SOXL LONG-TERM SIGNALS (Your accumulation strategy)
+    # SIGNAL GROUP 2: GLD/USDU Combo Signals (MAJOR DISCOVERY)
     # =========================================================================
-    
-    if 'SMH' in indicators:
-        smh = indicators['SMH']
+    if 'GLD' in indicators and 'USDU' in indicators:
+        gld = indicators['GLD']
+        usdu = indicators['USDU']
         
-        # SELL SIGNALS
-        if smh['pct_SMA200'] >= 40:
-            alerts.append("🔴 SOXL SELL: SMH 40%+ above SMA(200)!")
-            alerts.append(f"   Currently: {smh['pct_SMA200']:.1f}% | Historical 3m win: 26%")
-            alerts.append("   → EXIT most/all SOXL position")
-        elif smh['pct_SMA200'] >= 35:
-            alerts.append("🟡 SOXL WARNING: SMH 35%+ above SMA(200)")
-            alerts.append(f"   Currently: {smh['pct_SMA200']:.1f}% | Approaching 40% sell zone")
-        elif smh['pct_SMA200'] >= 30:
-            alerts.append("🟡 SOXL TRIM: SMH 30%+ above SMA(200)")
-            alerts.append(f"   Currently: {smh['pct_SMA200']:.1f}% | Consider reducing 25-50%")
+        # Double Signal: GLD > 79 AND USDU < 25
+        if gld['rsi10'] > 79 and usdu['rsi10'] < 25:
+            alerts.append(('🟢🔥 DOUBLE SIGNAL ACTIVE', 
+                f"GLD RSI={gld['rsi10']:.1f} > 79 AND USDU RSI={usdu['rsi10']:.1f} < 25\n"
+                f"   → Long TQQQ: 88% win, +7% avg (5d)\n"
+                f"   → Long UPRO: 85% win, +5.2% avg (5d)\n"
+                f"   → AMD/NVDA: 86% win, +5-8% avg (5d)", 'buy'))
+            
+            # Triple Signal: Add XLP > 65
+            if 'XLP' in indicators and indicators['XLP']['rsi10'] > 65:
+                xlp = indicators['XLP']
+                alerts.append(('🟢🔥🔥 TRIPLE SIGNAL ACTIVE', 
+                    f"GLD RSI={gld['rsi10']:.1f} + USDU RSI={usdu['rsi10']:.1f} + XLP RSI={xlp['rsi10']:.1f}\n"
+                    f"   → Long TQQQ: 100% win, +11.6% avg (5d) - RARE!", 'buy'))
         
-        if smh['death_cross']:
-            alerts.append("🔴 SOXL SELL: Death Cross (SMA50 < SMA200)!")
-            alerts.append("   Historical 3m win: 43% | → EXIT position")
-        
-        if smh['below_SMA200'] and not indicators['SMH'].get('prev_below', True):
-            alerts.append("🔴 SOXL WARNING: Price crossed below SMA(200)")
-        
-        # BUY SIGNALS
-        if smh['days_below_SMA200'] >= 100:
-            alerts.append(f"🟢 SOXL ACCUMULATE: {smh['days_below_SMA200']} days below SMA(200)")
-            alerts.append("   Historical 6m win: 85% | → Accumulate SOXL")
-            if smh['RSI50'] < 45:
-                alerts.append("   + RSI(50) < 45 = STRONG BUY (97% win rate)")
-        elif smh['days_below_SMA200'] >= 50:
-            alerts.append(f"🟡 SOXL WATCH: {smh['days_below_SMA200']} days below SMA(200)")
-            alerts.append("   Approaching 100-day accumulation signal")
-        
-        if smh['RSI50'] < 40 and smh['days_below_SMA200'] < 50:
-            alerts.append(f"🟡 SOXL ALERT: RSI(50) = {smh['RSI50']:.1f} (oversold)")
-            alerts.append("   Better when combined with days below SMA200")
+        # Individual GLD overbought (weaker but still valid)
+        elif gld['rsi10'] > 79:
+            alerts.append(('🟢 GLD OVERBOUGHT', 
+                f"GLD RSI={gld['rsi10']:.1f} > 79 → Long TQQQ: 72% win, +3.2% avg (5d)", 'buy'))
     
     # =========================================================================
-    # TIER 2: DEFENSIVE ROTATION (XLP/XLU/XLV → TQQQ)
+    # SIGNAL GROUP 3: Defensive Rotation (XLP/XLU/XLV)
     # =========================================================================
+    defensive_ob = False
+    for ticker in ['XLP', 'XLU', 'XLV']:
+        if ticker in indicators and indicators[ticker]['rsi10'] > 79:
+            defensive_ob = True
+            break
     
-    xlp_ob = indicators.get('XLP', {}).get('RSI10', 0) > 79
-    xlu_ob = indicators.get('XLU', {}).get('RSI10', 0) > 79
-    xlv_ob = indicators.get('XLV', {}).get('RSI10', 0) > 79
-    spy_ob = indicators.get('SPY', {}).get('RSI10', 0) > 79
-    qqq_ob = indicators.get('QQQ', {}).get('RSI10', 0) > 79
-    
-    vix = indicators.get('VIX', {}).get('price', 20)
-    
-    defensives_ob = sum([xlp_ob, xlu_ob, xlv_ob])
-    
-    if defensives_ob >= 1 and not spy_ob and not qqq_ob and vix < 30:
-        ob_names = []
-        if xlp_ob: ob_names.append(f"XLP={indicators['XLP']['RSI10']:.0f}")
-        if xlu_ob: ob_names.append(f"XLU={indicators['XLU']['RSI10']:.0f}")
-        if xlv_ob: ob_names.append(f"XLV={indicators['XLV']['RSI10']:.0f}")
+    if defensive_ob:
+        spy_ob = 'SPY' in indicators and indicators['SPY']['rsi10'] > 79
+        qqq_ob = 'QQQ' in indicators and indicators['QQQ']['rsi10'] > 79
+        vix_ok = '^VIX' in indicators and indicators['^VIX']['price'] < 30
         
-        alerts.append(f"🟢 DEFENSIVE ROTATION: {', '.join(ob_names)} RSI(10) > 79")
-        alerts.append(f"   SPY/QQQ not overbought, VIX={vix:.1f}")
-        alerts.append("   → Long TQQQ, hold 20 days | Win: 70%, Avg: +5%")
+        if not spy_ob and not qqq_ob and (vix_ok or '^VIX' not in indicators):
+            alerts.append(('🟢 DEFENSIVE ROTATION', 
+                f"Defensive sector overbought, SPY/QQQ not → Long TQQQ 20d: 70% win, +5% avg", 'buy'))
     
     # =========================================================================
-    # TIER 3: VOLATILITY HEDGE (QQQ/SPY overbought → UVXY/VIXY)
+    # SIGNAL GROUP 4: Volatility Hedge Signals
     # =========================================================================
-    
     if 'QQQ' in indicators:
         qqq = indicators['QQQ']
-        spy = indicators.get('SPY', {})
+        spy_ob = 'SPY' in indicators and indicators['SPY']['rsi10'] > 79
         
-        if qqq.get('RSI10', 0) > 79:
-            alerts.append(f"🟢 VOL SIGNAL: QQQ RSI(10) = {qqq['RSI10']:.1f} > 79")
-            alerts.append("   → Long UVXY 5 days | CAGR: +33%, Win: 67%")
-        elif spy.get('RSI10', 0) > 79 and qqq.get('RSI10', 0) <= 79:
-            alerts.append(f"🟢 VOL SIGNAL: SPY RSI(10) = {spy['RSI10']:.1f} > 79 (QQQ not)")
-            alerts.append("   → Long VIXY 5 days")
+        # QQQ overbought → UVXY
+        if qqq['rsi10'] > 79:
+            alerts.append(('🟡 VOL HEDGE', 
+                f"QQQ RSI={qqq['rsi10']:.1f} > 79 → Long UVXY 5d: 67% win, +33% CAGR", 'hedge'))
+        
+        # QQQ oversold → TQQQ dip buy
+        if qqq['rsi10'] < 20:
+            alerts.append(('🟢 QQQ DIP BUY', 
+                f"QQQ RSI={qqq['rsi10']:.1f} < 20 → Long TQQQ 5d: 69% win, +26% CAGR", 'buy'))
     
     # =========================================================================
-    # TIER 4: DIP-BUY SIGNALS (Oversold → TQQQ/SOXL)
+    # SIGNAL GROUP 5: SOXS Short Signals (Short Semis)
     # =========================================================================
-    
-    if 'QQQ' in indicators:
-        qqq = indicators['QQQ']
-        
-        if qqq.get('RSI5', 50) < 20:
-            alerts.append(f"🟢 DIP-BUY: QQQ RSI(5) = {qqq['RSI5']:.1f} < 20")
-            alerts.append("   → Long TQQQ 5 days | CAGR: +26%, Win: 69%")
-        elif qqq.get('RSI10', 50) < 25:
-            alerts.append(f"🟢 DIP-BUY: QQQ RSI(10) = {qqq['RSI10']:.1f} < 25")
-            alerts.append("   → Long TQQQ 5 days | CAGR: +20%, Win: 76%")
-    
-    if 'SMH' in indicators:
+    if 'SMH' in indicators and 'USDU' in indicators:
         smh = indicators['SMH']
+        usdu = indicators['USDU']
         
-        if smh.get('RSI5', 50) < 20:
-            alerts.append(f"🟢 SEMI DIP-BUY: SMH RSI(5) = {smh['RSI5']:.1f} < 20")
-            alerts.append("   → Long SOXL 10 days | CAGR: +21%, Win: 59%")
+        # SMH overbought + Dollar strong → SOXS
+        if smh['rsi10'] > 79 and usdu['rsi10'] > 70:
+            alerts.append(('🔴 SOXS SIGNAL', 
+                f"SMH RSI={smh['rsi10']:.1f} > 79 AND USDU RSI={usdu['rsi10']:.1f} > 70\n"
+                f"   → Long SOXS 5d: 100% win, +9.5% avg", 'short'))
+        
+        # SMH overbought + Small caps weak
+        if 'IWM' in indicators and smh['rsi10'] > 79 and indicators['IWM']['rsi10'] < 50:
+            alerts.append(('🔴 SOXS DIVERGENCE', 
+                f"SMH RSI={smh['rsi10']:.1f} > 79 AND IWM RSI={indicators['IWM']['rsi10']:.1f} < 50\n"
+                f"   → Long SOXS 5d: 86% win, +6.9% avg (narrow leadership)", 'short'))
     
     # =========================================================================
-    # TIER 5: CREDIT SIGNALS (LQD/HYG overbought → TQQQ)
+    # SIGNAL GROUP 6: Credit Signals
     # =========================================================================
-    
     if 'LQD' in indicators:
         lqd = indicators['LQD']
-        if lqd.get('RSI10', 0) > 79:
-            alerts.append(f"🟢 CREDIT RISK-ON: LQD RSI(10) = {lqd['RSI10']:.1f} > 79")
-            alerts.append("   → Long TQQQ 10 days | CAGR: +19%, Win: 84%")
-    
-    if 'HYG' in indicators:
-        hyg = indicators['HYG']
-        if hyg.get('RSI10', 0) > 79:
-            alerts.append(f"🟢 CREDIT RISK-ON: HYG RSI(10) = {hyg['RSI10']:.1f} > 79")
-            alerts.append("   → Long TQQQ 10 days | Win: 79%")
+        if lqd['rsi10'] > 79:
+            alerts.append(('🟢 CREDIT SIGNAL', 
+                f"LQD RSI={lqd['rsi10']:.1f} > 79 → Long TQQQ 10d: 84% win", 'buy'))
     
     # =========================================================================
-    # TIER 6: OIL SHORT SIGNALS (UCO overbought → SCO)
+    # SIGNAL GROUP 7: EM/China Volatility Signal
     # =========================================================================
+    edc_ob = 'EDC' in indicators and indicators['EDC']['rsi10'] > 79
+    yinn_ob = 'YINN' in indicators and indicators['YINN']['rsi10'] > 79
     
+    if edc_ob or yinn_ob:
+        alerts.append(('🟡 EM OVERBOUGHT → VOL', 
+            f"EDC/YINN overbought → Long UVXY 5d: 77% win, +6% avg", 'hedge'))
+    
+    # =========================================================================
+    # SIGNAL GROUP 8: Oil Short Signal
+    # =========================================================================
     if 'UCO' in indicators:
         uco = indicators['UCO']
+        pct_above_ema21 = (uco['price'] / uco['ema21'] - 1) * 100
+        if pct_above_ema21 > 15:
+            alerts.append(('🔴 OIL SHORT', 
+                f"UCO {pct_above_ema21:.1f}% above EMA(21) → Long SCO 1d: 76% win", 'short'))
+    
+    # =========================================================================
+    # SIGNAL GROUP 9: BTC Signals
+    # =========================================================================
+    if 'BTC-USD' in indicators:
+        btc = indicators['BTC-USD']
         
-        if uco.get('pct_EMA21', 0) > 15:
-            alerts.append(f"🟢 OIL SHORT: UCO {uco['pct_EMA21']:.1f}% above EMA(21)")
-            alerts.append("   → Long SCO 1 day | Win: 76%")
-        elif uco.get('RSI10', 0) > 85:
-            alerts.append(f"🟢 OIL SHORT: UCO RSI(10) = {uco['RSI10']:.1f} > 85")
-            alerts.append("   → Long SCO 1 day | Win: 70%")
-    
-    if 'TLT' in indicators:
-        tlt = indicators['TLT']
-        if tlt.get('RSI10', 0) > 79:
-            alerts.append(f"🟢 OIL SHORT: TLT RSI(10) = {tlt['RSI10']:.1f} > 79 (flight to safety)")
-            alerts.append("   → Long SCO 10 days | CAGR: +19%")
-    
-    # =========================================================================
-    # TIER 7: EM/CHINA SIGNALS (Overbought → UVXY)
-    # =========================================================================
-    
-    edc_ob = indicators.get('EDC', {}).get('RSI10', 0) > 79
-    yinn_ob = indicators.get('YINN', {}).get('RSI10', 0) > 79
-    
-    if edc_ob and yinn_ob:
-        alerts.append("🟢 EM/CHINA FROTHY: EDC AND YINN RSI(10) > 79")
-        alerts.append("   → Long UVXY 1-2 days | Win: 77%")
-    elif edc_ob or yinn_ob:
-        which = "EDC" if edc_ob else "YINN"
-        val = indicators.get(which, {}).get('RSI10', 0)
-        alerts.append(f"🟡 EM/CHINA WATCH: {which} RSI(10) = {val:.1f} > 79")
-        alerts.append("   → Long UVXY 3 days | Win: 57%")
+        # BTC momentum (overbought = bullish for crypto!)
+        if btc['rsi10'] > 79:
+            alerts.append(('🟢 BTC MOMENTUM', 
+                f"BTC RSI={btc['rsi10']:.1f} > 79 → Hold/Add BTC: 67% win, +5.2% avg (5d)", 'buy'))
+        
+        # BTC dip buy with low vol
+        if btc['rsi10'] < 30:
+            uvxy_low = 'UVXY' in indicators and indicators['UVXY']['rsi10'] < 40
+            if uvxy_low:
+                alerts.append(('🟢 BTC DIP BUY', 
+                    f"BTC RSI={btc['rsi10']:.1f} < 30 AND UVXY < 40 → Buy BTC: 77% win, +4.1% avg (5d)", 'buy'))
+            else:
+                alerts.append(('🟡 BTC OVERSOLD', 
+                    f"BTC RSI={btc['rsi10']:.1f} < 30 (wait for UVXY < 40 for better signal)", 'watch'))
     
     # =========================================================================
-    # TIER 8: GOLD OVERSOLD (GLD → TQQQ)
+    # SIGNAL GROUP 10: UPRO Entry/Exit Signals
     # =========================================================================
-    
-    if 'GLD' in indicators:
-        gld = indicators['GLD']
-        if gld.get('RSI10', 50) < 21:
-            alerts.append(f"🟢 GOLD OVERSOLD: GLD RSI(10) = {gld['RSI10']:.1f} < 21")
-            alerts.append("   → Long TQQQ 10 days | CAGR: +19%, Win: 70%")
+    if 'SPY' in indicators:
+        spy = indicators['SPY']
+        
+        # UPRO Exit
+        if spy['rsi10'] > 85:
+            alerts.append(('🔴 UPRO EXIT', 
+                f"SPY RSI={spy['rsi10']:.1f} > 85 → Trim/Exit UPRO: Only 36% win, -3.5% avg (5d)", 'exit'))
+        elif spy['rsi10'] > 82:
+            alerts.append(('🟡 UPRO CAUTION', 
+                f"SPY RSI={spy['rsi10']:.1f} > 82 → Watch UPRO: 49% win at 5d", 'warning'))
+        
+        # UPRO Add
+        if spy['rsi10'] < 21:
+            alerts.append(('🟢 UPRO STRONG BUY', 
+                f"SPY RSI={spy['rsi10']:.1f} < 21 → Add UPRO: 94% win, +8.9% avg (5d)", 'buy'))
+        elif spy['rsi10'] < 25:
+            alerts.append(('🟢 UPRO BUY', 
+                f"SPY RSI={spy['rsi10']:.1f} < 25 → Add UPRO: 74% win, +3.9% avg (5d)", 'buy'))
+        elif spy['rsi10'] < 30:
+            alerts.append(('🟢 UPRO CONSIDER', 
+                f"SPY RSI={spy['rsi10']:.1f} < 30 → Consider UPRO: 69% win, +4.3% avg (5d)", 'buy'))
     
     # =========================================================================
-    # BUILD STATUS SUMMARY
+    # SIGNAL GROUP 11: AMD/NVDA Specific
     # =========================================================================
+    if 'AMD' in indicators:
+        amd = indicators['AMD']
+        if amd['rsi10'] > 85:
+            alerts.append(('🟡 AMD EXTENDED', 
+                f"AMD RSI={amd['rsi10']:.1f} > 85 → Consider taking profits", 'warning'))
     
-    status_lines.append("=" * 70)
-    status_lines.append(f"DAILY SIGNAL STATUS - {datetime.now().strftime('%Y-%m-%d')}")
-    status_lines.append("=" * 70)
-    status_lines.append("")
+    if 'NVDA' in indicators:
+        nvda = indicators['NVDA']
+        if nvda['rsi10'] > 85:
+            alerts.append(('🟡 NVDA EXTENDED', 
+                f"NVDA RSI={nvda['rsi10']:.1f} > 85 → Consider taking profits", 'warning'))
     
-    # SOXL Status
+    return alerts, status
+
+# =============================================================================
+# EMAIL FUNCTIONS
+# =============================================================================
+def format_email(alerts, status, is_preclose=False):
+    """Format the email body"""
+    now = datetime.now()
+    
+    timing = "PRE-CLOSE PREVIEW (3:15 PM)" if is_preclose else "MARKET CLOSE CONFIRMATION (4:05 PM)"
+    
+    body = f"""
+{'='*70}
+MARKET SIGNAL MONITOR - {timing}
+{now.strftime('%Y-%m-%d %H:%M')} ET
+{'='*70}
+
+"""
+    
+    if alerts:
+        # Group alerts by type
+        buy_alerts = [a for a in alerts if a[2] == 'buy']
+        exit_alerts = [a for a in alerts if a[2] in ['exit', 'short']]
+        warning_alerts = [a for a in alerts if a[2] in ['warning', 'hedge', 'watch']]
+        
+        if buy_alerts:
+            body += "🟢 BUY SIGNALS:\n" + "-"*50 + "\n"
+            for title, msg, _ in buy_alerts:
+                body += f"{title}\n{msg}\n\n"
+        
+        if exit_alerts:
+            body += "🔴 EXIT/SHORT SIGNALS:\n" + "-"*50 + "\n"
+            for title, msg, _ in exit_alerts:
+                body += f"{title}\n{msg}\n\n"
+        
+        if warning_alerts:
+            body += "🟡 WARNINGS/WATCH:\n" + "-"*50 + "\n"
+            for title, msg, _ in warning_alerts:
+                body += f"{title}\n{msg}\n\n"
+    else:
+        body += "No signals triggered today.\n\n"
+    
+    # Status summary
+    body += f"""
+{'='*70}
+CURRENT INDICATOR STATUS
+{'='*70}
+
+"""
+    
+    indicators = status.get('indicators', {})
+    
+    # Key indicators table
+    key_tickers = ['SPY', 'QQQ', 'SMH', 'GLD', 'USDU', 'XLP', 'UVXY', 'BTC-USD', 'AMD', 'NVDA']
+    body += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}\n"
+    body += "-"*50 + "\n"
+    
+    for ticker in key_tickers:
+        if ticker in indicators:
+            ind = indicators[ticker]
+            price = f"${ind['price']:.2f}" if ind['price'] < 1000 else f"${ind['price']:,.0f}"
+            rsi = f"{ind['rsi10']:.1f}"
+            pct = f"{ind.get('pct_above_sma200', 0):+.1f}%" if 'pct_above_sma200' in ind else "N/A"
+            body += f"{ticker:<10} {price:>12} {rsi:>10} {pct:>12}\n"
+    
+    # SMH specific status
     if 'SMH' in indicators:
         smh = indicators['SMH']
-        status_lines.append("SOXL/SMH STATUS:")
-        status_lines.append(f"  Price: ${smh['price']:.2f}")
-        status_lines.append(f"  % Above SMA(200): {smh['pct_SMA200']:+.1f}%")
-        status_lines.append(f"  RSI(50): {smh['RSI50']:.1f}")
-        status_lines.append(f"  Days Above SMA200: {smh['days_above_SMA200']}")
-        status_lines.append(f"  Days Below SMA200: {smh['days_below_SMA200']}")
-        status_lines.append(f"  30% Trim Level: ${smh['SMA200'] * 1.30:.2f}")
-        status_lines.append(f"  40% Sell Level: ${smh['SMA200'] * 1.40:.2f}")
-        status_lines.append("")
+        sma200 = smh['sma200']
+        body += f"""
+{'='*70}
+SMH/SOXL LEVELS
+{'='*70}
+Current Price:    ${smh['price']:.2f}
+SMA(200):         ${sma200:.2f}
+% Above SMA200:   {smh['pct_above_sma200']:+.1f}%
+Days Below SMA:   {status.get('smh_days_below_sma200', 0)}
+
+Key Levels:
+  30% (Trim):     ${sma200 * 1.30:.2f}
+  35% (Warning):  ${sma200 * 1.35:.2f}
+  40% (Sell):     ${sma200 * 1.40:.2f}
+"""
     
-    # Key RSI Levels
-    status_lines.append("KEY RSI(10) LEVELS:")
-    for ticker in ['QQQ', 'SPY', 'SMH', 'XLP', 'XLU', 'XLV', 'LQD', 'HYG', 'UCO', 'TLT', 'GLD']:
-        if ticker in indicators:
-            rsi = indicators[ticker].get('RSI10', 0)
-            flag = "🔴" if rsi > 79 else ("🟢" if rsi < 25 else "  ")
-            status_lines.append(f"  {flag} {ticker}: {rsi:.1f}")
+    if is_preclose:
+        body += f"""
+{'='*70}
+⚠️ NOTE: This is a PRE-CLOSE preview. Signals may change by market close.
+Final confirmation email will be sent at 4:05 PM ET.
+{'='*70}
+"""
     
-    status_lines.append("")
-    status_lines.append("RSI > 79 = Overbought | RSI < 25 = Oversold")
-    status_lines.append("=" * 70)
-    
-    return alerts, status_lines
+    return body
 
 def send_email(subject, body):
     """Send email alert"""
-    if not SENDER_EMAIL or SENDER_EMAIL == "your.email@gmail.com":
+    if not SENDER_EMAIL or not SENDER_PASSWORD or not RECIPIENT_EMAIL:
         print("Email not configured - printing to console:")
         print(f"Subject: {subject}")
         print(body)
-        return
-    
-    msg = MIMEMultipart()
-    msg['From'] = SENDER_EMAIL
-    msg['To'] = RECIPIENT_EMAIL
-    msg['Subject'] = subject
-    msg.attach(MIMEText(body, 'plain'))
+        return False
     
     try:
+        msg = MIMEMultipart()
+        msg['From'] = SENDER_EMAIL
+        msg['To'] = RECIPIENT_EMAIL
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+        
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        server.sendmail(SENDER_EMAIL, RECIPIENT_EMAIL, msg.as_string())
-        
-        if PHONE_EMAIL:
-            short_msg = MIMEText(body[:160])
-            short_msg['From'] = SENDER_EMAIL
-            short_msg['To'] = PHONE_EMAIL
-            short_msg['Subject'] = subject[:50]
-            server.sendmail(SENDER_EMAIL, PHONE_EMAIL, short_msg.as_string())
-        
+        server.send_message(msg)
         server.quit()
-        print(f"Alert sent to {RECIPIENT_EMAIL}")
+        
+        print(f"Email sent successfully to {RECIPIENT_EMAIL}")
+        
+        # Also send SMS if configured
+        if PHONE_EMAIL:
+            sms_msg = MIMEText(subject[:160])
+            sms_msg['From'] = SENDER_EMAIL
+            sms_msg['To'] = PHONE_EMAIL
+            sms_msg['Subject'] = ''
+            
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            server.send_message(sms_msg)
+            server.quit()
+        
+        return True
     except Exception as e:
         print(f"Email failed: {e}")
+        return False
 
+# =============================================================================
+# MAIN
+# =============================================================================
 def main():
-    """Main function"""
     print(f"Running signal check at {datetime.now()}")
+    print(f"Mode: {'PRE-CLOSE (3:15 PM)' if IS_PRECLOSE else 'MARKET CLOSE (4:05 PM)'}")
     
-    try:
-        df = get_data()
-        alerts, status = analyze_signals(df)
+    # Tickers to monitor
+    tickers = [
+        'SMH', 'SPY', 'QQQ', 'IWM',           # Major indices
+        'XLP', 'XLU', 'XLV',                   # Defensive sectors
+        'GLD', 'TLT', 'HYG', 'LQD',           # Safe havens & credit
+        'USDU', 'UCO',                         # Dollar & oil
+        'UVXY',                                # Volatility
+        'EDC', 'YINN',                         # EM/China
+        'BTC-USD',                             # Bitcoin
+        'AMD', 'NVDA',                         # Individual stocks
+        '^VIX',                                # VIX
+    ]
+    
+    # Download data
+    print("Downloading market data...")
+    data = download_data(tickers)
+    print(f"Downloaded data for {len(data)} tickers")
+    
+    # Check signals
+    alerts, status = check_signals(data)
+    
+    # Determine email subject
+    if alerts:
+        buy_count = len([a for a in alerts if a[2] == 'buy'])
+        exit_count = len([a for a in alerts if a[2] in ['exit', 'short']])
         
-        body_parts = []
-        if alerts:
-            body_parts.append("⚠️ SIGNALS DETECTED ⚠️")
-            body_parts.append("")
-            body_parts.extend(alerts)
-            body_parts.append("")
-        
-        body_parts.extend(status)
-        body = "\n".join(body_parts)
-        
-        # Determine priority
-        if any("🔴" in a for a in alerts):
-            subject = "🔴 SIGNAL ALERT: Action Required!"
-        elif any("🟢" in a for a in alerts):
-            subject = "🟢 SIGNAL ALERT: Trading Opportunity"
-        elif any("🟡" in a for a in alerts):
-            subject = "🟡 Signal Alert: Watch List"
+        if exit_count > 0:
+            emoji = "🔴"
+            urgency = "EXIT SIGNALS"
+        elif buy_count > 0:
+            emoji = "🟢"
+            urgency = "BUY SIGNALS"
         else:
-            subject = "Daily Signal Status"
-            # Uncomment to only send when signals fire:
-            # return
+            emoji = "🟡"
+            urgency = "WATCH"
         
-        send_email(subject, body)
-        
-    except Exception as e:
-        send_email("❌ Signal Monitor Error", f"Error: {e}")
+        timing = "PRE-CLOSE" if IS_PRECLOSE else "CLOSE"
+        subject = f"{emoji} [{timing}] Market Signals: {len(alerts)} Alert(s) - {urgency}"
+    else:
+        timing = "PRE-CLOSE" if IS_PRECLOSE else "CLOSE"
+        subject = f"📊 [{timing}] Market Signals: No Alerts"
+    
+    # Format and send email
+    body = format_email(alerts, status, IS_PRECLOSE)
+    send_email(subject, body)
+    
+    # Print summary
+    print(f"\n{len(alerts)} signal(s) detected")
+    for title, msg, _ in alerts:
+        print(f"  {title}")
 
 if __name__ == "__main__":
     main()
-
-
-# =============================================================================
-# SIGNAL SUMMARY (What this monitors)
-# =============================================================================
-"""
-SELL SIGNALS:
-  🔴 SMH 40%+ above SMA(200) → Exit SOXL (26% win rate)
-  🔴 SMH Death Cross → Exit SOXL (43% win rate)
-  🔴 SMH below SMA(200) → Warning
-
-BUY/ACCUMULATE SIGNALS:
-  🟢 SMH 100+ days below SMA(200) → Accumulate SOXL (85% win, +54% avg)
-  🟢 SMH 100+ days below + RSI(50) < 45 → STRONG BUY (97% win)
-  
-TRADING SIGNALS:
-  🟢 XLP/XLU/XLV RSI(10) > 79 (SPY/QQQ not) → TQQQ 20d (70% win, +5%)
-  🟢 QQQ RSI(10) > 79 → UVXY 5d (+33% CAGR, 67% win)
-  🟢 QQQ RSI(5) < 20 → TQQQ 5d (+26% CAGR, 69% win)
-  🟢 QQQ RSI(10) < 25 → TQQQ 5d (+20% CAGR, 76% win)
-  🟢 SMH RSI(5) < 20 → SOXL 10d (+21% CAGR, 59% win)
-  🟢 LQD RSI(10) > 79 → TQQQ 10d (+19% CAGR, 84% win)
-  🟢 UCO RSI(10) > 85 → SCO 1d (70% win)
-  🟢 UCO 15%+ above EMA(21) → SCO 1d (76% win)
-  🟢 TLT RSI(10) > 79 → SCO 10d (+19% CAGR)
-  🟢 EDC AND YINN RSI(10) > 79 → UVXY 1-2d (77% win)
-  🟢 GLD RSI(10) < 21 → TQQQ 10d (+19% CAGR, 70% win)
-"""
-
-# =============================================================================
-# SETUP INSTRUCTIONS
-# =============================================================================
-"""
-STEP 1: CREATE GMAIL APP PASSWORD
-1. Go to https://myaccount.google.com/apppasswords
-2. Generate password for "Mail" / "Other"
-3. Copy the 16-character password
-
-STEP 2: SETUP PYTHONANYWHERE (FREE)
-1. Go to https://www.pythonanywhere.com - create free account
-2. Files tab → Upload this script
-3. Consoles tab → Bash → run: pip install yfinance --user
-4. Test: python signal_monitor.py
-5. Tasks tab → Schedule at 21:30 UTC (4:30 PM ET)
-
-STEP 3: EDIT CONFIGURATION
-Change these at the top of the script:
-  SENDER_EMAIL = "your.email@gmail.com"
-  SENDER_PASSWORD = "xxxx xxxx xxxx xxxx"  
-  RECIPIENT_EMAIL = "your.email@gmail.com"
-"""
