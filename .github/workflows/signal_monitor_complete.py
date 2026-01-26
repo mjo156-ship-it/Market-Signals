@@ -1,463 +1,500 @@
-#!/usr/bin/env python3
-"""
-Comprehensive Market Signal Monitor v2.1
-========================================
-Monitors all backtested trading signals and sends alerts.
+# Complete Trading Signal Playbook
+## Mike's Quantitative Strategy Reference
+### Updated: January 26, 2026
 
-SCHEDULE: Two emails daily (weekdays)
-- 3:15 PM ET: Pre-close preview
-- 4:05 PM ET: Market close confirmation
-"""
+---
 
-import os
-import yfinance as yf
-import pandas as pd
-import numpy as np
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from datetime import datetime, timedelta
-import sys
+# Statistical Confidence Guide
 
-# =============================================================================
-# CONFIGURATION
-# =============================================================================
-SENDER_EMAIL = os.environ.get('SENDER_EMAIL', '')
-SENDER_PASSWORD = os.environ.get('SENDER_PASSWORD', '')
-RECIPIENT_EMAIL = os.environ.get('RECIPIENT_EMAIL', '')
-PHONE_EMAIL = os.environ.get('PHONE_EMAIL', '')
+| Confidence | Sample Size | Interpretation |
+|------------|-------------|----------------|
+| 🟢 **High** | n ≥ 30 | Statistically robust |
+| 🟡 **Moderate** | n = 10-29 | Directionally reliable |
+| 🔴 **Low** | n < 10 | Use with caution |
 
-IS_PRECLOSE = len(sys.argv) > 1 and sys.argv[1] == 'preclose'
+**Always verify sample size before sizing positions.**
 
-# =============================================================================
-# CALCULATIONS
-# =============================================================================
-def calculate_rsi_wilder(prices, period):
-    """Calculate Wilder's RSI"""
-    delta = prices.diff()
-    gain = delta.where(delta > 0, 0)
-    loss = -delta.where(delta < 0, 0)
-    avg_gain = gain.ewm(alpha=1/period, min_periods=period, adjust=False).mean()
-    avg_loss = loss.ewm(alpha=1/period, min_periods=period, adjust=False).mean()
-    rs = avg_gain / avg_loss
-    return 100 - (100 / (1 + rs))
+---
 
-def safe_float(value):
-    """Safely convert a value to float, handling Series and arrays"""
-    if isinstance(value, pd.Series):
-        return float(value.iloc[-1]) if len(value) > 0 else 0.0
-    elif isinstance(value, np.ndarray):
-        return float(value[-1]) if len(value) > 0 else 0.0
-    elif pd.isna(value):
-        return 0.0
-    else:
-        return float(value)
+# Table of Contents
 
-def download_data(tickers, period='2y'):
-    """Download data for multiple tickers"""
-    data = {}
-    for ticker in tickers:
-        try:
-            df = yf.download(ticker, period=period, progress=False)
-            if len(df) > 0:
-                # Flatten multi-index columns if present
-                if isinstance(df.columns, pd.MultiIndex):
-                    df.columns = df.columns.get_level_values(0)
-                data[ticker] = df
-        except Exception as e:
-            print(f"Error downloading {ticker}: {e}")
-    return data
+1. [Active Signals - Current Market](#active-signals---current-market)
+2. [High-Conviction Combo Signals](#high-conviction-combo-signals)
+3. [SOXL/SMH Long-Term Signals](#soxlsmh-long-term-signals)
+4. [UPRO Entry/Exit Signals](#upro-entryexit-signals)
+5. [SOXS Short Signals](#soxs-short-signals)
+6. [Volatility Hedge Signals](#volatility-hedge-signals)
+7. [BTC Signals](#btc-signals)
+8. [AMD/NVDA Signals](#amdnvda-signals)
+9. [Defensive Rotation Signals](#defensive-rotation-signals)
+10. [Dollar-Based Signals](#dollar-based-signals)
+11. [Signal Monitor Schedule](#signal-monitor-schedule)
 
-# =============================================================================
-# SIGNAL CHECKS
-# =============================================================================
-def check_signals(data):
-    """Check all signals and return alerts"""
-    alerts = []
-    status = {}
-    
-    # Calculate indicators for all tickers
-    indicators = {}
-    for ticker, df in data.items():
-        if len(df) < 200:
-            continue
-        
-        try:
-            close = df['Close']
-            
-            # Get latest values as scalars
-            price = safe_float(close.iloc[-1])
-            rsi10 = safe_float(calculate_rsi_wilder(close, 10).iloc[-1])
-            rsi50 = safe_float(calculate_rsi_wilder(close, 50).iloc[-1])
-            sma200 = safe_float(close.rolling(window=200).mean().iloc[-1])
-            sma50 = safe_float(close.rolling(window=50).mean().iloc[-1])
-            ema21 = safe_float(close.ewm(span=21, adjust=False).mean().iloc[-1])
-            
-            indicators[ticker] = {
-                'price': price,
-                'rsi10': rsi10,
-                'rsi50': rsi50,
-                'sma200': sma200,
-                'sma50': sma50,
-                'ema21': ema21,
-            }
-            
-            # Calculate % above SMA200
-            if sma200 > 0:
-                indicators[ticker]['pct_above_sma200'] = (price / sma200 - 1) * 100
-            else:
-                indicators[ticker]['pct_above_sma200'] = 0
-                
-        except Exception as e:
-            print(f"Error calculating indicators for {ticker}: {e}")
-            continue
-    
-    status['indicators'] = indicators
-    
-    # =========================================================================
-    # SIGNAL GROUP 1: SOXL/SMH Long-Term Signals
-    # =========================================================================
-    if 'SMH' in indicators:
-        smh = indicators['SMH']
-        
-        # EXIT Signals
-        if smh['pct_above_sma200'] >= 40:
-            alerts.append(('🔴 SOXL EXIT', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - SELL SOXL", 'exit'))
-        elif smh['pct_above_sma200'] >= 35:
-            alerts.append(('🟡 SOXL WARNING', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - Approaching sell zone", 'warning'))
-        elif smh['pct_above_sma200'] >= 30:
-            alerts.append(('🟡 SOXL TRIM', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - Consider trimming 25-50%", 'warning'))
-        
-        # Death Cross
-        if smh['sma50'] < smh['sma200'] and smh['sma200'] > 0:
-            alerts.append(('🔴 DEATH CROSS', f"SMH SMA(50) below SMA(200) - Bearish trend", 'exit'))
-        
-        # BUY Signals - Days below SMA200
-        if 'SMH' in data:
-            smh_df = data['SMH']
-            close = smh_df['Close']
-            sma200_series = close.rolling(window=200).mean()
-            
-            # Count consecutive days below
-            days_below = 0
-            for i in range(len(close)-1, max(len(close)-500, 199), -1):
-                try:
-                    c = safe_float(close.iloc[i])
-                    s = safe_float(sma200_series.iloc[i])
-                    if s > 0 and c < s:
-                        days_below += 1
-                    else:
-                        break
-                except:
-                    break
-            
-            if days_below >= 100:
-                if smh['rsi50'] < 45:
-                    alerts.append(('🟢 SOXL STRONG BUY', f"SMH {days_below} days below SMA(200) + RSI(50)={smh['rsi50']:.1f} < 45 | 97% win, +81% avg", 'buy'))
-                else:
-                    alerts.append(('🟢 SOXL ACCUMULATE', f"SMH {days_below} days below SMA(200) | 85% win, +54% avg", 'buy'))
-            
-            status['smh_days_below_sma200'] = days_below
-    
-    # =========================================================================
-    # SIGNAL GROUP 2: GLD/USDU Combo Signals
-    # =========================================================================
-    if 'GLD' in indicators and 'USDU' in indicators:
-        gld = indicators['GLD']
-        usdu = indicators['USDU']
-        
-        # Double Signal: GLD > 79 AND USDU < 25
-        if gld['rsi10'] > 79 and usdu['rsi10'] < 25:
-            alerts.append(('🟢🔥 DOUBLE SIGNAL ACTIVE', 
-                f"GLD RSI={gld['rsi10']:.1f} > 79 AND USDU RSI={usdu['rsi10']:.1f} < 25\n"
-                f"   → Long TQQQ: 88% win, +7% avg (5d)\n"
-                f"   → Long UPRO: 85% win, +5.2% avg (5d)\n"
-                f"   → AMD/NVDA: 86% win, +5-8% avg (5d)", 'buy'))
-            
-            # Triple Signal: Add XLP > 65
-            if 'XLP' in indicators and indicators['XLP']['rsi10'] > 65:
-                xlp = indicators['XLP']
-                alerts.append(('🟢🔥🔥 TRIPLE SIGNAL ACTIVE', 
-                    f"GLD RSI={gld['rsi10']:.1f} + USDU RSI={usdu['rsi10']:.1f} + XLP RSI={xlp['rsi10']:.1f}\n"
-                    f"   → Long TQQQ: 100% win, +11.6% avg (5d) - RARE!", 'buy'))
-        
-        # Individual GLD overbought
-        elif gld['rsi10'] > 79:
-            alerts.append(('🟢 GLD OVERBOUGHT', 
-                f"GLD RSI={gld['rsi10']:.1f} > 79 → Long TQQQ: 72% win, +3.2% avg (5d)", 'buy'))
-    
-    # =========================================================================
-    # SIGNAL GROUP 3: Defensive Rotation
-    # =========================================================================
-    defensive_ob = False
-    for ticker in ['XLP', 'XLU', 'XLV']:
-        if ticker in indicators and indicators[ticker]['rsi10'] > 79:
-            defensive_ob = True
-            break
-    
-    if defensive_ob:
-        spy_ob = 'SPY' in indicators and indicators['SPY']['rsi10'] > 79
-        qqq_ob = 'QQQ' in indicators and indicators['QQQ']['rsi10'] > 79
-        
-        if not spy_ob and not qqq_ob:
-            alerts.append(('🟢 DEFENSIVE ROTATION', 
-                f"Defensive sector overbought, SPY/QQQ not → Long TQQQ 20d: 70% win, +5% avg", 'buy'))
-    
-    # =========================================================================
-    # SIGNAL GROUP 4: Volatility Hedge Signals
-    # =========================================================================
-    if 'QQQ' in indicators:
-        qqq = indicators['QQQ']
-        
-        if qqq['rsi10'] > 79:
-            alerts.append(('🟡 VOL HEDGE', 
-                f"QQQ RSI={qqq['rsi10']:.1f} > 79 → Long UVXY 5d: 67% win, +33% CAGR", 'hedge'))
-        
-        if qqq['rsi10'] < 20:
-            alerts.append(('🟢 QQQ DIP BUY', 
-                f"QQQ RSI={qqq['rsi10']:.1f} < 20 → Long TQQQ 5d: 69% win, +26% CAGR", 'buy'))
-    
-    # =========================================================================
-    # SIGNAL GROUP 5: SOXS Short Signals
-    # =========================================================================
-    if 'SMH' in indicators and 'USDU' in indicators:
-        smh = indicators['SMH']
-        usdu = indicators['USDU']
-        
-        if smh['rsi10'] > 79 and usdu['rsi10'] > 70:
-            alerts.append(('🔴 SOXS SIGNAL', 
-                f"SMH RSI={smh['rsi10']:.1f} > 79 AND USDU RSI={usdu['rsi10']:.1f} > 70\n"
-                f"   → Long SOXS 5d: 100% win, +9.5% avg", 'short'))
-        
-        if 'IWM' in indicators and smh['rsi10'] > 79 and indicators['IWM']['rsi10'] < 50:
-            alerts.append(('🔴 SOXS DIVERGENCE', 
-                f"SMH RSI={smh['rsi10']:.1f} > 79 AND IWM RSI={indicators['IWM']['rsi10']:.1f} < 50\n"
-                f"   → Long SOXS 5d: 86% win, +6.9% avg", 'short'))
-    
-    # =========================================================================
-    # SIGNAL GROUP 6: BTC Signals
-    # =========================================================================
-    if 'BTC-USD' in indicators:
-        btc = indicators['BTC-USD']
-        
-        if btc['rsi10'] > 79:
-            alerts.append(('🟢 BTC MOMENTUM', 
-                f"BTC RSI={btc['rsi10']:.1f} > 79 → Hold/Add BTC: 67% win, +5.2% avg (5d)", 'buy'))
-        
-        if btc['rsi10'] < 30:
-            uvxy_low = 'UVXY' in indicators and indicators['UVXY']['rsi10'] < 40
-            if uvxy_low:
-                alerts.append(('🟢 BTC DIP BUY', 
-                    f"BTC RSI={btc['rsi10']:.1f} < 30 AND UVXY < 40 → Buy BTC: 77% win, +4.1% avg (5d)", 'buy'))
-            else:
-                alerts.append(('🟡 BTC OVERSOLD', 
-                    f"BTC RSI={btc['rsi10']:.1f} < 30 (wait for UVXY < 40 for better signal)", 'watch'))
-    
-    # =========================================================================
-    # SIGNAL GROUP 7: UPRO Entry/Exit Signals
-    # =========================================================================
-    if 'SPY' in indicators:
-        spy = indicators['SPY']
-        
-        if spy['rsi10'] > 85:
-            alerts.append(('🔴 UPRO EXIT', 
-                f"SPY RSI={spy['rsi10']:.1f} > 85 → Trim/Exit UPRO: Only 36% win, -3.5% avg (5d)", 'exit'))
-        elif spy['rsi10'] > 82:
-            alerts.append(('🟡 UPRO CAUTION', 
-                f"SPY RSI={spy['rsi10']:.1f} > 82 → Watch UPRO: 49% win at 5d", 'warning'))
-        
-        if spy['rsi10'] < 21:
-            alerts.append(('🟢 UPRO STRONG BUY', 
-                f"SPY RSI={spy['rsi10']:.1f} < 21 → Add UPRO: 94% win, +8.9% avg (5d)", 'buy'))
-        elif spy['rsi10'] < 25:
-            alerts.append(('🟢 UPRO BUY', 
-                f"SPY RSI={spy['rsi10']:.1f} < 25 → Add UPRO: 74% win, +3.9% avg (5d)", 'buy'))
-        elif spy['rsi10'] < 30:
-            alerts.append(('🟢 UPRO CONSIDER', 
-                f"SPY RSI={spy['rsi10']:.1f} < 30 → Consider UPRO: 69% win, +4.3% avg (5d)", 'buy'))
-    
-    # =========================================================================
-    # SIGNAL GROUP 8: AMD/NVDA Specific
-    # =========================================================================
-    if 'AMD' in indicators:
-        amd = indicators['AMD']
-        if amd['rsi10'] > 85:
-            alerts.append(('🟡 AMD EXTENDED', 
-                f"AMD RSI={amd['rsi10']:.1f} > 85 → Consider taking profits", 'warning'))
-    
-    if 'NVDA' in indicators:
-        nvda = indicators['NVDA']
-        if nvda['rsi10'] > 85:
-            alerts.append(('🟡 NVDA EXTENDED', 
-                f"NVDA RSI={nvda['rsi10']:.1f} > 85 → Consider taking profits", 'warning'))
-    
-    return alerts, status
+---
 
-# =============================================================================
-# EMAIL FUNCTIONS
-# =============================================================================
-def format_email(alerts, status, is_preclose=False):
-    """Format the email body"""
-    now = datetime.now()
-    
-    timing = "PRE-CLOSE PREVIEW (3:15 PM)" if is_preclose else "MARKET CLOSE CONFIRMATION (4:05 PM)"
-    
-    body = f"""
-{'='*70}
-MARKET SIGNAL MONITOR - {timing}
-{now.strftime('%Y-%m-%d %H:%M')} ET
-{'='*70}
+# Active Signals - Current Market
 
-"""
-    
-    if alerts:
-        buy_alerts = [a for a in alerts if a[2] == 'buy']
-        exit_alerts = [a for a in alerts if a[2] in ['exit', 'short']]
-        warning_alerts = [a for a in alerts if a[2] in ['warning', 'hedge', 'watch']]
-        
-        if buy_alerts:
-            body += "🟢 BUY SIGNALS:\n" + "-"*50 + "\n"
-            for title, msg, _ in buy_alerts:
-                body += f"{title}\n{msg}\n\n"
-        
-        if exit_alerts:
-            body += "🔴 EXIT/SHORT SIGNALS:\n" + "-"*50 + "\n"
-            for title, msg, _ in exit_alerts:
-                body += f"{title}\n{msg}\n\n"
-        
-        if warning_alerts:
-            body += "🟡 WARNINGS/WATCH:\n" + "-"*50 + "\n"
-            for title, msg, _ in warning_alerts:
-                body += f"{title}\n{msg}\n\n"
-    else:
-        body += "No signals triggered today.\n\n"
-    
-    body += f"""
-{'='*70}
-CURRENT INDICATOR STATUS
-{'='*70}
+**As of January 25, 2026:**
 
-"""
-    
-    indicators = status.get('indicators', {})
-    
-    key_tickers = ['SPY', 'QQQ', 'SMH', 'GLD', 'USDU', 'XLP', 'UVXY', 'BTC-USD', 'AMD', 'NVDA']
-    body += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}\n"
-    body += "-"*50 + "\n"
-    
-    for ticker in key_tickers:
-        if ticker in indicators:
-            ind = indicators[ticker]
-            price = f"${ind['price']:.2f}" if ind['price'] < 1000 else f"${ind['price']:,.0f}"
-            rsi = f"{ind['rsi10']:.1f}"
-            pct = f"{ind.get('pct_above_sma200', 0):+.1f}%"
-            body += f"{ticker:<10} {price:>12} {rsi:>10} {pct:>12}\n"
-    
-    if 'SMH' in indicators:
-        smh = indicators['SMH']
-        sma200 = smh['sma200']
-        body += f"""
-{'='*70}
-SMH/SOXL LEVELS
-{'='*70}
-Current Price:    ${smh['price']:.2f}
-SMA(200):         ${sma200:.2f}
-% Above SMA200:   {smh['pct_above_sma200']:+.1f}%
-Days Below SMA:   {status.get('smh_days_below_sma200', 0)}
+| Indicator | Current Value | Signal Status |
+|-----------|---------------|---------------|
+| GLD RSI(10) | 82.2 | ✅ > 79 ACTIVE |
+| USDU RSI(10) | 21.5 | ✅ < 25 ACTIVE |
+| XLP RSI(10) | 74.1 | ✅ > 65 ACTIVE |
+| SPY RSI(10) | 56.4 | Neutral |
+| QQQ RSI(10) | 50.7 | Neutral |
+| SMH RSI(10) | 68.0 | Neutral |
+| BTC RSI(10) | 37.3 | Approaching oversold |
+| AMD RSI(10) | 82.3 | ⚠️ Extended |
+| NVDA RSI(10) | 55.5 | Neutral |
 
-Key Levels:
-  30% (Trim):     ${sma200 * 1.30:.2f}
-  35% (Warning):  ${sma200 * 1.35:.2f}
-  40% (Sell):     ${sma200 * 1.40:.2f}
-"""
-    
-    if is_preclose:
-        body += f"""
-{'='*70}
-NOTE: This is a PRE-CLOSE preview. Signals may change by market close.
-Final confirmation email will be sent at 4:05 PM ET.
-{'='*70}
-"""
-    
-    return body
+**🔥 TRIPLE SIGNAL ACTIVE:** GLD > 79 + USDU < 25 + XLP > 65
+- Long TQQQ: **100% win rate**, +11.6% avg (5d)
+- Long UPRO: **85% win rate**, +5.2% avg (5d)
+- Long AMD/NVDA: **86% win rate**, +5-8% avg (5d)
 
-def send_email(subject, body):
-    """Send email alert"""
-    if not SENDER_EMAIL or not SENDER_PASSWORD or not RECIPIENT_EMAIL:
-        print("Email not configured - printing to console:")
-        print(f"Subject: {subject}")
-        print(body)
-        return False
-    
-    try:
-        msg = MIMEMultipart()
-        msg['From'] = SENDER_EMAIL
-        msg['To'] = RECIPIENT_EMAIL
-        msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain'))
-        
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
-        server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        server.send_message(msg)
-        server.quit()
-        
-        print(f"Email sent successfully to {RECIPIENT_EMAIL}")
-        return True
-    except Exception as e:
-        print(f"Email failed: {e}")
-        return False
+---
 
-# =============================================================================
-# MAIN
-# =============================================================================
-def main():
-    print(f"Running signal check at {datetime.now()}")
-    print(f"Mode: {'PRE-CLOSE (3:15 PM)' if IS_PRECLOSE else 'MARKET CLOSE (4:05 PM)'}")
-    
-    tickers = [
-        'SMH', 'SPY', 'QQQ', 'IWM',
-        'XLP', 'XLU', 'XLV',
-        'GLD', 'TLT', 'HYG', 'LQD',
-        'USDU', 'UCO',
-        'UVXY',
-        'EDC', 'YINN',
-        'BTC-USD',
-        'AMD', 'NVDA',
-    ]
-    
-    print("Downloading market data...")
-    data = download_data(tickers)
-    print(f"Downloaded data for {len(data)} tickers")
-    
-    alerts, status = check_signals(data)
-    
-    if alerts:
-        buy_count = len([a for a in alerts if a[2] == 'buy'])
-        exit_count = len([a for a in alerts if a[2] in ['exit', 'short']])
-        
-        if exit_count > 0:
-            emoji = "🔴"
-            urgency = "EXIT SIGNALS"
-        elif buy_count > 0:
-            emoji = "🟢"
-            urgency = "BUY SIGNALS"
-        else:
-            emoji = "🟡"
-            urgency = "WATCH"
-        
-        timing = "PRE-CLOSE" if IS_PRECLOSE else "CLOSE"
-        subject = f"{emoji} [{timing}] Market Signals: {len(alerts)} Alert(s) - {urgency}"
-    else:
-        timing = "PRE-CLOSE" if IS_PRECLOSE else "CLOSE"
-        subject = f"📊 [{timing}] Market Signals: No Alerts"
-    
-    body = format_email(alerts, status, IS_PRECLOSE)
-    send_email(subject, body)
-    
-    print(f"\n{len(alerts)} signal(s) detected")
-    for title, msg, _ in alerts:
-        print(f"  {title}")
+# High-Conviction Combo Signals
 
-if __name__ == "__main__":
-    main()
+## 🔥🔥 Triple Signal (Highest Conviction)
+**GLD RSI(10) > 79 AND USDU RSI(10) < 25 AND XLP RSI(10) > 65**
+
+| Hold | Win Rate | Avg Return | Sample |
+|------|----------|------------|--------|
+| 5 days | **100%** | +11.6% | 🔴 n=5 days, 2 episodes |
+
+**Trade History:** Every occurrence was a winner
+- 2018-01-24: +1.6%
+- 2020-07-27: +10.6%
+- 2020-07-28: +16.4%
+- 2020-07-29: +13.4%
+- 2020-07-30: +15.9%
+
+**⚠️ Sample Size Warning:** Only 2 independent market environments (2018, 2020). Fundamentally sound but statistically limited.
+
+**Optimal Hold Strategy:**
+- Enter on Day 1 of signal
+- Hold while signal remains active
+- Exit 5 trading days after signal ends (GLD drops < 79 OR USDU rises > 25)
+- Avg return improves from +6.9% (fixed 5d) to +9.2% (hold through + 5d)
+
+**Pyramiding:** Not recommended. Day 2+ shows better returns but sample too small (n=5). Enter full position on Day 1.
+
+**Action:** Long TQQQ immediately
+
+---
+
+## 🔥 Double Signal (High Conviction)
+**GLD RSI(10) > 79 AND USDU RSI(10) < 25**
+
+| Asset | 5d Win | 5d Avg | 10d Win | 10d Avg | Sample |
+|-------|--------|--------|---------|---------|--------|
+| TQQQ | **88%** | +7.0% | 100% | +11.7% | 🔴 n=7 episodes |
+| UPRO | **85%** | +5.2% | 92% | +7.5% | 🔴 n=7 episodes |
+| AMD | **86%** | +7.7% | 79% | +5.8% | 🔴 n=7 episodes |
+| NVDA | **86%** | +5.0% | 86% | +5.5% | 🔴 n=7 episodes |
+
+**Duration Effect:** Signal improves with consecutive days
+| GLD Consecutive Days | 5d Win | 5d Avg |
+|---------------------|--------|--------|
+| ≥ 1 day | 93% | +8.3% |
+| ≥ 2 days | 89% | +9.0% |
+| ≥ 5 days | 100% | +13.3% |
+
+**Logic:** Gold strong + Dollar weak = Global liquidity expansion / risk-on rotation
+
+**Action:** Long TQQQ, UPRO, AMD, NVDA
+
+---
+
+## GLD Overbought Alone
+**GLD RSI(10) > 79**
+
+| Hold | Win Rate | Avg Return | Sample |
+|------|----------|------------|--------|
+| 5 days | 72% | +3.2% | 🟡 n=97 days |
+| 10 days | 75% | +5.6% | 🟡 n=97 days |
+
+**Action:** Long TQQQ (weaker than combo signals)
+
+---
+
+# SOXL/SMH Long-Term Signals
+
+## 🟢 BUY Signals (Accumulation)
+
+### Best Signal: 100+ Days Below SMA(200) + RSI(50) < 45
+| Metric | Value |
+|--------|-------|
+| Win Rate | **97%** |
+| Avg Return (6mo) | **+81%** |
+| Sample | 🟢 n=33 trades |
+
+### Standard Signal: 100+ Days Below SMA(200)
+| Metric | Value |
+|--------|-------|
+| Win Rate | **85%** |
+| Avg Return (6mo) | **+54%** |
+| Sample | 🟢 n=52 trades |
+
+**Action:** Aggressive SOXL accumulation
+
+---
+
+## 🔴 EXIT Signals
+
+| Signal | Action | Notes |
+|--------|--------|-------|
+| SMH **40%+ above SMA(200)** | 🔴 SELL ALL SOXL | Historical top zone |
+| SMH **35-40% above SMA(200)** | 🟡 WARNING | Approaching danger |
+| SMH **30-35% above SMA(200)** | 🟡 TRIM 25-50% | Reduce exposure |
+| Death Cross (SMA50 < SMA200) | 🔴 EXIT | Trend reversal |
+
+**Current SMH Status:**
+- Price: $402.82
+- SMA(200): ~$302
+- % Above: +33.3% (TRIM zone)
+
+---
+
+# UPRO Entry/Exit Signals
+
+## 🔴 EXIT Signals
+
+| Signal | Win Rate | 5d Avg | 10d Avg | Sample | Action |
+|--------|----------|--------|---------|--------|--------|
+| SPY RSI(10) > **85** | 36% | -3.5% | -11.2% | 🔴 n=11 | 🔴 SELL/TRIM |
+| SPY RSI(10) > 82 | 49% | -1.0% | -3.9% | 🟡 n=35 | ⚠️ Caution |
+| SPY RSI(10) > 79 | 46% | -1.0% | -2.1% | 🟢 n=68 | ⚠️ Watch |
+
+**SPY > 85 Trade History (all losers):**
+- 2018-01-26: RSI 89.4 → UPRO -11.4%
+- 2020-09-02: RSI 86.6 → UPRO -19.4%
+
+---
+
+## 🟢 BUY Signals
+
+| Signal | Win Rate | 5d Avg | Sample | Action |
+|--------|----------|--------|--------|--------|
+| SPY RSI(10) < **21** | **94%** | +8.9% | 🟡 n=18 | 🟢 STRONG BUY |
+| SPY RSI(10) < 25 | 74% | +3.9% | 🟢 n=42 | 🟢 Buy |
+| SPY RSI(10) < 30 | 69% | +4.3% | 🟢 n=108 | 🟢 Consider |
+| SPY < 30 AND HYG < 30 | **77%** | +5.3% | 🟢 n=65 | 🟢 Buy (credit stress) |
+
+**SPY < 21 Trade History (17/18 winners):**
+- 2015-08-24: RSI 13.5 → +11.6%
+- 2018-12-24: RSI 13.4 → +20.2%
+- 2022-01-26: RSI 19.6 → +17.0%
+- 2025-04-08: RSI 17.5 → +23.0%
+
+---
+
+# SOXS Short Signals
+
+## 🔴 Signal 1: Dollar Squeeze (100% Win Rate)
+**SMH RSI(10) > 79 AND USDU RSI(10) > 70**
+
+| Hold | Win Rate | Avg Return | Sample |
+|------|----------|------------|--------|
+| 5 days | **100%** | +9.5% | 🔴 n=8 trades |
+
+**Trade History (all winners):**
+| Date | SMH RSI | USDU RSI | SOXS 5d |
+|------|---------|----------|---------|
+| 2014-09-08 | 80.5 | 73.1 | +9.8% |
+| 2014-12-05 | 81.0 | 71.5 | +13.8% |
+| 2024-06-13 | 80.4 | 70.4 | +3.8% |
+| 2024-06-18 | 85.4 | 73.0 | +15.6% |
+
+**Logic:** Strong dollar = global liquidity tightening → semis reverse
+
+---
+
+## 🔴 Signal 2: Narrow Leadership (86% Win Rate)
+**SMH RSI(10) > 79 AND IWM RSI(10) < 50**
+
+| Hold | Win Rate | Avg Return | Sample |
+|------|----------|------------|--------|
+| 5 days | **86%** | +6.9% | 🔴 n=7 trades |
+
+**Logic:** Semis ripping while small caps lag = fragile, narrow leadership
+
+---
+
+# Volatility Hedge Signals
+
+## QQQ Overbought → Long UVXY
+**QQQ RSI(10) > 79**
+
+| Hold | Win Rate | Avg Return | CAGR |
+|------|----------|------------|------|
+| 5 days | 67% | +8.2% | +33% |
+
+**Best combo:** QQQ > 79 AND SPY not > 79 (divergence)
+- 5d Win: 72%
+- 5d Avg: +10.8%
+
+---
+
+## SPY Overbought → Long UVXY
+**SPY RSI(10) > 79**
+
+| Hold | Win Rate | Avg Return | CAGR |
+|------|----------|------------|------|
+| 5 days | 64% | +5.9% | +41% |
+
+---
+
+## Dual Overbought → Long UVXY
+**SPY RSI(10) > 79 AND QQQ RSI(10) > 79**
+
+| Hold | Win Rate | Avg Return |
+|------|----------|------------|
+| 5 days | 76% | +9.0% |
+
+---
+
+# BTC Signals
+
+## Key Finding: BTC Overbought = MOMENTUM (Not a Sell!)
+
+Unlike stocks, overbought BTC keeps running:
+
+| BTC RSI | 5d Win | 5d Avg | 10d Win | Sample |
+|---------|--------|--------|---------|--------|
+| Baseline | 55% | +1.4% | 56% | - |
+| **> 79** | **67%** | **+5.2%** | **70%** | 🟢 n=215 days |
+| > 82 | 68% | +5.7% | 72% | 🟢 n=157 days |
+| > 85 | 67% | +5.4% | 71% | 🟢 n=99 days |
+
+**Action:** Hold/Add BTC when RSI > 79
+
+---
+
+## 🟢 BTC Dip Buy Signal
+**BTC RSI(10) < 30 AND UVXY RSI(10) < 40**
+
+| Hold | Win Rate | Avg Return | Sample |
+|------|----------|------------|--------|
+| 5 days | **77%** | +4.1% | 🟢 n=30 trades |
+| 10 days | 63% | +5.6% | 🟢 n=30 trades |
+
+**Logic:** BTC oversold + low volatility = safe dip buy (not capitulation)
+
+---
+
+## BTC as Leading Indicator
+
+| BTC Signal | TQQQ 5d Win | TQQQ 10d Win | Sample |
+|------------|-------------|--------------|--------|
+| BTC > 85 | **65%** | **70%** | 🟢 n=99 |
+| Baseline | 59% | 63% | - |
+
+**When BTC rips, equities follow**
+
+---
+
+# AMD/NVDA Signals
+
+## When SMH is Overbought
+
+| When SMH > 79 | AMD 5d | NVDA 5d |
+|---------------|--------|---------|
+| Win Rate | 46% ⚠️ | 55% |
+| Avg Return | -0.88% | -0.20% |
+
+**AMD underperforms significantly** when sector is extended. NVDA holds up better.
+
+---
+
+## Current GLD/USDU Signal → Bullish for AMD/NVDA
+
+| Asset | 5d Win | 5d Avg | 10d Win |
+|-------|--------|--------|---------|
+| AMD | **86%** | +7.7% | 79% |
+| NVDA | **86%** | +5.0% | 86% |
+
+---
+
+## Exit Warnings
+
+| Signal | Action |
+|--------|--------|
+| AMD RSI(10) > 85 | ⚠️ Take profits |
+| NVDA RSI(10) > 85 | ⚠️ Take profits |
+| SMH > 79 + USDU > 70 | 🔴 Trim semis |
+
+---
+
+# Defensive Rotation Signals
+
+## XLP/XLU/XLV Overbought → Long TQQQ
+**Any defensive sector RSI(10) > 79 AND SPY/QQQ RSI(10) < 79**
+
+| Hold | Win Rate | Avg Return |
+|------|----------|------------|
+| 20 days | **70%** | +5.0% |
+
+**Logic:** Money rotating into defensives while indices not overbought = broad strength, TQQQ catches up
+
+---
+
+# Dollar-Based Signals
+
+## Dollar Extremely Weak (USDU < 21) → Risk Off!
+
+**Counter-intuitive:** Extreme dollar weakness is NOT bullish for risk assets
+
+| Asset | 5d Win | 10d Avg |
+|-------|--------|---------|
+| TQQQ | 41% | -4.1% |
+| EDC (EM) | 37% | -5.9% |
+| GLD | **68%** | +1.1% |
+| UVXY | 51% | +17.4% |
+
+**Action:** Long GLD, consider UVXY, avoid TQQQ/EM
+
+---
+
+## Dollar Strong (USDU > 79) → Low Volatility
+
+| Signal | UVXY 5d |
+|--------|---------|
+| Win Rate | 30% (UVXY loses) |
+| Avg Loss | -4.9% |
+
+**Action:** Short volatility (or long SVXY) when dollar is strong
+
+---
+
+# Signal Monitor Schedule
+
+## Daily Emails
+
+| Time (ET) | Type | Purpose |
+|-----------|------|---------|
+| **3:15 PM** | Pre-close | See signals setting up |
+| **4:05 PM** | Close | Final confirmation |
+
+## Tickers Monitored
+
+**Indices:** SPY, QQQ, SMH, IWM
+**Defensives:** XLP, XLU, XLV
+**Safe Havens:** GLD, TLT, HYG, LQD
+**Macro:** USDU, UCO
+**Volatility:** UVXY
+**EM:** EDC, YINN
+**Crypto:** BTC-USD
+**Individual:** AMD, NVDA
+
+---
+
+# NAIL (3x Homebuilders) Signals
+
+## Best Buy Signals
+| Signal | Win Rate | 5d Avg | Sample | Confidence |
+|--------|----------|--------|--------|------------|
+| **GLD > 79 + USDU < 25 + XLF < 70** | **90%** | +4.9% | 🔴 n=10 | Low |
+| GLD > 79 + USDU < 25 + TLT > 60 | **100%** | +4.2% | 🔴 n=4 | Low |
+| XLF > 79 + TLT > 60 | 89% | +9.0% | 🔴 n=9 | Low |
+| HYG > 70 + GLD > 79 | **91%** | +5.6% | 🔴 n=11 | Low |
+
+**⚠️ DANGER SIGNAL:** XLF > 70 + USDU < 25 → 11% win, -11.5% avg (n=18) - EXIT NAIL
+
+---
+
+# CURE (3x Healthcare) Signals
+
+## Overbought/Oversold
+| Signal | Win Rate | 5d Avg | Sample | Confidence |
+|--------|----------|--------|--------|------------|
+| **RSI < 21** | **85%** | +7.3% | 🟡 n=33 | Moderate |
+| RSI < 25 | **81%** | +5.4% | 🟡 n=70 | Moderate |
+| RSI < 30 | 64% | +3.3% | 🟢 n=167 | High |
+| RSI > 79 | 40% | -0.8% | 🟢 n=95 | **Exit signal** |
+| RSI > 85 | 33% | -0.9% | 🟡 n=15 | **Strong exit** |
+
+**Pattern:** Classic mean-reversion. Buy extreme oversold, sell overbought.
+
+---
+
+# FAS (3x Financials) Signals
+
+## Buy Signals
+| Signal | Win Rate | Avg Return | Sample | Confidence |
+|--------|----------|------------|--------|------------|
+| **GLD > 79 + USDU < 25** | 71%/92% (5d/10d) | +5.8% (10d) | 🔴 n=13 | Low |
+| RSI < 30 | 63% | +3.3% | 🟢 n=195 | High |
+| SPY < 21 | 78% | +7.0% | 🟡 n=18 | Moderate |
+
+## Exit Signals
+| Signal | Win Rate | 5d Avg | Sample | Action |
+|--------|----------|--------|--------|--------|
+| RSI > 82 | 38% | -1.3% | 🟡 n=40 | Exit |
+| **RSI > 85** | **8%** | -3.6% | 🔴 n=12 | **Strong exit** |
+
+**Note:** FAS responds well to GLD/USDU signal. RSI > 85 is extremely bearish.
+
+---
+
+# LABU (3x Biotech) Signals
+
+## Buy Signals
+| Signal | Win Rate | 5d Avg | Sample | Confidence |
+|--------|----------|--------|--------|------------|
+| **RSI < 21** | **73%** | +11.2% | 🔴 n=11 | Low |
+| RSI < 25 | **66%** | +5.7% | 🟡 n=59 | Moderate |
+| SPY < 21 | **89%** | +12.2% | 🟡 n=18 | Moderate |
+
+## Caution Signals
+| Signal | Win Rate | Note |
+|--------|----------|------|
+| RSI > 70 | 42% | Slight negative edge |
+| RSI > 85 | 67% | Momentum continues (n=6) |
+
+**Pattern:** Buy extreme oversold. GLD/USDU signal does NOT work for LABU (54% win only).
+
+---
+
+# Quick Reference Card
+
+## 🟢 BUY Triggers
+
+| Signal | Asset | Win Rate | Sample | Confidence |
+|--------|-------|----------|--------|------------|
+| GLD > 79 + USDU < 25 + XLP > 65 | TQQQ | **100%** | n=2 episodes | 🔴 Low |
+| GLD > 79 + USDU < 25 | TQQQ/UPRO/AMD/NVDA | **85-88%** | n=7 episodes | 🔴 Low |
+| GLD > 79 + USDU < 25 + XLF < 70 | **NAIL** | **90%** | n=10 | 🔴 Low |
+| GLD > 79 + USDU < 25 | **FAS** (10d) | **92%** | n=13 | 🔴 Low |
+| SPY RSI < 21 | UPRO | **94%** | n=18 | 🟡 Moderate |
+| SMH 100d below SMA200 + RSI50 < 45 | SOXL | **97%** | n=33 | 🟢 High |
+| BTC < 30 + UVXY < 40 | BTC | **77%** | n=30 | 🟢 High |
+| **CURE RSI < 21** | CURE | **85%** | n=33 | 🟡 Moderate |
+| **CURE RSI < 25** | CURE | **81%** | n=70 | 🟡 Moderate |
+| **LABU RSI < 21** | LABU | **73%** | n=11 | 🔴 Low |
+| **FAS RSI < 30** | FAS | 63% | n=195 | 🟢 High |
+
+## 🔴 EXIT/SHORT Triggers
+
+| Signal | Asset | Win Rate | Sample | Confidence |
+|--------|-------|----------|--------|------------|
+| SMH > 79 + USDU > 70 | SOXS | **100%** | n=8 | 🔴 Low |
+| SMH > 79 + IWM < 50 | SOXS | **86%** | n=7 | 🔴 Low |
+| SPY RSI > 85 | Exit UPRO | 36% (exit) | n=11 | 🔴 Low |
+| SMH 40% above SMA200 | Exit SOXL | Historical top | n=5 | 🔴 Low |
+| **CURE RSI > 79** | Exit CURE | 40% | n=95 | 🟢 High |
+| **FAS RSI > 85** | Exit FAS | **8%** | n=12 | 🔴 Low |
+| **XLF > 70 + USDU < 25** | Exit NAIL | **11%** | n=18 | 🟡 Moderate |
+
+## 🟡 HEDGE Triggers
+
+| Signal | Asset | Win Rate | Sample | Confidence |
+|--------|-------|----------|--------|------------|
+| QQQ > 79 + SPY < 79 | UVXY | **72%** | n=41 | 🟢 High |
+| SPY > 79 + QQQ > 79 | UVXY | **76%** | n=29 | 🟡 Moderate |
+
+---
+
+*Document auto-generated from backtested signals. All signals use Wilder RSI(10) unless otherwise noted. Past performance does not guarantee future results. Always consider sample size when sizing positions.*
