@@ -10,9 +10,9 @@ name: Signal Monitor v4
 on:
   schedule:
     # 3:15 PM Eastern = 20:15 UTC (pre-close preview)
-    - cron: '14 40 * * 1-5'
+    - cron: '15 20 * * 1-5'
     # 4:05 PM Eastern = 21:05 UTC (market close confirmation)
-    - cron: '05 21 * * 1-5'
+    - cron: '5 21 * * 1-5'
   workflow_dispatch:
     inputs:
       mode:
@@ -44,14 +44,11 @@ jobs:
       - name: Determine run mode
         id: mode
         run: |
-          # Check if this is the 3:15 PM run (20:15 UTC)
           HOUR=$(date -u +%H)
           MINUTE=$(date -u +%M)
           
-          # If manually triggered, use the input
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
-          # If it's around 20:15 UTC (3:15 PM ET), it's preclose
           elif [ "$HOUR" == "20" ] && [ "$MINUTE" -lt "30" ]; then
             echo "mode=preclose" >> $GITHUB_OUTPUT
           else
@@ -65,38 +62,24 @@ jobs:
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
           PHONE_EMAIL: ${{ secrets.PHONE_EMAIL }}
         run: |
-          # Try multiple possible locations for the Python script
-          SCRIPT_NAMES=("signal_monitor_v4.py" "signal_monitor_complete.py" "signal_monitor.py")
-          SCRIPT_DIRS=(".github/workflows" "." "scripts")
-          
-          SCRIPT_PATH=""
-          for dir in "${SCRIPT_DIRS[@]}"; do
-            for name in "${SCRIPT_NAMES[@]}"; do
-              if [ -f "$dir/$name" ]; then
-                SCRIPT_PATH="$dir/$name"
-                break 2
-              fi
-            done
-          done
-          
-          if [ -z "$SCRIPT_PATH" ]; then
-            echo "Error: signal_monitor script not found!"
-            echo "Searched for: ${SCRIPT_NAMES[*]}"
-            echo "In directories: ${SCRIPT_DIRS[*]}"
-            echo ""
-            echo "Files in current directory:"
-            ls -la
-            echo ""
-            echo "Files in .github/workflows/:"
-            ls -la .github/workflows/ 2>/dev/null || echo "Directory not found"
+          if [ -f ".github/workflows/signal_monitor_v4.py" ]; then
+            SCRIPT=".github/workflows/signal_monitor_v4.py"
+          elif [ -f ".github/workflows/signal_monitor.py" ]; then
+            SCRIPT=".github/workflows/signal_monitor.py"
+          elif [ -f "signal_monitor_v4.py" ]; then
+            SCRIPT="signal_monitor_v4.py"
+          elif [ -f "signal_monitor.py" ]; then
+            SCRIPT="signal_monitor.py"
+          else
+            echo "ERROR: No signal_monitor script found!"
+            ls -la .github/workflows/ || true
             exit 1
           fi
           
-          echo "Found script: $SCRIPT_PATH"
-          echo "Running: python $SCRIPT_PATH ${{ steps.mode.outputs.mode }}"
+          echo "Using script: $SCRIPT"
           
           if [ "${{ steps.mode.outputs.mode }}" == "preclose" ]; then
-            python "$SCRIPT_PATH" preclose
+            python "$SCRIPT" preclose
           else
-            python "$SCRIPT_PATH"
+            python "$SCRIPT"
           fi
