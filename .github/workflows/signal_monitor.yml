@@ -62,21 +62,17 @@ jobs:
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
           PHONE_EMAIL: ${{ secrets.PHONE_EMAIL }}
         run: |
-          if [ -f ".github/workflows/signal_monitor_v4.py" ]; then
-            SCRIPT=".github/workflows/signal_monitor_v4.py"
-          elif [ -f ".github/workflows/signal_monitor.py" ]; then
-            SCRIPT=".github/workflows/signal_monitor.py"
-          elif [ -f "signal_monitor_v4.py" ]; then
-            SCRIPT="signal_monitor_v4.py"
-          elif [ -f "signal_monitor.py" ]; then
-            SCRIPT="signal_monitor.py"
-          else
-            echo "ERROR: No signal_monitor script found!"
-            ls -la .github/workflows/ || true
+          # Use signal_monitor_complete.py (the actual file in your repo)
+          SCRIPT=".github/workflows/signal_monitor_complete.py"
+          
+          if [ ! -f "$SCRIPT" ]; then
+            echo "ERROR: $SCRIPT not found!"
+            echo "Files in .github/workflows/:"
+            ls -la .github/workflows/
             exit 1
           fi
           
-          echo "Using script: $SCRIPT"
+          echo "Running: python $SCRIPT"
           
           if [ "${{ steps.mode.outputs.mode }}" == "preclose" ]; then
             python "$SCRIPT" preclose
