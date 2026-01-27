@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """
-Comprehensive Market Signal Monitor v3.0
+Comprehensive Market Signal Monitor v4.0
 ========================================
 Monitors all backtested trading signals and sends alerts.
-NEW: Includes BOIL/KOLD signals with weather forecast integration.
 
 SCHEDULE: Two emails daily (weekdays)
 - 3:15 PM ET: Pre-close preview
 - 4:05 PM ET: Market close confirmation
 
-NEW IN v3.0:
-- BOIL/KOLD natural gas signals with forward weather forecast
-- Automated NOAA CPC temperature outlook data pull
-- EIA natural gas inventory tracking
-- Weather override logic for fade signals
+NEW IN v4.0:
+- Refined BOIL/KOLD signals with 5-day gain bands (from Jan 2026 backtest)
+- UCO > 50 enhancement filter for KOLD fade (77% vs 68% win rate)
+- Supply shock signal: UVXY > 70 + UCO > 60 (73% win, +23.5% avg)
+- Open-Meteo API for reliable weather forecasts (replaces NOAA scraping)
+- Strong dollar winter signal (USDU > 75 → 73% BOIL win rate)
+- Weather override only blocks fades when RSI < 70
 """
 
 import os
@@ -26,7 +27,6 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import sys
 import requests
-import re
 
 # =============================================================================
 # CONFIGURATION
@@ -38,169 +38,100 @@ PHONE_EMAIL = os.environ.get('PHONE_EMAIL', '')
 
 IS_PRECLOSE = len(sys.argv) > 1 and sys.argv[1] == 'preclose'
 
-# =============================================================================
-# WEATHER DATA FUNCTIONS
-# =============================================================================
-def fetch_cpc_outlook():
-    """
-    Fetch 6-10 day temperature outlook from NOAA CPC prognostic discussion.
-    Returns dict with outlook info.
-    """
-    outlook = {
-        'fetched': False,
-        'source': 'NOAA CPC',
-        '6_10_day': {
-            'eastern_us': 'Unknown',
-            'trend': 'Unknown'
-        },
-        '8_14_day': {
-            'eastern_us': 'Unknown'
-        },
-        'raw_text': '',
-        'error': None
-    }
-    
-    try:
-        # 6-10 day prognostic discussion text
-        url = "https://www.cpc.ncep.noaa.gov/products/predictions/610day/fxus06.html"
-        headers = {'User-Agent': 'Mozilla/5.0 (compatible; WeatherBot/1.0)'}
-        response = requests.get(url, timeout=15, headers=headers)
-        
-        if response.status_code == 200:
-            text = response.text.lower()
-            outlook['fetched'] = True
-            
-            # Extract key phrases for Eastern US temperature outlook
-            # Look for temperature-related keywords
-            below_count = text.count('below normal') + text.count('below-normal')
-            above_count = text.count('above normal') + text.count('above-normal')
-            
-            # Check for specific regional mentions
-            east_cold = any(phrase in text for phrase in [
-                'eastern' in text and 'below' in text,
-                'east coast' in text and 'cold' in text,
-                'northeast' in text and 'below' in text,
-                'much below' in text
-            ])
-            
-            if 'much below normal' in text or 'well below normal' in text:
-                outlook['6_10_day']['eastern_us'] = 'Much Below Normal'
-                outlook['6_10_day']['cold_intensity'] = 'HIGH'
-            elif below_count > above_count:
-                outlook['6_10_day']['eastern_us'] = 'Below Normal'
-                outlook['6_10_day']['cold_intensity'] = 'MODERATE'
-            elif above_count > below_count:
-                outlook['6_10_day']['eastern_us'] = 'Above Normal'
-                outlook['6_10_day']['cold_intensity'] = 'LOW'
-            else:
-                outlook['6_10_day']['eastern_us'] = 'Near Normal'
-                outlook['6_10_day']['cold_intensity'] = 'LOW'
-            
-            # Store snippet for debugging
-            outlook['raw_text'] = text[:500]
-            
-    except Exception as e:
-        outlook['error'] = str(e)
-        print(f"Weather fetch error: {e}")
-    
-    return outlook
+# NYC coordinates for weather (proxy for Eastern US heating demand)
+NYC_LAT = 40.74
+NYC_LON = -74.04
 
-def fetch_weather_hazards():
+# =============================================================================
+# WEATHER DATA FUNCTIONS (Open-Meteo API - Free, Reliable)
+# =============================================================================
+def fetch_openmeteo_forecast():
     """
-    Fetch weather hazards outlook from NOAA CPC.
-    Includes cold waves, heat waves, etc.
+    Fetch 7-day temperature forecast from Open-Meteo API.
+    Returns dict with forecast data for BOIL/KOLD signal generation.
     """
-    hazards = {
+    forecast = {
         'fetched': False,
-        'cold_risk': 'Unknown',
-        'source': 'NOAA CPC Hazards',
+        'source': 'Open-Meteo API',
+        'current_temp': None,
+        'temps_7d': [],
+        'temp_change_7d': None,
+        'cold_coming': False,
+        'warming_coming': False,
         'error': None
     }
     
     try:
-        url = "https://www.cpc.ncep.noaa.gov/products/predictions/threats/threats.php"
-        headers = {'User-Agent': 'Mozilla/5.0 (compatible; WeatherBot/1.0)'}
-        response = requests.get(url, timeout=15, headers=headers)
+        url = (
+            f"https://api.open-meteo.com/v1/forecast?"
+            f"latitude={NYC_LAT}&longitude={NYC_LON}"
+            f"&daily=temperature_2m_max,temperature_2m_min"
+            f"&temperature_unit=fahrenheit"
+            f"&timezone=America/New_York"
+            f"&forecast_days=8"
+        )
+        
+        response = requests.get(url, timeout=15)
         
         if response.status_code == 200:
-            text = response.text.lower()
-            hazards['fetched'] = True
+            data = response.json()
+            daily = data.get('daily', {})
             
-            # Check for cold-related hazard keywords
-            if any(phrase in text for phrase in ['dangerously cold', 'arctic', 'extreme cold', 'much below']):
-                hazards['cold_risk'] = 'HIGH'
-            elif any(phrase in text for phrase in ['below normal', 'below-normal', 'cold']):
-                hazards['cold_risk'] = 'MODERATE'
-            else:
-                hazards['cold_risk'] = 'LOW'
+            temps_max = daily.get('temperature_2m_max', [])
+            temps_min = daily.get('temperature_2m_min', [])
+            dates = daily.get('time', [])
+            
+            if temps_max and temps_min:
+                # Calculate daily mean temps
+                temps_mean = [(mx + mn) / 2 for mx, mn in zip(temps_max, temps_min)]
+                forecast['temps_7d'] = temps_mean
+                forecast['dates'] = dates
+                forecast['current_temp'] = temps_mean[0] if temps_mean else None
+                
+                # Calculate 7-day temperature change
+                if len(temps_mean) >= 8:
+                    forecast['temp_change_7d'] = temps_mean[0] - temps_mean[7]  # Positive = colder coming
+                    
+                    # Signal thresholds from backtest
+                    if forecast['temp_change_7d'] >= 20:
+                        forecast['cold_coming'] = True
+                        forecast['cold_intensity'] = 'SEVERE'
+                    elif forecast['temp_change_7d'] >= 15:
+                        forecast['cold_coming'] = True
+                        forecast['cold_intensity'] = 'MODERATE'
+                    elif forecast['temp_change_7d'] >= 10:
+                        forecast['cold_coming'] = True
+                        forecast['cold_intensity'] = 'MILD'
+                    elif forecast['temp_change_7d'] <= -10:
+                        forecast['warming_coming'] = True
+                        forecast['warming_intensity'] = 'SIGNIFICANT'
+                    elif forecast['temp_change_7d'] <= -5:
+                        forecast['warming_coming'] = True
+                        forecast['warming_intensity'] = 'MILD'
+                
+                forecast['fetched'] = True
                 
     except Exception as e:
-        hazards['error'] = str(e)
-        print(f"Hazards fetch error: {e}")
+        forecast['error'] = str(e)
+        print(f"Open-Meteo fetch error: {e}")
     
-    return hazards
+    return forecast
 
-def fetch_eia_storage():
+def get_weather_data():
     """
-    Fetch natural gas storage data from EIA.
-    Returns dict with inventory info.
+    Fetch weather forecast data.
+    Returns combined dict with forecast info.
     """
-    inventory = {
-        'fetched': False,
-        'source': 'EIA Weekly Natural Gas Storage',
-        'current_level': 'N/A',
-        'vs_5yr_avg': 'N/A',
-        'weekly_change': 'N/A',
-        'report_date': 'N/A',
-        'next_report': 'Thursday 10:30 AM ET',
-        'error': None
-    }
-    
-    try:
-        # EIA natural gas storage summary page
-        url = "https://ir.eia.gov/ngs/ngs.html"
-        headers = {'User-Agent': 'Mozilla/5.0 (compatible; EIABot/1.0)'}
-        response = requests.get(url, timeout=15, headers=headers)
-        
-        if response.status_code == 200:
-            text = response.text
-            inventory['fetched'] = True
-            
-            # Try to extract numbers using regex
-            # Look for patterns like "3,065 Bcf" or storage numbers
-            bcf_match = re.search(r'(\d{1,2},?\d{3})\s*Bcf', text)
-            if bcf_match:
-                inventory['current_level'] = bcf_match.group(1) + ' Bcf'
-            
-            # Look for percentage vs 5-year average
-            pct_match = re.search(r'([+-]?\d+\.?\d*)%?\s*(above|below)\s*5-year', text, re.IGNORECASE)
-            if pct_match:
-                sign = '+' if 'above' in pct_match.group(2).lower() else '-'
-                inventory['vs_5yr_avg'] = f"{sign}{pct_match.group(1)}%"
-                
-    except Exception as e:
-        inventory['error'] = str(e)
-        print(f"EIA fetch error: {e}")
-    
-    return inventory
-
-def get_all_weather_data():
-    """
-    Fetch all weather and inventory data.
-    Returns combined dict.
-    """
-    print("Fetching weather and inventory data...")
+    print("Fetching weather forecast data...")
     
     weather_data = {
-        'outlook': fetch_cpc_outlook(),
-        'hazards': fetch_weather_hazards(),
-        'inventory': fetch_eia_storage(),
+        'forecast': fetch_openmeteo_forecast(),
         'fetch_time': datetime.now().strftime('%Y-%m-%d %H:%M ET')
     }
     
-    print(f"  CPC Outlook fetched: {weather_data['outlook'].get('fetched', False)}")
-    print(f"  Hazards fetched: {weather_data['hazards'].get('fetched', False)}")
-    print(f"  EIA Storage fetched: {weather_data['inventory'].get('fetched', False)}")
+    print(f"  Open-Meteo fetched: {weather_data['forecast'].get('fetched', False)}")
+    if weather_data['forecast'].get('temp_change_7d') is not None:
+        print(f"  7-day temp change: {weather_data['forecast']['temp_change_7d']:+.1f}°F")
     
     return weather_data
 
@@ -235,7 +166,6 @@ def download_data(tickers, period='2y'):
         try:
             df = yf.download(ticker, period=period, progress=False)
             if len(df) > 0:
-                # Flatten multi-index columns if present
                 if isinstance(df.columns, pd.MultiIndex):
                     df.columns = df.columns.get_level_values(0)
                 data[ticker] = df
@@ -244,26 +174,27 @@ def download_data(tickers, period='2y'):
     return data
 
 # =============================================================================
-# BOIL/KOLD SIGNAL LOGIC
+# BOIL/KOLD SIGNAL LOGIC (Updated with Jan 2026 backtest findings)
 # =============================================================================
-def check_boil_kold_signals(data, weather_data):
+def check_boil_kold_signals(data, weather_data, indicators):
     """
-    Check BOIL/KOLD signals incorporating weather forecasts and backtested patterns.
+    Check BOIL/KOLD signals with refined logic from Jan 2026 backtest.
     
-    Key signals from backtest:
-    - 5d rally >40%: 84% KOLD win rate (n=19)
-    - 5d rally >50%: 90% KOLD win rate (n=10)
-    - RSI > 79: 56% KOLD win rate (n=48)
-    - RSI < 21: 69% BOIL win rate at 20d (n=62)
-    - Winter spikes reverse MORE than summer (12.5% vs 53.8% continuation)
-    
-    Weather override: If cold forecast continues, delay fade signal.
+    KEY FINDINGS:
+    - 5-day gain bands are MORE predictive than RSI for KOLD entry
+    - KOLD 5d gain >= 30%: 88% win, +14.5% avg (n=24)
+    - KOLD 5d gain >= 40%: 89% win, +18.5% avg (n=9)
+    - KOLD 5d gain >= 50%: 100% win, +25.4% avg (n=7)
+    - UCO > 50 enhancement: 77% win, +10.1% avg (vs 68% baseline)
+    - UCO < 50 warning: only 57% win rate
+    - Weather forecast improves BOIL entry, NOT KOLD entry
+    - Supply shock (UVXY > 70 + UCO > 60): 73% win, +23.5% avg (n=11)
     """
     alerts = []
     boil_status = {
-        'signal': 'N/A',
-        'action': 'N/A',
-        'signal_score': 0,
+        'signal': 'NEUTRAL',
+        'action': 'No clear signal',
+        'tier': None,
         'reasoning': [],
         'weather_override': False
     }
@@ -279,175 +210,226 @@ def check_boil_kold_signals(data, weather_data):
     
     close = boil_df['Close']
     
-    # Calculate indicators
+    # Calculate BOIL indicators
     price = safe_float(close.iloc[-1])
     rsi10 = safe_float(calculate_rsi_wilder(close, 10).iloc[-1])
-    ema9 = safe_float(close.ewm(span=9, adjust=False).mean().iloc[-1])
-    ema20 = safe_float(close.ewm(span=20, adjust=False).mean().iloc[-1])
     
-    # Calculate returns
-    daily_ret = safe_float(close.pct_change().iloc[-1]) * 100
-    
+    # Calculate 5-day gain (KEY metric for KOLD entry)
     if len(close) >= 6:
-        ret_5d = (price / safe_float(close.iloc[-6]) - 1) * 100
+        price_5d_ago = safe_float(close.iloc[-6])
+        gain_5d = (price / price_5d_ago - 1) * 100
     else:
-        ret_5d = 0
+        gain_5d = 0
     
-    if len(close) >= 11:
-        ret_10d = (price / safe_float(close.iloc[-11]) - 1) * 100
+    # Calculate 7-day gain
+    if len(close) >= 8:
+        price_7d_ago = safe_float(close.iloc[-8])
+        gain_7d = (price / price_7d_ago - 1) * 100
     else:
-        ret_10d = 0
+        gain_7d = 0
+    
+    # Get macro indicators
+    uco_rsi = indicators.get('UCO', {}).get('rsi10', 50)
+    uvxy_rsi = indicators.get('UVXY', {}).get('rsi10', 50)
+    usdu_rsi = indicators.get('USDU', {}).get('rsi10', 50)
+    
+    # Get weather forecast
+    forecast = weather_data.get('forecast', {})
+    temp_change_7d = forecast.get('temp_change_7d', 0) or 0
+    cold_coming = forecast.get('cold_coming', False)
+    warming_coming = forecast.get('warming_coming', False)
+    current_temp = forecast.get('current_temp', 'N/A')
+    
+    # Determine if winter (Nov-Feb)
+    current_month = datetime.now().month
+    is_winter = current_month in [11, 12, 1, 2]
     
     # Store status
     boil_status.update({
         'price': price,
         'rsi10': rsi10,
-        'ret_5d': ret_5d,
-        'ret_10d': ret_10d,
-        'daily_ret': daily_ret,
-        'ema9': ema9,
-        'ema20': ema20,
-        'above_ema9': price > ema9,
-        'above_ema20': price > ema20
+        'gain_5d': gain_5d,
+        'gain_7d': gain_7d,
+        'uco_rsi': uco_rsi,
+        'uvxy_rsi': uvxy_rsi,
+        'usdu_rsi': usdu_rsi,
+        'temp_change_7d': temp_change_7d,
+        'current_temp': current_temp,
+        'is_winter': is_winter
     })
     
-    # ==========================================================================
-    # SIGNAL SCORING
-    # ==========================================================================
-    signal_score = 0
     reasoning = []
     
-    # --- TECHNICAL SIGNALS ---
+    # =========================================================================
+    # KOLD ENTRY SIGNALS (Fade the spike)
+    # =========================================================================
     
-    # RSI signals
-    if rsi10 > 79:
-        signal_score -= 2
-        reasoning.append(f"RSI {rsi10:.1f} > 79 = OVERBOUGHT (exit signal)")
-    elif rsi10 > 70:
-        signal_score -= 1
-        reasoning.append(f"RSI {rsi10:.1f} approaching overbought")
+    kold_signal = False
+    kold_tier = None
+    kold_enhanced = False
+    kold_warning = False
+    
+    # Check UCO filter
+    if uco_rsi > 50:
+        kold_enhanced = True
+        reasoning.append(f"UCO RSI {uco_rsi:.1f} > 50 → Enhanced KOLD (77% win vs 68%)")
+    elif uco_rsi < 50:
+        kold_warning = True
+        reasoning.append(f"⚠️ UCO RSI {uco_rsi:.1f} < 50 → Weaker fade (57% win rate)")
+    
+    # TIER 1: Extreme spike (highest conviction)
+    if gain_5d >= 50:
+        kold_signal = True
+        kold_tier = 1
+        reasoning.append(f"🔥 TIER 1: 5d gain {gain_5d:+.1f}% >= 50% → 100% win, +25.4% avg (n=7)")
+    
+    elif gain_5d >= 40:
+        kold_signal = True
+        kold_tier = 1
+        if rsi10 > 70:
+            reasoning.append(f"🔥 TIER 1: 5d gain {gain_5d:+.1f}% >= 40% + RSI {rsi10:.1f} > 70 → 100% win, +24% avg (n=6)")
+        else:
+            reasoning.append(f"🔥 TIER 1: 5d gain {gain_5d:+.1f}% >= 40% → 89% win, +18.5% avg (n=9)")
+    
+    # TIER 2: Strong spike
+    elif gain_5d >= 30 and rsi10 > 70:
+        kold_signal = True
+        kold_tier = 2
+        reasoning.append(f"🟢 TIER 2: 5d gain {gain_5d:+.1f}% >= 30% + RSI {rsi10:.1f} > 70 → 92% win, +16% avg (n=12)")
+    
+    elif gain_5d >= 30:
+        kold_signal = True
+        kold_tier = 2
+        reasoning.append(f"🟢 TIER 2: 5d gain {gain_5d:+.1f}% >= 30% → 88% win, +14.5% avg (n=24)")
+    
+    # TIER 3: Moderate spike (watch)
+    elif gain_5d >= 20:
+        kold_tier = 3
+        reasoning.append(f"🟡 TIER 3: 5d gain {gain_5d:+.1f}% >= 20% → 66% win, +7.6% avg (n=76)")
+    
+    boil_status['tier'] = kold_tier
+    
+    # =========================================================================
+    # BOIL ENTRY SIGNALS (Buy the dip / weather play)
+    # =========================================================================
+    
+    boil_signal = False
+    boil_type = None
+    
+    # SUPPLY SHOCK SIGNAL (rare but powerful)
+    if uvxy_rsi > 70 and uco_rsi > 60:
+        boil_signal = True
+        boil_type = 'supply_shock'
+        reasoning.append(f"🔥 SUPPLY SHOCK: UVXY {uvxy_rsi:.1f} > 70 + UCO {uco_rsi:.1f} > 60 → 73% win, +23.5% avg (n=11)")
+    
+    # WEATHER-BASED ENTRY (winter only)
+    elif is_winter and cold_coming and rsi10 < 50:
+        boil_signal = True
+        boil_type = 'weather'
+        intensity = forecast.get('cold_intensity', 'UNKNOWN')
+        if temp_change_7d >= 20:
+            reasoning.append(f"🟢 WEATHER BUY: {temp_change_7d:+.1f}°F drop coming + RSI {rsi10:.1f} < 50 → 62% win, +7.1% avg")
+        else:
+            reasoning.append(f"🟡 WEATHER WATCH: {temp_change_7d:+.1f}°F drop coming ({intensity})")
+    
+    # OVERSOLD BOUNCE
     elif rsi10 < 21:
-        signal_score += 2
-        reasoning.append(f"RSI {rsi10:.1f} < 21 = OVERSOLD (69% win at 20d)")
-    elif rsi10 < 30:
-        signal_score += 1
-        reasoning.append(f"RSI {rsi10:.1f} approaching oversold")
+        boil_signal = True
+        boil_type = 'oversold'
+        reasoning.append(f"🟢 OVERSOLD: RSI {rsi10:.1f} < 21 → Mean reversion likely")
     
-    # --- BACKTEST SIGNALS (5-day rally fade) ---
+    # STRONG DOLLAR WINTER SIGNAL
+    elif is_winter and usdu_rsi > 75 and rsi10 < 50:
+        reasoning.append(f"🟡 WINTER DOLLAR: USDU RSI {usdu_rsi:.1f} > 75 in winter → 73% BOIL win, +7.3% avg (n=22)")
     
-    if ret_5d > 50:
-        signal_score -= 2
-        reasoning.append(f"5d rally {ret_5d:+.1f}% > 50% → 90% KOLD win (n=10)")
-    elif ret_5d > 40:
-        signal_score -= 1.5
-        reasoning.append(f"5d rally {ret_5d:+.1f}% > 40% → 84% KOLD win (n=19)")
-    elif ret_5d > 30:
-        signal_score -= 1
-        reasoning.append(f"5d rally {ret_5d:+.1f}% > 30% → 69% KOLD win (n=65)")
-    elif ret_5d > 20:
-        signal_score -= 0.5
-        reasoning.append(f"5d rally {ret_5d:+.1f}% > 20% → 62% KOLD win (n=196)")
-    
-    # --- WEATHER SIGNALS ---
-    
-    cold_risk = weather_data.get('hazards', {}).get('cold_risk', 'Unknown')
-    outlook = weather_data.get('outlook', {}).get('6_10_day', {}).get('eastern_us', 'Unknown')
-    
-    weather_bullish = False
-    weather_bearish = False
-    
-    if cold_risk == 'HIGH':
-        signal_score += 1.5
-        reasoning.append(f"NOAA Hazards: HIGH cold risk → supports BOIL")
-        weather_bullish = True
-    elif cold_risk == 'MODERATE':
-        signal_score += 0.5
-        reasoning.append(f"NOAA Hazards: MODERATE cold risk")
-        weather_bullish = True
-    elif cold_risk == 'LOW':
-        reasoning.append(f"NOAA Hazards: LOW cold risk")
-    
-    if 'Above Normal' in outlook:
-        signal_score -= 1
-        reasoning.append(f"6-10 Day Outlook: {outlook} → bearish BOIL")
-        weather_bearish = True
-    elif 'Below Normal' in outlook:
-        signal_score += 0.5
-        reasoning.append(f"6-10 Day Outlook: {outlook} → supports BOIL")
-        weather_bullish = True
-    
-    # --- WEATHER OVERRIDE LOGIC ---
-    # If backtest says fade but weather says cold continues, WAIT
-    
-    backtest_says_fade = ret_5d > 30 or rsi10 > 79
-    weather_says_cold = weather_bullish and not weather_bearish
+    # =========================================================================
+    # WEATHER OVERRIDE LOGIC
+    # =========================================================================
+    # Only block KOLD fade if RSI < 70 and severe cold coming
     
     weather_override = False
-    if backtest_says_fade and weather_says_cold and rsi10 < 79:
-        weather_override = True
-        reasoning.append("⚠️ WEATHER OVERRIDE: Fade blocked - cold forecast continues")
+    if kold_signal and kold_tier in [2, 3] and cold_coming and rsi10 < 70:
+        if temp_change_7d >= 15:
+            weather_override = True
+            reasoning.append(f"⚠️ WEATHER OVERRIDE: Fade blocked - {temp_change_7d:+.1f}°F cold coming, RSI only {rsi10:.1f}")
     
     boil_status['weather_override'] = weather_override
-    boil_status['signal_score'] = signal_score
     boil_status['reasoning'] = reasoning
     
-    # ==========================================================================
+    # =========================================================================
     # DETERMINE FINAL SIGNAL
-    # ==========================================================================
+    # =========================================================================
     
-    if rsi10 > 79:
-        # RSI overbought overrides everything
-        signal = "🔴 EXIT BOIL"
-        action = "RSI > 79 - Exit regardless of weather"
-        signal_type = 'natgas_exit'
+    if kold_signal and not weather_override:
+        if kold_tier == 1:
+            signal = "🔴 KOLD TIER 1"
+            action = "Enter KOLD NOW - highest conviction fade"
+            signal_type = 'natgas_kold_t1'
+        else:
+            signal = "🔴 KOLD TIER 2"
+            action = "Strong KOLD entry"
+            signal_type = 'natgas_kold_t2'
+        
+        if kold_enhanced:
+            signal += " (ENHANCED)"
+            action += f" | UCO confirms (77% win)"
+        elif kold_warning:
+            signal += " (CAUTION)"
+            action += f" | UCO weak - only 57% win"
+    
     elif weather_override:
         signal = "🟡 HOLD - WEATHER OVERRIDE"
-        action = "Backtest says fade, but cold continues. WAIT."
+        action = f"Spike says fade, but {temp_change_7d:+.1f}°F cold coming. WAIT."
         signal_type = 'natgas_hold'
-    elif signal_score >= 2:
-        signal = "🟢 BUY BOIL"
-        action = "Oversold + cold weather support"
-        signal_type = 'natgas_buy'
-    elif signal_score <= -2:
-        signal = "🔴 GO KOLD"
-        action = "Fade the spike - enter KOLD"
-        signal_type = 'natgas_short'
-    elif signal_score <= -1:
-        signal = "🟡 LEAN KOLD"
-        action = "Consider reducing BOIL or small KOLD"
-        signal_type = 'natgas_warning'
-    elif signal_score >= 1:
-        signal = "🟢 LEAN BOIL"
-        action = "Conditions favor BOIL"
-        signal_type = 'natgas_buy'
+    
+    elif boil_signal:
+        if boil_type == 'supply_shock':
+            signal = "🟢 BOIL - SUPPLY SHOCK"
+            action = "Rare geopolitical/supply signal - consider BOIL"
+            signal_type = 'natgas_boil_shock'
+        elif boil_type == 'weather':
+            signal = "🟢 BOIL - WEATHER"
+            action = f"Cold coming ({temp_change_7d:+.1f}°F) + RSI low - buy BOIL"
+            signal_type = 'natgas_boil_weather'
+        else:
+            signal = "🟢 BOIL - OVERSOLD"
+            action = "RSI oversold - mean reversion likely"
+            signal_type = 'natgas_boil_oversold'
+    
+    elif kold_tier == 3:
+        signal = "🟡 KOLD WATCH"
+        action = f"5d gain {gain_5d:+.1f}% - approaching fade territory"
+        signal_type = 'natgas_watch'
+    
     else:
         signal = "⚪ NEUTRAL"
-        action = "No clear signal - stay flat or hold"
+        action = "No clear signal"
         signal_type = 'natgas_neutral'
     
     boil_status['signal'] = signal
     boil_status['action'] = action
     
     # Create alert if actionable
-    if signal_type in ['natgas_exit', 'natgas_short', 'natgas_buy']:
-        alert_title = f"🔥 BOIL/KOLD: {signal}"
-        alert_msg = f"""BOIL ${price:.2f} | RSI {rsi10:.1f} | 5d {ret_5d:+.1f}%
-   Weather: {cold_risk} cold risk | Outlook: {outlook}
-   Action: {action}
-   Score: {signal_score:+.1f}"""
+    if signal_type in ['natgas_kold_t1', 'natgas_kold_t2', 'natgas_boil_shock', 
+                       'natgas_boil_weather', 'natgas_boil_oversold']:
+        alert_title = f"🔥 NATGAS: {signal}"
+        alert_msg = f"""BOIL ${price:.2f} | RSI {rsi10:.1f} | 5d {gain_5d:+.1f}%
+   UCO RSI: {uco_rsi:.1f} | UVXY RSI: {uvxy_rsi:.1f}
+   Weather: {temp_change_7d:+.1f}°F change (7d) | Temp: {current_temp}°F
+   Action: {action}"""
         alerts.append((alert_title, alert_msg, signal_type))
-    elif signal_type == 'natgas_hold' and weather_override:
-        alert_title = f"🔥 BOIL/KOLD: {signal}"
-        alert_msg = f"""BOIL ${price:.2f} | RSI {rsi10:.1f} | 5d {ret_5d:+.1f}%
-   Weather: {cold_risk} cold risk | Outlook: {outlook}
-   Action: {action}
-   Score: {signal_score:+.1f}"""
+    
+    elif signal_type == 'natgas_hold':
+        alert_title = f"🔥 NATGAS: {signal}"
+        alert_msg = f"""BOIL ${price:.2f} | RSI {rsi10:.1f} | 5d {gain_5d:+.1f}%
+   Weather: {temp_change_7d:+.1f}°F cold coming - blocking fade
+   Action: {action}"""
         alerts.append((alert_title, alert_msg, 'natgas_warning'))
     
     return alerts, boil_status
 
 # =============================================================================
-# ORIGINAL SIGNAL CHECKS (from v2.1)
+# ORIGINAL SIGNAL CHECKS
 # =============================================================================
 def check_signals(data):
     """Check all signals and return alerts"""
@@ -463,7 +445,6 @@ def check_signals(data):
         try:
             close = df['Close']
             
-            # Get latest values as scalars
             price = safe_float(close.iloc[-1])
             rsi10 = safe_float(calculate_rsi_wilder(close, 10).iloc[-1])
             rsi50 = safe_float(calculate_rsi_wilder(close, 50).iloc[-1])
@@ -480,7 +461,6 @@ def check_signals(data):
                 'ema21': ema21,
             }
             
-            # Calculate % above SMA200
             if sma200 > 0:
                 indicators[ticker]['pct_above_sma200'] = (price / sma200 - 1) * 100
             else:
@@ -498,7 +478,6 @@ def check_signals(data):
     if 'SMH' in indicators:
         smh = indicators['SMH']
         
-        # EXIT Signals
         if smh['pct_above_sma200'] >= 40:
             alerts.append(('🔴 SOXL EXIT', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - SELL SOXL", 'exit'))
         elif smh['pct_above_sma200'] >= 35:
@@ -506,17 +485,14 @@ def check_signals(data):
         elif smh['pct_above_sma200'] >= 30:
             alerts.append(('🟡 SOXL TRIM', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - Consider trimming 25-50%", 'warning'))
         
-        # Death Cross
         if smh['sma50'] < smh['sma200'] and smh['sma200'] > 0:
             alerts.append(('🔴 DEATH CROSS', f"SMH SMA(50) below SMA(200) - Bearish trend", 'exit'))
         
-        # BUY Signals - Days below SMA200
         if 'SMH' in data:
             smh_df = data['SMH']
             close = smh_df['Close']
             sma200_series = close.rolling(window=200).mean()
             
-            # Count consecutive days below
             days_below = 0
             for i in range(len(close)-1, max(len(close)-500, 199), -1):
                 try:
@@ -544,7 +520,6 @@ def check_signals(data):
         gld = indicators['GLD']
         usdu = indicators['USDU']
         
-        # Double Signal: GLD > 79 AND USDU < 25
         if gld['rsi10'] > 79 and usdu['rsi10'] < 25:
             alerts.append(('🟢🔥 DOUBLE SIGNAL ACTIVE', 
                 f"GLD RSI={gld['rsi10']:.1f} > 79 AND USDU RSI={usdu['rsi10']:.1f} < 25\n"
@@ -552,14 +527,12 @@ def check_signals(data):
                 f"   → Long UPRO: 85% win, +5.2% avg (5d)\n"
                 f"   → AMD/NVDA: 86% win, +5-8% avg (5d)", 'buy'))
             
-            # Triple Signal: Add XLP > 65
             if 'XLP' in indicators and indicators['XLP']['rsi10'] > 65:
                 xlp = indicators['XLP']
                 alerts.append(('🟢🔥🔥 TRIPLE SIGNAL ACTIVE', 
                     f"GLD RSI={gld['rsi10']:.1f} + USDU RSI={usdu['rsi10']:.1f} + XLP RSI={xlp['rsi10']:.1f}\n"
                     f"   → Long TQQQ: 100% win, +11.6% avg (5d) - RARE!", 'buy'))
         
-        # Individual GLD overbought
         elif gld['rsi10'] > 79:
             alerts.append(('🟢 GLD OVERBOUGHT', 
                 f"GLD RSI={gld['rsi10']:.1f} > 79 → Long TQQQ: 72% win, +3.2% avg (5d)", 'buy'))
@@ -655,7 +628,7 @@ def check_signals(data):
                 f"SPY RSI={spy['rsi10']:.1f} < 30 → Consider UPRO: 69% win, +4.3% avg (5d)", 'buy'))
     
     # =========================================================================
-    # SIGNAL GROUP 8: 3x ETF Signals (CURE, FAS, LABU)
+    # SIGNAL GROUP 8: 3x ETF Signals (CURE, FAS, LABU, NAIL)
     # =========================================================================
     
     # CURE
@@ -674,6 +647,15 @@ def check_signals(data):
     # FAS
     if 'FAS' in indicators:
         fas = indicators['FAS']
+        
+        # FAS responds to GLD/USDU signal
+        if 'GLD' in indicators and 'USDU' in indicators:
+            gld = indicators['GLD']
+            usdu = indicators['USDU']
+            if gld['rsi10'] > 79 and usdu['rsi10'] < 25:
+                alerts.append(('🟢 FAS SIGNAL', 
+                    f"GLD>{gld['rsi10']:.0f} + USDU<{usdu['rsi10']:.0f} → Long FAS 10d: 92% win, +5.8% avg | n=13", 'buy'))
+        
         if fas['rsi10'] < 30:
             alerts.append(('🟢 FAS BUY', 
                 f"FAS RSI={fas['rsi10']:.1f} < 30 → Buy FAS: 63% win, +3.3% avg (5d) | n=195", 'buy'))
@@ -691,6 +673,23 @@ def check_signals(data):
             alerts.append(('🟢 LABU BUY', 
                 f"LABU RSI={labu['rsi10']:.1f} < 25 → Buy LABU: 66% win, +5.7% avg (5d) | n=59", 'buy'))
     
+    # NAIL
+    if 'NAIL' in indicators and 'GLD' in indicators and 'USDU' in indicators and 'XLF' in indicators:
+        nail = indicators['NAIL']
+        gld = indicators['GLD']
+        usdu = indicators['USDU']
+        xlf = indicators['XLF']
+        
+        if gld['rsi10'] > 79 and usdu['rsi10'] < 25 and xlf['rsi10'] < 70:
+            alerts.append(('🟢 NAIL SIGNAL', 
+                f"GLD>{gld['rsi10']:.0f} + USDU<{usdu['rsi10']:.0f} + XLF<{xlf['rsi10']:.0f}\n"
+                f"   → Long NAIL: 90% win, +4.9% avg (5d), +14.4% avg (10d) | n=10", 'buy'))
+        
+        if xlf['rsi10'] > 70 and usdu['rsi10'] < 25:
+            alerts.append(('🔴 NAIL DANGER', 
+                f"XLF RSI={xlf['rsi10']:.1f} > 70 + USDU < 25 = Historically BAD for NAIL\n"
+                f"   → 11% win, -11.5% avg (5d) | Consider exit", 'exit'))
+    
     return alerts, status
 
 # =============================================================================
@@ -704,78 +703,53 @@ def format_email(alerts, status, boil_status, weather_data, is_preclose=False):
     
     body = f"""
 {'='*70}
-MARKET SIGNAL MONITOR v3.0 - {timing}
+MARKET SIGNAL MONITOR v4.0 - {timing}
 {now.strftime('%Y-%m-%d %H:%M')} ET
 {'='*70}
 
 """
     
     # ==========================================================================
-    # BOIL/KOLD SECTION (NEW)
+    # BOIL/KOLD STATUS (Top of email for visibility)
     # ==========================================================================
-    if boil_status.get('price'):
-        cold_risk = weather_data.get('hazards', {}).get('cold_risk', 'Unknown')
-        outlook = weather_data.get('outlook', {}).get('6_10_day', {}).get('eastern_us', 'Unknown')
-        
-        body += f"""
+    body += f"""{'='*70}
+🔥 NATURAL GAS (BOIL/KOLD) STATUS
 {'='*70}
-🔥 NATURAL GAS (BOIL/KOLD) SIGNAL
-{'='*70}
+Signal: {boil_status.get('signal', 'N/A')}
+Action: {boil_status.get('action', 'N/A')}
 
-┌────────────────────────────────────────────────────────────────────┐
-│  SIGNAL: {boil_status.get('signal', 'N/A'):<55} │
-│  ACTION: {boil_status.get('action', 'N/A'):<55} │
-│  SCORE:  {boil_status.get('signal_score', 0):+.1f}                                                        │
-└────────────────────────────────────────────────────────────────────┘
+BOIL: ${boil_status.get('price', 0):.2f} | RSI(10): {boil_status.get('rsi10', 0):.1f}
+5-Day Gain: {boil_status.get('gain_5d', 0):+.1f}% | 7-Day Gain: {boil_status.get('gain_7d', 0):+.1f}%
 
-BOIL TECHNICALS:
-  Price:         ${boil_status.get('price', 0):.2f}
-  RSI(10):       {boil_status.get('rsi10', 0):.1f}  {"⚠️ OVERBOUGHT" if boil_status.get('rsi10', 0) > 79 else "✓ OVERSOLD" if boil_status.get('rsi10', 0) < 21 else ""}
-  5-Day Return:  {boil_status.get('ret_5d', 0):+.1f}%
-  10-Day Return: {boil_status.get('ret_10d', 0):+.1f}%
-  Daily Change:  {boil_status.get('daily_ret', 0):+.1f}%
-  vs EMA(9):     {"ABOVE" if boil_status.get('above_ema9') else "BELOW"}
-  vs EMA(20):    {"ABOVE" if boil_status.get('above_ema20') else "BELOW"}
+Macro Filters:
+  UCO RSI: {boil_status.get('uco_rsi', 0):.1f} {'(>50 ✓ Enhanced)' if boil_status.get('uco_rsi', 0) > 50 else '(<50 ⚠️ Weaker)'}
+  UVXY RSI: {boil_status.get('uvxy_rsi', 0):.1f}
+  USDU RSI: {boil_status.get('usdu_rsi', 0):.1f}
 
-WEATHER FORECAST:
-  Cold Risk:     {cold_risk}
-  6-10 Day:      {outlook}
-  Source:        NOAA CPC
+Weather (7-day forecast):
+  Current Temp: {boil_status.get('current_temp', 'N/A')}°F
+  7-Day Change: {boil_status.get('temp_change_7d', 0):+.1f}°F {'(COLD COMING)' if boil_status.get('temp_change_7d', 0) >= 15 else '(warming)' if boil_status.get('temp_change_7d', 0) <= -10 else ''}
 
-INVENTORY:
-  Storage:       {weather_data.get('inventory', {}).get('current_level', 'N/A')}
-  vs 5-Yr Avg:   {weather_data.get('inventory', {}).get('vs_5yr_avg', 'N/A')}
-  Next Report:   {weather_data.get('inventory', {}).get('next_report', 'Thursday 10:30 AM ET')}
-
-SIGNAL REASONING:
+Signal Reasoning:
 """
-        for reason in boil_status.get('reasoning', []):
-            body += f"  • {reason}\n"
-        
-        body += f"""
-BACKTEST REFERENCE (Winter Spike Fade):
-  ┌─────────────┬─────────────┬─────────────┬─────────────┐
-  │ 5d Rally    │ KOLD Win %  │ Avg Return  │ Sample      │
-  ├─────────────┼─────────────┼─────────────┼─────────────┤
-  │ >30%        │ 69%         │ +10.2%      │ n=65        │
-  │ >40%        │ 84%         │ +18.4%      │ n=19        │
-  │ >50%        │ 90%         │ +22.7%      │ n=10        │
-  └─────────────┴─────────────┴─────────────┴─────────────┘
-
-KEY THRESHOLDS:
-  • RSI > 79 = EXIT BOIL (regardless of weather)
-  • 6-10 day "Above Normal" = GO KOLD
-  • Weather turns warmer = GO KOLD
+    for reason in boil_status.get('reasoning', []):
+        body += f"  • {reason}\n"
+    
+    body += f"""
+KOLD Entry Thresholds (5-day gain):
+  30% → 88% win, +14.5% avg (n=24) {'← ACTIVE' if boil_status.get('gain_5d', 0) >= 30 else ''}
+  40% → 89% win, +18.5% avg (n=9) {'← ACTIVE' if boil_status.get('gain_5d', 0) >= 40 else ''}
+  50% → 100% win, +25.4% avg (n=7) {'← ACTIVE' if boil_status.get('gain_5d', 0) >= 50 else ''}
 
 """
     
     # ==========================================================================
-    # STANDARD ALERTS
+    # ALERTS
     # ==========================================================================
     if alerts:
-        buy_alerts = [a for a in alerts if a[2] in ['buy', 'natgas_buy']]
-        exit_alerts = [a for a in alerts if a[2] in ['exit', 'short', 'natgas_exit', 'natgas_short']]
-        warning_alerts = [a for a in alerts if a[2] in ['warning', 'hedge', 'watch', 'natgas_warning', 'natgas_hold']]
+        buy_alerts = [a for a in alerts if 'buy' in a[2].lower()]
+        exit_alerts = [a for a in alerts if 'exit' in a[2].lower() or 'short' in a[2].lower() or 'kold' in a[2].lower()]
+        warning_alerts = [a for a in alerts if a[2] in ['warning', 'hedge', 'watch', 'natgas_warning']]
         
         if buy_alerts:
             body += f"{'='*70}\n"
@@ -785,7 +759,7 @@ KEY THRESHOLDS:
         
         if exit_alerts:
             body += f"{'='*70}\n"
-            body += "🔴 EXIT/SHORT SIGNALS:\n" + "-"*50 + "\n"
+            body += "🔴 EXIT/SHORT/KOLD SIGNALS:\n" + "-"*50 + "\n"
             for title, msg, _ in exit_alerts:
                 body += f"{title}\n{msg}\n\n"
         
@@ -838,7 +812,6 @@ CURRENT INDICATOR STATUS
             rsi = f"{ind['rsi10']:.1f}"
             pct = f"{ind.get('pct_above_sma200', 0):+.1f}%"
             
-            # Signal status
             rsi_val = ind['rsi10']
             if rsi_val < 21:
                 signal = "🟢 OVERSOLD"
@@ -884,11 +857,13 @@ Final confirmation email will be sent at 4:05 PM ET.
 {'='*70}
 DATA SOURCES
 {'='*70}
-  Weather: NOAA Climate Prediction Center (cpc.ncep.noaa.gov)
-  Inventory: EIA Weekly Natural Gas Storage
+  Weather: Open-Meteo API (api.open-meteo.com)
   Prices: Yahoo Finance via yfinance
   
-  For intraday HDD trends: celsiusenergy.net/p/weather-data.html
+  BOIL/KOLD Strategy: Based on Jan 2026 backtest
+  - 5-day gain bands primary signal for KOLD fade
+  - UCO > 50 = enhanced fade (77% win)
+  - Weather forecast for BOIL entry timing only
 {'='*70}
 """
     
@@ -931,7 +906,7 @@ def main():
     # =========================================================================
     # FETCH WEATHER DATA
     # =========================================================================
-    weather_data = get_all_weather_data()
+    weather_data = get_weather_data()
     
     # =========================================================================
     # FETCH MARKET DATA
@@ -944,21 +919,19 @@ def main():
         # Safe Havens & Macro
         'GLD', 'TLT', 'HYG', 'LQD', 'TMV',
         'USDU', 'UCO',
-        # Natural Gas (NEW)
+        # Natural Gas
         'BOIL', 'KOLD',
         # Volatility
         'UVXY',
         # International
-        'EDC', 'YINN', 'KORU', 'EURL', 'INDL',
+        'EDC', 'YINN',
         # Crypto
         'BTC-USD',
         # Individual Stocks
         'AMD', 'NVDA',
         # 3x Leveraged ETFs
         'NAIL', 'CURE', 'FAS', 'LABU',
-        'TQQQ', 'SOXL', 'TECL', 'DRN',
-        # Style/Factor ETFs
-        'VOOV', 'VOOG', 'VTV', 'QQQE',
+        'TQQQ', 'SOXL', 'UPRO',
         # Energy
         'XLE', 'XLF',
     ]
@@ -971,11 +944,12 @@ def main():
     # CHECK SIGNALS
     # =========================================================================
     
-    # Standard signals
+    # Standard signals (also builds indicators dict)
     alerts, status = check_signals(data)
+    indicators = status.get('indicators', {})
     
-    # BOIL/KOLD signals with weather integration
-    boil_alerts, boil_status = check_boil_kold_signals(data, weather_data)
+    # BOIL/KOLD signals with weather integration and macro filters
+    boil_alerts, boil_status = check_boil_kold_signals(data, weather_data, indicators)
     
     # Combine alerts
     all_alerts = alerts + boil_alerts
@@ -985,7 +959,7 @@ def main():
     # =========================================================================
     if all_alerts:
         buy_count = len([a for a in all_alerts if 'buy' in a[2].lower()])
-        exit_count = len([a for a in all_alerts if 'exit' in a[2].lower() or 'short' in a[2].lower()])
+        exit_count = len([a for a in all_alerts if 'exit' in a[2].lower() or 'short' in a[2].lower() or 'kold' in a[2].lower()])
         natgas_alert = any('natgas' in a[2] for a in all_alerts)
         
         if exit_count > 0:
