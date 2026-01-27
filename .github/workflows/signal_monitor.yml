@@ -1,7 +1,8 @@
-# Signal Monitor v2.2 - Updated 2026-01-26
-# Monitors NAIL, CURE, FAS, LABU + all backtested signals
+# Signal Monitor v3.0 - Updated 2026-01-27
+# Includes BOIL/KOLD with weather integration
+# Monitors all backtested signals + Natural Gas weather signals
 
-name: Signal Monitor
+name: Signal Monitor v3
 
 on:
   schedule:
@@ -35,7 +36,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install yfinance pandas numpy
+          pip install yfinance pandas numpy requests
       
       - name: Determine run mode
         id: mode
@@ -62,7 +63,7 @@ jobs:
           PHONE_EMAIL: ${{ secrets.PHONE_EMAIL }}
         run: |
           if [ "${{ steps.mode.outputs.mode }}" == "preclose" ]; then
-            python .github/workflows/signal_monitor_complete.py preclose
+            python .github/workflows/signal_monitor_v3.py preclose
           else
-            python .github/workflows/signal_monitor_complete.py
+            python .github/workflows/signal_monitor_v3.py
           fi
