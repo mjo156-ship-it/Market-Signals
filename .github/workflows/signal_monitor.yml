@@ -62,8 +62,32 @@ jobs:
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
           PHONE_EMAIL: ${{ secrets.PHONE_EMAIL }}
         run: |
-          if [ "${{ steps.mode.outputs.mode }}" == "preclose" ]; then
-            python .github/workflows/signal_monitor_v3.py preclose
+          # Try multiple possible locations for the Python script
+          if [ -f ".github/workflows/signal_monitor_v3.py" ]; then
+            SCRIPT_PATH=".github/workflows/signal_monitor_v3.py"
+          elif [ -f "signal_monitor_v3.py" ]; then
+            SCRIPT_PATH="signal_monitor_v3.py"
+          elif [ -f "scripts/signal_monitor_v3.py" ]; then
+            SCRIPT_PATH="scripts/signal_monitor_v3.py"
           else
-            python .github/workflows/signal_monitor_v3.py
+            echo "Error: signal_monitor_v3.py not found!"
+            echo "Searched in:"
+            echo "  - .github/workflows/signal_monitor_v3.py"
+            echo "  - signal_monitor_v3.py"
+            echo "  - scripts/signal_monitor_v3.py"
+            echo ""
+            echo "Files in current directory:"
+            ls -la
+            echo ""
+            echo "Files in .github/workflows/:"
+            ls -la .github/workflows/ || echo "Directory not found"
+            exit 1
+          fi
+          
+          echo "Running: python $SCRIPT_PATH ${{ steps.mode.outputs.mode }}"
+          
+          if [ "${{ steps.mode.outputs.mode }}" == "preclose" ]; then
+            python "$SCRIPT_PATH" preclose
+          else
+            python "$SCRIPT_PATH"
           fi
