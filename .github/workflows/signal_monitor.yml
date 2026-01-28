@@ -1,9 +1,13 @@
-# Signal Monitor v5.0 - Updated 2026-01-28
+# Signal Monitor v5.1 - Updated 2026-01-28
+# Added FNGO (2x FANG+) signals from backtest analysis
+# - FNGO responds to GLD/USDU combo: 91% win, +8.9% avg (5d)
+# - FNGO RSI < 25: 100% win, +12.1% avg (5d)
+# - EXIT when SPY/QQQ > 79 or FNGO diverges from QQQ by 10+
 # Enhanced XLP/XLU/XLV defensive rotation signals
 # Pre-close moved to 2:40 PM ET to account for ~40min execution lag
 # Includes BOIL/KOLD signals with 5-day gain bands
 
-name: Signal Monitor v5
+name: Signal Monitor v5.1
 
 on:
   schedule:
