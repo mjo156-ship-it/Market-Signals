@@ -1,16 +1,14 @@
-# Signal Monitor v4.0 - Updated 2026-01-27
-# Includes refined BOIL/KOLD signals with:
-# - 5-day gain bands (primary KOLD trigger)
-# - UCO > 50 enhancement filter
-# - Open-Meteo weather API (reliable)
-# - Supply shock signal (UVXY > 70 + UCO > 60)
+# Signal Monitor v5.0 - Updated 2026-01-28
+# Enhanced XLP/XLU/XLV defensive rotation signals
+# Pre-close moved to 2:40 PM ET to account for ~40min execution lag
+# Includes BOIL/KOLD signals with 5-day gain bands
 
-name: Signal Monitor v4
+name: Signal Monitor v5
 
 on:
   schedule:
-    # 3:15 PM Eastern = 20:15 UTC (pre-close preview)
-    - cron: '15 20 * * 1-5'
+    # 2:40 PM Eastern = 19:40 UTC (pre-close preview - moved earlier for lag)
+    - cron: '40 19 * * 1-5'
     # 4:05 PM Eastern = 21:05 UTC (market close confirmation)
     - cron: '5 21 * * 1-5'
   workflow_dispatch:
@@ -49,7 +47,8 @@ jobs:
           
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
-          elif [ "$HOUR" == "20" ] && [ "$MINUTE" -lt "30" ]; then
+          # If it's around 19:40 UTC (2:40 PM ET), it's preclose
+          elif [ "$HOUR" == "19" ] && [ "$MINUTE" -lt "55" ]; then
             echo "mode=preclose" >> $GITHUB_OUTPUT
           else
             echo "mode=close" >> $GITHUB_OUTPUT
