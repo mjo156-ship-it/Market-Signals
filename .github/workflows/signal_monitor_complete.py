@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive Market Signal Monitor v5.0
+Comprehensive Market Signal Monitor v5.1
 ========================================
 Monitors all backtested trading signals and sends alerts.
 
@@ -8,7 +8,15 @@ SCHEDULE: Two emails daily (weekdays)
 - 2:40 PM ET: Pre-close preview (moved earlier to account for ~40min lag)
 - 4:05 PM ET: Market close confirmation
 
-NEW IN v5.0 (Jan 28, 2026):
+NEW IN v5.1 (Jan 28, 2026):
+- Added FNGO (2x FANG+ ETN) signals from backtest analysis
+- FNGO responds to GLD/USDU combo: 91% win, +8.9% avg (5d) | n=11
+- FNGO RSI < 25: 100% win, +12.1% avg (5d) | n=11
+- FNGO EXIT when SPY/QQQ > 79: Only 32-36% win rate
+- FNGO divergence warning: When FNGO RSI > QQQ RSI by 10+, only 30% win
+- KEY: FNGO does NOT follow momentum (unlike BTC) - overbought = SELL
+
+FROM v5.0 (Jan 28, 2026):
 - Enhanced XLP/XLU/XLV defensive rotation signals based on backtesting
 - XLP RSI 75-79 "transition zone" = UVXY hedge (56% win, +1.69% 1-day)
 - XLP RSI > 82 = next-day UVXY trade (67% win, +4.81%)
@@ -755,6 +763,88 @@ def check_signals(data):
                 f"XLF RSI={xlf['rsi10']:.1f} > 70 + USDU < 25 = Historically BAD for NAIL\n"
                 f"   → 11% win, -11.5% avg (5d) | Consider exit", 'exit'))
     
+    # =========================================================================
+    # SIGNAL GROUP 9: FNGO (2x FANG+) Signals - NEW in v5.1
+    # =========================================================================
+    # KEY INSIGHTS from Jan 28, 2026 backtest:
+    # - FNGO does NOT follow momentum (unlike BTC) - overbought = SELL
+    # - Responds very well to GLD/USDU combo signals
+    # - FNGO divergence from QQQ is a DANGER signal
+    # - Best entries: RSI < 25, or when GLD/USDU combo active
+    
+    if 'FNGO' in indicators:
+        fngo = indicators['FNGO']
+        fngo_rsi = fngo['rsi10']
+        
+        # Check for GLD/USDU combo (FNGO's best signal)
+        if 'GLD' in indicators and 'USDU' in indicators:
+            gld = indicators['GLD']
+            usdu = indicators['USDU']
+            
+            # Double Signal for FNGO
+            if gld['rsi10'] > 79 and usdu['rsi10'] < 25:
+                alerts.append(('🟢 FNGO SIGNAL', 
+                    f"GLD RSI={gld['rsi10']:.1f} > 79 + USDU RSI={usdu['rsi10']:.1f} < 25\n"
+                    f"   → Long FNGO: 91% win, +8.9% avg (5d), +11.8% avg (10d) | n=11\n"
+                    f"   → Comparable to TQQQ (91%/+9.5%)\n"
+                    f"   → Hold 10-20 days, exit if SPY/QQQ RSI > 79", 'buy'))
+                
+                # Triple Signal for FNGO
+                if 'XLP' in indicators and indicators['XLP']['rsi10'] > 65:
+                    xlp = indicators['XLP']
+                    alerts.append(('🟢🔥 FNGO TRIPLE SIGNAL', 
+                        f"GLD>{gld['rsi10']:.0f} + USDU<{usdu['rsi10']:.0f} + XLP>{xlp['rsi10']:.0f}\n"
+                        f"   → Long FNGO: 100% win, +9.2% avg (5d), +38.1% avg (20d) | n=4\n"
+                        f"   ⚠️ Low sample size - use as confirmation, not primary", 'buy'))
+        
+        # FNGO RSI < 25 - Strong mean reversion
+        if fngo_rsi < 25:
+            alerts.append(('🟢 FNGO OVERSOLD', 
+                f"FNGO RSI={fngo_rsi:.1f} < 25 → Buy FNGO: 100% win, +12.1% avg (5d) | n=11", 'buy'))
+        elif fngo_rsi < 30:
+            pct_sma = fngo.get('pct_above_sma200', 0)
+            if pct_sma < 0:
+                alerts.append(('🟢 FNGO BUY ZONE', 
+                    f"FNGO RSI={fngo_rsi:.1f} < 30 + Below SMA(200)\n"
+                    f"   → Buy FNGO: 71% win, +6.5% avg (5d) | n=45", 'buy'))
+            else:
+                alerts.append(('🟢 FNGO WATCH', 
+                    f"FNGO RSI={fngo_rsi:.1f} < 30 → Consider FNGO: 73% win, +5.5% avg (5d) | n=67", 'buy'))
+        
+        # FNGO EXIT SIGNALS
+        # SPY overbought = bad for FNGO
+        if 'SPY' in indicators and indicators['SPY']['rsi10'] > 79:
+            spy = indicators['SPY']
+            alerts.append(('🔴 FNGO EXIT - SPY OB', 
+                f"SPY RSI={spy['rsi10']:.1f} > 79 → Exit FNGO: Only 36% win, -3.9% avg (5d) | n=33\n"
+                f"   → WORSE than TQQQ under same conditions", 'exit'))
+        
+        # QQQ overbought = bad for FNGO
+        elif 'QQQ' in indicators and indicators['QQQ']['rsi10'] > 79:
+            qqq = indicators['QQQ']
+            alerts.append(('🔴 FNGO EXIT - QQQ OB', 
+                f"QQQ RSI={qqq['rsi10']:.1f} > 79 → Exit FNGO: Only 32% win, -2.9% avg (5d) | n=53\n"
+                f"   → FNGO underperforms when QQQ extended", 'exit'))
+        
+        # FNGO overbought = SELL (does NOT follow momentum like BTC)
+        if fngo_rsi > 85:
+            alerts.append(('🔴 FNGO OVERBOUGHT', 
+                f"FNGO RSI={fngo_rsi:.1f} > 85 → TRIM FNGO: Only 46% win, -4.4% avg (5d) | n=13\n"
+                f"   → Unlike BTC, FNGO overbought is a SELL signal", 'exit'))
+        elif fngo_rsi > 79:
+            alerts.append(('🟡 FNGO EXTENDED', 
+                f"FNGO RSI={fngo_rsi:.1f} > 79 → Watch FNGO: Only 48% win, -1.3% avg (5d) | n=61", 'warning'))
+        
+        # FNGO divergence from QQQ = DANGER
+        if 'QQQ' in indicators:
+            qqq = indicators['QQQ']
+            rsi_diff = fngo_rsi - qqq['rsi10']
+            if rsi_diff > 10:
+                alerts.append(('🔴 FNGO DIVERGENCE WARNING', 
+                    f"FNGO RSI={fngo_rsi:.1f} > QQQ RSI={qqq['rsi10']:.1f} by {rsi_diff:.1f}\n"
+                    f"   → FNGO running ahead of QQQ: Only 30% win, -4.6% avg (5d) | n=47\n"
+                    f"   → EXIT FNGO when divergence > 10 points", 'exit'))
+    
     return alerts, status
 
 # =============================================================================
@@ -897,6 +987,37 @@ CURRENT INDICATOR STATUS
                 signal = ""
             
             body += f"{ticker:<10} {price:>12} {rsi:>10} {pct:>12}  {signal}\n"
+    
+    # FNGO (2x FANG+) - NEW SECTION
+    if 'FNGO' in indicators:
+        fngo = indicators['FNGO']
+        qqq_rsi = indicators.get('QQQ', {}).get('rsi10', 0)
+        spy_rsi = indicators.get('SPY', {}).get('rsi10', 0)
+        rsi_diff = fngo['rsi10'] - qqq_rsi if qqq_rsi > 0 else 0
+        
+        body += f"""
+{'='*70}
+FNGO (2x FANG+) STATUS
+{'='*70}
+Price:         ${fngo['price']:.2f}
+RSI(10):       {fngo['rsi10']:.1f}
+vs SMA(200):   {fngo.get('pct_above_sma200', 0):+.1f}%
+vs QQQ RSI:    {rsi_diff:+.1f} points {'⚠️ DIVERGENCE!' if rsi_diff > 10 else '(OK)' if -5 <= rsi_diff <= 10 else ''}
+
+Exit Triggers:
+  SPY RSI:     {spy_rsi:.1f} {'🔴 EXIT NOW (>79)' if spy_rsi > 79 else '✓ OK'}
+  QQQ RSI:     {qqq_rsi:.1f} {'🔴 EXIT NOW (>79)' if qqq_rsi > 79 else '✓ OK'}
+  FNGO RSI:    {fngo['rsi10']:.1f} {'🔴 TRIM (>85)' if fngo['rsi10'] > 85 else '🟡 Watch (>79)' if fngo['rsi10'] > 79 else '✓ OK'}
+  Divergence:  {rsi_diff:+.1f} {'🔴 EXIT (>10)' if rsi_diff > 10 else '✓ OK'}
+
+FNGO Quick Reference:
+  BUY:  GLD>79 + USDU<25 → 91% win, +8.9% (5d) | n=11
+  BUY:  FNGO RSI<25 → 100% win, +12.1% (5d) | n=11
+  EXIT: SPY/QQQ RSI>79 → Only 32-36% win
+  EXIT: FNGO RSI>85 → Only 46% win
+  EXIT: FNGO RSI > QQQ RSI by 10+ → Only 30% win
+  NOTE: FNGO does NOT follow momentum like BTC!
+"""
     
     # SMH/SOXL Levels
     if 'SMH' in indicators:
@@ -1077,6 +1198,8 @@ def main():
         # 3x Leveraged ETFs
         'NAIL', 'CURE', 'FAS', 'LABU',
         'TQQQ', 'SOXL', 'UPRO',
+        # 2x Leveraged ETFs (NEW: FNGO)
+        'FNGO',
         # Style/Factor ETFs (all requested)
         'VOOV', 'VOOG', 'VTV', 'QQQE',
         # Energy & Financials
