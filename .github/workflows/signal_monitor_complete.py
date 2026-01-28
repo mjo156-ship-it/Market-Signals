@@ -1,20 +1,27 @@
 #!/usr/bin/env python3
 """
-Comprehensive Market Signal Monitor v4.0
+Comprehensive Market Signal Monitor v5.0
 ========================================
 Monitors all backtested trading signals and sends alerts.
 
 SCHEDULE: Two emails daily (weekdays)
-- 3:15 PM ET: Pre-close preview
+- 2:40 PM ET: Pre-close preview (moved earlier to account for ~40min lag)
 - 4:05 PM ET: Market close confirmation
 
-NEW IN v4.0:
+NEW IN v5.0 (Jan 28, 2026):
+- Enhanced XLP/XLU/XLV defensive rotation signals based on backtesting
+- XLP RSI 75-79 "transition zone" = UVXY hedge (56% win, +1.69% 1-day)
+- XLP RSI > 82 = next-day UVXY trade (67% win, +4.81%)
+- XLU overbought = SHORT via SDP (76% win, +2.34% 20d) - WORKS!
+- XLV overbought = DO NOT SHORT (only 42% win) - use as signal only
+- Best trade: 50% SOXL + 50% SDP pairs when defensives OB
+- Added ETFs: XLV, XLU, XLE, TMV, VOOV, VOOG, VTV, QQQE, BOIL, EURL, YINN, KORU, INDL, EDC
+
+FROM v4.0:
 - Refined BOIL/KOLD signals with 5-day gain bands (from Jan 2026 backtest)
 - UCO > 50 enhancement filter for KOLD fade (77% vs 68% win rate)
 - Supply shock signal: UVXY > 70 + UCO > 60 (73% win, +23.5% avg)
-- Open-Meteo API for reliable weather forecasts (replaces NOAA scraping)
-- Strong dollar winter signal (USDU > 75 → 73% BOIL win rate)
-- Weather override only blocks fades when RSI < 70
+- Open-Meteo API for reliable weather forecasts
 """
 
 import os
@@ -538,21 +545,79 @@ def check_signals(data):
                 f"GLD RSI={gld['rsi10']:.1f} > 79 → Long TQQQ: 72% win, +3.2% avg (5d)", 'buy'))
     
     # =========================================================================
-    # SIGNAL GROUP 3: Defensive Rotation
+    # SIGNAL GROUP 3: ENHANCED Defensive Rotation (v5.0 - Based on Jan 28 analysis)
     # =========================================================================
-    defensive_ob = False
-    for ticker in ['XLP', 'XLU', 'XLV']:
-        if ticker in indicators and indicators[ticker]['rsi10'] > 79:
-            defensive_ob = True
-            break
+    xlp_rsi = indicators.get('XLP', {}).get('rsi10', 0)
+    xlu_rsi = indicators.get('XLU', {}).get('rsi10', 0)
+    xlv_rsi = indicators.get('XLV', {}).get('rsi10', 0)
+    spy_rsi = indicators.get('SPY', {}).get('rsi10', 0)
+    qqq_rsi = indicators.get('QQQ', {}).get('rsi10', 0)
+    smh_rsi = indicators.get('SMH', {}).get('rsi10', 0)
     
-    if defensive_ob:
-        spy_ob = 'SPY' in indicators and indicators['SPY']['rsi10'] > 79
-        qqq_ob = 'QQQ' in indicators and indicators['QQQ']['rsi10'] > 79
+    # Track which defensives are overbought
+    defensive_status = []
+    if xlp_rsi > 79:
+        defensive_status.append(f"XLP={xlp_rsi:.1f}")
+    if xlu_rsi > 79:
+        defensive_status.append(f"XLU={xlu_rsi:.1f}")
+    if xlv_rsi > 79:
+        defensive_status.append(f"XLV={xlv_rsi:.1f}")
+    
+    # NEW: XLP RSI 75-79 "Transition Zone" - UVXY hedge
+    if 75 <= xlp_rsi < 79:
+        alerts.append(('🟡 XLP TRANSITION ZONE', 
+            f"XLP RSI={xlp_rsi:.1f} in 75-79 range\n"
+            f"   → Small UVXY hedge (1-2 day hold): 56% win, +1.69% avg\n"
+            f"   → This is the ONLY zone where UVXY outperforms TQQQ", 'hedge'))
+    
+    # NEW: XLP RSI > 82 - Strong next-day UVXY signal
+    if xlp_rsi > 82:
+        alerts.append(('🟡 XLP EXTREME - UVXY', 
+            f"XLP RSI={xlp_rsi:.1f} > 82\n"
+            f"   → Next-day UVXY trade: 67% win, +4.81% avg (1-day only!)\n"
+            f"   → Do NOT hold UVXY beyond 1-2 days", 'hedge'))
+    
+    # NEW: XLU Overbought - Short Utilities works!
+    if xlu_rsi > 79 and spy_rsi < 79 and qqq_rsi < 79:
+        alerts.append(('🟢 XLU OVERBOUGHT - SHORT UTILITIES', 
+            f"XLU RSI={xlu_rsi:.1f} > 79 + SPY/QQQ not overbought\n"
+            f"   → Short XLU (via SDP): 76% win, +2.34% avg (20d)\n"
+            f"   → Sharpe 0.53, Max loss only -6.2%\n"
+            f"   → BETTER risk-adjusted than long TQQQ", 'buy'))
         
-        if not spy_ob and not qqq_ob:
-            alerts.append(('🟢 DEFENSIVE ROTATION', 
-                f"Defensive sector overbought, SPY/QQQ not → Long TQQQ 20d: 70% win, +5% avg", 'buy'))
+        if xlu_rsi > 82:
+            alerts.append(('🟢🔥 XLU EXTREME - STRONG SHORT', 
+                f"XLU RSI={xlu_rsi:.1f} > 82\n"
+                f"   → Short XLU (via SDP): 89% win, +2.98% avg (20d)", 'buy'))
+    
+    # Main Defensive Rotation Signal
+    any_defensive_ob = xlp_rsi > 79 or xlu_rsi > 79 or xlv_rsi > 79
+    
+    if any_defensive_ob and spy_rsi < 79 and qqq_rsi < 79:
+        # Check SMH state for optimal play
+        if 50 <= smh_rsi <= 70:
+            smh_note = "SMH in goldilocks zone (50-70) - BEST for growth longs"
+        elif smh_rsi < 50:
+            smh_note = "⚠️ SMH weak (<50) - Favor SDP short over SOXL long"
+        else:
+            smh_note = "⚠️ SMH extended (>70) - Rotation risk, favor SDP short"
+        
+        alerts.append(('🟢 DEFENSIVE ROTATION SIGNAL', 
+            f"Defensive OB: {', '.join(defensive_status) if defensive_status else 'None'}\n"
+            f"SPY RSI={spy_rsi:.1f}, QQQ RSI={qqq_rsi:.1f} (not OB)\n"
+            f"   → BEST: 50% SOXL + 50% SDP pairs trade\n"
+            f"   → SOXL alone 20d: 61% win, +3.53% avg (but -75% max DD)\n"
+            f"   → SDP alone 20d: 67% win, +2.46% avg (only -12% max DD)\n"
+            f"   → Pairs 20d: 60% win, +2.99% avg (hedged)\n"
+            f"   {smh_note}", 'buy'))
+        
+        # XLV note - DO NOT SHORT
+        if xlv_rsi > 79:
+            alerts.append(('ℹ️ XLV NOTE - DO NOT SHORT', 
+                f"XLV RSI={xlv_rsi:.1f} > 79 - Healthcare does NOT mean-revert!\n"
+                f"   → Short XLV: Only 42% win, -0.58% avg (LOSES money)\n"
+                f"   → Use XLV as SIGNAL only, short UTILITIES (XLU) instead\n"
+                f"   → XLV overbought is actually BULLISH for SOXL: 65% win, +8.18% avg", 'info'))
     
     # =========================================================================
     # SIGNAL GROUP 4: Volatility Hedge Signals
@@ -699,11 +764,11 @@ def format_email(alerts, status, boil_status, weather_data, is_preclose=False):
     """Format the email body"""
     now = datetime.now()
     
-    timing = "PRE-CLOSE PREVIEW (3:15 PM)" if is_preclose else "MARKET CLOSE CONFIRMATION (4:05 PM)"
+    timing = "PRE-CLOSE PREVIEW (2:40 PM)" if is_preclose else "MARKET CLOSE CONFIRMATION (4:05 PM)"
     
     body = f"""
 {'='*70}
-MARKET SIGNAL MONITOR v4.0 - {timing}
+MARKET SIGNAL MONITOR v5.0 - {timing}
 {now.strftime('%Y-%m-%d %H:%M')} ET
 {'='*70}
 
@@ -750,6 +815,7 @@ KOLD Entry Thresholds (5-day gain):
         buy_alerts = [a for a in alerts if 'buy' in a[2].lower()]
         exit_alerts = [a for a in alerts if 'exit' in a[2].lower() or 'short' in a[2].lower() or 'kold' in a[2].lower()]
         warning_alerts = [a for a in alerts if a[2] in ['warning', 'hedge', 'watch', 'natgas_warning']]
+        info_alerts = [a for a in alerts if a[2] == 'info']
         
         if buy_alerts:
             body += f"{'='*70}\n"
@@ -768,6 +834,12 @@ KOLD Entry Thresholds (5-day gain):
             body += "🟡 WARNINGS/WATCH:\n" + "-"*50 + "\n"
             for title, msg, _ in warning_alerts:
                 body += f"{title}\n{msg}\n\n"
+        
+        if info_alerts:
+            body += f"{'='*70}\n"
+            body += "ℹ️ NOTES:\n" + "-"*50 + "\n"
+            for title, msg, _ in info_alerts:
+                body += f"{title}\n{msg}\n\n"
     else:
         body += "No signals triggered today.\n\n"
     
@@ -783,7 +855,7 @@ CURRENT INDICATOR STATUS
     
     indicators = status.get('indicators', {})
     
-    key_tickers = ['SPY', 'QQQ', 'SMH', 'GLD', 'USDU', 'XLP', 'TLT', 'HYG', 'XLF', 'UVXY', 'BTC-USD', 'AMD', 'NVDA']
+    key_tickers = ['SPY', 'QQQ', 'SMH', 'GLD', 'USDU', 'XLP', 'XLU', 'XLV', 'TLT', 'HYG', 'XLF', 'UVXY', 'BTC-USD', 'AMD', 'NVDA']
     body += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}\n"
     body += "-"*50 + "\n"
     
@@ -845,6 +917,74 @@ Key Levels:
   40% (Sell):     ${sma200 * 1.40:.2f}
 """
     
+    # Defensive & Sector ETFs (NEW section with signals)
+    body += f"""
+{'='*70}
+DEFENSIVE & SECTOR ETFs
+{'='*70}
+"""
+    body += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}  Signal\n"
+    body += "-"*70 + "\n"
+    
+    sector_tickers = ['XLV', 'XLU', 'XLP', 'XLE', 'XLF']
+    for ticker in sector_tickers:
+        if ticker in indicators:
+            ind = indicators[ticker]
+            price = f"${ind['price']:.2f}"
+            rsi = f"{ind['rsi10']:.1f}"
+            pct = f"{ind.get('pct_above_sma200', 0):+.1f}%"
+            
+            rsi_val = ind['rsi10']
+            signal = ""
+            if ticker == 'XLU' and rsi_val > 82:
+                signal = "🟢🔥 STRONG SHORT"
+            elif ticker == 'XLU' and rsi_val > 79:
+                signal = "🟢 SHORT via SDP"
+            elif ticker == 'XLV' and rsi_val > 79:
+                signal = "⚠️ Don't short!"
+            elif ticker == 'XLP' and rsi_val > 82:
+                signal = "🟡 UVXY 1-day"
+            elif ticker == 'XLP' and 75 <= rsi_val < 79:
+                signal = "🟡 UVXY zone"
+            elif rsi_val > 79:
+                signal = "OB"
+            
+            body += f"{ticker:<10} {price:>12} {rsi:>10} {pct:>12}  {signal}\n"
+    
+    # Other ETFs (all requested tickers)
+    body += f"""
+{'='*70}
+OTHER ETFs
+{'='*70}
+"""
+    body += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}\n"
+    body += "-"*50 + "\n"
+    
+    other_tickers = ['TMV', 'VOOV', 'VOOG', 'VTV', 'QQQE', 'EURL', 'YINN', 'KORU', 'INDL', 'EDC']
+    for ticker in other_tickers:
+        if ticker in indicators:
+            ind = indicators[ticker]
+            price = f"${ind['price']:.2f}" if ind['price'] < 1000 else f"${ind['price']:,.0f}"
+            rsi = f"{ind['rsi10']:.1f}"
+            pct = f"{ind.get('pct_above_sma200', 0):+.1f}%"
+            body += f"{ticker:<10} {price:>12} {rsi:>10} {pct:>12}\n"
+    
+    # Defensive Rotation Quick Reference (NEW)
+    body += f"""
+{'='*70}
+DEFENSIVE ROTATION QUICK REFERENCE
+{'='*70}
+XLP RSI 75-79: UVXY hedge (56% win, +1.69% 1-day)
+XLP RSI > 82:  UVXY next-day trade (67% win, +4.81%)
+XLU RSI > 79:  Short XLU via SDP (76% win, +2.34% 20d)
+XLU RSI > 82:  Strong short (89% win, +2.98% 20d)
+XLV RSI > 79:  DO NOT SHORT - use as signal only
+
+Best trade when defensives OB + SPY/QQQ not OB:
+  → 50% SOXL + 50% SDP (pairs trade)
+  → ~60% win, +3% avg, hedged risk
+"""
+    
     if is_preclose:
         body += f"""
 {'='*70}
@@ -864,6 +1004,11 @@ DATA SOURCES
   - 5-day gain bands primary signal for KOLD fade
   - UCO > 50 = enhanced fade (77% win)
   - Weather forecast for BOIL entry timing only
+  
+  Defensive Rotation: Based on Jan 28, 2026 backtest
+  - XLU shorts WORK (76% win at 20d)
+  - XLV shorts DO NOT work (42% win)
+  - XLP 75-79 = UVXY transition zone
 {'='*70}
 """
     
@@ -901,7 +1046,7 @@ def send_email(subject, body):
 # =============================================================================
 def main():
     print(f"Running signal check at {datetime.now()}")
-    print(f"Mode: {'PRE-CLOSE (3:15 PM)' if IS_PRECLOSE else 'MARKET CLOSE (4:05 PM)'}")
+    print(f"Mode: {'PRE-CLOSE (2:40 PM)' if IS_PRECLOSE else 'MARKET CLOSE (4:05 PM)'}")
     
     # =========================================================================
     # FETCH WEATHER DATA
@@ -914,7 +1059,7 @@ def main():
     tickers = [
         # Core Indices
         'SMH', 'SPY', 'QQQ', 'IWM',
-        # Defensive Sectors
+        # Defensive Sectors (critical for new signals)
         'XLP', 'XLU', 'XLV',
         # Safe Havens & Macro
         'GLD', 'TLT', 'HYG', 'LQD', 'TMV',
@@ -923,8 +1068,8 @@ def main():
         'BOIL', 'KOLD',
         # Volatility
         'UVXY',
-        # International
-        'EDC', 'YINN',
+        # International (all requested)
+        'EDC', 'YINN', 'KORU', 'EURL', 'INDL',
         # Crypto
         'BTC-USD',
         # Individual Stocks
@@ -932,7 +1077,9 @@ def main():
         # 3x Leveraged ETFs
         'NAIL', 'CURE', 'FAS', 'LABU',
         'TQQQ', 'SOXL', 'UPRO',
-        # Energy
+        # Style/Factor ETFs (all requested)
+        'VOOV', 'VOOG', 'VTV', 'QQQE',
+        # Energy & Financials
         'XLE', 'XLF',
     ]
     
