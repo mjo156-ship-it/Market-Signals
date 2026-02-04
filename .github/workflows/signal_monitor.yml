@@ -1,18 +1,16 @@
-# Signal Monitor v5.1 - Updated 2026-01-28
-# Added FNGO (2x FANG+) signals from backtest analysis
-# - FNGO responds to GLD/USDU combo: 91% win, +8.9% avg (5d)
-# - FNGO RSI < 25: 100% win, +12.1% avg (5d)
-# - EXIT when SPY/QQQ > 79 or FNGO diverges from QQQ by 10+
-# Enhanced XLP/XLU/XLV defensive rotation signals
-# Pre-close moved to 2:40 PM ET to account for ~40min execution lag
-# Includes BOIL/KOLD signals with 5-day gain bands
+# Signal Monitor v5.2 - Updated 2026-02-04
+# Added SMH/IGV Rotation Framework from backtest analysis
+# - Spread > 25 + IGV < 35 → TECL: 75% win, +10.5% avg (10d)
+# - Spread < -25 + SMH < 35 → SOXL: 80% win, +12.1% avg (10d)
+# Pre-close moved to noon ET for more actionable timing
+# Includes all v5.1 features: FNGO, defensive rotation, BOIL/KOLD
 
-name: Signal Monitor v5.1
+name: Signal Monitor v5.2
 
 on:
   schedule:
-    # 2:40 PM Eastern = 19:40 UTC (pre-close preview - moved earlier for lag)
-    - cron: '40 19 * * 1-5'
+    # 12:00 PM Eastern = 17:00 UTC (noon pre-close preview)
+    - cron: '0 17 * * 1-5'
     # 4:05 PM Eastern = 21:05 UTC (market close confirmation)
     - cron: '5 21 * * 1-5'
   workflow_dispatch:
@@ -51,8 +49,8 @@ jobs:
           
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
-          # If it's around 19:40 UTC (2:40 PM ET), it's preclose
-          elif [ "$HOUR" == "19" ] && [ "$MINUTE" -lt "55" ]; then
+          # If it's around 17:00 UTC (12:00 PM ET noon), it's preclose
+          elif [ "$HOUR" == "17" ] && [ "$MINUTE" -lt "30" ]; then
             echo "mode=preclose" >> $GITHUB_OUTPUT
           else
             echo "mode=close" >> $GITHUB_OUTPUT
