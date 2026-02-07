@@ -1,18 +1,18 @@
-# Signal Monitor v5.2 - Updated 2026-02-04
-# Added SMH/IGV Rotation Framework from backtest analysis
-# - Spread > 25 + IGV < 35 → TECL: 75% win, +10.5% avg (10d)
-# - Spread < -25 + SMH < 35 → SOXL: 80% win, +12.1% avg (10d)
-# Pre-close moved to noon ET for more actionable timing
-# Includes all v5.1 features: FNGO, defensive rotation, BOIL/KOLD
+# Signal Monitor v3.0 - Updated 2026-02-07
+# CHANGELOG v3.0:
+#   - Added VIXM confirmation filter for TQQQ/SOXL dip buys
+#   - Added BOIL/KOLD natural gas signals (RSI, 5d rally, geopolitical)
+#   - Added comprehensive ETF status table (58 tickers)
+#   - Active signals now lead the email; BOIL/KOLD section at end unless active
 
-name: Signal Monitor v5.2
+name: Signal Monitor
 
 on:
   schedule:
-    # 12:00 PM Eastern = 17:00 UTC (noon pre-close preview)
-    - cron: '0 17 * * 1-5'
+    # 3:15 PM Eastern = 20:15 UTC (pre-close preview)
+    - cron: '15 20 * * 1-5'
     # 4:05 PM Eastern = 21:05 UTC (market close confirmation)
-    - cron: '5 21 * * 1-5'
+    - cron: '05 21 * * 1-5'
   workflow_dispatch:
     inputs:
       mode:
@@ -27,35 +27,37 @@ on:
 jobs:
   check-signals:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
-          pip install yfinance pandas numpy requests
-      
+          pip install yfinance pandas numpy
+
       - name: Determine run mode
         id: mode
         run: |
+          # Check if this is the 3:15 PM run (20:15 UTC)
           HOUR=$(date -u +%H)
           MINUTE=$(date -u +%M)
-          
+
+          # If manually triggered, use the input
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
-          # If it's around 17:00 UTC (12:00 PM ET noon), it's preclose
-          elif [ "$HOUR" == "17" ] && [ "$MINUTE" -lt "30" ]; then
+          # If it's around 20:15 UTC (3:15 PM ET), it's preclose
+          elif [ "$HOUR" == "20" ] && [ "$MINUTE" -lt "30" ]; then
             echo "mode=preclose" >> $GITHUB_OUTPUT
           else
             echo "mode=close" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Run signal monitor
         env:
           SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
@@ -63,20 +65,8 @@ jobs:
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
           PHONE_EMAIL: ${{ secrets.PHONE_EMAIL }}
         run: |
-          # Use signal_monitor_complete.py (the actual file in your repo)
-          SCRIPT=".github/workflows/signal_monitor_complete.py"
-          
-          if [ ! -f "$SCRIPT" ]; then
-            echo "ERROR: $SCRIPT not found!"
-            echo "Files in .github/workflows/:"
-            ls -la .github/workflows/
-            exit 1
-          fi
-          
-          echo "Running: python $SCRIPT"
-          
           if [ "${{ steps.mode.outputs.mode }}" == "preclose" ]; then
-            python "$SCRIPT" preclose
+            python .github/workflows/signal_monitor_complete.py preclose
           else
-            python "$SCRIPT"
+            python .github/workflows/signal_monitor_complete.py
           fi
