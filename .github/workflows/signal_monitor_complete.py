@@ -540,6 +540,116 @@ MARKET SIGNAL MONITOR v3.0 - {timing}
     else:
         body += "No signals triggered today.\n\n"
     
+    # ─── Playbook Status ───
+    indicators = status.get('indicators', {})
+    
+    def _rsi(ticker):
+        return indicators.get(ticker, {}).get('rsi10')
+    
+    def _pct_bar(current, threshold, direction='above'):
+        """Create a visual proximity bar. direction='above' means signal fires when current > threshold."""
+        if current is None:
+            return "          —           "
+        if direction == 'above':
+            pct = (current / threshold) * 100 if threshold > 0 else 0
+            active = current >= threshold
+        else:  # 'below' — signal fires when current < threshold
+            # Invert: closer to firing as current drops toward threshold
+            pct = ((100 - current) / (100 - threshold)) * 100 if threshold < 100 else 0
+            active = current <= threshold
+        
+        pct = min(pct, 100)
+        filled = int(pct / 100 * 12)
+        bar = '█' * filled + '░' * (12 - filled)
+        
+        if active:
+            return f"[{bar}] ✓ ACTIVE"
+        else:
+            return f"[{bar}] {pct:.0f}%"
+    
+    gld_rsi = _rsi('GLD')
+    usdu_rsi = _rsi('USDU')
+    xlp_rsi = _rsi('XLP')
+    xlu_rsi = _rsi('XLU')
+    xlv_rsi = _rsi('XLV')
+    spy_rsi = _rsi('SPY')
+    qqq_rsi = _rsi('QQQ')
+    smh_rsi = _rsi('SMH')
+    xlf_rsi = _rsi('XLF')
+    uvxy_rsi = _rsi('UVXY')
+    btc_rsi = _rsi('BTC-USD')
+    
+    # Count combo signal conditions
+    triple_met = sum([
+        1 if gld_rsi and gld_rsi > 79 else 0,
+        1 if usdu_rsi and usdu_rsi < 25 else 0,
+        1 if xlp_rsi and xlp_rsi > 65 else 0,
+    ])
+    double_met = sum([
+        1 if gld_rsi and gld_rsi > 79 else 0,
+        1 if usdu_rsi and usdu_rsi < 25 else 0,
+    ])
+    def_rotation_met = sum([
+        1 if any(_rsi(t) and _rsi(t) > 79 for t in ['XLP', 'XLU', 'XLV']) else 0,
+        1 if spy_rsi and spy_rsi < 79 else 0,
+        1 if qqq_rsi and qqq_rsi < 79 else 0,
+    ])
+    soxs_squeeze_met = sum([
+        1 if smh_rsi and smh_rsi > 79 else 0,
+        1 if usdu_rsi and usdu_rsi > 70 else 0,
+    ])
+    
+    body += f"""
+{'='*70}
+PLAYBOOK STATUS — Signal Proximity
+{'='*70}
+
+COMBO SIGNALS
+{'─'*50}
+  Triple Signal ({triple_met}/3 conditions):
+    GLD RSI > 79:    {gld_rsi if gld_rsi else 0:>5.1f}  {_pct_bar(gld_rsi, 79, 'above')}
+    USDU RSI < 25:   {usdu_rsi if usdu_rsi else 0:>5.1f}  {_pct_bar(usdu_rsi, 25, 'below')}
+    XLP RSI > 65:    {xlp_rsi if xlp_rsi else 0:>5.1f}  {_pct_bar(xlp_rsi, 65, 'above')}
+
+  Double Signal ({double_met}/2 conditions):
+    GLD RSI > 79:    {gld_rsi if gld_rsi else 0:>5.1f}  {_pct_bar(gld_rsi, 79, 'above')}
+    USDU RSI < 25:   {usdu_rsi if usdu_rsi else 0:>5.1f}  {_pct_bar(usdu_rsi, 25, 'below')}
+
+DEFENSIVE ROTATION ({def_rotation_met}/3 conditions):
+{'─'*50}
+    XLP RSI > 79:    {xlp_rsi if xlp_rsi else 0:>5.1f}  {_pct_bar(xlp_rsi, 79, 'above') if xlp_rsi else '—'}
+    XLU RSI > 79:    {xlu_rsi if xlu_rsi else 0:>5.1f}  {_pct_bar(xlu_rsi, 79, 'above') if xlu_rsi else '—'}
+    XLV RSI > 79:    {xlv_rsi if xlv_rsi else 0:>5.1f}  {_pct_bar(xlv_rsi, 79, 'above') if xlv_rsi else '—'}
+    SPY RSI < 79:    {spy_rsi if spy_rsi else 0:>5.1f}  {'✓ met' if spy_rsi and spy_rsi < 79 else '✗ SPY overbought'}
+    QQQ RSI < 79:    {qqq_rsi if qqq_rsi else 0:>5.1f}  {'✓ met' if qqq_rsi and qqq_rsi < 79 else '✗ QQQ overbought'}
+
+VOL HEDGE
+{'─'*50}
+    SPY RSI > 79:    {spy_rsi if spy_rsi else 0:>5.1f}  {_pct_bar(spy_rsi, 79, 'above') if spy_rsi else '—'}
+    QQQ RSI > 79:    {qqq_rsi if qqq_rsi else 0:>5.1f}  {_pct_bar(qqq_rsi, 79, 'above') if qqq_rsi else '—'}
+
+SOXS DOLLAR SQUEEZE ({soxs_squeeze_met}/2 conditions):
+{'─'*50}
+    SMH RSI > 79:    {smh_rsi if smh_rsi else 0:>5.1f}  {_pct_bar(smh_rsi, 79, 'above') if smh_rsi else '—'}
+    USDU RSI > 70:   {usdu_rsi if usdu_rsi else 0:>5.1f}  {_pct_bar(usdu_rsi, 70, 'above') if usdu_rsi else '—'}
+
+DANGER SIGNALS
+{'─'*50}
+    XLF > 70 + USDU < 25 (NAIL danger):  XLF={xlf_rsi if xlf_rsi else 0:.1f}  USDU={usdu_rsi if usdu_rsi else 0:.1f}  {'⚠️ ACTIVE' if xlf_rsi and usdu_rsi and xlf_rsi > 70 and usdu_rsi < 25 else '— clear'}
+    SPY RSI > 85 (UPRO exit):   {spy_rsi if spy_rsi else 0:>5.1f}  {_pct_bar(spy_rsi, 85, 'above') if spy_rsi else '—'}
+    FAS RSI > 85 (FAS exit):    {_rsi('FAS') or 0:>5.1f}  {_pct_bar(_rsi('FAS'), 85, 'above') if _rsi('FAS') else '—'}
+
+DIP BUY PROXIMITY
+{'─'*50}
+    SPY RSI < 25:    {spy_rsi if spy_rsi else 0:>5.1f}  {_pct_bar(spy_rsi, 25, 'below') if spy_rsi else '—'}
+    QQQ RSI < 20:    {qqq_rsi if qqq_rsi else 0:>5.1f}  {_pct_bar(qqq_rsi, 20, 'below') if qqq_rsi else '—'}
+    BTC RSI < 30:    {btc_rsi if btc_rsi else 0:>5.1f}  {_pct_bar(btc_rsi, 30, 'below') if btc_rsi else '—'}
+    CURE RSI < 25:   {_rsi('CURE') or 0:>5.1f}  {_pct_bar(_rsi('CURE'), 25, 'below') if _rsi('CURE') else '—'}
+    LABU RSI < 25:   {_rsi('LABU') or 0:>5.1f}  {_pct_bar(_rsi('LABU'), 25, 'below') if _rsi('LABU') else '—'}
+    FAS RSI < 30:    {_rsi('FAS') or 0:>5.1f}  {_pct_bar(_rsi('FAS'), 30, 'below') if _rsi('FAS') else '—'}
+
+"""
+    
     # ─── Current Indicator Status ───
     body += f"""
 {'='*70}
@@ -547,8 +657,6 @@ CURRENT INDICATOR STATUS
 {'='*70}
 
 """
-    
-    indicators = status.get('indicators', {})
     
     key_tickers = ['SPY', 'QQQ', 'SMH', 'GLD', 'USDU', 'XLP', 'TLT', 'HYG', 'XLF', 'UVXY', 'BTC-USD', 'AMD', 'NVDA']
     body += f"{'Ticker':<10} {'Price':>10} {'RSI(10)':>8} {'vsSMA200':>9}  {'EMA Trend':>20}\n"
