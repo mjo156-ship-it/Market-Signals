@@ -46,10 +46,10 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ inputs.mode }}" == "backfill" ]; then
             echo "Running BACKFILL mode..."
-            python polygon_downloader.py --backfill --force
+            python .github/workflows/polygon_downloader.py --backfill --force
           else
             echo "Running UPDATE mode..."
-            python polygon_downloader.py --update
+            python .github/workflows/polygon_downloader.py --update
           fi
 
       - name: Show data status
