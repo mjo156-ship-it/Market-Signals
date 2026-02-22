@@ -1,0 +1,76 @@
+# Polygon Intraday Data Collector
+# Runs daily after market close to append new intraday bars
+# Schedule: 4:45 PM ET (21:45 UTC) - after signal monitor
+
+name: Polygon Data Collector
+
+on:
+  schedule:
+    # 4:45 PM ET = 21:45 UTC (after signal monitor's 4:05 PM run)
+    - cron: '45 21 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Run mode'
+        required: false
+        default: 'update'
+        type: choice
+        options:
+          - update
+          - backfill
+
+permissions:
+  contents: write
+
+jobs:
+  collect-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120  # Backfill can take a while
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install polygon-api-client pandas numpy
+
+      - name: Run Polygon downloader
+        env:
+          POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ inputs.mode }}" == "backfill" ]; then
+            echo "Running BACKFILL mode..."
+            python polygon_downloader.py --backfill --force
+          else
+            echo "Running UPDATE mode..."
+            python polygon_downloader.py --update
+          fi
+
+      - name: Show data status
+        env:
+          POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
+        run: |
+          python polygon_downloader.py --status
+
+      - name: Commit updated data
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/polygon/
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No new data to commit"
+          else
+            DATESTR=$(date -u +"%Y-%m-%d")
+            FILE_COUNT=$(git diff --staged --name-only | wc -l)
+            git commit -m "📊 Polygon data update: ${DATESTR} (${FILE_COUNT} files)"
+            git push
+            echo "Committed and pushed ${FILE_COUNT} updated files"
+          fi
