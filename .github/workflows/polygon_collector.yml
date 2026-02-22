@@ -56,7 +56,7 @@ jobs:
         env:
           POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
         run: |
-          python polygon_downloader.py --status
+          python .github/workflows/polygon_downloader.py --status
 
       - name: Commit updated data
         run: |
