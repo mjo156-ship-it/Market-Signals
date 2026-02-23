@@ -72,6 +72,6 @@ jobs:
             FILE_COUNT=$(git diff --staged --name-only | wc -l)
             git commit -m "📊 Polygon data update: ${DATESTR} (${FILE_COUNT} files)"
             git pull --rebase
-git push
+            git push
             echo "Committed and pushed ${FILE_COUNT} updated files"
           fi
