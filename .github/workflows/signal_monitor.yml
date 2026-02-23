@@ -1,4 +1,8 @@
-# Signal Monitor v3.0 - Updated 2026-02-07
+# Signal Monitor v3.1 - Updated with BOIL/KOLD natgas signals
+# CHANGELOG v3.1:
+#   - Added BOIL/KOLD natural gas signals with weather (Open-Meteo)
+#   - KOLD fade entry on 5-day BOIL gain bands (30/40/50%)
+#   - UCO enhancement, supply shock, weather override logic
 # CHANGELOG v3.0:
 #   - Added VIXM confirmation filter for TQQQ/SOXL dip buys
 #   - Added BOIL/KOLD natural gas signals (RSI, 5d rally, geopolitical)
@@ -39,7 +43,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install yfinance pandas numpy
+          pip install yfinance pandas numpy requests
 
       - name: Determine run mode
         id: mode
