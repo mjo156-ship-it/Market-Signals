@@ -1,0 +1,116 @@
+# Signal Snapshot Generator
+# Writes data/snapshot.json every 15 minutes during market hours
+# Enables Claude (and other tools) to pull real-time signal state from GitHub
+#
+# Schedule: Every 15 min, 9:30 AM - 4:15 PM ET (14:30 - 21:15 UTC)
+# Also runs on manual trigger for ad-hoc updates
+
+name: Signal Snapshot
+
+on:
+  schedule:
+    # Every 15 minutes during market hours (UTC)
+    # 9:30 AM ET = 14:30 UTC, 4:15 PM ET = 21:15 UTC
+    # Cron doesn't support :30 start, so we run at :00, :15, :30, :45
+    # The script itself is fast (~30s) so slight timing offset is fine
+    - cron: '30,45 14 * * 1-5'     # 9:30, 9:45 AM ET
+    - cron: '0,15,30,45 15 * * 1-5' # 10:00 - 10:45 AM ET
+    - cron: '0,15,30,45 16 * * 1-5' # 11:00 - 11:45 AM ET
+    - cron: '0,15,30,45 17 * * 1-5' # 12:00 - 12:45 PM ET
+    - cron: '0,15,30,45 18 * * 1-5' # 1:00 - 1:45 PM ET
+    - cron: '0,15,30,45 19 * * 1-5' # 2:00 - 2:45 PM ET
+    - cron: '0,15,30,45 20 * * 1-5' # 3:00 - 3:45 PM ET
+    - cron: '0,15 21 * * 1-5'       # 4:00, 4:15 PM ET
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Output mode'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - compact
+
+permissions:
+  contents: write
+
+jobs:
+  generate-snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install yfinance pandas numpy
+
+      - name: Check if market is open
+        id: market-check
+        run: |
+          python3 -c "
+          from datetime import datetime, timezone, timedelta
+          now = datetime.now(timezone.utc)
+          et = now - timedelta(hours=5)
+          weekday = et.weekday()  # 0=Mon, 6=Sun
+          hour = et.hour
+          minute = et.minute
+          time_min = hour * 60 + minute
+          
+          # Market hours: 9:30 AM - 4:15 PM ET (include 15 min post-close)
+          market_open = 9 * 60 + 30   # 570
+          market_close = 16 * 60 + 15  # 975
+          
+          is_weekday = weekday < 5
+          is_market_hours = market_open <= time_min <= market_close
+          
+          if is_weekday and is_market_hours:
+              print('Market is OPEN')
+              open_flag = 'true'
+          else:
+              print(f'Market is CLOSED (weekday={weekday}, time={hour}:{minute:02d} ET)')
+              open_flag = 'false'
+          
+          # Always run on manual trigger
+          import os
+          if os.environ.get('GITHUB_EVENT_NAME') == 'workflow_dispatch':
+              open_flag = 'true'
+              print('Manual trigger — running regardless')
+          
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f'is_open={open_flag}\n')
+          "
+
+      - name: Generate snapshot
+        if: steps.market-check.outputs.is_open == 'true'
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ] && [ "${{ inputs.mode }}" == "compact" ]; then
+            python .github/workflows/snapshot_generator.py --compact
+          else
+            python .github/workflows/snapshot_generator.py
+          fi
+
+      - name: Commit snapshot
+        if: steps.market-check.outputs.is_open == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/snapshot.json
+          
+          if git diff --staged --quiet; then
+            echo "No changes to snapshot"
+          else
+            TIMESTAMP=$(date -u +"%H:%M UTC")
+            git commit -m "📡 Signal snapshot ${TIMESTAMP}"
+            git pull --rebase
+            git push
+            echo "Snapshot committed and pushed"
+          fi
