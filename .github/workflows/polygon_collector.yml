@@ -71,6 +71,7 @@ jobs:
             DATESTR=$(date -u +"%Y-%m-%d")
             FILE_COUNT=$(git diff --staged --name-only | wc -l)
             git commit -m "📊 Polygon data update: ${DATESTR} (${FILE_COUNT} files)"
-            git push
+            git pull --rebase
+git push
             echo "Committed and pushed ${FILE_COUNT} updated files"
           fi
