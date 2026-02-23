@@ -1,0 +1,266 @@
+# Signal Snapshot Generator
+# Writes data/snapshot.json every 15 minutes during market hours
+# Enables Claude to pull real-time signal state from GitHub
+#
+# To test: Actions → Signal Snapshot → Run workflow
+
+name: Signal Snapshot
+
+on:
+  schedule:
+    - cron: '30,45 14 * * 1-5'
+    - cron: '0,15,30,45 15 * * 1-5'
+    - cron: '0,15,30,45 16 * * 1-5'
+    - cron: '0,15,30,45 17 * * 1-5'
+    - cron: '0,15,30,45 18 * * 1-5'
+    - cron: '0,15,30,45 19 * * 1-5'
+    - cron: '0,15,30,45 20 * * 1-5'
+    - cron: '0,15 21 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install yfinance pandas numpy
+
+      - name: Generate snapshot
+        run: |
+          python3 << 'PYEOF'
+          import json, sys
+          import yfinance as yf
+          import pandas as pd
+          import numpy as np
+          from datetime import datetime, timezone, timedelta
+          from pathlib import Path
+
+          TICKERS = [
+              'SPY','QQQ','SMH','IWM',
+              'XLP','XLU','XLV','XLF','XLE',
+              'GLD','TLT','HYG','LQD','TMV','USDU','BND',
+              'UCO','BOIL','DBC',
+              'UVXY','SVXY','VIXY','VIXM',
+              'TQQQ','SOXL','SOXS','TECL','FAS','UPRO',
+              'NAIL','CURE','LABU','DRN','FNGO','HIBL',
+              'EDC','YINN','KORU','EURL','INDL',
+              'BTC-USD',
+              'AMD','NVDA',
+              'VOOV','VOOG','VTV','QQQE',
+              'KMLM','DBMF','CTA','BTAL',
+          ]
+
+          def calc_rsi(prices, period):
+              delta = prices.diff()
+              gain = delta.where(delta > 0, 0)
+              loss = -delta.where(delta < 0, 0)
+              avg_gain = gain.ewm(alpha=1/period, min_periods=period, adjust=False).mean()
+              avg_loss = loss.ewm(alpha=1/period, min_periods=period, adjust=False).mean()
+              rs = avg_gain / avg_loss
+              return 100 - (100 / (1 + rs))
+
+          def sf(value):
+              if isinstance(value, pd.Series):
+                  return float(value.iloc[-1]) if len(value) > 0 else None
+              elif isinstance(value, np.ndarray):
+                  return float(value[-1]) if len(value) > 0 else None
+              elif pd.isna(value):
+                  return None
+              return float(value)
+
+          print(f"Downloading {len(TICKERS)} tickers...")
+          raw = {}
+          for t in TICKERS:
+              try:
+                  df = yf.download(t, period='2y', progress=False)
+                  if len(df) > 0:
+                      if isinstance(df.columns, pd.MultiIndex):
+                          df.columns = df.columns.get_level_values(0)
+                      raw[t] = df
+              except Exception as e:
+                  print(f"  {t}: {e}")
+          print(f"Got {len(raw)} tickers")
+
+          indicators = {}
+          for t, df in raw.items():
+              if len(df) < 200:
+                  continue
+              try:
+                  c = df['Close']
+                  p = sf(c.iloc[-1])
+                  pp = sf(c.iloc[-2]) if len(c)>1 else p
+                  r10 = sf(calc_rsi(c, 10).iloc[-1])
+                  s50 = sf(c.rolling(50).mean().iloc[-1])
+                  s200 = sf(c.rolling(200).mean().iloc[-1])
+                  e9 = sf(c.ewm(span=9,adjust=False).mean().iloc[-1])
+                  e20 = sf(c.ewm(span=20,adjust=False).mean().iloc[-1])
+                  e50 = sf(c.ewm(span=50,adjust=False).mean().iloc[-1])
+                  e200 = sf(c.ewm(span=200,adjust=False).mean().iloc[-1])
+                  r1d = (p/pp-1)*100 if pp else None
+                  r5d = sf((c.iloc[-1]/c.iloc[-6]-1)*100) if len(c)>6 else None
+                  r10d = sf((c.iloc[-1]/c.iloc[-11]-1)*100) if len(c)>11 else None
+                  r20d = sf((c.iloc[-1]/c.iloc[-21]-1)*100) if len(c)>21 else None
+                  v200 = ((p/s200)-1)*100 if s200 and s200>0 else None
+                  v50 = ((p/s50)-1)*100 if s50 and s50>0 else None
+                  eb = e9>e20 if (e9 and e20) else None
+                  indicators[t] = {
+                      'price': round(p,2) if p else None,
+                      'change_pct': round(r1d,2) if r1d is not None else None,
+                      'rsi10': round(r10,1) if r10 else None,
+                      'ema9': round(e9,2) if e9 else None,
+                      'ema20': round(e20,2) if e20 else None,
+                      'ema50': round(e50,2) if e50 else None,
+                      'ema200': round(e200,2) if e200 else None,
+                      'sma50': round(s50,2) if s50 else None,
+                      'sma200': round(s200,2) if s200 else None,
+                      'ema_cross': 'BULL' if eb else ('BEAR' if eb is not None else None),
+                      'above_sma200': p>s200 if (p and s200) else None,
+                      'vs_sma200': round(v200,1) if v200 is not None else None,
+                      'vs_sma50': round(v50,1) if v50 is not None else None,
+                      'ret_1d': round(r1d,2) if r1d is not None else None,
+                      'ret_5d': round(r5d,2) if r5d is not None else None,
+                      'ret_10d': round(r10d,2) if r10d is not None else None,
+                      'ret_20d': round(r20d,2) if r20d is not None else None,
+                  }
+              except Exception as e:
+                  print(f"  {t}: {e}")
+
+          def rsi(t):
+              return indicators.get(t,{}).get('rsi10')
+
+          gld_r=rsi('GLD'); usdu_r=rsi('USDU'); xlp_r=rsi('XLP')
+          spy_r=rsi('SPY'); qqq_r=rsi('QQQ'); smh_r=rsi('SMH')
+          xlf_r=rsi('XLF'); uvxy_r=rsi('UVXY'); vixm_r=rsi('VIXM')
+
+          playbook = {
+              'GLD_RSI_gt_79':  {'value':gld_r,  'threshold':79, 'active': gld_r>79 if gld_r else False},
+              'USDU_RSI_lt_25': {'value':usdu_r, 'threshold':25, 'active': usdu_r<25 if usdu_r else False},
+              'XLP_RSI_gt_65':  {'value':xlp_r,  'threshold':65, 'active': xlp_r>65 if xlp_r else False},
+              'XLP_RSI_gt_75':  {'value':xlp_r,  'threshold':75, 'active': xlp_r>75 if xlp_r else False},
+              'SPY_RSI_gt_79':  {'value':spy_r,  'threshold':79, 'active': spy_r>79 if spy_r else False},
+              'QQQ_RSI_gt_79':  {'value':qqq_r,  'threshold':79, 'active': qqq_r>79 if qqq_r else False},
+              'SMH_RSI_gt_79':  {'value':smh_r,  'threshold':79, 'active': smh_r>79 if smh_r else False},
+              'XLF_RSI_gt_70':  {'value':xlf_r,  'threshold':70, 'active': xlf_r>70 if xlf_r else False},
+              'UVXY_RSI_gt_82': {'value':uvxy_r, 'threshold':82, 'active': uvxy_r>82 if uvxy_r else False},
+              'VIXM_RSI_lt_25': {'value':vixm_r, 'threshold':25, 'active': vixm_r<25 if vixm_r else False},
+          }
+
+          ga = gld_r and gld_r>79
+          ua = usdu_r and usdu_r<25
+          x65 = xlp_r and xlp_r>65
+          x75 = xlp_r and xlp_r>75
+
+          combos = {
+              'double_signal': {'active':bool(ga and ua), 'desc':'GLD>79+USDU<25 → TQQQ'},
+              'triple_signal': {'active':bool(ga and ua and x65), 'desc':'Double+XLP>65 → TQQQ high conviction'},
+              'xlp_cascade':   {'active':bool(x75), 'desc':'XLP>75 → UVXY 1-day hold'},
+          }
+
+          tlt_r10 = indicators.get('TLT',{}).get('ret_10d')
+          bnd_r10 = indicators.get('BND',{}).get('ret_10d')
+          br = tlt_r10>0 if tlt_r10 is not None else None
+          bond = {
+              'direction': 'RISING' if br else ('FALLING' if br is False else 'UNKNOWN'),
+              'tlt_ret_10d': round(tlt_r10,2) if tlt_r10 is not None else None,
+              'bnd_ret_10d': round(bnd_r10,2) if bnd_r10 is not None else None,
+              'uvxy_conviction': 'MODERATE' if br else ('HIGH' if br is False else None),
+          }
+
+          si = indicators.get('SMH',{})
+          s2 = si.get('sma200')
+          smh_lev = {
+              'price': si.get('price'), 'sma200': s2,
+              'pct_above': si.get('vs_sma200'),
+              'trim': round(s2*1.30,2) if s2 else None,
+              'warn': round(s2*1.35,2) if s2 else None,
+              'sell': round(s2*1.40,2) if s2 else None,
+          }
+
+          contrarian = {}
+          for t in ['FAS','TECL','FNGO','LABU','NAIL']:
+              ind = indicators.get(t,{})
+              r = ind.get('rsi10')
+              b200 = ind.get('above_sma200') is False
+              be = ind.get('ema_cross')=='BEAR'
+              st = 'ACTIVE' if (r and b200 and r<40) else ('WATCH' if (r and b200 and r<50) else 'INACTIVE')
+              contrarian[t] = {'rsi10':r, 'below_sma200':b200, 'bear_ema':be, 'status':st}
+
+          extended = {}
+          for t in ['SOXL','KORU','EDC','HIBL','LABU','SMH']:
+              ind = indicators.get(t,{})
+              v = ind.get('vs_sma200')
+              if v is not None and v>50:
+                  extended[t] = {'vs_sma200':v, 'rsi10':ind.get('rsi10'), 'warning':'EXTENDED' if v>100 else 'ELEVATED'}
+
+          alerts = []
+          if combos['double_signal']['active']:
+              alerts.append('DOUBLE SIGNAL: GLD/USDU → TQQQ buy')
+          if combos['triple_signal']['active']:
+              alerts.append('TRIPLE SIGNAL: GLD/USDU/XLP → TQQQ high conviction')
+          if combos['xlp_cascade']['active']:
+              alerts.append('XLP CASCADE: RSI>75 → UVXY 1-day hold')
+          for t,cv in contrarian.items():
+              if cv['status']=='ACTIVE': alerts.append(f'{t} CONTRARIAN: RSI<40+below SMA200')
+              elif cv['status']=='WATCH': alerts.append(f'{t} WATCH: below SMA200, nearing oversold')
+          for t,e in extended.items():
+              alerts.append(f'{t} {e["warning"]}: {e["vs_sma200"]:+.0f}% above SMA200')
+
+          now_utc = datetime.now(timezone.utc)
+          now_et = now_utc + timedelta(hours=-5)
+
+          snapshot = {
+              'meta': {
+                  'generated_utc': now_utc.isoformat(),
+                  'generated_et': now_et.strftime('%Y-%m-%d %H:%M:%S ET'),
+                  'ticker_count': len(indicators),
+                  'version': '1.0',
+              },
+              'signals': {
+                  'playbook': playbook,
+                  'combos': combos,
+                  'bond_momentum': bond,
+                  'smh_levels': smh_lev,
+                  'contrarian': contrarian,
+                  'extended': extended,
+                  'active_alerts': alerts,
+              },
+              'indicators': indicators,
+          }
+
+          Path('data').mkdir(exist_ok=True)
+          with open('data/snapshot.json','w') as f:
+              json.dump(snapshot, f, indent=2, default=str)
+
+          print(f"\nSnapshot written: {len(indicators)} tickers")
+          print(f"Alerts: {len(alerts)}")
+          for a in alerts:
+              print(f"  {a}")
+          PYEOF
+
+      - name: Commit snapshot
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/snapshot.json
+          if git diff --staged --quiet; then
+            echo "No changes"
+          else
+            TIMESTAMP=$(date -u +"%H:%M UTC")
+            git commit -m "📡 Signal snapshot ${TIMESTAMP}"
+            git pull --rebase
+            git push
+            echo "Snapshot pushed"
+          fi
