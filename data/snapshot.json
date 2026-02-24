@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated_utc": "2026-02-24T21:19:57.788317+00:00",
-    "generated_et": "2026-02-24 16:19:57 ET",
+    "generated_utc": "2026-02-24T21:30:36.171752+00:00",
+    "generated_et": "2026-02-24 16:30:36 ET",
     "ticker_count": 52,
     "version": "1.1"
   },
@@ -106,7 +106,7 @@
         "status": "ACTIVE"
       },
       "LABU": {
-        "rsi10": 59.9,
+        "rsi10": 59.6,
         "below_sma200": false,
         "bear_ema": false,
         "status": "INACTIVE"
@@ -135,8 +135,8 @@
         "warning": "ELEVATED"
       },
       "LABU": {
-        "vs_sma200": 69.2,
-        "rsi10": 59.9,
+        "vs_sma200": 68.7,
+        "rsi10": 59.6,
         "warning": "ELEVATED"
       }
     },
@@ -167,8 +167,8 @@
         "supply_shock": false
       },
       "weather": {
-        "current_temp": 21.1,
-        "temp_change_7d": 4.0,
+        "current_temp": 21.8,
+        "temp_change_7d": 3.3,
         "severe_cold": false,
         "is_winter": true
       },
@@ -277,8 +277,8 @@
       "ret_20d": -0.25
     },
     "XLP": {
-      "price": 89.73,
-      "change_pct": 0.85,
+      "price": 89.74,
+      "change_pct": 0.87,
       "rsi10": 73.5,
       "ema9": 88.35,
       "ema20": 86.81,
@@ -290,10 +290,10 @@
       "above_sma200": true,
       "vs_sma200": 12.5,
       "vs_sma50": 8.9,
-      "ret_1d": 0.85,
-      "ret_5d": 1.73,
-      "ret_10d": 2.63,
-      "ret_20d": 8.4
+      "ret_1d": 0.87,
+      "ret_5d": 1.75,
+      "ret_10d": 2.64,
+      "ret_20d": 8.41
     },
     "XLU": {
       "price": 47.2,
@@ -790,23 +790,23 @@
       "ret_20d": -1.73
     },
     "LABU": {
-      "price": 179.94,
-      "change_pct": 5.3,
-      "rsi10": 59.9,
-      "ema9": 168.8,
-      "ema20": 167.97,
-      "ema50": 163.09,
+      "price": 179.4,
+      "change_pct": 4.99,
+      "rsi10": 59.6,
+      "ema9": 168.69,
+      "ema20": 167.92,
+      "ema50": 163.07,
       "ema200": 125.55,
-      "sma50": 167.59,
+      "sma50": 167.58,
       "sma200": 106.32,
       "ema_cross": "BULL",
       "above_sma200": true,
-      "vs_sma200": 69.2,
-      "vs_sma50": 7.4,
-      "ret_1d": 5.3,
-      "ret_5d": 11.03,
-      "ret_10d": 6.36,
-      "ret_20d": 0.43
+      "vs_sma200": 68.7,
+      "vs_sma50": 7.1,
+      "ret_1d": 4.99,
+      "ret_5d": 10.69,
+      "ret_10d": 6.04,
+      "ret_20d": 0.13
     },
     "DRN": {
       "price": 10.59,
@@ -923,23 +923,23 @@
       "ret_20d": 77.76
     },
     "EURL": {
-      "price": 50.27,
-      "change_pct": 0.6,
-      "rsi10": 61.0,
-      "ema9": 49.59,
-      "ema20": 48.49,
-      "ema50": 45.55,
+      "price": 50.53,
+      "change_pct": 1.12,
+      "rsi10": 62.2,
+      "ema9": 49.64,
+      "ema20": 48.51,
+      "ema50": 45.56,
       "ema200": 38.09,
       "sma50": 45.13,
       "sma200": 37.39,
       "ema_cross": "BULL",
       "above_sma200": true,
-      "vs_sma200": 34.5,
-      "vs_sma50": 11.4,
-      "ret_1d": 0.6,
-      "ret_5d": 1.97,
-      "ret_10d": 0.66,
-      "ret_20d": 6.75
+      "vs_sma200": 35.2,
+      "vs_sma50": 12.0,
+      "ret_1d": 1.12,
+      "ret_5d": 2.49,
+      "ret_10d": 1.18,
+      "ret_20d": 7.31
     },
     "INDL": {
       "price": 53.34,
@@ -961,23 +961,23 @@
       "ret_20d": 4.0
     },
     "BTC-USD": {
-      "price": 64070.9,
-      "change_pct": -0.84,
-      "rsi10": 29.1,
-      "ema9": 66694.98,
-      "ema20": 69494.3,
-      "ema50": 76793.95,
-      "ema200": 91775.76,
-      "sma50": 80170.84,
-      "sma200": 98406.12,
+      "price": 64014.25,
+      "change_pct": -0.93,
+      "rsi10": 29.0,
+      "ema9": 66683.65,
+      "ema20": 69488.91,
+      "ema50": 76791.72,
+      "ema200": 91775.19,
+      "sma50": 80169.7,
+      "sma200": 98405.84,
       "ema_cross": "BEAR",
       "above_sma200": false,
       "vs_sma200": -34.9,
-      "vs_sma50": -20.1,
-      "ret_1d": -0.84,
-      "ret_5d": -4.31,
-      "ret_10d": -8.17,
-      "ret_20d": -12.26
+      "vs_sma50": -20.2,
+      "ret_1d": -0.93,
+      "ret_5d": -4.4,
+      "ret_10d": -8.25,
+      "ret_20d": -12.33
     },
     "AMD": {
       "price": 213.84,
