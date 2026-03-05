@@ -1,13 +1,6 @@
-# Signal Monitor v3.1 - Updated with BOIL/KOLD natgas signals
-# CHANGELOG v3.1:
-#   - Added BOIL/KOLD natural gas signals with weather (Open-Meteo)
-#   - KOLD fade entry on 5-day BOIL gain bands (30/40/50%)
-#   - UCO enhancement, supply shock, weather override logic
-# CHANGELOG v3.0:
-#   - Added VIXM confirmation filter for TQQQ/SOXL dip buys
-#   - Added BOIL/KOLD natural gas signals (RSI, 5d rally, geopolitical)
-#   - Added comprehensive ETF status table (58 tickers)
-#   - Active signals now lead the email; BOIL/KOLD section at end unless active
+# Signal Monitor v4.0 - Updated 2026-03-05
+# Monitors Oil Supply Shock, Dispersion Regime, Commodity Playbook,
+# KOLD Oil Reversal, AND Combo Signals + all existing signals
 
 name: Signal Monitor
 
@@ -31,37 +24,34 @@ on:
 jobs:
   check-signals:
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-
+      
       - name: Install dependencies
         run: |
-          pip install yfinance pandas numpy requests
-
+          pip install yfinance pandas numpy
+      
       - name: Determine run mode
         id: mode
         run: |
-          # Check if this is the 3:15 PM run (20:15 UTC)
           HOUR=$(date -u +%H)
           MINUTE=$(date -u +%M)
-
-          # If manually triggered, use the input
+          
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
-          # If it's around 20:15 UTC (3:15 PM ET), it's preclose
           elif [ "$HOUR" == "20" ] && [ "$MINUTE" -lt "30" ]; then
             echo "mode=preclose" >> $GITHUB_OUTPUT
           else
             echo "mode=close" >> $GITHUB_OUTPUT
           fi
-
+      
       - name: Run signal monitor
         env:
           SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
@@ -70,7 +60,7 @@ jobs:
           PHONE_EMAIL: ${{ secrets.PHONE_EMAIL }}
         run: |
           if [ "${{ steps.mode.outputs.mode }}" == "preclose" ]; then
-            python .github/workflows/signal_monitor_complete.py preclose
+            python .github/workflows/signal_monitor_complete-4.py preclose
           else
-            python .github/workflows/signal_monitor_complete.py
+            python .github/workflows/signal_monitor_complete-4.py
           fi
