@@ -62,5 +62,5 @@ jobs:
           if [ "${{ steps.mode.outputs.mode }}" == "preclose" ]; then
             python .github/workflows/signal_monitor_complete-4.py preclose
           else
-            python .github/workflows/signal_monitor_complete-4.py
+            python .github/workflows/signal_monitor_complete.py
           fi
