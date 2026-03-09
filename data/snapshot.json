@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated_utc": "2026-03-09T21:05:48.418106+00:00",
-    "generated_et": "2026-03-09 16:05:48 ET",
+    "generated_utc": "2026-03-09T21:29:02.534193+00:00",
+    "generated_et": "2026-03-09 16:29:02 ET",
     "ticker_count": 52,
     "version": "1.1"
   },
@@ -140,7 +140,7 @@
         "gain_7d": 14.3,
         "signal": "ACTIVE",
         "reasoning": [
-          "Winter + RSI 48.8 < 50 + 7d temp drop -12.2\u00b0F \u2192 BUY BOIL"
+          "Winter + RSI 48.8 < 50 + 7d temp drop -12.5\u00b0F \u2192 BUY BOIL"
         ]
       },
       "kold": {
@@ -159,8 +159,8 @@
         "supply_shock": false
       },
       "weather": {
-        "current_temp": 59.0,
-        "temp_change_7d": -12.2,
+        "current_temp": 59.2,
+        "temp_change_7d": -12.5,
         "severe_cold": false,
         "is_winter": true
       },
@@ -953,23 +953,23 @@
       "ret_20d": -12.75
     },
     "BTC-USD": {
-      "price": 69083.97,
-      "change_pct": 4.72,
-      "rsi10": 51.8,
-      "ema9": 68172.31,
-      "ema20": 68565.4,
-      "ema50": 73288.37,
-      "ema200": 88900.39,
-      "sma50": 73652.37,
-      "sma200": 95209.06,
+      "price": 68872.8,
+      "change_pct": 4.4,
+      "rsi10": 51.3,
+      "ema9": 68130.07,
+      "ema20": 68545.29,
+      "ema50": 73280.09,
+      "ema200": 88898.29,
+      "sma50": 73648.15,
+      "sma200": 95208.01,
       "ema_cross": "BEAR",
       "above_sma200": false,
-      "vs_sma200": -27.4,
-      "vs_sma50": -6.2,
-      "ret_1d": 4.72,
-      "ret_5d": -4.99,
-      "ret_10d": 4.86,
-      "ret_20d": 2.36
+      "vs_sma200": -27.7,
+      "vs_sma50": -6.5,
+      "ret_1d": 4.4,
+      "ret_5d": -5.28,
+      "ret_10d": 4.54,
+      "ret_20d": 2.04
     },
     "AMD": {
       "price": 202.68,
