@@ -18,6 +18,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import sys
+import json
 
 # =============================================================================
 # CONFIGURATION
@@ -524,6 +525,193 @@ def check_signals(data):
             'spy_above_ema20': spy_above_ema20,
         }
 
+    # =========================================================================
+    # SIGNAL GROUP 15: SIGNAL DEGRADATION / CALIBRATION WARNINGS
+    # =========================================================================
+    # Track trailing win rates for key signals and warn when degrading
+    degradation_checks = [
+        ('UCO RSI>75 → TMV', 'UCO', lambda i: i.get('rsi10',0) > 75, 0.65, 'TMV'),
+        ('GLD>79 + USDU<25 → TQQQ', None, lambda i: i.get('GLD',{}).get('rsi10',0) > 79 and i.get('USDU',{}).get('rsi10',50) < 25, 0.88, 'TQQQ'),
+        ('SPY>79 → UVXY', 'SPY', lambda i: i.get('rsi10',0) > 79, 0.686, 'UVXY'),
+        ('GLD RSI>79 alone', 'GLD', lambda i: i.get('rsi10',0) > 79, 0.72, 'TQQQ'),
+    ]
+    
+    for sig_name, ticker, cond_fn, hist_wr, target in degradation_checks:
+        if ticker and ticker in data and target in data:
+            try:
+                close_sig = data[ticker]['Close']
+                close_tgt = data[target]['Close']
+                rsi_series = calculate_rsi_wilder(close_sig, 10)
+                fwd_5d = close_tgt.shift(-5) / close_tgt - 1
+                
+                # Build indicator dict for condition check
+                if ticker:
+                    recent_rsi = rsi_series.iloc[-200:]
+                    episodes = []
+                    for dt in recent_rsi.index:
+                        rsi_val = safe_float(recent_rsi.loc[dt])
+                        test_ind = {'rsi10': rsi_val}
+                        try:
+                            if cond_fn(test_ind) and dt in fwd_5d.index:
+                                fr = safe_float(fwd_5d.loc[dt])
+                                if not pd.isna(fr):
+                                    episodes.append(1 if fr > 0 else 0)
+                        except:
+                            continue
+                    
+                    if len(episodes) >= 5:
+                        trail_wr = sum(episodes[-16:]) / len(episodes[-16:]) if len(episodes) >= 16 else sum(episodes) / len(episodes)
+                        n_trail = min(len(episodes), 16)
+                        
+                        if trail_wr < 0.40 and hist_wr > 0.60:
+                            alerts.append(('🔴 SIGNAL DEGRADATION',
+                                f"{sig_name}: Trailing WR {trail_wr:.0%} vs historical {hist_wr:.0%} — signal may be BROKEN (n={n_trail})", 'exit'))
+                        elif trail_wr < hist_wr - 0.15 and len(episodes) >= 8:
+                            alerts.append(('🟡 SIGNAL CALIBRATION',
+                                f"{sig_name}: Trailing WR {trail_wr:.0%} vs historical {hist_wr:.0%} — signal DEGRADING (n={n_trail})", 'warning'))
+            except Exception as e:
+                pass  # Skip if data issue
+    
+    # =========================================================================
+    # SIGNAL GROUP 16: BOIL/KOLD NATURAL GAS MONITORING
+    # =========================================================================
+    if 'BOIL' in indicators:
+        boil = indicators['BOIL']
+        boil_rsi = boil['rsi10']
+        
+        # BOIL RSI extremes
+        if boil_rsi > 79:
+            alerts.append(('🟡 BOIL OVERBOUGHT',
+                f"BOIL RSI={boil_rsi:.1f} > 79 → Consider KOLD fade\n"
+                f"   Winter spikes tend to fade. 44% WR 5d in high-HDD months", 'warning'))
+        elif boil_rsi < 21:
+            alerts.append(('🟢 BOIL OVERSOLD',
+                f"BOIL RSI={boil_rsi:.1f} < 21 → Watch for weather-driven bounce", 'buy'))
+        
+        # 5-day gain tracking for KOLD entry
+        if 'BOIL' in data and len(data['BOIL']) > 5:
+            boil_close = data['BOIL']['Close']
+            boil_5d_gain = safe_float((boil_close.iloc[-1] / boil_close.iloc[-6] - 1) * 100)
+            
+            if boil_5d_gain > 30:
+                alerts.append(('🔴 BOIL SPIKE → KOLD',
+                    f"BOIL 5d gain: {boil_5d_gain:+.1f}% > 30% → KOLD entry zone\n"
+                    f"   Historical: 88% of spikes >30% fade within 10d", 'short'))
+            elif boil_5d_gain > 20:
+                alerts.append(('🟡 BOIL SPIKE WATCH',
+                    f"BOIL 5d gain: {boil_5d_gain:+.1f}% — approaching 30% KOLD trigger", 'watch'))
+            
+            status['boil_5d_gain'] = boil_5d_gain
+    
+    # Temperature forecast (Open-Meteo NYC proxy for heating demand)
+    try:
+        import urllib.request
+        url = "https://api.open-meteo.com/v1/forecast?latitude=40.71&longitude=-74.01&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=America/New_York&forecast_days=7"
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            weather = json.loads(resp.read())
+        
+        if 'daily' in weather:
+            temps = weather['daily']
+            avg_temps = [(h + l) / 2 for h, l in zip(temps['temperature_2m_max'], temps['temperature_2m_min'])]
+            avg_7d = sum(avg_temps) / len(avg_temps)
+            cold_days = sum(1 for t in avg_temps if t < 32)
+            
+            status['weather'] = {
+                'avg_7d_temp': round(avg_7d, 1),
+                'cold_days': cold_days,
+                'dates': temps.get('time', []),
+                'temps': [round(t, 1) for t in avg_temps],
+            }
+            
+            if cold_days >= 5:
+                alerts.append(('🟡 COLD SNAP AHEAD',
+                    f"NYC 7d forecast: {cold_days}/7 days below freezing, avg {avg_7d:.0f}°F\n"
+                    f"   → NatGas demand elevated. BOIL may hold/rise. Delay KOLD fade", 'watch'))
+            elif avg_7d > 55:
+                alerts.append(('🟡 WARM FORECAST',
+                    f"NYC 7d avg: {avg_7d:.0f}°F → Low heating demand\n"
+                    f"   → KOLD favored if BOIL is extended", 'watch'))
+    except:
+        pass  # Weather API optional — don't break monitor if unavailable
+
+    # =========================================================================
+    # SIGNAL GROUP 17: DFEN (3x Defense) with Bollinger Band Enhancement
+    # =========================================================================
+    if 'DFEN' in indicators and 'DFEN' in data:
+        dfen = indicators['DFEN']
+        dfen_rsi = dfen['rsi10']
+        dfen_above_sma200 = dfen['price'] > dfen['sma200'] and dfen['sma200'] > 0
+        
+        # Compute Bollinger Bands for DFEN
+        dfen_close = data['DFEN']['Close']
+        dfen_bb_sma = safe_float(dfen_close.rolling(20).mean().iloc[-1])
+        dfen_bb_std = safe_float(dfen_close.rolling(20).std().iloc[-1])
+        dfen_bb_upper = dfen_bb_sma + 2 * dfen_bb_std
+        dfen_bb_lower = dfen_bb_sma - 2 * dfen_bb_std
+        dfen_pct_b = (dfen['price'] - dfen_bb_lower) / (dfen_bb_upper - dfen_bb_lower) if (dfen_bb_upper - dfen_bb_lower) > 0 else 0.5
+        dfen_bb_width = (dfen_bb_upper - dfen_bb_lower) / dfen_bb_sma * 100 if dfen_bb_sma > 0 else 0
+        dfen_below_bb = dfen['price'] < dfen_bb_lower
+        
+        # Store BB data for dashboard
+        dfen['bb_upper'] = round(dfen_bb_upper, 2)
+        dfen['bb_lower'] = round(dfen_bb_lower, 2)
+        dfen['bb_sma20'] = round(dfen_bb_sma, 2)
+        dfen['pct_b'] = round(dfen_pct_b, 3)
+        dfen['bb_width'] = round(dfen_bb_width, 1)
+        
+        # PRIMARY: Bollinger Band signal — DFEN-specific edge BB beats RSI
+        # Below BB + RSI>=30: 73.5% WR, +4.28% avg 5d, +17% edge, n=49
+        # Below BB + RSI<30: 63.8% WR, +6.83% avg 5d, n=47
+        if dfen_below_bb and dfen_rsi >= 30:
+            alerts.append(('🟢🔥 DFEN BOLLINGER BUY',
+                f"DFEN ${dfen['price']:.2f} BELOW lower BB (${dfen_bb_lower:.2f}) + RSI={dfen_rsi:.1f}≥30\n"
+                f"   → 73.5% WR, +4.3% avg (5d) | +17% edge vs unconditional | n=49\n"
+                f"   BB catches DFEN dips RSI misses — RSI<30 alone only 57.5% WR for DFEN", 'buy'))
+        elif dfen_below_bb and dfen_rsi < 30:
+            alerts.append(('🟢 DFEN BB + RSI OVERSOLD',
+                f"DFEN ${dfen['price']:.2f} BELOW lower BB (${dfen_bb_lower:.2f}) + RSI={dfen_rsi:.1f}\n"
+                f"   → 63.8% WR, +6.8% avg (5d) | n=47 | Double oversold", 'buy'))
+        
+        # SECONDARY: RSI + SMA200 signal (existing)
+        elif dfen_above_sma200:
+            if dfen_rsi < 25:
+                alerts.append(('🟢🔥 DFEN STRONG BUY',
+                    f"DFEN RSI={dfen_rsi:.1f} < 25 + above SMA200\n"
+                    f"   → 90% WR, +11% avg (20d) | n=52 | Strong uptrend dip", 'buy'))
+            elif dfen_rsi < 30:
+                alerts.append(('🟢 DFEN BUY',
+                    f"DFEN RSI={dfen_rsi:.1f} < 30 + above SMA200\n"
+                    f"   → 90% WR, +11% avg (20d) | n=52 | Uptrend dip buy", 'buy'))
+            elif dfen_rsi < 35:
+                alerts.append(('🟢 DFEN WATCH',
+                    f"DFEN RSI={dfen_rsi:.1f} < 35 + above SMA200\n"
+                    f"   → 90% WR, +11% avg (20d) | n=52 | Pullback in uptrend", 'buy'))
+        else:
+            if dfen_rsi < 25:
+                alerts.append(('🟡 DFEN OVERSOLD (no trend)',
+                    f"DFEN RSI={dfen_rsi:.1f} < 25 but BELOW SMA200\n"
+                    f"   → 63% WR without trend filter — reduced conviction", 'watch'))
+        
+        # Exit signals
+        if dfen_rsi > 85:
+            alerts.append(('🔴 DFEN OVERBOUGHT',
+                f"DFEN RSI={dfen_rsi:.1f} > 85 → Exit DFEN: 42% WR (20d)", 'exit'))
+        elif dfen_rsi > 79:
+            alerts.append(('🟡 DFEN EXTENDED',
+                f"DFEN RSI={dfen_rsi:.1f} > 79 → Caution: 48% WR (20d)", 'warning'))
+        
+        # BB status line for dashboard section
+        status['dfen_bb'] = {
+            'price': dfen['price'],
+            'upper': round(dfen_bb_upper, 2),
+            'lower': round(dfen_bb_lower, 2),
+            'sma20': round(dfen_bb_sma, 2),
+            'pct_b': round(dfen_pct_b, 3),
+            'width': round(dfen_bb_width, 1),
+            'below_band': dfen_below_bb,
+            'rsi': dfen_rsi,
+        }
+
     return alerts, status
 
 # =============================================================================
@@ -595,7 +783,7 @@ CURRENT INDICATOR STATUS
     body += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}  Signal\n"
     body += "-"*65 + "\n"
     
-    leveraged_tickers = ['NAIL', 'CURE', 'FAS', 'LABU', 'TQQQ', 'SOXL', 'TECL', 'DRN']
+    leveraged_tickers = ['NAIL', 'CURE', 'FAS', 'LABU', 'TQQQ', 'SOXL', 'TECL', 'DRN', 'DFEN']
     for ticker in leveraged_tickers:
         if ticker in indicators:
             ind = indicators[ticker]
@@ -702,6 +890,20 @@ CRISIS ALPHA / DEEP VALUE DASHBOARD
                 status_str = "ACTIVE" if val < thresh else f"{dist:+.1f}% away"
                 body += f"    {ticker} {label}: {val:+.1f}% (trigger: {thresh}%) — {status_str}\n"
     
+    # DFEN Bollinger Band Status
+    dfen_bb = status.get('dfen_bb')
+    if dfen_bb:
+        bb_status = "🔥 BELOW LOWER BAND" if dfen_bb['below_band'] else "Within bands"
+        body += f"""
+  DFEN BOLLINGER BANDS (20, 2):
+    Price: ${dfen_bb['price']:.2f}  |  RSI: {dfen_bb['rsi']:.1f}
+    Upper:  ${dfen_bb['upper']:.2f}
+    SMA20:  ${dfen_bb['sma20']:.2f}
+    Lower:  ${dfen_bb['lower']:.2f}
+    %B: {dfen_bb['pct_b']:.3f}  |  Width: {dfen_bb['width']:.1f}%  |  {bb_status}
+    Signal: Below BB+RSI>=30 = 73.5% WR (5d) | Below BB+RSI<30 = 63.8% WR
+"""
+    
     if is_preclose:
         body += f"""
 {'='*70}
@@ -771,6 +973,10 @@ def main():
         'XLE', 'XLF',
         # Crisis Alpha / Deep Value
         'USMV',
+        # NatGas
+        'KOLD',
+        # Defense
+        'DFEN',
     ]
     
     print("Downloading market data...")
