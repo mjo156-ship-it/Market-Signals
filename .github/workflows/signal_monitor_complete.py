@@ -61,7 +61,15 @@ def download_data(tickers, period='2y'):
             print(f"Error downloading {ticker}: {e}")
     return data
 
-def calculate_rolling_betas(data):
+def calculate_rolling_betas(data, regime='UNKNOWN'):
+    """Calculate rolling beta vs SPY for key asset groups.
+    Blend weights are regime-conditional to reflect actual Opus behavior:
+      BULL+VOL COMPRESS: 70% equity (Opus in B5, most aggressive)
+      BULL+VOL EXPAND:   50% equity (Opus in B4/B5, slightly defensive)
+      BEAR RECOVERY:     35% equity (Opus recovery mode, 50% UPRO but smaller overall)
+      BEAR DEFENSIVE:    15% equity (Opus in SHY/GLD/MF, minimal equity)
+      UNKNOWN/default:   40% equity (conservative middle estimate)
+    """
     if 'SPY' not in data: return None
     spy_ret = data['SPY']['Close'].pct_change()
     def _beta(ticker, window):
@@ -73,25 +81,36 @@ def calculate_rolling_betas(data):
         b = a.rolling(window).cov(sr) / sr.rolling(window).var()
         v = b.iloc[-1]
         return round(float(v), 3) if not pd.isna(v) else None
+
+    # Regime-conditional blend weights
+    regime_weights = {
+        'BULL + VOL COMPRESS': {'Equity Sleeve':0.70,'MF Rotation':0.08,'GLD':0.12,'KMLM':0.05,'BTAL':0.05},
+        'BULL + VOL EXPAND':   {'Equity Sleeve':0.50,'MF Rotation':0.12,'GLD':0.18,'KMLM':0.10,'BTAL':0.10},
+        'BEAR RECOVERY':       {'Equity Sleeve':0.35,'MF Rotation':0.15,'GLD':0.20,'KMLM':0.15,'BTAL':0.15},
+        'BEAR DEFENSIVE':      {'Equity Sleeve':0.15,'MF Rotation':0.20,'GLD':0.25,'KMLM':0.20,'BTAL':0.20},
+    }
+    default_weights = {'Equity Sleeve':0.40,'MF Rotation':0.15,'GLD':0.20,'KMLM':0.13,'BTAL':0.12}
+    blend_w = regime_weights.get(regime, default_weights)
+
     groups = [
-        ('Equity Sleeve', [('UPRO',0.4),('TQQQ',0.3),('SOXL',0.3)], 0.55),
-        ('MF Rotation', [('CTA',0.33),('DBMF',0.33),('BTAL',0.34)], 0.15),
-        ('GLD', [('GLD',1.0)], 0.15),
-        ('KMLM', [('KMLM',1.0)], 0.10),
-        ('BTAL', [('BTAL',1.0)], 0.05),
+        ('Equity Sleeve', [('UPRO',0.4),('TQQQ',0.3),('SOXL',0.3)]),
+        ('MF Rotation', [('CTA',0.33),('DBMF',0.33),('BTAL',0.34)]),
+        ('GLD', [('GLD',1.0)]),
+        ('KMLM', [('KMLM',1.0)]),
+        ('BTAL', [('BTAL',1.0)]),
     ]
-    results = {}
+    results = {'regime': regime, 'blend_weights': blend_w}
     for wname, w in [('63d',63),('126d',126),('252d',252)]:
         results[wname] = {}
         blend = 0
-        for gname, tw, bw in groups:
+        for gname, tw in groups:
             gb, valid = 0, True
             for t, twt in tw:
                 b = _beta(t, w)
                 if b is not None: gb += b * twt
                 else: valid = False
             results[wname][gname] = round(gb,3) if valid else None
-            if valid: blend += gb * bw
+            if valid: blend += gb * blend_w.get(gname, 0)
         results[wname]['Est. Blend'] = round(blend, 3)
     return results
 
@@ -444,26 +463,44 @@ MARKET SIGNAL MONITOR - {timing}
     # --- ROLLING BETA ---
     rb=status.get('rolling_betas')
     if rb:
+        beta_regime = rb.get('regime', 'UNKNOWN')
+        blend_w = rb.get('blend_weights', {})
         body += f"\n{'='*70}\nROLLING BETA vs SPY\n{'='*70}\n"
         body += "  Beta = how much each group moves per 1% SPY move.\n"
-        body += "  Blend >2.0 = portfolio is leveraged SPY (diversification minimal).\n"
-        body += "  MF Rotation / BTAL should be NEGATIVE (hedge value).\n\n"
-        body += f"{'Group':<20} {'63d':>8} {'126d':>8} {'252d':>8}\n" + "-"*50 + "\n"
+        body += "  Blend weights are REGIME-CONDITIONAL (not static):\n"
+        body += f"  Current regime: {beta_regime}\n"
+        body += f"  Weights used:  Equity {blend_w.get('Equity Sleeve',0):.0%}"
+        body += f" | MF {blend_w.get('MF Rotation',0):.0%}"
+        body += f" | GLD {blend_w.get('GLD',0):.0%}"
+        body += f" | KMLM {blend_w.get('KMLM',0):.0%}"
+        body += f" | BTAL {blend_w.get('BTAL',0):.0%}\n"
+        body += "  (Opus holds heavy equity only in proven dip-buy/low-vol regimes)\n\n"
+        body += f"{'Group':<20} {'63d':>8} {'126d':>8} {'252d':>8}  {'Blend Wt':>8}\n" + "-"*58 + "\n"
         for g in ['Equity Sleeve','MF Rotation','GLD','KMLM','BTAL','Est. Blend']:
             row=f"{g:<20}"
             for w in ['63d','126d','252d']:
                 v=rb.get(w,{}).get(g)
                 row += f" {v:>+7.2f}" if v is not None else f" {'N/A':>7}"
-            if g=='Est. Blend':
+            if g != 'Est. Blend':
+                bwt = blend_w.get(g, 0)
+                row += f"  {bwt:>7.0%}"
+            else:
                 b63=rb.get('63d',{}).get('Est. Blend')
-                if b63 and b63>2.0: row+="  << HIGH LEVERAGE"
-                elif b63 and b63>1.5: row+="  << ELEVATED"
+                if b63 and b63>2.0: row+="  << HIGH"
+                elif b63 and b63>1.5: row+="  << ELEV"
+                elif b63 and b63>0.8: row+="      OK"
+                else: row+="   DIVERS"
             body += row+"\n"
-            if g=='BTAL': body += "-"*50+"\n"
+            if g=='BTAL': body += "-"*58+"\n"
         b63=rb.get('63d',{}).get('Est. Blend'); b252=rb.get('252d',{}).get('Est. Blend')
         if b63 and b252:
             body += f"\nTrend: {b252:+.2f} (252d) -> {b63:+.2f} (63d)\n"
-            if b63>2.0: body += "WARNING: HIGH leverage. Holy Grail diversification minimal.\n  -> Consider increasing KMLM/CTA/GLD, reducing equity sleeve.\n"
+            if b63>2.0:
+                body += "WARNING: HIGH leverage even with regime-adjusted weights.\n"
+                body += "  -> Holy Grail diversification minimal at current positioning.\n"
+            elif b63<1.0:
+                body += "Diversification ACTIVE: blend beta below 1.0x SPY.\n"
+                body += "  -> Alternatives are meaningfully reducing portfolio risk.\n"
 
     # --- GLD & MINERS ---
     body += f"\n{'='*70}\nGLD & MINERS STATUS\n{'='*70}\n"
@@ -521,7 +558,28 @@ def main():
     print("Downloading market data...")
     data = download_data(tickers)
     print(f"Downloaded {len(data)} tickers")
-    rolling_betas = calculate_rolling_betas(data)
+
+    # Determine regime FIRST so rolling beta uses correct blend weights
+    regime = 'UNKNOWN'
+    if 'SPY' in data and 'QQQ' in data:
+        spy_c = data['SPY']['Close']
+        qqq_c = data['QQQ']['Close']
+        spy_price = sf(spy_c.iloc[-1])
+        spy_sma200 = sf(spy_c.rolling(200).mean().iloc[-1]) if len(spy_c)>=200 else 0
+        spy_ema20 = sf(spy_c.ewm(span=20,adjust=False).mean().iloc[-1])
+        qqq_rets = qqq_c.pct_change()
+        std10 = sf(qqq_rets.rolling(10).std().iloc[-1])
+        std50 = sf(qqq_rets.rolling(50).std().iloc[-1])
+        vol_exp = (std10/std50 > 1.0) if std50 > 0 else False
+        above200 = spy_price > spy_sma200 if spy_sma200 > 0 else False
+        above_ema20 = spy_price > spy_ema20 if spy_ema20 > 0 else False
+        if above200 and not vol_exp: regime = 'BULL + VOL COMPRESS'
+        elif above200 and vol_exp: regime = 'BULL + VOL EXPAND'
+        elif not above200 and above_ema20: regime = 'BEAR RECOVERY'
+        elif not above200: regime = 'BEAR DEFENSIVE'
+    print(f"Regime: {regime}")
+
+    rolling_betas = calculate_rolling_betas(data, regime=regime)
     alerts, status = check_signals(data)
     status['rolling_betas'] = rolling_betas
     if alerts:
