@@ -18,7 +18,6 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 import sys
-import json
 
 # =============================================================================
 # CONFIGURATION
@@ -70,6 +69,58 @@ def download_data(tickers, period='2y'):
     return data
 
 # =============================================================================
+# ROLLING BETA vs SPY
+# =============================================================================
+def calculate_rolling_betas(data):
+    """Calculate rolling beta vs SPY for key asset groups"""
+    if 'SPY' not in data:
+        return None
+    spy_ret = data['SPY']['Close'].pct_change()
+    
+    def _beta(ticker, window):
+        if ticker not in data:
+            return None
+        ar = data[ticker]['Close'].pct_change()
+        common = spy_ret.dropna().index.intersection(ar.dropna().index)
+        if len(common) < window + 10:
+            return None
+        sr = spy_ret.loc[common]
+        a = ar.loc[common]
+        cov = a.rolling(window).cov(sr)
+        var = sr.rolling(window).var()
+        b = cov / var
+        v = b.iloc[-1]
+        return round(float(v), 3) if not pd.isna(v) else None
+    
+    groups = [
+        ('Equity Sleeve', [('UPRO', 0.4), ('TQQQ', 0.3), ('SOXL', 0.3)], 0.55),
+        ('MF Rotation',   [('CTA', 0.33), ('DBMF', 0.33), ('BTAL', 0.34)], 0.15),
+        ('GLD',           [('GLD', 1.0)], 0.15),
+        ('KMLM',          [('KMLM', 1.0)], 0.10),
+        ('BTAL',          [('BTAL', 1.0)], 0.05),
+    ]
+    
+    results = {}
+    for wname, w in [('63d', 63), ('126d', 126), ('252d', 252)]:
+        results[wname] = {}
+        blend = 0
+        for gname, tickers_w, bw in groups:
+            gb = 0
+            valid = True
+            for t, tw in tickers_w:
+                b = _beta(t, w)
+                if b is not None:
+                    gb += b * tw
+                else:
+                    valid = False
+            results[wname][gname] = round(gb, 3) if valid else None
+            if valid:
+                blend += gb * bw
+        results[wname]['Est. Blend'] = round(blend, 3)
+    return results
+
+
+# =============================================================================
 # SIGNAL CHECKS
 # =============================================================================
 def check_signals(data):
@@ -108,33 +159,6 @@ def check_signals(data):
                 indicators[ticker]['pct_above_sma200'] = (price / sma200 - 1) * 100
             else:
                 indicators[ticker]['pct_above_sma200'] = 0
-            
-            # New indicators for Crisis Alpha / Deep Value
-            daily_ret = close.pct_change()
-            
-            # Moving Average of Return (10d) — avg daily return in %
-            if len(daily_ret) >= 10:
-                indicators[ticker]['maret_10'] = safe_float(daily_ret.rolling(10).mean().iloc[-1]) * 100
-            else:
-                indicators[ticker]['maret_10'] = 0
-            
-            # Cumulative Return over various windows (in %)
-            for win in [10, 30, 50, 100]:
-                if len(close) > win:
-                    indicators[ticker][f'cumret_{win}'] = (price / safe_float(close.iloc[-win-1]) - 1) * 100
-                else:
-                    indicators[ticker][f'cumret_{win}'] = 0
-            
-            # Standard Deviation of Return (10d and 50d) — daily decimal
-            if len(daily_ret) >= 50:
-                indicators[ticker]['stdret_10'] = safe_float(daily_ret.rolling(10).std().iloc[-1])
-                indicators[ticker]['stdret_50'] = safe_float(daily_ret.rolling(50).std().iloc[-1])
-            else:
-                indicators[ticker]['stdret_10'] = 0
-                indicators[ticker]['stdret_50'] = 0
-            
-            # EMA20 for recovery detection
-            indicators[ticker]['ema20'] = safe_float(close.ewm(span=20, adjust=False).mean().iloc[-1])
                 
         except Exception as e:
             print(f"Error calculating indicators for {ticker}: {e}")
@@ -417,301 +441,44 @@ def check_signals(data):
                 f"LABU {labu['pct_above_sma200']:.0f}% above SMA(200) â†’ Very extended, consider profits", 'warning'))
     
     # =========================================================================
-    # SIGNAL GROUP 13: DEEP VALUE (Cumulative Return / MaRet Cascade)
+    # SIGNAL GROUP 18: GLD & Miners
     # =========================================================================
-    # Rule 1: QQQ MaRet(10) < -1%/day → TQQQ (crash bounce)
-    if 'QQQ' in indicators and indicators['QQQ'].get('maret_10', 0) < -1.0:
-        qqq = indicators['QQQ']
-        alerts.append(('🟢🔥 CRASH BOUNCE',
-            f"QQQ MaRet(10)={qqq['maret_10']:+.2f}%/day < -1.0%\n"
-            f"   → Long TQQQ: 75% win, +6.3% avg (1d) | n=28\n"
-            f"   QQQ losing >{abs(qqq['maret_10']):.1f}%/day avg for 10 sessions", 'buy'))
-
-    # Rule 2: SMH MaRet(10) < -1.5%/day → SOXL
-    if 'SMH' in indicators and indicators['SMH'].get('maret_10', 0) < -1.5:
-        smh_i = indicators['SMH']
-        alerts.append(('🟢🔥 SMH CRASH BOUNCE',
-            f"SMH MaRet(10)={smh_i['maret_10']:+.2f}%/day < -1.5%\n"
-            f"   → Long SOXL: extreme semi selloff", 'buy'))
-
-    # Rule 3: QQQ CumRet(30) < -20% → TQQQ
-    if 'QQQ' in indicators:
-        qqq = indicators['QQQ']
-        cr30 = qqq.get('cumret_30', 0)
-        if cr30 < -20:
-            alerts.append(('🟢 QQQ DEEP DRAWDOWN',
-                f"QQQ CumRet(30d)={cr30:+.1f}% < -20%\n"
-                f"   → Long TQQQ: deep drawdown buy", 'buy'))
-        elif cr30 < -15:
-            alerts.append(('🟡 QQQ DRAWDOWN WATCH',
-                f"QQQ CumRet(30d)={cr30:+.1f}% — approaching -20% trigger", 'watch'))
-
-    # Rule 4: SMH CumRet(30) < -25% → SOXL
-    if 'SMH' in indicators:
-        smh_i = indicators['SMH']
-        cr30 = smh_i.get('cumret_30', 0)
-        if cr30 < -25:
-            alerts.append(('🟢 SMH DEEP DRAWDOWN',
-                f"SMH CumRet(30d)={cr30:+.1f}% < -25%\n"
-                f"   → Long SOXL: deep semi drawdown buy", 'buy'))
-
-    # Rule 5: SPY CumRet(50) < -15% + RSI < 35 → UPRO
-    if 'SPY' in indicators:
-        spy = indicators['SPY']
-        cr50 = spy.get('cumret_50', 0)
-        if cr50 < -15 and spy['rsi10'] < 35:
-            alerts.append(('🟢🔥 SPY DEEP VALUE',
-                f"SPY CumRet(50d)={cr50:+.1f}% + RSI={spy['rsi10']:.1f}\n"
-                f"   → Long UPRO: 88% win at 10d, +12% avg | n=56", 'buy'))
-        elif cr50 < -10:
-            alerts.append(('🟡 SPY DRAWDOWN WATCH',
-                f"SPY CumRet(50d)={cr50:+.1f}% — approaching -15% trigger", 'watch'))
-
-    # Rule 6: SPY CumRet(100) < -10% → UPRO
-    if 'SPY' in indicators:
-        spy = indicators['SPY']
-        cr100 = spy.get('cumret_100', 0)
-        if cr100 < -10 and spy.get('cumret_50', 0) >= -15:
-            alerts.append(('🟢 SPY MODERATE DRAWDOWN',
-                f"SPY CumRet(100d)={cr100:+.1f}% < -10%\n"
-                f"   → Long UPRO: 85% win at 10d | n=92", 'buy'))
-
-    # DANGER: SPY falling + strong dollar
-    if 'SPY' in indicators and 'USDU' in indicators:
-        spy = indicators['SPY']
-        usdu = indicators['USDU']
-        cr10 = spy.get('cumret_10', 0)
-        if cr10 < -5 and usdu['rsi10'] > 70:
-            alerts.append(('🔴 FALLING KNIFE WARNING',
-                f"SPY CumRet(10d)={cr10:+.1f}% + USDU RSI={usdu['rsi10']:.1f}\n"
-                f"   → DO NOT buy dip: 20% WR when SPY<-5% + USDU>70\n"
-                f"   Strong dollar + falling equities = more pain ahead", 'exit'))
-
-    # =========================================================================
-    # SIGNAL GROUP 14: CRISIS ALPHA v2 (Vol Compression Regime)
-    # =========================================================================
-    if 'QQQ' in indicators and 'SPY' in indicators:
-        qqq = indicators['QQQ']
-        spy = indicators['SPY']
-
-        vol_10 = qqq.get('stdret_10', 0)
-        vol_50 = qqq.get('stdret_50', 0)
-        vol_compressing = vol_10 < vol_50 and vol_50 > 0
-        vol_ratio = vol_10 / vol_50 if vol_50 > 0 else 1.0
-        spy_above_sma200 = spy['price'] > spy['sma200'] and spy['sma200'] > 0
-        spy_above_ema20 = spy['price'] > spy.get('ema20', 0) and spy.get('ema20', 0) > 0
-
-        if spy_above_sma200 and vol_compressing:
-            alerts.append(('🟢 VOL COMPRESSION (BULL)',
-                f"QQQ StdDev 10/50 ratio={vol_ratio:.2f} + SPY above SMA200\n"
-                f"   → Crisis Alpha: TQQQ/GLD regime | 69% WR 20d (n=1407)", 'buy'))
-        elif spy_above_sma200 and not vol_compressing:
-            alerts.append(('🟡 VOL EXPANDING (BULL)',
-                f"QQQ StdDev 10/50 ratio={vol_ratio:.2f} + SPY above SMA200\n"
-                f"   → Crisis Alpha: UPRO/GLD regime (less aggressive)", 'watch'))
-        elif not spy_above_sma200 and vol_compressing and spy_above_ema20:
-            alerts.append(('🟢 BEAR RECOVERY',
-                f"SPY below SMA200 but above EMA20 + vol compressing\n"
-                f"   → Crisis Alpha: recovery regime (UPRO/GLD/SHY)", 'buy'))
-        elif not spy_above_sma200:
-            alerts.append(('🟡 BEAR DEFENSIVE',
-                f"SPY below SMA200 + vol ratio={vol_ratio:.2f}\n"
-                f"   → Crisis Alpha: defensive (SHY/GLD)", 'warning'))
-
-        status['crisis_alpha'] = {
-            'vol_ratio': vol_ratio,
-            'vol_compressing': vol_compressing,
-            'spy_above_sma200': spy_above_sma200,
-            'spy_above_ema20': spy_above_ema20,
-        }
-
-    # =========================================================================
-    # SIGNAL GROUP 15: SIGNAL DEGRADATION / CALIBRATION WARNINGS
-    # =========================================================================
-    # Track trailing win rates for key signals and warn when degrading
-    degradation_checks = [
-        ('UCO RSI>75 → TMV', 'UCO', lambda i: i.get('rsi10',0) > 75, 0.65, 'TMV'),
-        ('GLD>79 + USDU<25 → TQQQ', None, lambda i: i.get('GLD',{}).get('rsi10',0) > 79 and i.get('USDU',{}).get('rsi10',50) < 25, 0.88, 'TQQQ'),
-        ('SPY>79 → UVXY', 'SPY', lambda i: i.get('rsi10',0) > 79, 0.686, 'UVXY'),
-        ('GLD RSI>79 alone', 'GLD', lambda i: i.get('rsi10',0) > 79, 0.72, 'TQQQ'),
-    ]
+    if 'GDXJ' in indicators:
+        gdxj = indicators['GDXJ']
+        if gdxj['rsi10'] < 21:
+            alerts.append(('JNUG STRONG BUY [TIER 2]',
+                f"GDXJ RSI={gdxj['rsi10']:.1f} < 21 -> Long JNUG\n"
+                f"   1d: 59% WR, +8.43% avg | n=17\n"
+                f"   5d: +14.9% avg | 20d: +18.9% avg", 'buy'))
+        elif gdxj['rsi10'] < 25:
+            alerts.append(('JNUG DIP BUY [TIER 2]',
+                f"GDXJ RSI={gdxj['rsi10']:.1f} < 25 -> Long JNUG\n"
+                f"   1d: 63% WR, +3.55% avg | n=59\n"
+                f"   5d: +7.6% avg | 20d: +18.9% avg", 'buy'))
+        elif gdxj['rsi10'] < 30:
+            alerts.append(('GDXJ APPROACHING',
+                f"GDXJ RSI={gdxj['rsi10']:.1f} -> Approaching JNUG buy zone (<25)", 'watch'))
     
-    for sig_name, ticker, cond_fn, hist_wr, target in degradation_checks:
-        if ticker and ticker in data and target in data:
-            try:
-                close_sig = data[ticker]['Close']
-                close_tgt = data[target]['Close']
-                rsi_series = calculate_rsi_wilder(close_sig, 10)
-                fwd_5d = close_tgt.shift(-5) / close_tgt - 1
-                
-                # Build indicator dict for condition check
-                if ticker:
-                    recent_rsi = rsi_series.iloc[-200:]
-                    episodes = []
-                    for dt in recent_rsi.index:
-                        rsi_val = safe_float(recent_rsi.loc[dt])
-                        test_ind = {'rsi10': rsi_val}
-                        try:
-                            if cond_fn(test_ind) and dt in fwd_5d.index:
-                                fr = safe_float(fwd_5d.loc[dt])
-                                if not pd.isna(fr):
-                                    episodes.append(1 if fr > 0 else 0)
-                        except:
-                            continue
-                    
-                    if len(episodes) >= 5:
-                        trail_wr = sum(episodes[-16:]) / len(episodes[-16:]) if len(episodes) >= 16 else sum(episodes) / len(episodes)
-                        n_trail = min(len(episodes), 16)
-                        
-                        if trail_wr < 0.40 and hist_wr > 0.60:
-                            alerts.append(('🔴 SIGNAL DEGRADATION',
-                                f"{sig_name}: Trailing WR {trail_wr:.0%} vs historical {hist_wr:.0%} — signal may be BROKEN (n={n_trail})", 'exit'))
-                        elif trail_wr < hist_wr - 0.15 and len(episodes) >= 8:
-                            alerts.append(('🟡 SIGNAL CALIBRATION',
-                                f"{sig_name}: Trailing WR {trail_wr:.0%} vs historical {hist_wr:.0%} — signal DEGRADING (n={n_trail})", 'warning'))
-            except Exception as e:
-                pass  # Skip if data issue
+    if 'GDX' in indicators:
+        gdx = indicators['GDX']
+        if gdx['rsi10'] < 21:
+            gdxj_already = 'GDXJ' in indicators and indicators['GDXJ']['rsi10'] < 25
+            if not gdxj_already:
+                alerts.append(('NUGT BUY',
+                    f"GDX RSI={gdx['rsi10']:.1f} < 21 -> Long NUGT: 56% WR, +1.13% avg (1d) | n=25", 'buy'))
+        if gdx['rsi10'] > 85:
+            alerts.append(('GDX EXTENDED - DO NOT SHORT',
+                f"GDX RSI={gdx['rsi10']:.1f} > 85 - Miners continue when OB\n"
+                f"   GDX>82 20d: 90% WR, +7.2%. DUST -18.6% (5% WR)", 'warning'))
     
-    # =========================================================================
-    # SIGNAL GROUP 16: BOIL/KOLD NATURAL GAS MONITORING
-    # =========================================================================
-    if 'BOIL' in indicators:
-        boil = indicators['BOIL']
-        boil_rsi = boil['rsi10']
-        
-        # BOIL RSI extremes
-        if boil_rsi > 79:
-            alerts.append(('🟡 BOIL OVERBOUGHT',
-                f"BOIL RSI={boil_rsi:.1f} > 79 → Consider KOLD fade\n"
-                f"   Winter spikes tend to fade. 44% WR 5d in high-HDD months", 'warning'))
-        elif boil_rsi < 21:
-            alerts.append(('🟢 BOIL OVERSOLD',
-                f"BOIL RSI={boil_rsi:.1f} < 21 → Watch for weather-driven bounce", 'buy'))
-        
-        # 5-day gain tracking for KOLD entry
-        if 'BOIL' in data and len(data['BOIL']) > 5:
-            boil_close = data['BOIL']['Close']
-            boil_5d_gain = safe_float((boil_close.iloc[-1] / boil_close.iloc[-6] - 1) * 100)
-            
-            if boil_5d_gain > 30:
-                alerts.append(('🔴 BOIL SPIKE → KOLD',
-                    f"BOIL 5d gain: {boil_5d_gain:+.1f}% > 30% → KOLD entry zone\n"
-                    f"   Historical: 88% of spikes >30% fade within 10d", 'short'))
-            elif boil_5d_gain > 20:
-                alerts.append(('🟡 BOIL SPIKE WATCH',
-                    f"BOIL 5d gain: {boil_5d_gain:+.1f}% — approaching 30% KOLD trigger", 'watch'))
-            
-            status['boil_5d_gain'] = boil_5d_gain
+    if 'GLD' in indicators and 'USDU' in indicators:
+        gld_r = indicators['GLD']['rsi10']
+        usdu_r = indicators['USDU']['rsi10']
+        if gld_r > 75 and usdu_r > 60:
+            alerts.append(('MINER SHORT WINDOW',
+                f"GLD RSI={gld_r:.1f}>75 + USDU RSI={usdu_r:.1f}>60\n"
+                f"   JDST 5d: 59% WR, +7.2% avg | n=34 (5-10d hold only)", 'hedge'))
     
-    # Temperature forecast (Open-Meteo NYC proxy for heating demand)
-    try:
-        import urllib.request
-        url = "https://api.open-meteo.com/v1/forecast?latitude=40.71&longitude=-74.01&daily=temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=America/New_York&forecast_days=7"
-        with urllib.request.urlopen(url, timeout=5) as resp:
-            weather = json.loads(resp.read())
-        
-        if 'daily' in weather:
-            temps = weather['daily']
-            avg_temps = [(h + l) / 2 for h, l in zip(temps['temperature_2m_max'], temps['temperature_2m_min'])]
-            avg_7d = sum(avg_temps) / len(avg_temps)
-            cold_days = sum(1 for t in avg_temps if t < 32)
-            
-            status['weather'] = {
-                'avg_7d_temp': round(avg_7d, 1),
-                'cold_days': cold_days,
-                'dates': temps.get('time', []),
-                'temps': [round(t, 1) for t in avg_temps],
-            }
-            
-            if cold_days >= 5:
-                alerts.append(('🟡 COLD SNAP AHEAD',
-                    f"NYC 7d forecast: {cold_days}/7 days below freezing, avg {avg_7d:.0f}°F\n"
-                    f"   → NatGas demand elevated. BOIL may hold/rise. Delay KOLD fade", 'watch'))
-            elif avg_7d > 55:
-                alerts.append(('🟡 WARM FORECAST',
-                    f"NYC 7d avg: {avg_7d:.0f}°F → Low heating demand\n"
-                    f"   → KOLD favored if BOIL is extended", 'watch'))
-    except:
-        pass  # Weather API optional — don't break monitor if unavailable
-
-    # =========================================================================
-    # SIGNAL GROUP 17: DFEN (3x Defense) with Bollinger Band Enhancement
-    # =========================================================================
-    if 'DFEN' in indicators and 'DFEN' in data:
-        dfen = indicators['DFEN']
-        dfen_rsi = dfen['rsi10']
-        dfen_above_sma200 = dfen['price'] > dfen['sma200'] and dfen['sma200'] > 0
-        
-        # Compute Bollinger Bands for DFEN
-        dfen_close = data['DFEN']['Close']
-        dfen_bb_sma = safe_float(dfen_close.rolling(20).mean().iloc[-1])
-        dfen_bb_std = safe_float(dfen_close.rolling(20).std().iloc[-1])
-        dfen_bb_upper = dfen_bb_sma + 2 * dfen_bb_std
-        dfen_bb_lower = dfen_bb_sma - 2 * dfen_bb_std
-        dfen_pct_b = (dfen['price'] - dfen_bb_lower) / (dfen_bb_upper - dfen_bb_lower) if (dfen_bb_upper - dfen_bb_lower) > 0 else 0.5
-        dfen_bb_width = (dfen_bb_upper - dfen_bb_lower) / dfen_bb_sma * 100 if dfen_bb_sma > 0 else 0
-        dfen_below_bb = dfen['price'] < dfen_bb_lower
-        
-        # Store BB data for dashboard
-        dfen['bb_upper'] = round(dfen_bb_upper, 2)
-        dfen['bb_lower'] = round(dfen_bb_lower, 2)
-        dfen['bb_sma20'] = round(dfen_bb_sma, 2)
-        dfen['pct_b'] = round(dfen_pct_b, 3)
-        dfen['bb_width'] = round(dfen_bb_width, 1)
-        
-        # PRIMARY: Bollinger Band signal — DFEN-specific edge BB beats RSI
-        # Below BB + RSI>=30: 73.5% WR, +4.28% avg 5d, +17% edge, n=49
-        # Below BB + RSI<30: 63.8% WR, +6.83% avg 5d, n=47
-        if dfen_below_bb and dfen_rsi >= 30:
-            alerts.append(('🟢🔥 DFEN BOLLINGER BUY',
-                f"DFEN ${dfen['price']:.2f} BELOW lower BB (${dfen_bb_lower:.2f}) + RSI={dfen_rsi:.1f}≥30\n"
-                f"   → 73.5% WR, +4.3% avg (5d) | +17% edge vs unconditional | n=49\n"
-                f"   BB catches DFEN dips RSI misses — RSI<30 alone only 57.5% WR for DFEN", 'buy'))
-        elif dfen_below_bb and dfen_rsi < 30:
-            alerts.append(('🟢 DFEN BB + RSI OVERSOLD',
-                f"DFEN ${dfen['price']:.2f} BELOW lower BB (${dfen_bb_lower:.2f}) + RSI={dfen_rsi:.1f}\n"
-                f"   → 63.8% WR, +6.8% avg (5d) | n=47 | Double oversold", 'buy'))
-        
-        # SECONDARY: RSI + SMA200 signal (existing)
-        elif dfen_above_sma200:
-            if dfen_rsi < 25:
-                alerts.append(('🟢🔥 DFEN STRONG BUY',
-                    f"DFEN RSI={dfen_rsi:.1f} < 25 + above SMA200\n"
-                    f"   → 90% WR, +11% avg (20d) | n=52 | Strong uptrend dip", 'buy'))
-            elif dfen_rsi < 30:
-                alerts.append(('🟢 DFEN BUY',
-                    f"DFEN RSI={dfen_rsi:.1f} < 30 + above SMA200\n"
-                    f"   → 90% WR, +11% avg (20d) | n=52 | Uptrend dip buy", 'buy'))
-            elif dfen_rsi < 35:
-                alerts.append(('🟢 DFEN WATCH',
-                    f"DFEN RSI={dfen_rsi:.1f} < 35 + above SMA200\n"
-                    f"   → 90% WR, +11% avg (20d) | n=52 | Pullback in uptrend", 'buy'))
-        else:
-            if dfen_rsi < 25:
-                alerts.append(('🟡 DFEN OVERSOLD (no trend)',
-                    f"DFEN RSI={dfen_rsi:.1f} < 25 but BELOW SMA200\n"
-                    f"   → 63% WR without trend filter — reduced conviction", 'watch'))
-        
-        # Exit signals
-        if dfen_rsi > 85:
-            alerts.append(('🔴 DFEN OVERBOUGHT',
-                f"DFEN RSI={dfen_rsi:.1f} > 85 → Exit DFEN: 42% WR (20d)", 'exit'))
-        elif dfen_rsi > 79:
-            alerts.append(('🟡 DFEN EXTENDED',
-                f"DFEN RSI={dfen_rsi:.1f} > 79 → Caution: 48% WR (20d)", 'warning'))
-        
-        # BB status line for dashboard section
-        status['dfen_bb'] = {
-            'price': dfen['price'],
-            'upper': round(dfen_bb_upper, 2),
-            'lower': round(dfen_bb_lower, 2),
-            'sma20': round(dfen_bb_sma, 2),
-            'pct_b': round(dfen_pct_b, 3),
-            'width': round(dfen_bb_width, 1),
-            'below_band': dfen_below_bb,
-            'rsi': dfen_rsi,
-        }
-
     return alerts, status
 
 # =============================================================================
@@ -783,7 +550,7 @@ CURRENT INDICATOR STATUS
     body += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}  Signal\n"
     body += "-"*65 + "\n"
     
-    leveraged_tickers = ['NAIL', 'CURE', 'FAS', 'LABU', 'TQQQ', 'SOXL', 'TECL', 'DRN', 'DFEN']
+    leveraged_tickers = ['NAIL', 'CURE', 'FAS', 'LABU', 'TQQQ', 'SOXL', 'TECL', 'DRN']
     for ticker in leveraged_tickers:
         if ticker in indicators:
             ind = indicators[ticker]
@@ -842,67 +609,71 @@ Key Levels:
   40% (Sell):     ${sma200 * 1.40:.2f}
 """
     
-    # Crisis Alpha / Deep Value Dashboard
+    # Rolling Beta vs SPY
+    rolling_betas = status.get('rolling_betas')
+    if rolling_betas:
+        body += f"""
+{'='*70}
+ROLLING BETA vs SPY
+{'='*70}
+"""
+        body += f"{'Group':<20} {'63d':>8} {'126d':>8} {'252d':>8}\n"
+        body += "-" * 50 + "\n"
+        
+        for group in ['Equity Sleeve', 'MF Rotation', 'GLD', 'KMLM', 'BTAL', 'Est. Blend']:
+            row = f"{group:<20}"
+            for window in ['63d', '126d', '252d']:
+                v = rolling_betas.get(window, {}).get(group)
+                if v is not None:
+                    row += f" {v:>+7.2f}"
+                else:
+                    row += f" {'N/A':>7}"
+            if group == 'Est. Blend':
+                b63 = rolling_betas.get('63d', {}).get('Est. Blend')
+                if b63 and b63 > 2.0:
+                    row += "  << HIGH LEVERAGE"
+                elif b63 and b63 > 1.5:
+                    row += "  << ELEVATED"
+            body += row + "\n"
+            if group == 'BTAL':
+                body += "-" * 50 + "\n"
+        
+        b63 = rolling_betas.get('63d', {}).get('Est. Blend')
+        b252 = rolling_betas.get('252d', {}).get('Est. Blend')
+        if b63 and b252:
+            body += f"\nTrend: {b252:+.2f} (252d) -> {b63:+.2f} (63d)\n"
+            if b63 > 2.0:
+                body += "WARNING: Portfolio at HIGH leverage. Holy Grail diversification minimal.\n"
+    
+    # GLD & Miners Status
     body += f"""
 {'='*70}
-CRISIS ALPHA / DEEP VALUE DASHBOARD
+GLD & MINERS STATUS
 {'='*70}
 """
-    for ticker in ['SPY', 'QQQ', 'SMH', 'USMV']:
+    body += f"{'Ticker':<8} {'Price':>10} {'RSI(10)':>8} {'vs SMA200':>10}  Signal\n"
+    body += "-" * 55 + "\n"
+    
+    for ticker in ['GLD', 'GDX', 'GDXJ', 'JNUG', 'NUGT']:
         if ticker in indicators:
             ind = indicators[ticker]
-            maret = ind.get('maret_10', 0)
-            cr10 = ind.get('cumret_10', 0)
-            cr30 = ind.get('cumret_30', 0)
-            cr50 = ind.get('cumret_50', 0)
-            s10 = ind.get('stdret_10', 0)
-            s50 = ind.get('stdret_50', 0)
-            vr = s10/s50 if s50 > 0 else 0
-            body += f"\n  {ticker}:\n"
-            body += f"    MaRet(10d): {maret:+.2f}%/day    CumRet 10d/30d/50d: {cr10:+.1f}% / {cr30:+.1f}% / {cr50:+.1f}%\n"
-            body += f"    StdDev 10/50: {s10:.4f}/{s50:.4f}  Vol Ratio: {vr:.2f}\n"
-
-    # Crisis Alpha regime
-    ca = status.get('crisis_alpha', {})
-    if ca:
-        regime = "UNKNOWN"
-        if ca.get('spy_above_sma200') and ca.get('vol_compressing'):
-            regime = "BULL + VOL COMPRESS (TQQQ/GLD)"
-        elif ca.get('spy_above_sma200') and not ca.get('vol_compressing'):
-            regime = "BULL + VOL EXPAND (UPRO/GLD)"
-        elif not ca.get('spy_above_sma200') and ca.get('vol_compressing') and ca.get('spy_above_ema20'):
-            regime = "BEAR RECOVERY (UPRO/GLD/SHY)"
-        elif not ca.get('spy_above_sma200'):
-            regime = "BEAR DEFENSIVE (SHY/GLD)"
-        body += f"\n  CRISIS ALPHA REGIME: {regime}\n"
-        body += f"    Vol Ratio: {ca.get('vol_ratio', 0):.2f}  SPY>SMA200: {ca.get('spy_above_sma200')}  SPY>EMA20: {ca.get('spy_above_ema20')}\n"
-    
-    # Deep Value trigger proximity
-    body += f"\n  DEEP VALUE TRIGGER PROXIMITY:\n"
-    for ticker, thresholds in [('QQQ', [('MaRet(10d)', 'maret_10', -1.0), ('CumRet(30d)', 'cumret_30', -20)]),
-                                ('SMH', [('MaRet(10d)', 'maret_10', -1.5), ('CumRet(30d)', 'cumret_30', -25)]),
-                                ('SPY', [('CumRet(50d)', 'cumret_50', -15), ('CumRet(100d)', 'cumret_100', -10)])]:
-        if ticker in indicators:
-            for label, key, thresh in thresholds:
-                val = indicators[ticker].get(key, 0)
-                dist = val - thresh
-                pct_to_trigger = (dist / abs(thresh)) * 100 if thresh != 0 else 0
-                status_str = "ACTIVE" if val < thresh else f"{dist:+.1f}% away"
-                body += f"    {ticker} {label}: {val:+.1f}% (trigger: {thresh}%) — {status_str}\n"
-    
-    # DFEN Bollinger Band Status
-    dfen_bb = status.get('dfen_bb')
-    if dfen_bb:
-        bb_status = "🔥 BELOW LOWER BAND" if dfen_bb['below_band'] else "Within bands"
-        body += f"""
-  DFEN BOLLINGER BANDS (20, 2):
-    Price: ${dfen_bb['price']:.2f}  |  RSI: {dfen_bb['rsi']:.1f}
-    Upper:  ${dfen_bb['upper']:.2f}
-    SMA20:  ${dfen_bb['sma20']:.2f}
-    Lower:  ${dfen_bb['lower']:.2f}
-    %B: {dfen_bb['pct_b']:.3f}  |  Width: {dfen_bb['width']:.1f}%  |  {bb_status}
-    Signal: Below BB+RSI>=30 = 73.5% WR (5d) | Below BB+RSI<30 = 63.8% WR
-"""
+            price = f"${ind['price']:.2f}"
+            rsi = f"{ind['rsi10']:.1f}"
+            pct = f"{ind.get('pct_above_sma200', 0):+.1f}%"
+            flag = ""
+            if ticker in ('GDXJ',) and ind['rsi10'] < 21:
+                flag = "JNUG BUY 59% +8.4%"
+            elif ticker in ('GDXJ',) and ind['rsi10'] < 25:
+                flag = "JNUG 63% +3.6%"
+            elif ticker in ('GDX',) and ind['rsi10'] < 21:
+                flag = "NUGT BUY 56%"
+            elif ticker in ('GDX', 'GDXJ') and ind['rsi10'] > 85:
+                flag = "DO NOT SHORT"
+            elif ind['rsi10'] < 25:
+                flag = "Oversold"
+            elif ind['rsi10'] > 79:
+                flag = "High - momentum"
+            body += f"{ticker:<8} {price:>10} {rsi:>8} {pct:>10}  {flag}\n"
     
     if is_preclose:
         body += f"""
@@ -971,19 +742,23 @@ def main():
         'VOOV', 'VOOG', 'VTV', 'QQQE',
         # Energy
         'XLE', 'XLF',
-        # Crisis Alpha / Deep Value
-        'USMV',
-        # NatGas
-        'KOLD',
-        # Defense
-        'DFEN',
+        # Gold Miners (Group 18)
+        'GDX', 'GDXJ', 'JNUG', 'NUGT',
+        # Rolling Beta components
+        'UPRO', 'CTA', 'DBMF', 'BTAL', 'KMLM',
     ]
     
     print("Downloading market data...")
     data = download_data(tickers)
     print(f"Downloaded data for {len(data)} tickers")
     
+    # Calculate rolling betas
+    rolling_betas = calculate_rolling_betas(data)
+    
     alerts, status = check_signals(data)
+    
+    # Inject rolling betas into status for email formatting
+    status['rolling_betas'] = rolling_betas
     
     if alerts:
         buy_count = len([a for a in alerts if a[2] == 'buy'])
