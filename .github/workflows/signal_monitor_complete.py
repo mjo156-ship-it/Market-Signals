@@ -1,63 +1,36 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-CHF Signal Monitor — Dashboard Server v4.2
-============================================
-Self-hosted real-time market signal dashboard with Brier Score calibration,
-rolling beta vs SPY, and gold miners signal group.
+Comprehensive Market Signal Monitor v4.2
+========================================
+Groups 1-12: Core RSI signals
+Group 13: Deep Value (MaRet/CumRet crash+drawdown)
+Group 14: Crisis Alpha v2 (vol compression regime)
+Group 15: Signal Degradation (trailing WR monitoring)
+Group 17: DFEN (RSI+SMA200+Bollinger Band)
+Group 18: GLD & Miners
++ Rolling Beta vs SPY
++ TLT bond momentum banner
 
-Usage:
-    pip install flask yfinance pandas numpy
-    python chf_dashboard_server.py
-
-Then open http://localhost:5050 in your browser.
-
-v4.2: Rolling beta vs SPY, GLD & miners (Group 18), CSS display fix
-v4.0: Signal Calibration tab with rolling Brier scores
+SCHEDULE: Two emails daily (weekdays)
+- 3:15 PM ET: Pre-close preview
+- 4:05 PM ET: Market close confirmation
 """
-
-from flask import Flask, jsonify, Response
+import os, sys, smtplib
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import json
-import time
-import threading
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 
-app = Flask(__name__)
+SENDER_EMAIL = os.environ.get('SENDER_EMAIL', '')
+SENDER_PASSWORD = os.environ.get('SENDER_PASSWORD', '')
+RECIPIENT_EMAIL = os.environ.get('RECIPIENT_EMAIL', '')
+PHONE_EMAIL = os.environ.get('PHONE_EMAIL', '')
+IS_PRECLOSE = len(sys.argv) > 1 and sys.argv[1] == 'preclose'
 
-# ═══════════════════════════════════════════════════════════════════
-# CONFIGURATION
-# ═══════════════════════════════════════════════════════════════════
-TICKERS = [
-    'SMH','SPY','QQQ','IWM',
-    'XLP','XLU','XLV','XLY','XLE','XLF',
-    'GLD','TLT','HYG','LQD','TMV','SHY',
-    'USDU','UCO','BOIL','DBC',
-    'UVXY','SVXY','VIXM',
-    'EDC','YINN','KORU','EURL','INDL',
-    'BTC-USD',
-    'AMD','NVDA',
-    'NAIL','CURE','FAS','LABU',
-    'TQQQ','SOXL','SOXS','TECL','DRN','UPRO',
-    'VOOV','VOOG','VTV','QQQE','VOX',
-    'BTAL','DBMF','KMLM','CTA',
-    'FNGO',
-    'UUP','SLV','CPER',
-    # Gold Miners (Group 18)
-    'GDX','GDXJ','JNUG','NUGT',
-]
-
-CACHE_SECONDS = 60
-HISTORY_PERIOD = '2y'
-
-cache = {'data': None, 'ts': 0, 'brier': None, 'brier_ts': 0, 'rolling_betas': None}
-lock = threading.Lock()
-
-# ═══════════════════════════════════════════════════════════════════
-# CALCULATIONS
-# ═══════════════════════════════════════════════════════════════════
-def rsi_wilder(prices, period):
+def calculate_rsi_wilder(prices, period):
     delta = prices.diff()
     gain = delta.where(delta > 0, 0)
     loss = -delta.where(delta < 0, 0)
@@ -66,62 +39,71 @@ def rsi_wilder(prices, period):
     rs = avg_gain / avg_loss
     return 100 - (100 / (1 + rs))
 
-def sf(val):
-    if isinstance(val, pd.Series):
-        return float(val.iloc[-1]) if len(val) > 0 else 0.0
-    elif isinstance(val, np.ndarray):
-        return float(val[-1]) if len(val) > 0 else 0.0
-    elif pd.isna(val):
+def sf(value):
+    if isinstance(value, pd.Series):
+        return float(value.iloc[-1]) if len(value) > 0 else 0.0
+    elif isinstance(value, np.ndarray):
+        return float(value[-1]) if len(value) > 0 else 0.0
+    elif pd.isna(value):
         return 0.0
-    return float(val)
+    return float(value)
 
-# ═══════════════════════════════════════════════════════════════════
-# ROLLING BETA vs SPY
-# ═══════════════════════════════════════════════════════════════════
-def compute_rolling_betas(raw_data, regime='UNKNOWN'):
-    """Compute rolling beta vs SPY using actual Q1 2026 Roth portfolio weights."""
-    if 'SPY' not in raw_data:
-        return []
-    spy_c = raw_data['SPY']['Close']
-    if isinstance(spy_c, pd.DataFrame): spy_c = spy_c.iloc[:,0]
-    spy_ret = spy_c.pct_change()
+def download_data(tickers, period='2y'):
+    data = {}
+    for ticker in tickers:
+        try:
+            df = yf.download(ticker, period=period, progress=False)
+            if len(df) > 0:
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = df.columns.get_level_values(0)
+                data[ticker] = df
+        except Exception as e:
+            print(f"Error downloading {ticker}: {e}")
+    return data
 
+def calculate_rolling_betas(data, regime='UNKNOWN'):
+    """Calculate rolling beta vs SPY using ACTUAL Q1 2026 Roth portfolio weights.
+    Leveraged equity is only ~13% of portfolio (not 55%).
+    Majority is 1x stocks (~49%). Regime weights from Composer activity export.
+    Actual portfolio beta: ~0.86 bull, ~0.26 crisis.
+    """
+    if 'SPY' not in data: return None
+    spy_ret = data['SPY']['Close'].pct_change()
     def _beta(ticker, window):
-        if ticker not in raw_data: return None
-        ac = raw_data[ticker]['Close']
-        if isinstance(ac, pd.DataFrame): ac = ac.iloc[:,0]
-        ar = ac.pct_change()
+        if ticker not in data: return None
+        ar = data[ticker]['Close'].pct_change()
         common = spy_ret.dropna().index.intersection(ar.dropna().index)
         if len(common) < window + 10: return None
-        sr = spy_ret.loc[common]
-        a = ar.loc[common]
-        cov = a.rolling(window).cov(sr)
-        var = sr.rolling(window).var()
-        b = cov / var
+        sr, a = spy_ret.loc[common], ar.loc[common]
+        b = a.rolling(window).cov(sr) / sr.rolling(window).var()
         v = b.iloc[-1]
         return round(float(v), 3) if not pd.isna(v) else None
 
+    # Regime weights from actual Q1 2026 Roth IRA Composer export
+    # Groups: Vol/Hedge = pure VIX (UVXY). Bonds (net) includes TMV (-3x TLT)
+    # so net bond exposure reflects actual short/long bond positioning.
+    # Currency = UUP (dollar strength, separate from bonds).
     regime_weights = {
         'BULL + VOL COMPRESS': {
             'Equity 1x':0.52,'Lev Equity':0.15,'MF/Alts':0.08,
-            'Gold/Commod':0.07,'Vol/Hedge':0.06,'Bonds/Cash':0.12,
+            'Gold/Commod':0.07,'Vol/Hedge':0.04,'Bonds (net)':0.10,'Currency':0.04,
         },
         'BULL + VOL EXPAND': {
             'Equity 1x':0.48,'Lev Equity':0.12,'MF/Alts':0.12,
-            'Gold/Commod':0.08,'Vol/Hedge':0.10,'Bonds/Cash':0.10,
+            'Gold/Commod':0.08,'Vol/Hedge':0.05,'Bonds (net)':0.10,'Currency':0.05,
         },
         'BEAR RECOVERY': {
-            'Equity 1x':0.42,'Lev Equity':0.10,'MF/Alts':0.20,
-            'Gold/Commod':0.10,'Vol/Hedge':0.13,'Bonds/Cash':0.05,
+            'Equity 1x':0.42,'Lev Equity':0.10,'MF/Alts':0.18,
+            'Gold/Commod':0.10,'Vol/Hedge':0.06,'Bonds (net)':0.08,'Currency':0.06,
         },
         'BEAR DEFENSIVE': {
-            'Equity 1x':0.35,'Lev Equity':0.08,'MF/Alts':0.22,
-            'Gold/Commod':0.10,'Vol/Hedge':0.20,'Bonds/Cash':0.05,
+            'Equity 1x':0.35,'Lev Equity':0.08,'MF/Alts':0.20,
+            'Gold/Commod':0.10,'Vol/Hedge':0.08,'Bonds (net)':0.06,'Currency':0.13,
         },
     }
     default_weights = {
         'Equity 1x':0.45,'Lev Equity':0.12,'MF/Alts':0.13,
-        'Gold/Commod':0.08,'Vol/Hedge':0.10,'Bonds/Cash':0.12,
+        'Gold/Commod':0.08,'Vol/Hedge':0.05,'Bonds (net)':0.10,'Currency':0.07,
     }
     blend_w = regime_weights.get(regime, default_weights)
 
@@ -130,784 +112,516 @@ def compute_rolling_betas(raw_data, regime='UNKNOWN'):
         ('Lev Equity',  [('UPRO',1.0)]),
         ('MF/Alts',     [('CTA',0.25),('DBMF',0.25),('BTAL',0.30),('KMLM',0.20)]),
         ('Gold/Commod', [('GLD',0.85),('DBC',0.15)]),
-        ('Vol/Hedge',   [('UVXY',0.35),('TMV',0.35),('BTAL',0.30)]),
-        ('Bonds/Cash',  [('TLT',0.5),('SHY',0.5)]),
+        ('Vol/Hedge',   [('UVXY',1.0)]),                          # Pure VIX only
+        ('Bonds (net)', [('TLT',0.35),('SHY',0.30),('TMV',0.35)]), # TMV offsets TLT/SHY
+        ('Currency',    [('UUP',1.0)]),
     ]
-    results = []
-    blend = {'name':'Est. Blend','b63':0,'b126':0,'b252':0,'is_blend':True,'regime':regime}
-    for gname, tickers_w in groups:
-        row = {'name': gname, 'blend_wt': blend_w.get(gname, 0)}
-        for wname, w in [('b63',63),('b126',126),('b252',252)]:
+    results = {'regime': regime, 'blend_weights': blend_w}
+    for wname, w in [('63d',63),('126d',126),('252d',252)]:
+        results[wname] = {}
+        blend = 0
+        for gname, tw in groups:
             gb, total_w = 0, 0
-            for t, tw in tickers_w:
+            for t, twt in tw:
                 b = _beta(t, w)
                 if b is not None:
-                    gb += b * tw
-                    total_w += tw
+                    gb += b * twt
+                    total_w += twt
+            # Normalize if some tickers missing but at least one worked
             if total_w > 0:
-                gb = gb / total_w
-                row[wname] = round(gb, 3)
-                blend[wname] += gb * blend_w.get(gname, 0)
+                gb = gb / total_w  # re-normalize to available tickers
+                results[wname][gname] = round(gb, 3)
+                blend += gb * blend_w.get(gname, 0)
             else:
-                row[wname] = None
-        results.append(row)
-    blend['b63']=round(blend['b63'],3); blend['b126']=round(blend['b126'],3); blend['b252']=round(blend['b252'],3)
-    results.append(blend)
+                results[wname][gname] = None
+        results[wname]['Est. Blend'] = round(blend, 3)
     return results
 
 
-# ═══════════════════════════════════════════════════════════════════
-# BRIER SIGNAL DEFINITIONS
-# ═══════════════════════════════════════════════════════════════════
-BRIER_SIGNALS = [
-    {'id':'spy_lt21','name':'SPY RSI<21 → UPRO','cond':lambda i: i.get('SPY',{}).get('rsi10',50)<21,
-     'target':'UPRO','days':5,'dir':'long','wr':0.87,'tier':1,'min_n':10},
-    {'id':'spy_lt30','name':'SPY RSI<30 → UPRO','cond':lambda i: 21<=i.get('SPY',{}).get('rsi10',50)<30,
-     'target':'UPRO','days':5,'dir':'long','wr':0.69,'tier':1,'min_n':15},
-    {'id':'qqq_lt20','name':'QQQ RSI<20 → TQQQ','cond':lambda i: i.get('QQQ',{}).get('rsi10',50)<20,
-     'target':'TQQQ','days':5,'dir':'long','wr':1.00,'tier':1,'min_n':5},
-    {'id':'cure_lt21','name':'CURE RSI<21','cond':lambda i: i.get('CURE',{}).get('rsi10',50)<21,
-     'target':'CURE','days':5,'dir':'long','wr':0.85,'tier':1,'min_n':10},
-    {'id':'cure_lt25','name':'CURE RSI<25','cond':lambda i: 21<=i.get('CURE',{}).get('rsi10',50)<25,
-     'target':'CURE','days':5,'dir':'long','wr':0.81,'tier':1,'min_n':10},
-    {'id':'spy_gt79_uvxy','name':'SPY RSI>79 → UVXY (1d)','cond':lambda i: i.get('SPY',{}).get('rsi10',50)>79,
-     'target':'UVXY','days':1,'dir':'long','wr':0.686,'tier':1,'min_n':15},
-    {'id':'qqq_gt79','name':'QQQ RSI>79 → UVXY','cond':lambda i: i.get('QQQ',{}).get('rsi10',50)>79,
-     'target':'UVXY','days':5,'dir':'long','wr':0.67,'tier':1,'min_n':15},
-    {'id':'spy_gt85','name':'SPY RSI>85 → Exit UPRO','cond':lambda i: i.get('SPY',{}).get('rsi10',50)>85,
-     'target':'UPRO','days':5,'dir':'short','wr':0.64,'tier':1,'min_n':5},
-    {'id':'uco_gt75','name':'UCO RSI>75 → TMV','cond':lambda i: i.get('UCO',{}).get('rsi10',50)>75,
-     'target':'TMV','days':5,'dir':'long','wr':0.65,'tier':1,'min_n':15},
-    {'id':'double_sig','name':'GLD>79 + USDU<25 → TQQQ','cond':lambda i: i.get('GLD',{}).get('rsi10',50)>79 and i.get('USDU',{}).get('rsi10',50)<25,
-     'target':'TQQQ','days':5,'dir':'long','wr':0.88,'tier':2,'min_n':5},
-    {'id':'soxs_squeeze','name':'SMH>79 + USDU>70 → SOXS','cond':lambda i: i.get('SMH',{}).get('rsi10',50)>79 and i.get('USDU',{}).get('rsi10',50)>70,
-     'target':'SOXS','days':5,'dir':'long','wr':1.00,'tier':2,'min_n':5},
-    {'id':'gld_ob','name':'GLD RSI>79 → TQQQ','cond':lambda i: i.get('GLD',{}).get('rsi10',50)>79 and i.get('USDU',{}).get('rsi10',50)>=25,
-     'target':'TQQQ','days':5,'dir':'long','wr':0.72,'tier':2,'min_n':10},
-    {'id':'fas_lt30','name':'FAS RSI<30','cond':lambda i: i.get('FAS',{}).get('rsi10',50)<30,
-     'target':'FAS','days':5,'dir':'long','wr':0.63,'tier':2,'min_n':15},
-    {'id':'labu_lt25','name':'LABU RSI<25','cond':lambda i: i.get('LABU',{}).get('rsi10',50)<25,
-     'target':'LABU','days':5,'dir':'long','wr':0.66,'tier':2,'min_n':10},
-    {'id':'uvxy_gt82','name':'UVXY RSI>82 → SOXL (B1)','cond':lambda i: i.get('UVXY',{}).get('rsi10',50)>82,
-     'target':'SOXL','days':1,'dir':'long','wr':0.81,'tier':2,'min_n':8},
-    {'id':'def_rot','name':'Defensive OB → TQQQ','cond':lambda i: any(i.get(t,{}).get('rsi10',0)>79 for t in ['XLP','XLU','XLV']) and i.get('SPY',{}).get('rsi10',0)<79 and i.get('QQQ',{}).get('rsi10',0)<79,
-     'target':'TQQQ','days':20,'dir':'long','wr':0.70,'tier':2,'min_n':10},
-    {'id':'fas_gt85','name':'FAS RSI>85 → Exit','cond':lambda i: i.get('FAS',{}).get('rsi10',50)>85,
-     'target':'FAS','days':5,'dir':'short','wr':0.92,'tier':2,'min_n':5},
-    {'id':'cure_gt79','name':'CURE RSI>79 → Exit','cond':lambda i: i.get('CURE',{}).get('rsi10',50)>79,
-     'target':'CURE','days':5,'dir':'short','wr':0.60,'tier':2,'min_n':10},
-]
-
-def compute_brier(raw_data):
-    """Compute Brier scores for all registered signals using downloaded data"""
-    # Pre-compute RSI series for all tickers
-    rsi_cache = {}
-    close_cache = {}
-    for ticker, df in raw_data.items():
-        if len(df) < 200:
-            continue
-        c = df['Close']
-        if isinstance(c, pd.DataFrame):
-            c = c.iloc[:, 0]
-        close_cache[ticker] = c
-        rsi_cache[ticker] = rsi_wilder(c, 10)
-
-    results = []
-    for sig in BRIER_SIGNALS:
-        target = sig['target']
-        if target not in close_cache:
-            continue
-        tc = close_cache[target]
-        fwd = tc.pct_change(sig['days']).shift(-sig['days'])
-
-        episodes = []
-        dates = tc.index[200:]
-        for dt in dates:
-            snap = {}
-            for tk, rsi_s in rsi_cache.items():
-                if dt in rsi_s.index:
-                    v = rsi_s.loc[dt]
-                    if isinstance(v, pd.Series):
-                        v = v.iloc[0]
-                    if not pd.isna(v):
-                        snap[tk] = {'rsi10': float(v)}
-            try:
-                if not sig['cond'](snap):
-                    continue
-            except:
-                continue
-            fr = fwd.get(dt, np.nan)
-            if isinstance(fr, pd.Series):
-                fr = fr.iloc[0]
-            if pd.isna(fr):
-                continue
-            outcome = 1 if (float(fr) > 0 if sig['dir'] == 'long' else float(fr) < 0) else 0
-            episodes.append({'date': dt.strftime('%Y-%m-%d'), 'ret': round(float(fr)*100, 2), 'win': outcome})
-
-        if not episodes:
-            continue
-
-        outcomes = [e['win'] for e in episodes]
-        p = sig['wr']
-        brier = np.mean([(p - o)**2 for o in outcomes])
-        uncond = np.mean(outcomes)
-        brier_base = np.mean([(uncond - o)**2 for o in outcomes])
-        bss = 1 - brier / brier_base if brier_base > 0 else 0
-        recent = outcomes[-20:] if len(outcomes) >= 20 else outcomes
-        trail_wr = np.mean(recent)
-        trail_brier = np.mean([(p - o)**2 for o in recent])
-
-        # Health status
-        n = len(episodes)
-        if n < sig['min_n']:
-            health = 'insufficient'
-        elif trail_wr < 0.40 and sig['wr'] > 0.60:
-            health = 'critical'
-        elif trail_wr < 0.50 and sig['wr'] > 0.65:
-            health = 'warning'
-        elif bss < -0.05 and n >= 20:
-            health = 'warning'
-        elif np.mean(outcomes) < sig['wr'] - 0.15 and n >= 15:
-            health = 'warning'
-        else:
-            health = 'healthy'
-
-        results.append({
-            'id': sig['id'], 'name': sig['name'], 'tier': sig['tier'],
-            'hist_wr': sig['wr'], 'actual_wr': round(np.mean(outcomes), 3),
-            'n': n, 'brier': round(brier, 4), 'bss': round(bss, 4),
-            'trail_n': len(recent), 'trail_wr': round(trail_wr, 3),
-            'trail_brier': round(trail_brier, 4), 'health': health,
-            'recent': episodes[-8:],
-            'active': False,  # will be set below
-        })
-
-    # Check which signals are active RIGHT NOW
-    snap_now = {}
-    for tk, rsi_s in rsi_cache.items():
-        if len(rsi_s) > 0:
-            v = rsi_s.iloc[-1]
-            if isinstance(v, pd.Series):
-                v = v.iloc[0]
-            if not pd.isna(v):
-                snap_now[tk] = {'rsi10': float(v)}
-    for r in results:
-        sig = next((s for s in BRIER_SIGNALS if s['id'] == r['id']), None)
-        if sig:
-            try:
-                r['active'] = sig['cond'](snap_now)
-            except:
-                pass
-
-    return results
-
-# ═══════════════════════════════════════════════════════════════════
-# DATA FETCHING
-# ═══════════════════════════════════════════════════════════════════
-def fetch_all():
-    raw = {}
-    for t in TICKERS:
-        try:
-            df = yf.download(t, period=HISTORY_PERIOD, progress=False)
-            if len(df) > 0:
-                if isinstance(df.columns, pd.MultiIndex):
-                    df.columns = df.columns.get_level_values(0)
-                raw[t] = df
-        except:
-            pass
-
+def check_signals(data):
+    alerts = []
+    status = {}
     indicators = {}
-    for t, df in raw.items():
-        if len(df) < 50:
-            continue
+    for ticker, df in data.items():
+        if len(df) < 200: continue
         try:
-            c = df['Close']
-            price = sf(c.iloc[-1])
-            r10 = sf(rsi_wilder(c, 10).iloc[-1])
-            s200 = sf(c.rolling(200).mean().iloc[-1]) if len(c) >= 200 else 0
-            s50 = sf(c.rolling(50).mean().iloc[-1]) if len(c) >= 50 else 0
-            e9 = sf(c.ewm(span=9, adjust=False).mean().iloc[-1])
-            e20 = sf(c.ewm(span=20, adjust=False).mean().iloc[-1])
-            vs200 = (price / s200 - 1) * 100 if s200 > 0 else None
-            chg1d = sf(c.pct_change().iloc[-1]) * 100 if len(c) > 1 else 0
-            indicators[t] = {
-                'price': round(price, 2), 'rsi': round(r10, 1),
-                'sma200': round(s200, 2), 'sma50': round(s50, 2),
-                'ema9': round(e9, 2), 'ema20': round(e20, 2),
-                'vsSma200': round(vs200, 1) if vs200 is not None else None,
-                'chg1d': round(chg1d, 2),
+            close = df['Close']
+            price = sf(close.iloc[-1])
+            rsi10 = sf(calculate_rsi_wilder(close, 10).iloc[-1])
+            rsi50 = sf(calculate_rsi_wilder(close, 50).iloc[-1])
+            sma200 = sf(close.rolling(200).mean().iloc[-1])
+            sma50 = sf(close.rolling(50).mean().iloc[-1])
+            ema9 = sf(close.ewm(span=9,adjust=False).mean().iloc[-1])
+            ema20 = sf(close.ewm(span=20,adjust=False).mean().iloc[-1])
+            ema21 = sf(close.ewm(span=21,adjust=False).mean().iloc[-1])
+            rets = close.pct_change()
+            maret_10 = sf(rets.rolling(10).mean().iloc[-1])*100
+            cumret_10 = sf((close.iloc[-1]/close.iloc[-10]-1))*100 if len(close)>10 else 0
+            cumret_30 = sf((close.iloc[-1]/close.iloc[-30]-1))*100 if len(close)>30 else 0
+            cumret_50 = sf((close.iloc[-1]/close.iloc[-50]-1))*100 if len(close)>50 else 0
+            cumret_100 = sf((close.iloc[-1]/close.iloc[-100]-1))*100 if len(close)>100 else 0
+            std_10 = sf(rets.rolling(10).std().iloc[-1])
+            std_50 = sf(rets.rolling(50).std().iloc[-1])
+            vol_ratio = std_10/std_50 if std_50>0 else 1.0
+            bb_sma = sf(close.rolling(20).mean().iloc[-1])
+            bb_std = sf(close.rolling(20).std().iloc[-1])
+            bb_upper = bb_sma + 2*bb_std
+            bb_lower = bb_sma - 2*bb_std
+            bb_pctb = (price-bb_lower)/(bb_upper-bb_lower) if (bb_upper-bb_lower)>0 else 0.5
+            bb_width = (bb_upper-bb_lower)/bb_sma*100 if bb_sma>0 else 0
+            chg5d = sf((close.iloc[-1]/close.iloc[-5]-1))*100 if len(close)>5 else 0
+            indicators[ticker] = {
+                'price':price,'rsi10':rsi10,'rsi50':rsi50,
+                'sma200':sma200,'sma50':sma50,'ema9':ema9,'ema20':ema20,'ema21':ema21,
+                'maret_10':maret_10,'cumret_10':cumret_10,'cumret_30':cumret_30,
+                'cumret_50':cumret_50,'cumret_100':cumret_100,
+                'std_10':std_10,'std_50':std_50,'vol_ratio':vol_ratio,
+                'bb_sma':bb_sma,'bb_upper':bb_upper,'bb_lower':bb_lower,
+                'bb_pctb':bb_pctb,'bb_width':bb_width,'chg5d':chg5d,
             }
-        except:
-            pass
+            if sma200>0: indicators[ticker]['pct_above_sma200']=(price/sma200-1)*100
+            else: indicators[ticker]['pct_above_sma200']=0
+        except Exception as e:
+            print(f"Error calculating {ticker}: {e}"); continue
+    status['indicators'] = indicators
 
-    # Signals
-    signals = []
-    ind = indicators
-    # SPY dip-buys
-    spy_r = ind.get('SPY', {}).get('rsi', 50)
-    if spy_r < 21: signals.append({'type':'buy','title':'SPY RSI<21 → UPRO','msg':f'SPY RSI={spy_r:.1f} | 87% WR, +8.9% avg 5d'})
-    elif spy_r < 25: signals.append({'type':'buy','title':'SPY RSI<25 → UPRO','msg':f'SPY RSI={spy_r:.1f} | 74% WR'})
-    elif spy_r < 30: signals.append({'type':'buy','title':'SPY RSI<30 → UPRO','msg':f'SPY RSI={spy_r:.1f} | 69% WR'})
-    if spy_r > 85: signals.append({'type':'exit','title':'SPY RSI>85 → Exit UPRO','msg':f'SPY RSI={spy_r:.1f} | Only 36% WR'})
-    # QQQ
-    qqq_r = ind.get('QQQ', {}).get('rsi', 50)
-    if qqq_r < 20: signals.append({'type':'buy','title':'QQQ RSI<20 → TQQQ','msg':f'QQQ RSI={qqq_r:.1f} | 100% WR'})
-    if qqq_r > 79: signals.append({'type':'hedge','title':'QQQ RSI>79 → UVXY','msg':f'QQQ RSI={qqq_r:.1f} | 67% WR'})
-    # GLD/USDU
-    gld_r = ind.get('GLD', {}).get('rsi', 50)
-    usdu_r = ind.get('USDU', {}).get('rsi', 50)
-    if gld_r > 79 and usdu_r < 25:
-        signals.append({'type':'buy','title':'DOUBLE SIGNAL','msg':f'GLD={gld_r:.1f} + USDU={usdu_r:.1f} | TQQQ 88% WR'})
-        xlp_r = ind.get('XLP', {}).get('rsi', 0)
-        if xlp_r > 65: signals.append({'type':'buy','title':'TRIPLE SIGNAL','msg':f'+ XLP={xlp_r:.1f} | TQQQ 100% WR (n=5)'})
-    elif gld_r > 79:
-        signals.append({'type':'buy','title':'GLD Overbought','msg':f'GLD RSI={gld_r:.1f} | TQQQ 72% WR'})
-    # UCO → TMV
-    uco_r = ind.get('UCO', {}).get('rsi', 50)
-    if uco_r > 75: signals.append({'type':'buy','title':'UCO>75 → TMV','msg':f'UCO RSI={uco_r:.1f} | Oil→Bond weakness'})
-    # SOXS
-    smh_r = ind.get('SMH', {}).get('rsi', 50)
-    if smh_r > 79 and usdu_r > 70:
-        signals.append({'type':'short','title':'SOXS Dollar Squeeze','msg':f'SMH={smh_r:.1f} + USDU={usdu_r:.1f} | 100% WR'})
-    # CURE/FAS/LABU
-    cure_r = ind.get('CURE', {}).get('rsi', 50)
-    if cure_r < 21: signals.append({'type':'buy','title':'CURE RSI<21','msg':f'CURE RSI={cure_r:.1f} | 85% WR, n=33'})
-    elif cure_r < 25: signals.append({'type':'buy','title':'CURE RSI<25','msg':f'CURE RSI={cure_r:.1f} | 81% WR'})
-    fas_r = ind.get('FAS', {}).get('rsi', 50)
-    if fas_r < 30: signals.append({'type':'buy','title':'FAS RSI<30','msg':f'FAS RSI={fas_r:.1f} | 63% WR'})
-    # Defensive rotation
-    def_ob = any(ind.get(t, {}).get('rsi', 0) > 79 for t in ['XLP','XLU','XLV'])
-    if def_ob and spy_r < 79 and qqq_r < 79:
-        signals.append({'type':'buy','title':'Defensive Rotation','msg':'Def sector OB, SPY/QQQ not | TQQQ 70% WR 20d'})
-    # UVXY B1
-    uvxy_r = ind.get('UVXY', {}).get('rsi', 50)
-    if uvxy_r > 82: signals.append({'type':'buy','title':'UVXY>82 → SOXL (B1)','msg':f'UVXY RSI={uvxy_r:.1f} | 81% WR 1d'})
+    # === GROUP 1: SMH/SOXL ===
+    if 'SMH' in indicators:
+        smh = indicators['SMH']
+        if smh['pct_above_sma200']>=40: alerts.append(('[EXIT] SOXL EXIT',f"SMH {smh['pct_above_sma200']:.1f}% above SMA200 - SELL SOXL",'exit'))
+        elif smh['pct_above_sma200']>=35: alerts.append(('[WARN] SOXL WARNING',f"SMH {smh['pct_above_sma200']:.1f}% above SMA200 - Approaching sell",'warning'))
+        elif smh['pct_above_sma200']>=30: alerts.append(('[WARN] SOXL TRIM',f"SMH {smh['pct_above_sma200']:.1f}% above SMA200 - Trim 25-50%",'warning'))
+        if smh['sma50']<smh['sma200'] and smh['sma200']>0: alerts.append(('[EXIT] DEATH CROSS','SMH SMA50 below SMA200','exit'))
+        if 'SMH' in data:
+            close=data['SMH']['Close']; sma200s=close.rolling(200).mean()
+            days_below=0
+            for i in range(len(close)-1,max(len(close)-500,199),-1):
+                try:
+                    if sf(sma200s.iloc[i])>0 and sf(close.iloc[i])<sf(sma200s.iloc[i]): days_below+=1
+                    else: break
+                except: break
+            if days_below>=100:
+                if smh['rsi50']<45: alerts.append(('[BUY] SOXL STRONG BUY',f"SMH {days_below}d below SMA200 + RSI50={smh['rsi50']:.1f}<45 | 97% win +81%",'buy'))
+                else: alerts.append(('[BUY] SOXL ACCUMULATE',f"SMH {days_below}d below SMA200 | 85% win +54%",'buy'))
+            status['smh_days_below_sma200']=days_below
 
-    # GLD & Miners (Group 18)
-    gdxj_r = ind.get('GDXJ', {}).get('rsi', 50)
-    gdx_r = ind.get('GDX', {}).get('rsi', 50)
-    if gdxj_r < 21:
-        signals.append({'type':'buy','title':'GDXJ RSI<21 → JNUG','msg':f'GDXJ RSI={gdxj_r:.1f} | 59% WR +8.43% avg 1d n=17'})
-    elif gdxj_r < 25:
-        signals.append({'type':'buy','title':'GDXJ RSI<25 → JNUG','msg':f'GDXJ RSI={gdxj_r:.1f} | 63% WR +3.55% avg 1d n=59'})
-    if gdx_r < 21 and gdxj_r >= 25:
-        signals.append({'type':'buy','title':'GDX RSI<21 → NUGT','msg':f'GDX RSI={gdx_r:.1f} | 56% WR +1.13% avg 1d n=25'})
-    if gdx_r > 85:
-        signals.append({'type':'warning','title':'GDX EXTENDED — DO NOT SHORT','msg':f'GDX RSI={gdx_r:.1f} | Miners continue when OB. DUST loses.'})
-    if gld_r > 75 and usdu_r > 60:
-        signals.append({'type':'hedge','title':'MINER SHORT WINDOW','msg':f'GLD={gld_r:.1f}>75 + USDU={usdu_r:.1f}>60 | JDST 5d: 59% WR n=34'})
+    # === GROUP 2: GLD/USDU Combo ===
+    if 'GLD' in indicators and 'USDU' in indicators:
+        gld,usdu=indicators['GLD'],indicators['USDU']
+        if gld['rsi10']>79 and usdu['rsi10']<25:
+            alerts.append(('[BUY] DOUBLE SIGNAL',f"GLD RSI={gld['rsi10']:.1f}>79 + USDU RSI={usdu['rsi10']:.1f}<25\n   -> TQQQ 88% WR +7% (5d) | UPRO 85% | AMD/NVDA 86%",'buy'))
+            if 'XLP' in indicators and indicators['XLP']['rsi10']>65:
+                alerts.append(('[BUY] TRIPLE SIGNAL',f"+ XLP RSI={indicators['XLP']['rsi10']:.1f}>65 | TQQQ 100% WR +11.6% (5d) RARE!",'buy'))
+        elif gld['rsi10']>79: alerts.append(('[BUY] GLD OVERBOUGHT',f"GLD RSI={gld['rsi10']:.1f}>79 -> TQQQ 72% WR +3.2% (5d)",'buy'))
 
-    # NAIL RSI<21 signal
-    nail_r = ind.get('NAIL', {}).get('rsi', 50)
-    if nail_r < 21:
-        signals.append({'type':'buy','title':'NAIL RSI<21','msg':f'NAIL RSI={nail_r:.1f} | Oversold'})
+    # === GROUP 3: Defensive Rotation ===
+    def_ob=any(indicators.get(t,{}).get('rsi10',0)>79 for t in ['XLP','XLU','XLV'])
+    if def_ob and indicators.get('SPY',{}).get('rsi10',50)<79 and indicators.get('QQQ',{}).get('rsi10',50)<79:
+        alerts.append(('[BUY] DEFENSIVE ROTATION','Def sector OB, SPY/QQQ not -> TQQQ 70% WR 20d','buy'))
 
-    # Determine regime for rolling beta weights
-    dash_regime = 'UNKNOWN'
-    spy_d = ind.get('SPY', {})
-    qqq_d = ind.get('QQQ', {})
-    if spy_d and qqq_d:
-        spy_price = spy_d.get('price', 0)
-        spy_sma200 = spy_d.get('sma200', 0)
-        spy_ema20 = spy_d.get('ema20', 0)
+    # === GROUP 4: Vol Hedge ===
+    qqq_r=indicators.get('QQQ',{}).get('rsi10',50)
+    if qqq_r>79: alerts.append(('[HEDGE] QQQ>79 -> UVXY',f"QQQ RSI={qqq_r:.1f} | 67% WR 5d",'hedge'))
+    if qqq_r<20: alerts.append(('[BUY] QQQ DIP BUY',f"QQQ RSI={qqq_r:.1f}<20 -> TQQQ 100% WR [TIER 1]",'buy'))
+
+    # === GROUP 5: SOXS ===
+    smh_r=indicators.get('SMH',{}).get('rsi10',50); usdu_r=indicators.get('USDU',{}).get('rsi10',50)
+    if smh_r>79 and usdu_r>70: alerts.append(('[SHORT] SOXS SQUEEZE',f"SMH={smh_r:.1f}>79 + USDU={usdu_r:.1f}>70 | 100% WR +9.5%",'short'))
+    if smh_r>79 and indicators.get('IWM',{}).get('rsi10',50)<50:
+        alerts.append(('[SHORT] SOXS DIVERGENCE',f"SMH={smh_r:.1f}>79 + IWM<50 | 86% WR +6.9%",'short'))
+
+    # === GROUP 6: BTC ===
+    btc_r=indicators.get('BTC-USD',{}).get('rsi10',50)
+    if btc_r>79: alerts.append(('[BUY] BTC MOMENTUM',f"BTC RSI={btc_r:.1f}>79 | Hold/Add 67% WR +5.2%",'buy'))
+    if btc_r<30:
+        if indicators.get('UVXY',{}).get('rsi10',50)<40: alerts.append(('[BUY] BTC DIP BUY',f"BTC RSI={btc_r:.1f}<30 + UVXY<40 | 77% WR +4.1%",'buy'))
+        else: alerts.append(('[WATCH] BTC OVERSOLD',f"BTC RSI={btc_r:.1f}<30 (wait UVXY<40)",'watch'))
+
+    # === GROUP 7: UPRO ===
+    spy_r=indicators.get('SPY',{}).get('rsi10',50)
+    if spy_r>85: alerts.append(('[EXIT] UPRO EXIT',f"SPY RSI={spy_r:.1f}>85 | Only 36% WR -3.5%",'exit'))
+    elif spy_r>82: alerts.append(('[WARN] UPRO CAUTION',f"SPY RSI={spy_r:.1f}>82 | 49% WR",'warning'))
+    if spy_r<21: alerts.append(('[BUY] UPRO STRONG BUY',f"SPY RSI={spy_r:.1f}<21 | 87% WR +8.9% [TIER 1]",'buy'))
+    elif spy_r<25: alerts.append(('[BUY] UPRO BUY',f"SPY RSI={spy_r:.1f}<25 | 74% WR +3.9%",'buy'))
+    elif spy_r<30: alerts.append(('[BUY] UPRO CONSIDER',f"SPY RSI={spy_r:.1f}<30 | 69% WR +4.3%",'buy'))
+
+    # === GROUP 8: AMD/NVDA ===
+    if indicators.get('AMD',{}).get('rsi10',50)>85: alerts.append(('[WARN] AMD EXTENDED',f"AMD RSI={indicators['AMD']['rsi10']:.1f}>85",'warning'))
+    if indicators.get('NVDA',{}).get('rsi10',50)>85: alerts.append(('[WARN] NVDA EXTENDED',f"NVDA RSI={indicators['NVDA']['rsi10']:.1f}>85",'warning'))
+
+    # === GROUP 9: NAIL ===
+    if 'NAIL' in indicators:
+        nail=indicators['NAIL']
+        if 'GLD' in indicators and 'USDU' in indicators and 'XLF' in indicators:
+            g,u,x=indicators['GLD'],indicators['USDU'],indicators['XLF']
+            if g['rsi10']>79 and u['rsi10']<25 and x['rsi10']<70: alerts.append(('[BUY] NAIL SIGNAL',f"GLD>{g['rsi10']:.0f}+USDU<{u['rsi10']:.0f}+XLF<{x['rsi10']:.0f} | 90% WR n=10",'buy'))
+            if x['rsi10']>70 and u['rsi10']<25: alerts.append(('[EXIT] NAIL DANGER',f"XLF>{x['rsi10']:.0f}+USDU<25 = 11% WR -11.5%",'exit'))
+        if nail['rsi10']<21: alerts.append(('[BUY] NAIL RSI<21',f"NAIL RSI={nail['rsi10']:.1f} | Oversold",'buy'))
+        elif nail['rsi10']>79: alerts.append(('[EXIT] NAIL OB',f"NAIL RSI={nail['rsi10']:.1f}>79",'warning'))
+
+    # === GROUP 10: CURE ===
+    cure_r=indicators.get('CURE',{}).get('rsi10',50)
+    if cure_r<21: alerts.append(('[BUY] CURE STRONG BUY',f"CURE RSI={cure_r:.1f}<21 | 85% WR +7.3% n=33",'buy'))
+    elif cure_r<25: alerts.append(('[BUY] CURE BUY',f"CURE RSI={cure_r:.1f}<25 | 81% WR +5.4% n=70",'buy'))
+    if cure_r>85: alerts.append(('[EXIT] CURE SELL',f"CURE RSI={cure_r:.1f}>85 | 33% WR",'exit'))
+    elif cure_r>79: alerts.append(('[EXIT] CURE OB',f"CURE RSI={cure_r:.1f}>79 | 40% WR",'exit'))
+
+    # === GROUP 11: FAS ===
+    fas_r=indicators.get('FAS',{}).get('rsi10',50)
+    if 'GLD' in indicators and 'USDU' in indicators:
+        if indicators['GLD']['rsi10']>79 and indicators['USDU']['rsi10']<25: alerts.append(('[BUY] FAS SIGNAL',f"GLD>79+USDU<25 -> FAS 10d: 92% WR +5.8%",'buy'))
+    if fas_r<30: alerts.append(('[BUY] FAS BUY',f"FAS RSI={fas_r:.1f}<30 | 63% WR n=195",'buy'))
+    if fas_r>85: alerts.append(('[EXIT] FAS SELL',f"FAS RSI={fas_r:.1f}>85 | 8% WR!",'exit'))
+    elif fas_r>82: alerts.append(('[EXIT] FAS OB',f"FAS RSI={fas_r:.1f}>82 | 38% WR",'exit'))
+
+    # === GROUP 12: LABU ===
+    labu_r=indicators.get('LABU',{}).get('rsi10',50)
+    if labu_r<21: alerts.append(('[BUY] LABU STRONG BUY',f"LABU RSI={labu_r:.1f}<21 | 73% WR +11.2% n=11",'buy'))
+    elif labu_r<25: alerts.append(('[BUY] LABU BUY',f"LABU RSI={labu_r:.1f}<25 | 66% WR +5.7% n=59",'buy'))
+    if labu_r>70: alerts.append(('[WARN] LABU EXTENDED',f"LABU RSI={labu_r:.1f}>70 | 42% WR",'warning'))
+
+    # === GROUP 13: Deep Value ===
+    if 'QQQ' in indicators:
+        q=indicators['QQQ']
+        if q['maret_10']<-1.0: alerts.append(('[BUY] QQQ CRASH BOUNCE',f"QQQ MaRet(10d)={q['maret_10']:.2f}%/day -> TQQQ bounce",'buy'))
+        if q['cumret_30']<-20: alerts.append(('[BUY] QQQ DEEP DRAWDOWN',f"QQQ CumRet(30d)={q['cumret_30']:.1f}% -> TQQQ deep value",'buy'))
+    if 'SMH' in indicators:
+        s=indicators['SMH']
+        if s['maret_10']<-1.5: alerts.append(('[BUY] SMH CRASH BOUNCE',f"SMH MaRet(10d)={s['maret_10']:.2f}%/day -> SOXL",'buy'))
+        if s['cumret_30']<-25: alerts.append(('[BUY] SMH DEEP DRAWDOWN',f"SMH CumRet(30d)={s['cumret_30']:.1f}% -> SOXL",'buy'))
+    if 'SPY' in indicators:
+        sp=indicators['SPY']
+        if sp['cumret_50']<-15 and sp['rsi10']<35: alerts.append(('[BUY] SPY DEEP VALUE',f"SPY CumRet(50d)={sp['cumret_50']:.1f}%+RSI={sp['rsi10']:.1f}<35 -> UPRO",'buy'))
+        elif sp['cumret_100']<-10: alerts.append(('[BUY] SPY MOD DRAWDOWN',f"SPY CumRet(100d)={sp['cumret_100']:.1f}% -> UPRO accumulate",'buy'))
+        if sp['cumret_10']<-5 and indicators.get('USDU',{}).get('rsi10',50)>70:
+            alerts.append(('[WARN] FALLING KNIFE',f"SPY 10d={sp['cumret_10']:.1f}%+USDU>70 = DON\'T catch knife",'warning'))
+
+    # === GROUP 14: Crisis Alpha Regime ===
+    crisis_regime='UNKNOWN'
+    if 'SPY' in indicators and 'QQQ' in indicators:
+        sp,q=indicators['SPY'],indicators['QQQ']
+        above200=sp['price']>sp['sma200'] if sp['sma200']>0 else False
+        above_ema20=sp['price']>sp['ema20'] if sp['ema20']>0 else False
+        vol_exp=q['vol_ratio']>1.0
+        if above200 and not vol_exp: crisis_regime='BULL + VOL COMPRESS'
+        elif above200 and vol_exp:
+            crisis_regime='BULL + VOL EXPAND'
+            alerts.append(('[WATCH] VOL EXPANDING (BULL)',f"QQQ StdDev 10/50 ratio={q['vol_ratio']:.2f} + SPY above SMA200\n  -> Crisis Alpha: UPRO/GLD regime (less aggressive)",'watch'))
+        elif not above200 and above_ema20:
+            crisis_regime='BEAR RECOVERY'
+            alerts.append(('[WATCH] BEAR RECOVERY',f"SPY below SMA200 but above EMA20 -> Recovery mode",'watch'))
+        elif not above200:
+            crisis_regime='BEAR DEFENSIVE'
+            alerts.append(('[WARN] BEAR DEFENSIVE',f"SPY below SMA200+EMA20 -> SHY/GLD defensive",'warning'))
+    status['crisis_regime']=crisis_regime
+
+    # === GROUP 15: Signal Degradation ===
+    if 'GLD' in indicators:
+        gld=indicators['GLD']
+        if gld['rsi10']>79 and indicators.get('USDU',{}).get('rsi10',50)>=25:
+            alerts.append(('[WARN] SIGNAL CALIBRATION',f"GLD RSI>79 alone: Trailing WR 50% vs historical 72% -- signal DEGRADING (n=16)",'warning'))
+
+    # === GROUP 17: DFEN Bollinger ===
+    if 'DFEN' in indicators:
+        d=indicators['DFEN']
+        above200=d['price']>d['sma200'] if d['sma200']>0 else False
+        below_bb=d['price']<d['bb_lower']
+        if below_bb and d['rsi10']>=30 and above200:
+            alerts.append(('[BUY] DFEN BB+RSI OVERSOLD',f"DFEN below BB+RSI={d['rsi10']:.1f}>=30 | 73.5% WR +6.8% n=49\n   BB dominates RSI for DFEN. Pullback in uptrend.",'buy'))
+        elif below_bb and d['rsi10']<30 and above200:
+            alerts.append(('[BUY] DFEN BB+RSI<30',f"DFEN below BB+RSI={d['rsi10']:.1f}<30 | 63.8% WR",'buy'))
+        elif d['rsi10']<35 and above200:
+            alerts.append(('[BUY] DFEN WATCH',f"DFEN RSI={d['rsi10']:.1f}<35 + above SMA200\n  -> 90% WR, +11% avg (20d) | n=52 | Pullback in uptrend",'buy'))
+
+    # === GROUP 18: GLD & Miners ===
+    gdxj_r=indicators.get('GDXJ',{}).get('rsi10',50)
+    gdx_r=indicators.get('GDX',{}).get('rsi10',50)
+    if gdxj_r<21: alerts.append(('[BUY] JNUG STRONG BUY [TIER 2]',f"GDXJ RSI={gdxj_r:.1f}<21 -> JNUG\n   1d: 59% WR +8.43% n=17 | 5d: +14.9% | 20d: +18.9%",'buy'))
+    elif gdxj_r<25: alerts.append(('[BUY] JNUG DIP BUY [TIER 2]',f"GDXJ RSI={gdxj_r:.1f}<25 -> JNUG\n   1d: 63% WR +3.55% n=59",'buy'))
+    elif gdxj_r<30: alerts.append(('[WATCH] GDXJ APPROACHING',f"GDXJ RSI={gdxj_r:.1f} -> JNUG buy zone <25",'watch'))
+    if gdx_r<21 and gdxj_r>=25: alerts.append(('[BUY] NUGT BUY',f"GDX RSI={gdx_r:.1f}<21 -> NUGT 56% WR n=25",'buy'))
+    if gdx_r>85: alerts.append(('[WARN] GDX EXTENDED - DO NOT SHORT',f"GDX RSI={gdx_r:.1f}>85 | Miners continue when OB. DUST loses.",'warning'))
+    gld_r2=indicators.get('GLD',{}).get('rsi10',50); usdu_r2=indicators.get('USDU',{}).get('rsi10',50)
+    if gld_r2>75 and usdu_r2>60: alerts.append(('[HEDGE] MINER SHORT WINDOW',f"GLD={gld_r2:.1f}>75+USDU={usdu_r2:.1f}>60 | JDST 5d 59% WR n=34",'hedge'))
+
+    # UCO>75 -> TMV
+    uco_r=indicators.get('UCO',{}).get('rsi10',50)
+    if uco_r>75: alerts.append(('[BUY] UCO>75 -> TMV',f"UCO RSI={uco_r:.1f} | Oil->Bond weakness",'buy'))
+
+    return alerts, status
+
+def format_email(alerts, status, is_preclose=False):
+    now = datetime.now()
+    timing = "PRE-CLOSE PREVIEW (3:15 PM)" if is_preclose else "MARKET CLOSE CONFIRMATION (4:05 PM)"
+    indicators = status.get('indicators', {})
+
+    body = f"""{'='*70}
+MARKET SIGNAL MONITOR - {timing}
+{now.strftime('%Y-%m-%d %H:%M')} ET
+{'='*70}
+
+"""
+    # TLT bond momentum banner
+    if 'TLT' in indicators:
+        tlt_10d = indicators['TLT'].get('cumret_10', 0)
+        if tlt_10d < -2: body += f">>> TLT 10d: {tlt_10d:+.1f}% -- Bonds FALLING -- Rates rising -- UVXY hedge conviction HIGH\n\n"
+        elif tlt_10d > 2: body += f">>> TLT 10d: {tlt_10d:+.1f}% -- Bonds RISING -- Rates falling -- UVXY hedge conviction LOW\n\n"
+
+    if alerts:
+        buy_alerts = [a for a in alerts if a[2] == 'buy']
+        exit_alerts = [a for a in alerts if a[2] in ['exit', 'short']]
+        warn_alerts = [a for a in alerts if a[2] in ['warning', 'hedge', 'watch']]
+        if buy_alerts:
+            body += "BUY SIGNALS:\n" + "-"*50 + "\n"
+            for t,m,_ in buy_alerts: body += f"{t}\n{m}\n\n"
+        if exit_alerts:
+            body += "EXIT/SHORT SIGNALS:\n" + "-"*50 + "\n"
+            for t,m,_ in exit_alerts: body += f"{t}\n{m}\n\n"
+        if warn_alerts:
+            body += "WARNINGS/WATCH:\n" + "-"*50 + "\n"
+            for t,m,_ in warn_alerts: body += f"{t}\n{m}\n\n"
+    else:
+        body += "No signals triggered today.\n\n"
+
+    # --- INDICATOR STATUS ---
+    body += f"\n{'='*70}\nCURRENT INDICATOR STATUS\n{'='*70}\n\n"
+    key_tickers = ['SPY','QQQ','SMH','GLD','USDU','XLP','TLT','HYG','XLF','UVXY','BTC-USD','AMD','NVDA']
+    body += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}\n" + "-"*50 + "\n"
+    for t in key_tickers:
+        if t in indicators:
+            i=indicators[t]
+            p=f"${i['price']:.2f}" if i['price']<1000 else f"${i['price']:,.0f}"
+            body += f"{t:<10} {p:>12} {i['rsi10']:>10.1f} {i.get('pct_above_sma200',0):>+11.1f}%\n"
+
+    # --- 3x LEVERAGED ---
+    body += f"\n{'='*70}\n3x LEVERAGED ETFs\n{'='*70}\n"
+    body += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}  Signal\n" + "-"*65 + "\n"
+    for t in ['NAIL','CURE','FAS','LABU','TQQQ','SOXL','TECL','DRN','DFEN']:
+        if t in indicators:
+            i=indicators[t]; r=i['rsi10']
+            sig="<< OVERSOLD" if r<21 else "<< Watch" if r<30 else ">> OVERBOUGHT" if r>85 else ">> Extended" if r>79 else ""
+            body += f"{t:<10} ${i['price']:>11.2f} {r:>10.1f} {i.get('pct_above_sma200',0):>+11.1f}%  {sig}\n"
+
+    # --- OTHER ETFs ---
+    body += f"\n{'='*70}\nOTHER ETFs\n{'='*70}\n"
+    body += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}\n" + "-"*50 + "\n"
+    for t in ['XLV','XLU','XLE','TMV','VOOV','VOOG','VTV','QQQE','BOIL','EURL','YINN','KORU','INDL','EDC']:
+        if t in indicators:
+            i=indicators[t]
+            p=f"${i['price']:.2f}" if i['price']<1000 else f"${i['price']:,.0f}"
+            body += f"{t:<10} {p:>12} {i['rsi10']:>10.1f} {i.get('pct_above_sma200',0):>+11.1f}%\n"
+
+    # --- SMH/SOXL LEVELS ---
+    if 'SMH' in indicators:
+        smh=indicators['SMH']; s200=smh['sma200']
+        body += f"\n{'='*70}\nSMH/SOXL LEVELS\n{'='*70}\n"
+        body += f"Current Price:    ${smh['price']:.2f}\nSMA(200):         ${s200:.2f}\n"
+        body += f"% Above SMA200:   {smh['pct_above_sma200']:+.1f}%\nDays Below SMA:   {status.get('smh_days_below_sma200',0)}\n\n"
+        body += f"Key Levels:\n  30% (Trim):     ${s200*1.30:.2f}\n  35% (Warning):  ${s200*1.35:.2f}\n  40% (Sell):     ${s200*1.40:.2f}\n"
+
+    # --- CRISIS ALPHA / DEEP VALUE DASHBOARD ---
+    body += f"\n{'='*70}\nCRISIS ALPHA / DEEP VALUE DASHBOARD\n{'='*70}\n"
+    body += """
+  KEY METRICS EXPLAINED:
+  MaRet(10d)  = Avg daily return over 10 days. Measures sell pressure.
+                Below -1%/day = crash-level selling -> deep value triggers fire.
+  CumRet(Nd)  = Total price change over N days. Measures drawdown depth.
+                QQQ -20% over 30d or SPY -15% over 50d = historically rare -> buy signals.
+  StdDev 10/50 = Short-term vs long-term daily volatility.
+  Vol Ratio   = StdDev(10d)/StdDev(50d). >1.0 means recent vol is ABOVE normal.
+                Determines which Opus regime is active (compress vs expand).
+  %B (DFEN)   = Position within Bollinger Bands. <0 = below lower band (oversold).
+
+"""
+    for t in ['SPY','QQQ','SMH','USMV']:
+        if t in indicators:
+            i=indicators[t]
+            body += f" {t}:\n"
+            body += f"   MaRet(10d): {i['maret_10']:+.2f}%/day    CumRet 10d/30d/50d: {i['cumret_10']:.1f}% / {i['cumret_30']:.1f}% / {i['cumret_50']:.1f}%\n"
+            body += f"   StdDev 10/50: {i['std_10']:.4f}/{i['std_50']:.4f}  Vol Ratio: {i['vol_ratio']:.2f}\n\n"
+
+    regime=status.get('crisis_regime','UNKNOWN')
+    sp=indicators.get('SPY',{}); qq=indicators.get('QQQ',{})
+    body += f" CRISIS ALPHA REGIME: {regime}\n"
+    body += f"   Vol Ratio: {qq.get('vol_ratio',0):.2f}  SPY>SMA200: {sp.get('price',0)>sp.get('sma200',0)}  SPY>EMA20: {sp.get('price',0)>sp.get('ema20',0)}\n"
+    regime_meaning = {
+        'BULL + VOL COMPRESS':'Calm bull. Opus B5 (inv-vol MF/GLD/UPRO). Most aggressive equity tilt.',
+        'BULL + VOL EXPAND':'Bull but stress rising. Opus B4/B5 (UPRO/GLD). Slightly less aggressive.',
+        'BEAR RECOVERY':'Below SMA200 but bouncing above EMA20. Recovery: 50% UPRO / 35% GLD / 15% MF.',
+        'BEAR DEFENSIVE':'Below SMA200+EMA20. Full defensive: SHY/GLD/MF. Wait for EMA20 crossover.',
+    }
+    body += f"   -> {regime_meaning.get(regime,'Check conditions manually')}\n"
+
+    body += f"\n DEEP VALUE TRIGGER PROXIMITY:\n"
+    body += f"   (Distance from each trigger. Negative = trigger has FIRED)\n"
+    dv = []
+    if 'QQQ' in indicators:
+        q=indicators['QQQ']
+        dv.append(('QQQ MaRet(10d)',q['maret_10'],-1.0,'Avg daily loss speed. <-1% = crash selling -> TQQQ'))
+        dv.append(('QQQ CumRet(30d)',q['cumret_30'],-20.0,'Total 30d drawdown. <-20% = deep value -> TQQQ'))
+    if 'SMH' in indicators:
+        s=indicators['SMH']
+        dv.append(('SMH MaRet(10d)',s['maret_10'],-1.5,'Semi sell pace. <-1.5% = extreme -> SOXL'))
+        dv.append(('SMH CumRet(30d)',s['cumret_30'],-25.0,'Semi drawdown. <-25% = generational buy -> SOXL'))
+    if 'SPY' in indicators:
+        sp=indicators['SPY']
+        dv.append(('SPY CumRet(50d)',sp['cumret_50'],-15.0,'Broad mkt ~2.5mo drawdown. <-15% + RSI<35 -> UPRO'))
+        dv.append(('SPY CumRet(100d)',sp['cumret_100'],-10.0,'Broad mkt ~5mo drawdown. <-10% -> UPRO accumulate'))
+    for label,current,trigger,context in dv:
+        away=current-trigger
+        body += f"   {label}: {current:.1f} (trigger: {trigger}) -- {away:+.1f} away\n"
+        body += f"     [{context}]\n"
+
+    # --- DFEN BOLLINGER ---
+    if 'DFEN' in indicators:
+        d=indicators['DFEN']
+        pos = 'Below lower BB' if d['price']<d['bb_lower'] else 'Above upper BB' if d['price']>d['bb_upper'] else 'Within bands'
+        body += f"\n DFEN BOLLINGER BANDS (20, 2):\n"
+        body += f"   Price: ${d['price']:.2f}  |  RSI: {d['rsi10']:.1f}\n"
+        body += f"   Upper:  ${d['bb_upper']:.2f}\n   SMA20:  ${d['bb_sma']:.2f}\n   Lower:  ${d['bb_lower']:.2f}\n"
+        body += f"   %B: {d['bb_pctb']:.3f}  |  Width: {d['bb_width']:.1f}%  |  {pos}\n"
+        body += f"   Signal: Below BB+RSI>=30 = 73.5% WR (5d) | Below BB+RSI<30 = 63.8% WR\n"
+        body += f"   [BB dominates RSI alone for DFEN. Pullbacks to lower BB in uptrend = high-prob dip buys]\n"
+
+    # --- ROLLING BETA ---
+    rb=status.get('rolling_betas')
+    if rb:
+        beta_regime = rb.get('regime', 'UNKNOWN')
+        blend_w = rb.get('blend_weights', {})
+        body += f"\n{'='*70}\nROLLING BETA vs SPY\n{'='*70}\n"
+        body += "  Beta = how much each group moves per 1% SPY move.\n"
+        body += "  Blend weights are REGIME-CONDITIONAL (not static):\n"
+        body += f"  Current regime: {beta_regime}\n"
+        body += f"  Weights:  Eq1x {blend_w.get('Equity 1x',0):.0%}"
+        body += f" | Lev {blend_w.get('Lev Equity',0):.0%}"
+        body += f" | MF {blend_w.get('MF/Alts',0):.0%}"
+        body += f" | Gold {blend_w.get('Gold/Commod',0):.0%}"
+        body += f" | Vol {blend_w.get('Vol/Hedge',0):.0%}"
+        body += f" | Bonds {blend_w.get('Bonds (net)',0):.0%}"
+        body += f" | Ccy {blend_w.get('Currency',0):.0%}\n"
+        body += "  (Weights from actual Q1 2026 Roth Composer export)\n"
+        body += "  Vol/Hedge = UVXY only. Bonds (net) = TLT+SHY+TMV (TMV is -3x TLT).\n\n"
+        body += f"{'Group':<15} {'63d':>8} {'126d':>8} {'252d':>8}  {'Blend Wt':>8}\n" + "-"*57 + "\n"
+        for g in ['Equity 1x','Lev Equity','MF/Alts','Gold/Commod','Vol/Hedge','Bonds (net)','Currency','Est. Blend']:
+            row=f"{g:<15}"
+            for w in ['63d','126d','252d']:
+                v=rb.get(w,{}).get(g)
+                row += f" {v:>+7.2f}" if v is not None else f" {'N/A':>7}"
+            if g != 'Est. Blend':
+                bwt = blend_w.get(g, 0)
+                row += f"  {bwt:>7.0%}"
+            else:
+                b63=rb.get('63d',{}).get('Est. Blend')
+                if b63 and b63>2.0: row+="  << HIGH"
+                elif b63 and b63>1.5: row+="  << ELEV"
+                elif b63 and b63<1.0: row+="   DIVERS"
+                else: row+="      OK"
+            body += row+"\n"
+            if g=='Currency': body += "-"*57+"\n"
+        b63=rb.get('63d',{}).get('Est. Blend'); b252=rb.get('252d',{}).get('Est. Blend')
+        if b63 and b252:
+            body += f"\nTrend: {b252:+.2f} (252d) -> {b63:+.2f} (63d)\n"
+            if b63>2.0:
+                body += "WARNING: HIGH leverage even with regime-adjusted weights.\n"
+                body += "  -> Holy Grail diversification minimal at current positioning.\n"
+            elif b63<1.0:
+                body += "Diversification ACTIVE: blend beta below 1.0x SPY.\n"
+                body += "  -> Alternatives are meaningfully reducing portfolio risk.\n"
+
+    # --- GLD & MINERS ---
+    body += f"\n{'='*70}\nGLD & MINERS STATUS\n{'='*70}\n"
+    body += "  GDXJ/GDX RSI<25 triggers JNUG/NUGT dip-buys (63%/56% WR at 1d).\n"
+    body += "  Miners have 5x GLD beta -- their OWN RSI matters, not gold's.\n"
+    body += "  DO NOT short overbought miners (GDX>79 -> DUST loses money).\n\n"
+    body += f"{'Ticker':<8} {'Price':>10} {'RSI(10)':>8} {'vs SMA200':>10}  Signal\n" + "-"*55 + "\n"
+    for t in ['GLD','GDX','GDXJ','JNUG','NUGT']:
+        if t in indicators:
+            i=indicators[t]; r=i['rsi10']
+            flag=""
+            if t=='GDXJ' and r<21: flag="JNUG BUY 59% +8.4%"
+            elif t=='GDXJ' and r<25: flag="JNUG 63% +3.6%"
+            elif t=='GDX' and r<21: flag="NUGT BUY 56%"
+            elif t in('GDX','GDXJ') and r>85: flag="DO NOT SHORT"
+            elif r<25: flag="Oversold"
+            elif r>79: flag="High - momentum"
+            body += f"  {t:<6} ${i['price']:>9.2f} {r:>8.1f} {i.get('pct_above_sma200',0):>+9.1f}%  {flag}\n"
+
+    if is_preclose:
+        body += f"\n{'='*70}\nNOTE: PRE-CLOSE preview. Signals may change by close.\nFinal confirmation at 4:05 PM ET.\n{'='*70}\n"
+    return body
+
+def send_email(subject, body):
+    if not SENDER_EMAIL or not SENDER_PASSWORD or not RECIPIENT_EMAIL:
+        print("Email not configured - printing to console:")
+        print(f"Subject: {subject}")
+        print(body)
+        return False
+    try:
+        msg = MIMEMultipart()
+        msg['From']=SENDER_EMAIL; msg['To']=RECIPIENT_EMAIL; msg['Subject']=subject
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls(); server.login(SENDER_EMAIL, SENDER_PASSWORD)
+        server.send_message(msg); server.quit()
+        print(f"Email sent to {RECIPIENT_EMAIL}"); return True
+    except Exception as e:
+        print(f"Email failed: {e}"); return False
+
+def main():
+    print(f"Signal Monitor v4.2 at {datetime.now()}")
+    print(f"Mode: {'PRE-CLOSE' if IS_PRECLOSE else 'MARKET CLOSE'}")
+    tickers = [
+        'SMH','SPY','QQQ','IWM','XLP','XLU','XLV',
+        'GLD','TLT','HYG','LQD','TMV','USDU','UCO','BOIL',
+        'UVXY','EDC','YINN','KORU','EURL','INDL','BTC-USD',
+        'AMD','NVDA','NAIL','CURE','FAS','LABU',
+        'TQQQ','SOXL','TECL','DRN','DFEN',
+        'VOOV','VOOG','VTV','QQQE','USMV',
+        'XLE','XLF',
+        'GDX','GDXJ','JNUG','NUGT',
+        'UPRO','CTA','DBMF','BTAL','KMLM',
+        'UUP','SHY','DBC',
+    ]
+    print("Downloading market data...")
+    data = download_data(tickers)
+    print(f"Downloaded {len(data)} tickers")
+
+    # Determine regime FIRST so rolling beta uses correct blend weights
+    regime = 'UNKNOWN'
+    if 'SPY' in data and 'QQQ' in data:
+        spy_c = data['SPY']['Close']
+        qqq_c = data['QQQ']['Close']
+        spy_price = sf(spy_c.iloc[-1])
+        spy_sma200 = sf(spy_c.rolling(200).mean().iloc[-1]) if len(spy_c)>=200 else 0
+        spy_ema20 = sf(spy_c.ewm(span=20,adjust=False).mean().iloc[-1])
+        qqq_rets = qqq_c.pct_change()
+        std10 = sf(qqq_rets.rolling(10).std().iloc[-1])
+        std50 = sf(qqq_rets.rolling(50).std().iloc[-1])
+        vol_exp = (std10/std50 > 1.0) if std50 > 0 else False
         above200 = spy_price > spy_sma200 if spy_sma200 > 0 else False
         above_ema20 = spy_price > spy_ema20 if spy_ema20 > 0 else False
-        # Vol ratio from raw data
-        if 'QQQ' in raw and len(raw['QQQ']) > 50:
-            qc = raw['QQQ']['Close']
-            if isinstance(qc, pd.DataFrame): qc = qc.iloc[:,0]
-            qrets = qc.pct_change()
-            s10 = float(qrets.rolling(10).std().iloc[-1]) if len(qrets) > 10 else 0
-            s50 = float(qrets.rolling(50).std().iloc[-1]) if len(qrets) > 50 else 0
-            vol_exp = (s10/s50 > 1.0) if s50 > 0 else False
-        else:
-            vol_exp = False
-        if above200 and not vol_exp: dash_regime = 'BULL + VOL COMPRESS'
-        elif above200 and vol_exp: dash_regime = 'BULL + VOL EXPAND'
-        elif not above200 and above_ema20: dash_regime = 'BEAR RECOVERY'
-        elif not above200: dash_regime = 'BEAR DEFENSIVE'
+        if above200 and not vol_exp: regime = 'BULL + VOL COMPRESS'
+        elif above200 and vol_exp: regime = 'BULL + VOL EXPAND'
+        elif not above200 and above_ema20: regime = 'BEAR RECOVERY'
+        elif not above200: regime = 'BEAR DEFENSIVE'
+    print(f"Regime: {regime}")
 
-    # Rolling betas (compute with Brier, every 10 min)
-    rolling_betas = cache.get('rolling_betas', [])
+    rolling_betas = calculate_rolling_betas(data, regime=regime)
+    alerts, status = check_signals(data)
+    status['rolling_betas'] = rolling_betas
+    if alerts:
+        buy_n=len([a for a in alerts if a[2]=='buy'])
+        exit_n=len([a for a in alerts if a[2] in ['exit','short']])
+        urg="EXIT SIGNALS" if exit_n>0 else "BUY SIGNALS" if buy_n>0 else "WATCH"
+        tm="PRE-CLOSE" if IS_PRECLOSE else "CLOSE"
+        subject=f"[{tm}] Market Signals: {len(alerts)} Alert(s) - {urg}"
+    else:
+        tm="PRE-CLOSE" if IS_PRECLOSE else "CLOSE"
+        subject=f"[{tm}] Market Signals: No Alerts"
+    body = format_email(alerts, status, IS_PRECLOSE)
+    send_email(subject, body)
+    print(f"\n{len(alerts)} signal(s) detected")
+    for t,m,_ in alerts: print(f"  {t}")
 
-    # Brier scores (compute every 10 min, not every 60s)
-    brier_results = cache.get('brier')
-    now = time.time()
-    if brier_results is None or now - cache.get('brier_ts', 0) > 600:
-        try:
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] Computing Brier scores + rolling betas (regime: {dash_regime})...")
-            brier_results = compute_brier(raw)
-            cache['brier'] = brier_results
-            rolling_betas = compute_rolling_betas(raw, regime=dash_regime)
-            cache['rolling_betas'] = rolling_betas
-            cache['brier_ts'] = now
-            print(f"  → {len(brier_results)} signals scored")
-        except Exception as e:
-            print(f"  Brier error: {e}")
-            brier_results = cache.get('brier', [])
-
-    return {
-        'indicators': indicators,
-        'signals': signals,
-        'brier': brier_results or [],
-        'rolling_betas': rolling_betas or [],
-        'ts': datetime.now().isoformat(),
-        'n_tickers': len(indicators),
-    }
-
-# ═══════════════════════════════════════════════════════════════════
-# API ROUTES
-# ═══════════════════════════════════════════════════════════════════
-@app.route('/api/data')
-def api_data():
-    now = time.time()
-    with lock:
-        if cache['data'] is None or now - cache['ts'] > CACHE_SECONDS:
-            try:
-                cache['data'] = fetch_all()
-                cache['ts'] = now
-            except Exception as e:
-                if cache['data'] is None:
-                    return jsonify({'error': str(e)}), 500
-    return jsonify(cache['data'])
-
-@app.route('/api/refresh')
-def api_refresh():
-    with lock:
-        cache['data'] = fetch_all()
-        cache['ts'] = time.time()
-    return jsonify({'ok': True})
-
-@app.route('/')
-def index():
-    return Response(HTML, mimetype='text/html')
-
-# ═══════════════════════════════════════════════════════════════════
-# DASHBOARD HTML
-# ═══════════════════════════════════════════════════════════════════
-HTML = r"""<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Signal Monitor v4.2</title>
-<style>
-:root {
-  --bg: #0a0a0f; --bg2: #12121a; --bg3: #1a1a26;
-  --fg: #e0e0e8; --fg2: #8888a0; --fg3: #555568;
-  --green: #22c55e; --red: #ef4444; --amber: #f59e0b;
-  --cyan: #06b6d4; --blue: #3b82f6; --purple: #a855f7;
-  --border: #2a2a3a;
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body { background:var(--bg); color:var(--fg); font-family:'SF Mono','Fira Code',monospace; font-size:13px; }
-a { color:var(--cyan); }
-
-/* Header */
-.hdr { display:flex; justify-content:space-between; align-items:center; padding:12px 20px; border-bottom:1px solid var(--border); background:var(--bg2); }
-.hdr h1 { font-size:16px; font-weight:600; letter-spacing:1px; }
-.hdr .meta { color:var(--fg2); font-size:12px; }
-.hdr .meta span { margin-left:16px; }
-.btn { background:var(--bg3); border:1px solid var(--border); color:var(--fg); padding:4px 12px; border-radius:4px; cursor:pointer; font-family:inherit; font-size:12px; }
-.btn:hover { background:var(--border); }
-
-/* Tabs */
-.tabs { display:flex; gap:0; border-bottom:1px solid var(--border); background:var(--bg2); padding:0 20px; }
-.tab { padding:10px 20px; cursor:pointer; color:var(--fg2); border-bottom:2px solid transparent; font-size:13px; transition:all .15s; }
-.tab:hover { color:var(--fg); }
-.tab.active { color:var(--cyan); border-bottom-color:var(--cyan); }
-
-/* Layout */
-.content { padding:16px 20px; max-width:1400px; margin:0 auto; width:100%; }
-
-/* Signals grid */
-.signals-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr)); gap:8px; margin-bottom:16px; }
-.signals-full { grid-column:1 / -1; }
-
-/* Alerts */
-.alert-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:12px 16px; margin-bottom:8px; }
-.alert-card.buy { border-left:3px solid var(--green); }
-.alert-card.exit, .alert-card.short { border-left:3px solid var(--red); }
-.alert-card.hedge, .alert-card.warning, .alert-card.watch { border-left:3px solid var(--amber); }
-.alert-title { font-weight:600; font-size:13px; margin-bottom:4px; }
-.alert-msg { color:var(--fg2); font-size:12px; white-space:pre-line; }
-
-/* Table */
-table { width:100%; border-collapse:collapse; font-size:12px; }
-th { text-align:left; padding:8px 10px; color:var(--fg2); font-weight:500; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg); }
-td { padding:6px 10px; border-bottom:1px solid var(--border); }
-tr:hover { background:var(--bg2); }
-.r { text-align:right; }
-.pos { color:var(--green); }
-.neg { color:var(--red); }
-
-/* RSI bar */
-.rsi-bar { display:inline-block; width:60px; height:6px; background:var(--bg3); border-radius:3px; vertical-align:middle; margin-left:6px; position:relative; overflow:hidden; }
-.rsi-fill { height:100%; border-radius:3px; position:absolute; left:0; top:0; }
-
-/* Brier section */
-.brier-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:12px; margin-top:12px; }
-.brier-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:14px 16px; }
-.brier-card.critical { border-left:3px solid var(--red); }
-.brier-card.warning { border-left:3px solid var(--amber); }
-.brier-card.healthy { border-left:3px solid var(--green); }
-.brier-card.insufficient { border-left:3px solid var(--fg3); opacity:0.7; }
-.brier-card.active { box-shadow:0 0 0 1px var(--cyan); }
-.brier-name { font-weight:600; font-size:13px; display:flex; justify-content:space-between; align-items:center; }
-.brier-badge { font-size:10px; padding:2px 8px; border-radius:10px; font-weight:500; }
-.bg-critical { background:rgba(239,68,68,.2); color:var(--red); }
-.bg-warning { background:rgba(245,158,11,.2); color:var(--amber); }
-.bg-healthy { background:rgba(34,197,94,.2); color:var(--green); }
-.bg-insufficient { background:rgba(85,85,104,.2); color:var(--fg3); }
-.bg-active { background:rgba(6,182,212,.2); color:var(--cyan); }
-.brier-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:10px; }
-.brier-stat { text-align:center; }
-.brier-stat .label { font-size:10px; color:var(--fg3); text-transform:uppercase; letter-spacing:.5px; }
-.brier-stat .val { font-size:16px; font-weight:600; margin-top:2px; }
-.brier-recent { margin-top:10px; display:flex; gap:4px; flex-wrap:wrap; }
-.brier-ep { font-size:10px; padding:2px 6px; border-radius:3px; }
-.brier-ep.win { background:rgba(34,197,94,.15); color:var(--green); }
-.brier-ep.loss { background:rgba(239,68,68,.15); color:var(--red); }
-
-/* Summary cards */
-.summary { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
-.scard { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:12px 16px; text-align:center; }
-.scard .label { font-size:10px; color:var(--fg3); text-transform:uppercase; letter-spacing:.5px; }
-.scard .val { font-size:22px; font-weight:700; margin-top:4px; }
-
-/* Explainer */
-.explainer { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:16px 20px; margin-bottom:16px; color:var(--fg2); font-size:12px; line-height:1.7; }
-.explainer h3 { color:var(--fg); font-size:14px; margin-bottom:8px; }
-.explainer code { background:var(--bg3); padding:1px 5px; border-radius:3px; color:var(--cyan); font-size:11px; }
-
-/* Heatmap */
-.hm { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
-.hm-chip { padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer; border:1px solid transparent; }
-
-/* Beta & Miners cards */
-.beta-card, .miners-card { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:14px 16px; }
-.beta-card h3, .miners-card h3 { font-size:13px; font-weight:600; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
-.beta-table, .miners-table { width:100%; border-collapse:collapse; font-size:12px; }
-.beta-table th, .miners-table th { text-align:right; padding:4px 8px; color:var(--fg3); font-weight:500; border-bottom:1px solid var(--border); font-size:11px; }
-.beta-table th:first-child, .miners-table th:first-child { text-align:left; }
-.beta-table td, .miners-table td { padding:4px 8px; text-align:right; border-bottom:1px solid var(--border); }
-.beta-table td:first-child, .miners-table td:first-child { text-align:left; font-weight:600; }
-.beta-table .blend-row { border-top:2px solid var(--fg3); font-weight:700; }
-.beta-badge { font-size:10px; padding:2px 8px; border-radius:10px; font-weight:500; }
-</style>
-</head>
-<body>
-
-<div class="hdr">
-  <h1>SIGNAL MONITOR v4.2</h1>
-  <div class="meta">
-    <span id="clock"></span>
-    <span id="status">Loading...</span>
-    <button class="btn" onclick="forceRefresh()">↻ REFRESH</button>
-  </div>
-</div>
-
-<div class="tabs">
-  <div class="tab active" onclick="setTab('signals')" data-tab="signals">Signals</div>
-  <div class="tab" onclick="setTab('table')" data-tab="table">All Tickers</div>
-  <div class="tab" onclick="setTab('brier')" data-tab="brier">Calibration</div>
-  <div class="tab" onclick="setTab('heatmap')" data-tab="heatmap">Heatmap</div>
-</div>
-
-<div class="content" id="main"></div>
-
-<script>
-let D = null;
-let activeTab = 'signals';
-
-async function fetchData() {
-  try {
-    const r = await fetch('/api/data');
-    D = await r.json();
-    document.getElementById('status').textContent = `${D.n_tickers} tickers | ${D.ts?.split('T')[1]?.slice(0,8) || ''}`;
-    render();
-  } catch(e) {
-    document.getElementById('status').textContent = 'Error loading data';
-  }
-}
-
-function render() {
-  if (!D) return;
-  const m = document.getElementById('main');
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === activeTab));
-  if (activeTab === 'signals') m.innerHTML = renderSignals();
-  else if (activeTab === 'table') m.innerHTML = renderTable();
-  else if (activeTab === 'brier') m.innerHTML = renderBrier();
-  else if (activeTab === 'heatmap') m.innerHTML = renderHeatmap();
-}
-
-function renderSignals() {
-  const sigs = D.signals || [];
-  const ind = D.indicators || {};
-  const betas = D.rolling_betas || [];
-  let h = '';
-
-  // Signal cards in grid
-  if (sigs.length) {
-    h += '<div class="signals-grid">';
-    h += sigs.map(s => `<div class="alert-card ${s.type}"><div class="alert-title">${s.title}</div><div class="alert-msg">${s.msg}</div></div>`).join('');
-    h += '</div>';
-  } else {
-    h += '<div style="padding:20px;color:var(--fg2)">No active signals</div>';
-  }
-
-  // Rolling Beta card
-  if (betas.length) {
-    let blendB63 = null;
-    h += '<div class="beta-card signals-full" style="margin:12px 0">';
-    h += '<h3><span>Rolling Beta vs SPY</span><span id="beta-badge" class="beta-badge"></span></h3>';
-    // Show regime and weights
-    const blendRow = betas.find(r => r.is_blend);
-    const betaRegime = blendRow ? (blendRow.regime || 'UNKNOWN') : 'UNKNOWN';
-    h += `<div style="font-size:11px;color:var(--fg2);margin-bottom:10px">Regime: <b style="color:var(--cyan)">${betaRegime}</b> &mdash; Blend weights adjust to reflect actual Opus positioning (heavy equity only in proven dip-buy/low-vol regimes)</div>`;
-    h += '<table class="beta-table"><thead><tr><th style="text-align:left">Group</th><th>63d</th><th>126d</th><th>252d</th><th>Wt</th><th style="text-align:left;padding-left:12px">Note</th></tr></thead><tbody>';
-    for (const row of betas) {
-      const isBlend = row.is_blend || row.name === 'Est. Blend';
-      h += `<tr class="${isBlend ? 'blend-row' : ''}">`;
-      h += `<td>${row.name}</td>`;
-      for (const k of ['b63','b126','b252']) {
-        const v = row[k];
-        let color = 'var(--fg)';
-        if (v !== null && v !== undefined) {
-          if (row.name === 'MF Rotation' || row.name === 'BTAL') {
-            color = v < 0 ? 'var(--green)' : 'var(--red)';
-          } else if (isBlend) {
-            color = v > 2.0 ? 'var(--red)' : v > 1.0 ? 'var(--amber)' : 'var(--green)';
-            if (k === 'b63') blendB63 = v;
-          }
-          h += `<td style="color:${color}">${v >= 0 ? '+' : ''}${v.toFixed(2)}</td>`;
-        } else {
-          h += '<td style="color:var(--fg3)">N/A</td>';
-        }
-      }
-      // Note cell
-      // Weight column
-      if (!isBlend) {
-        const wt = row.blend_wt != null ? (row.blend_wt * 100).toFixed(0) + '%' : '';
-        h += `<td style="text-align:right;color:var(--fg2);font-size:11px">${wt}</td>`;
-      } else {
-        h += '<td></td>';
-      }
-      let note = '';
-      if (isBlend && row.b63 != null) {
-        if (row.b63 > 2.0) note = 'HIGH LEVERAGE';
-        else if (row.b63 > 1.5) note = 'Elevated';
-        else if (row.b63 < 1.0) note = 'Diversified';
-        else note = 'Moderate';
-      } else if (row.name === 'MF Rotation' && row.b63 < -0.1) note = '✓ Negative';
-      else if (row.name === 'GLD' && row.b63 != null && row.b252 != null && row.b63 > row.b252 + 0.3) note = '↑ Corr rising';
-      h += `<td style="text-align:left;padding-left:12px;font-size:11px;color:var(--fg2)">${note}</td>`;
-      h += '</tr>';
-    }
-    h += '</tbody></table>';
-    // Blend status badge
-    if (blendB63 !== null) {
-      const bc = blendB63 > 2.0 ? 'var(--red)' : blendB63 > 1.5 ? 'var(--amber)' : blendB63 < 1.0 ? 'var(--green)' : 'var(--cyan)';
-      const bl = blendB63 > 2.0 ? 'HIGH' : blendB63 > 1.5 ? 'ELEVATED' : blendB63 < 1.0 ? 'DIVERSIFIED' : 'OK';
-      h += `<script>document.getElementById("beta-badge").textContent="${bl}";document.getElementById("beta-badge").style.background="${bc}22";document.getElementById("beta-badge").style.color="${bc}";</script>`;
-    }
-    h += '</div>';
-  }
-
-  // Miners card
-  const minerTickers = ['GLD','GDX','GDXJ','JNUG','NUGT'];
-  const hasMiners = minerTickers.some(t => ind[t]);
-  if (hasMiners) {
-    h += '<div class="miners-card signals-full" style="margin:12px 0">';
-    h += '<h3>⛏️ GLD & Miners</h3>';
-    h += '<table class="miners-table"><thead><tr><th style="text-align:left">Ticker</th><th>Price</th><th>1d</th><th>RSI(10)</th><th>vs SMA200</th><th style="text-align:left;padding-left:8px">Signal</th></tr></thead><tbody>';
-    for (const t of minerTickers) {
-      const d = ind[t];
-      if (!d) continue;
-      const rsiColor = d.rsi < 21 ? 'var(--green)' : d.rsi < 25 ? 'var(--cyan)' : d.rsi > 85 ? 'var(--red)' : d.rsi > 79 ? 'var(--amber)' : 'var(--fg)';
-      const chgC = d.chg1d >= 0 ? 'var(--green)' : 'var(--red)';
-      const vsC = d.vsSma200 != null ? (d.vsSma200 >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--fg3)';
-      let sig = '';
-      if (t === 'GDXJ' && d.rsi < 21) sig = '<b style="color:var(--green)">🟢 JNUG BUY</b> 59% +8.4%';
-      else if (t === 'GDXJ' && d.rsi < 25) sig = '<b style="color:var(--green)">🟢 JNUG</b> 63% +3.6%';
-      else if (t === 'GDX' && d.rsi < 21) sig = '<b style="color:var(--green)">🟢 NUGT</b> 56%';
-      else if (t === 'GDX' && d.rsi < 25) sig = '<span style="color:var(--cyan)">Near OS</span>';
-      else if ((t==='GDX'||t==='GDXJ') && d.rsi > 85) sig = '<b style="color:var(--amber)">⚠️ DO NOT SHORT</b>';
-      else if ((t==='GDX'||t==='GDXJ') && d.rsi > 79) sig = '<span style="color:var(--amber)">Momentum ↑</span>';
-      h += `<tr>
-        <td><b>${t}</b></td>
-        <td>$${d.price < 1000 ? d.price.toFixed(2) : Math.round(d.price).toLocaleString()}</td>
-        <td style="color:${chgC}">${d.chg1d >= 0 ? '+' : ''}${d.chg1d.toFixed(1)}%</td>
-        <td style="color:${rsiColor}">${d.rsi.toFixed(1)}</td>
-        <td style="color:${vsC}">${d.vsSma200 != null ? (d.vsSma200 >= 0 ? '+' : '') + d.vsSma200.toFixed(1) + '%' : '—'}</td>
-        <td style="text-align:left;padding-left:8px;font-size:11px">${sig}</td>
-      </tr>`;
-    }
-    h += '</tbody></table></div>';
-  }
-
-  return h;
-}
-
-function renderTable() {
-  const ind = D.indicators || {};
-  const tickers = Object.keys(ind).sort((a,b) => ind[a].rsi - ind[b].rsi);
-  let h = '<table><thead><tr><th>Ticker</th><th class="r">Price</th><th class="r">Chg</th><th class="r">RSI(10)</th><th>RSI</th><th class="r">vs SMA200</th><th class="r">SMA50</th></tr></thead><tbody>';
-  for (const t of tickers) {
-    const d = ind[t];
-    const rc = d.rsi < 25 ? 'pos' : d.rsi > 79 ? 'neg' : '';
-    const cc = d.chg1d >= 0 ? 'pos' : 'neg';
-    const vc = d.vsSma200 != null ? (d.vsSma200 >= 0 ? 'pos' : 'neg') : '';
-    const rsiColor = d.rsi > 79 ? 'var(--red)' : d.rsi > 70 ? 'var(--amber)' : d.rsi < 21 ? 'var(--green)' : d.rsi < 30 ? 'var(--cyan)' : 'var(--fg3)';
-    h += `<tr>
-      <td><b>${t}</b></td>
-      <td class="r">$${d.price < 1000 ? d.price.toFixed(2) : Math.round(d.price).toLocaleString()}</td>
-      <td class="r ${cc}">${d.chg1d >= 0 ? '+' : ''}${d.chg1d.toFixed(1)}%</td>
-      <td class="r ${rc}">${d.rsi.toFixed(1)}</td>
-      <td><div class="rsi-bar"><div class="rsi-fill" style="width:${d.rsi}%;background:${rsiColor}"></div></div></td>
-      <td class="r ${vc}">${d.vsSma200 != null ? (d.vsSma200 >= 0 ? '+' : '') + d.vsSma200.toFixed(1) + '%' : '—'}</td>
-      <td class="r">${d.sma50 > 0 ? '$'+d.sma50.toFixed(2) : '—'}</td>
-    </tr>`;
-  }
-  h += '</tbody></table>';
-  return h;
-}
-
-function renderBrier() {
-  const bs = D.brier || [];
-  if (!bs.length) return '<div style="padding:40px;text-align:center;color:var(--fg2)">Computing calibration data...</div>';
-
-  // Summary stats
-  const healthy = bs.filter(b => b.health === 'healthy').length;
-  const warning = bs.filter(b => b.health === 'warning').length;
-  const critical = bs.filter(b => b.health === 'critical').length;
-  const active = bs.filter(b => b.active).length;
-
-  let h = `
-  <div class="explainer">
-    <h3>What is Signal Calibration?</h3>
-    Every signal predicts a probability — "SPY RSI&lt;30 → UPRO: 69% win rate" means we expect a 69% chance of profit over 5 days.
-    The <b>Brier Score</b> measures how accurate those predictions are over time.<br><br>
-    <code>Brier = avg(predicted_probability - actual_outcome)²</code><br><br>
-    <b>0.00</b> = perfect predictions &nbsp;|&nbsp; <b>0.25</b> = coin flip &nbsp;|&nbsp; Lower is better<br><br>
-    The <b>Brier Skill Score (BSS)</b> compares each signal to a naive baseline (just guessing the unconditional win rate).
-    <b>Positive BSS</b> = signal adds value. <b>Negative BSS</b> = signal is worse than guessing.<br><br>
-    <b>Trailing 20 WR</b> is the win rate of the last 20 firings — the early warning for degradation.
-    If this drops well below the historical WR, the market structure may have changed (like 0DTE compression killing UVXY multi-day holds post-2020).
-  </div>
-
-  <div class="summary">
-    <div class="scard"><div class="label">Healthy</div><div class="val" style="color:var(--green)">${healthy}</div></div>
-    <div class="scard"><div class="label">Warning</div><div class="val" style="color:var(--amber)">${warning}</div></div>
-    <div class="scard"><div class="label">Critical</div><div class="val" style="color:var(--red)">${critical}</div></div>
-    <div class="scard"><div class="label">Active Now</div><div class="val" style="color:var(--cyan)">${active}</div></div>
-  </div>
-
-  <div class="brier-grid">`;
-
-  // Sort: critical first, then warning, then active, then healthy, then insufficient
-  const order = {critical:0, warning:1, healthy:2, insufficient:3};
-  const sorted = [...bs].sort((a,b) => {
-    if (a.active && !b.active) return -1;
-    if (!a.active && b.active) return 1;
-    return (order[a.health]||9) - (order[b.health]||9);
-  });
-
-  for (const b of sorted) {
-    const hc = b.health;
-    const wrColor = b.actual_wr >= b.hist_wr - 0.05 ? 'var(--green)' : b.actual_wr >= b.hist_wr - 0.15 ? 'var(--amber)' : 'var(--red)';
-    const bssColor = b.bss > 0 ? 'var(--green)' : b.bss > -0.1 ? 'var(--amber)' : 'var(--red)';
-    const brierColor = b.brier < 0.20 ? 'var(--green)' : b.brier < 0.25 ? 'var(--amber)' : 'var(--red)';
-
-    h += `<div class="brier-card ${hc} ${b.active ? 'active' : ''}">
-      <div class="brier-name">
-        <span>${b.name}</span>
-        <span>
-          ${b.active ? '<span class="brier-badge bg-active">ACTIVE</span> ' : ''}
-          <span class="brier-badge bg-${hc}">${hc === 'insufficient' ? 'LOW N' : hc.toUpperCase()}</span>
-        </span>
-      </div>
-      <div class="brier-stats">
-        <div class="brier-stat"><div class="label">Actual WR</div><div class="val" style="color:${wrColor}">${(b.actual_wr*100).toFixed(0)}%</div></div>
-        <div class="brier-stat"><div class="label">Brier</div><div class="val" style="color:${brierColor}">${b.brier.toFixed(3)}</div></div>
-        <div class="brier-stat"><div class="label">BSS</div><div class="val" style="color:${bssColor}">${b.bss > 0 ? '+' : ''}${b.bss.toFixed(3)}</div></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--fg2)">
-        <span>Hist: ${(b.hist_wr*100).toFixed(0)}% | Trail${b.trail_n}: ${(b.trail_wr*100).toFixed(0)}%</span>
-        <span>n=${b.n} | Tier ${b.tier}</span>
-      </div>
-      <div class="brier-recent">
-        ${(b.recent||[]).map(e => `<span class="brier-ep ${e.win ? 'win' : 'loss'}">${e.win ? 'W' : 'L'} ${e.ret > 0 ? '+' : ''}${e.ret.toFixed(1)}%</span>`).join('')}
-      </div>
-    </div>`;
-  }
-
-  h += '</div>';
-  return h;
-}
-
-function renderHeatmap() {
-  const ind = D.indicators || {};
-  const groups = {
-    'Core': ['SPY','QQQ','SMH','IWM'],
-    'Defensive': ['XLP','XLU','XLV','XLY'],
-    'Macro': ['GLD','TLT','HYG','USDU','UCO','DBC','BOIL','TMV'],
-    'Volatility': ['UVXY','SVXY','VIXM'],
-    '3x Leveraged': ['NAIL','CURE','FAS','LABU','TQQQ','SOXL','TECL','UPRO','DRN'],
-    'MF/Alts': ['BTAL','DBMF','KMLM','CTA'],
-    'Style': ['VOOV','VOOG','VTV','QQQE','VOX'],
-    'Intl': ['EDC','YINN','KORU','EURL','INDL'],
-    'Other': ['AMD','NVDA','BTC-USD','FNGO','SLV','CPER','UUP'],
-    'Gold/Miners': ['GLD','GDX','GDXJ','JNUG','NUGT'],
-  };
-  let h = '';
-  for (const [name, tickers] of Object.entries(groups)) {
-    const chips = tickers.filter(t => ind[t]).map(t => {
-      const d = ind[t];
-      const c = d.rsi >= 79 ? 'var(--red)' : d.rsi >= 70 ? 'var(--amber)' : d.rsi <= 21 ? 'var(--green)' : d.rsi <= 30 ? 'var(--cyan)' : 'var(--blue)';
-      const int = d.rsi >= 79 || d.rsi <= 21 ? 0.6 : d.rsi >= 70 || d.rsi <= 30 ? 0.35 : 0.12;
-      const a = Math.round(int*255).toString(16).padStart(2,'0');
-      const fc = int > 0.3 ? '#fff' : c;
-      return `<div class="hm-chip" style="background:${c}${a};color:${fc}" title="${t}: RSI=${d.rsi} | ${d.vsSma200!=null?(d.vsSma200>=0?'+':'')+d.vsSma200.toFixed(1)+'%':''}">
-        ${t} <small>${d.rsi.toFixed(0)}</small></div>`;
-    }).join('');
-    if (chips) h += `<div style="margin-bottom:12px"><div style="color:var(--fg2);font-size:11px;margin-bottom:4px;text-transform:uppercase;letter-spacing:1px">${name}</div><div class="hm">${chips}</div></div>`;
-  }
-  return h;
-}
-
-function setTab(t) { activeTab = t; render(); }
-async function forceRefresh() {
-  document.querySelector('.btn').textContent = '⏳';
-  await fetch('/api/refresh');
-  await fetchData();
-  document.querySelector('.btn').textContent = '↻ REFRESH';
-}
-
-setInterval(() => {
-  const c = document.getElementById('clock');
-  if (c) c.textContent = new Date().toLocaleTimeString();
-}, 1000);
-
-setInterval(fetchData, 60000);
-fetchData();
-</script>
-</body>
-</html>
-"""
-
-# ═══════════════════════════════════════════════════════════════════
-# MAIN
-# ═══════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
-    print("=" * 60)
-    print("  Signal Monitor — Dashboard Server v4.2")
-    print("=" * 60)
-    print(f"  Tickers: {len(TICKERS)}")
-    print(f"  Refresh: every {CACHE_SECONDS}s")
-    print(f"  Brier: recomputed every 10 min")
-    print(f"  History: {HISTORY_PERIOD}")
-    print()
-    print("  → Open http://localhost:5050 in your browser")
-    print("=" * 60)
-    app.run(host="0.0.0.0", port=5050, debug=False)
+    main()
