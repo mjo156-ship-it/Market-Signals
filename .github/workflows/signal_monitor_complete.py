@@ -512,21 +512,57 @@ MARKET SIGNAL MONITOR - {timing}
                 row += f"  {bwt:>7.0%}"
             else:
                 b63=rb.get('63d',{}).get('Est. Blend')
-                if b63 and b63>2.0: row+="  << HIGH"
-                elif b63 and b63>1.5: row+="  << ELEV"
-                elif b63 and b63<1.0: row+="   DIVERS"
-                else: row+="      OK"
+                tgt_map = {
+                    'BULL + VOL COMPRESS': (0.70, 1.00),
+                    'BULL + VOL EXPAND':   (0.50, 0.80),
+                    'BEAR RECOVERY':       (0.25, 0.50),
+                    'BEAR DEFENSIVE':      (0.00, 0.25),
+                }
+                tgt = tgt_map.get(beta_regime)
+                if b63 is not None and tgt:
+                    lo, hi = tgt
+                    if lo <= b63 <= hi: row += " ON TGT"
+                    elif b63 < lo: row += "  UNDER"
+                    else: row += "   OVER"
+                else:
+                    row += ""
             body += row+"\n"
             if g=='Currency': body += "-"*57+"\n"
         b63=rb.get('63d',{}).get('Est. Blend'); b252=rb.get('252d',{}).get('Est. Blend')
+        # Regime targets (from Holy Grail framework + actual Q1 2026 data)
+        targets = {
+            'BULL + VOL COMPRESS': (0.70, 1.00, 'Capture equity premium, alts dampen vol'),
+            'BULL + VOL EXPAND':   (0.50, 0.80, 'Stress rising, start de-risking'),
+            'BEAR RECOVERY':       (0.25, 0.50, 'Bouncing but not confirmed, cautious'),
+            'BEAR DEFENSIVE':      (0.00, 0.25, 'Full protection, near market-neutral'),
+        }
+        tgt = targets.get(beta_regime)
+        if b63 is not None and tgt:
+            lo, hi, desc = tgt
+            if lo <= b63 <= hi:
+                grade = 'ON TARGET'
+                note = f'Beta {b63:+.2f} is within {lo:.2f}-{hi:.2f} range for {beta_regime}'
+            elif b63 < lo:
+                grade = 'UNDER (too defensive)'
+                note = f'Beta {b63:+.2f} below target {lo:.2f}-{hi:.2f}. May be leaving returns on table.'
+            else:
+                grade = 'OVER (too aggressive)'
+                note = f'Beta {b63:+.2f} above target {lo:.2f}-{hi:.2f}. Insufficient hedging for regime.'
+            body += f"\n  REGIME TARGET: {beta_regime}\n"
+            body += f"  Target beta:   {lo:.2f} to {hi:.2f} ({desc})\n"
+            body += f"  Actual (63d):  {b63:+.2f}\n"
+            body += f"  Grade:         {grade}\n"
+            body += f"  {note}\n"
         if b63 and b252:
-            body += f"\nTrend: {b252:+.2f} (252d) -> {b63:+.2f} (63d)\n"
-            if b63>2.0:
-                body += "WARNING: HIGH leverage even with regime-adjusted weights.\n"
-                body += "  -> Holy Grail diversification minimal at current positioning.\n"
-            elif b63<1.0:
-                body += "Diversification ACTIVE: blend beta below 1.0x SPY.\n"
-                body += "  -> Alternatives are meaningfully reducing portfolio risk.\n"
+            body += f"\n  Trend: {b252:+.2f} (252d) -> {b63:+.2f} (63d)\n"
+        body += f"""
+  ALL REGIME TARGETS (Holy Grail framework):
+  BULL+VOL COMPRESS:  0.70 - 1.00  (max equity, alts as ballast)
+  BULL+VOL EXPAND:    0.50 - 0.80  (stress rising, de-risk)
+  BEAR RECOVERY:      0.25 - 0.50  (cautious, bouncing)
+  BEAR DEFENSIVE:     0.00 - 0.25  (full protection)
+  [Calibrated from actual Q1 2026 Roth Composer export. Recalibrate quarterly.]
+"""
 
     # --- GLD & MINERS ---
     body += f"\n{'='*70}\nGLD & MINERS STATUS\n{'='*70}\n"
