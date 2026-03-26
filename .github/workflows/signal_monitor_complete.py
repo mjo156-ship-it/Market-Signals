@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Comprehensive Market Signal Monitor v4.2
+Comprehensive Market Signal Monitor v4.3
 ========================================
 Groups 1-12: Core RSI signals
 Group 13: Deep Value (MaRet/CumRet crash+drawdown)
@@ -9,8 +9,18 @@ Group 14: Crisis Alpha v2 (vol compression regime)
 Group 15: Signal Degradation (trailing WR monitoring)
 Group 17: DFEN (RSI+SMA200+Bollinger Band)
 Group 18: GLD & Miners
+Group 19: HYG Credit Euphoria (NEW - audit Mar 24)
+Group 20: USMV Overbought -> UVXY (NEW - audit Mar 24)
+Group 21: UCO+USDU -> TMV (softer oil shock) (NEW - audit Mar 24)
+Group 22: GDXJ Oversold (enhanced from G18) (NEW - audit Mar 24)
+Group 23: GLD Oversold Dip-Buy (NEW - audit Mar 24)
+Group 24: ILS Cat Bond Monitor (NEW - Mar 25)
+Group 27: SPHB/SPLV Ratio RSI (NEW - Mar 25)
+Group 28: Vol Recovery Alpha (NEW - Mar 25)
+Group 29: UVXY SMA200 Cross -> SOXL 5d (NEW - Mar 25)
 + Rolling Beta vs SPY
 + TLT bond momentum banner
++ Market Breadth Regime (RSP/IWM/SPY)
 
 SCHEDULE: Two emails daily (weekdays)
 - 3:15 PM ET: Pre-close preview
@@ -61,12 +71,7 @@ def download_data(tickers, period='2y'):
             print(f"Error downloading {ticker}: {e}")
     return data
 
-def calculate_rolling_betas(data, regime='UNKNOWN'):
-    """Calculate rolling beta vs SPY using ACTUAL Q1 2026 Roth portfolio weights.
-    Leveraged equity is only ~13% of portfolio (not 55%).
-    Majority is 1x stocks (~49%). Regime weights from Composer activity export.
-    Actual portfolio beta: ~0.86 bull, ~0.26 crisis.
-    """
+def calculate_rolling_betas(data):
     if 'SPY' not in data: return None
     spy_ret = data['SPY']['Close'].pct_change()
     def _beta(ticker, window):
@@ -78,62 +83,25 @@ def calculate_rolling_betas(data, regime='UNKNOWN'):
         b = a.rolling(window).cov(sr) / sr.rolling(window).var()
         v = b.iloc[-1]
         return round(float(v), 3) if not pd.isna(v) else None
-
-    # Regime weights from actual Q1 2026 Roth IRA Composer export
-    # Groups: Vol/Hedge = pure VIX (UVXY). Bonds (net) includes TMV (-3x TLT)
-    # so net bond exposure reflects actual short/long bond positioning.
-    # Currency = UUP (dollar strength, separate from bonds).
-    regime_weights = {
-        'BULL + VOL COMPRESS': {
-            'Equity 1x':0.52,'Lev Equity':0.15,'MF/Alts':0.08,
-            'Gold/Commod':0.07,'Vol/Hedge':0.04,'Bonds (net)':0.10,'Currency':0.04,
-        },
-        'BULL + VOL EXPAND': {
-            'Equity 1x':0.48,'Lev Equity':0.12,'MF/Alts':0.12,
-            'Gold/Commod':0.08,'Vol/Hedge':0.05,'Bonds (net)':0.10,'Currency':0.05,
-        },
-        'BEAR RECOVERY': {
-            'Equity 1x':0.42,'Lev Equity':0.10,'MF/Alts':0.18,
-            'Gold/Commod':0.10,'Vol/Hedge':0.06,'Bonds (net)':0.08,'Currency':0.06,
-        },
-        'BEAR DEFENSIVE': {
-            'Equity 1x':0.35,'Lev Equity':0.08,'MF/Alts':0.20,
-            'Gold/Commod':0.10,'Vol/Hedge':0.08,'Bonds (net)':0.06,'Currency':0.13,
-        },
-    }
-    default_weights = {
-        'Equity 1x':0.45,'Lev Equity':0.12,'MF/Alts':0.13,
-        'Gold/Commod':0.08,'Vol/Hedge':0.05,'Bonds (net)':0.10,'Currency':0.07,
-    }
-    blend_w = regime_weights.get(regime, default_weights)
-
     groups = [
-        ('Equity 1x',   [('SPY',1.0)]),
-        ('Lev Equity',  [('UPRO',1.0)]),
-        ('MF/Alts',     [('CTA',0.25),('DBMF',0.25),('BTAL',0.30),('KMLM',0.20)]),
-        ('Gold/Commod', [('GLD',0.85),('DBC',0.15)]),
-        ('Vol/Hedge',   [('UVXY',1.0)]),                          # Pure VIX only
-        ('Bonds (net)', [('TLT',0.35),('SHY',0.30),('TMV',0.35)]), # TMV offsets TLT/SHY
-        ('Currency',    [('UUP',1.0)]),
+        ('Equity Sleeve', [('UPRO',0.4),('TQQQ',0.3),('SOXL',0.3)], 0.55),
+        ('MF Rotation', [('CTA',0.33),('DBMF',0.33),('BTAL',0.34)], 0.15),
+        ('GLD', [('GLD',1.0)], 0.15),
+        ('KMLM', [('KMLM',1.0)], 0.10),
+        ('BTAL', [('BTAL',1.0)], 0.05),
     ]
-    results = {'regime': regime, 'blend_weights': blend_w}
+    results = {}
     for wname, w in [('63d',63),('126d',126),('252d',252)]:
         results[wname] = {}
         blend = 0
-        for gname, tw in groups:
-            gb, total_w = 0, 0
+        for gname, tw, bw in groups:
+            gb, valid = 0, True
             for t, twt in tw:
                 b = _beta(t, w)
-                if b is not None:
-                    gb += b * twt
-                    total_w += twt
-            # Normalize if some tickers missing but at least one worked
-            if total_w > 0:
-                gb = gb / total_w  # re-normalize to available tickers
-                results[wname][gname] = round(gb, 3)
-                blend += gb * blend_w.get(gname, 0)
-            else:
-                results[wname][gname] = None
+                if b is not None: gb += b * twt
+                else: valid = False
+            results[wname][gname] = round(gb,3) if valid else None
+            if valid: blend += gb * bw
         results[wname]['Est. Blend'] = round(blend, 3)
     return results
 
@@ -344,9 +312,146 @@ def check_signals(data):
     gld_r2=indicators.get('GLD',{}).get('rsi10',50); usdu_r2=indicators.get('USDU',{}).get('rsi10',50)
     if gld_r2>75 and usdu_r2>60: alerts.append(('[HEDGE] MINER SHORT WINDOW',f"GLD={gld_r2:.1f}>75+USDU={usdu_r2:.1f}>60 | JDST 5d 59% WR n=34",'hedge'))
 
-    # UCO>75 -> TMV
-    uco_r=indicators.get('UCO',{}).get('rsi10',50)
-    if uco_r>75: alerts.append(('[BUY] UCO>75 -> TMV',f"UCO RSI={uco_r:.1f} | Oil->Bond weakness",'buy'))
+    # === GROUP 19: HYG Credit Euphoria (Audit Mar 24) ===
+    if 'HYG' in data and 'HYG' in indicators:
+        hyg = indicators['HYG']
+        hyg_rsi7 = sf(calculate_rsi_wilder(data['HYG']['Close'], 7).iloc[-1])
+        if hyg_rsi7 > 85 and hyg['price'] > hyg['sma200']:
+            alerts.append(('[BUY] CREDIT EUPHORIA [T1]',
+                f"HYG RSI(7)={hyg_rsi7:.1f}>85 + HYG>SMA200\n"
+                f"   -> TQQQ 1d: 80.6% WR, +1.01% avg (n=36) | Regime stable 80/81%",'buy'))
+
+    # === GROUP 20: USMV Overbought -> UVXY (Audit Mar 24) ===
+    usmv_r = indicators.get('USMV',{}).get('rsi10',50)
+    if usmv_r > 82:
+        alerts.append(('[HEDGE] USMV COMPLACENCY [T1]',
+            f"USMV RSI={usmv_r:.1f}>82 -> UVXY 1d: 75% WR +3.20% (n=24)",'hedge'))
+
+    # === GROUP 21: UCO+USDU -> TMV (Softer Oil Shock, Audit Mar 24) ===
+    uco_r = indicators.get('UCO',{}).get('rsi10',50)
+    usdu_r3 = indicators.get('USDU',{}).get('rsi10',50)
+    if uco_r > 75 and usdu_r3 > 55:
+        alerts.append(('[SHORT] OIL+DOLLAR -> TMV [T1]',
+            f"UCO RSI={uco_r:.1f}>75 + USDU RSI={usdu_r3:.1f}>55\n"
+            f"   -> TMV 10d: 75.4% WR, +6.97% avg (n=57) | Regime stable",'short'))
+    elif uco_r > 75:
+        alerts.append(('[WATCH] UCO>75',f"UCO RSI={uco_r:.1f} | Oil strong but USDU={usdu_r3:.1f}<55 -- no TMV signal",'watch'))
+
+    # === GROUP 23: GLD Oversold Dip-Buy (Audit Mar 24) ===
+    gld_r3 = indicators.get('GLD',{}).get('rsi10',50)
+    if gld_r3 < 20:
+        alerts.append(('[BUY] GLD DEEP OVERSOLD [T2]',
+            f"GLD RSI={gld_r3:.1f}<20\n"
+            f"   -> TQQQ 10d: 70.6% WR +4.83% (n=17 episodes) | PF=5.99\n"
+            f"   -> GLD 10d: 75.0% WR +2.25% (n=60) | Post-2020: 92.3% WR",'buy'))
+    elif gld_r3 < 22:
+        alerts.append(('[BUY] GLD OVERSOLD',
+            f"GLD RSI={gld_r3:.1f}<22 -> TQQQ 10d: 73.3% WR +4.94% (n=86)",'buy'))
+    elif gld_r3 < 25 and gld_r3 >= 22:
+        alerts.append(('[WATCH] GLD WEAK',
+            f"GLD RSI={gld_r3:.1f}<25 -> TQQQ 10d: 73.1% WR +4.77% (n=134)",'watch'))
+
+    # === GROUP 24: ILS Cat Bond Monitor (Mar 25) ===
+    if 'ILS' in data and len(data['ILS']) >= 6:
+        ils_close = data['ILS']['Close']
+        ils_5d = sf((ils_close.iloc[-1] / ils_close.iloc[-5] - 1)) * 100
+        ils_price = sf(ils_close.iloc[-1])
+        if ils_5d < -3:
+            alerts.append(('[WARN] ILS DRAWDOWN',
+                f"ILS 5d: {ils_5d:+.1f}% | Cat bond event likely\n"
+                f"   Price: ${ils_price:.2f} | $87K Fidelity position\n"
+                f"   DO NOT SELL -- drawdowns recover 1-3 months",'warning'))
+        elif ils_5d < -1.5:
+            alerts.append(('[WATCH] ILS WEAKNESS',f"ILS 5d: {ils_5d:+.1f}% -- monitor for cat bond event",'watch'))
+        # Hurricane season banner
+        if 6 <= datetime.now().month <= 11:
+            alerts.append(('[WATCH] HURRICANE SEASON',f"ILS $87K at elevated nat-cat risk (Jun-Nov)",'watch'))
+
+    # === GROUP 27: SPHB/SPLV Ratio RSI (Mar 25) ===
+    if 'SPHB' in data and 'SPLV' in data:
+        sphb_c = data['SPHB']['Close']
+        splv_c = data['SPLV']['Close']
+        ratio = sphb_c / splv_c
+        ratio_rsi = sf(calculate_rsi_wilder(ratio, 10).iloc[-1])
+        ratio_val = sf(ratio.iloc[-1])
+        spy_not_os = indicators.get('SPY',{}).get('rsi10',50) > 30
+        qqq_not_os = indicators.get('QQQ',{}).get('rsi10',50) > 30
+        unique_tag = " (SPY/QQQ NOT oversold -- UNIQUE)" if spy_not_os and qqq_not_os else ""
+        if ratio_rsi < 25:
+            alerts.append(('[BUY] RISK ROTATION EXHAUSTION [T2]',
+                f"SPHB/SPLV ratio RSI={ratio_rsi:.1f}<25 | Ratio={ratio_val:.3f}{unique_tag}\n"
+                f"   -> TQQQ 10d: 75.5% WR +6.09% (n=53) | Post-2020: 84.6% WR\n"
+                f"   -> Manual overlay -- same as Double Signal workflow",'buy'))
+        elif ratio_rsi < 30:
+            alerts.append(('[WATCH] RISK ROTATION WEAKENING',f"SPHB/SPLV ratio RSI={ratio_rsi:.1f} approaching exhaustion",'watch'))
+        status['sphb_splv_ratio'] = ratio_val
+        status['sphb_splv_rsi'] = ratio_rsi
+
+    # === GROUP 28: Vol Recovery Alpha (Mar 25) ===
+    if 'UVXY' in indicators and 'VIXM' in indicators:
+        uvxy_i = indicators['UVXY']
+        vixm_i = indicators['VIXM']
+        uvxy_above_200 = uvxy_i['price'] > uvxy_i['sma200'] if uvxy_i['sma200'] > 0 else False
+        vixm_below_50 = vixm_i['price'] < vixm_i['sma50'] if vixm_i['sma50'] > 0 else False
+        if uvxy_above_200 and vixm_below_50:
+            alerts.append(('[BUY] VOL RECOVERY ALPHA [T2]',
+                f"UVXY ${uvxy_i['price']:.2f} > SMA200 ${uvxy_i['sma200']:.2f} (still elevated)\n"
+                f"   + VIXM ${vixm_i['price']:.2f} < SMA50 ${vixm_i['sma50']:.2f} (normalizing)\n"
+                f"   -> SOXL 10d: 90.3% WR +13.67% (n=31) | 20d: 100% WR +24.53%\n"
+                f"   -> Zero overlap with RSI dip-buys | Composer-native",'buy'))
+        elif uvxy_above_200 and not vixm_below_50:
+            alerts.append(('[WATCH] VOL STILL ELEVATED',
+                f"UVXY ${uvxy_i['price']:.2f} > SMA200 -- crisis residual\n"
+                f"   VIXM ${vixm_i['price']:.2f} still above SMA50 -- waiting for normalization",'watch'))
+
+    # === GROUP 29: UVXY SMA200 Cross -> SOXL 5d Manual (Mar 25) ===
+    if 'UVXY' in data and len(data['UVXY']) >= 201:
+        uvxy_c = data['UVXY']['Close']
+        uvxy_sma200s = uvxy_c.rolling(200).mean()
+        today_above = sf(uvxy_c.iloc[-1]) > sf(uvxy_sma200s.iloc[-1])
+        yest_below = sf(uvxy_c.iloc[-2]) <= sf(uvxy_sma200s.iloc[-2]) if len(uvxy_c) > 1 else False
+        if today_above and yest_below:
+            alerts.append(('[BUY] UVXY SMA200 CROSS -- MANUAL 5d TRADE',
+                f"UVXY just crossed ABOVE SMA(200)!\n"
+                f"   -> BUY SOXL, HOLD 5 TRADING DAYS, EXIT\n"
+                f"   -> 80% WR, +8.3% avg, +10.3% med, PF=6.75 (n=10)\n"
+                f"   -> Alt: FAS for tighter losses (PF=16.70)\n"
+                f"   -> Size: 5% max ($110K on $2.2M)",'buy'))
+        elif today_above:
+            days_above = 0
+            for i in range(len(uvxy_c)-1, max(len(uvxy_c)-20, 200), -1):
+                if sf(uvxy_c.iloc[i]) > sf(uvxy_sma200s.iloc[i]):
+                    days_above += 1
+                else: break
+            if days_above <= 5:
+                exit_msg = "EXIT TODAY" if days_above == 5 else f"{5-days_above} days remaining"
+                alerts.append(('[WATCH] UVXY ABOVE SMA200',
+                    f"UVXY above SMA200 for {days_above} day(s)\n"
+                    f"   SOXL 5d hold: Day {days_above}/5 -- {exit_msg}",'watch'))
+
+    # === MARKET BREADTH REGIME (RSP/IWM/SPY) ===
+    if 'RSP' in indicators and 'SPY' in indicators:
+        rsp = indicators['RSP']
+        sp_i = indicators['SPY']
+        rsp_above = rsp['price'] > rsp['sma200'] if rsp['sma200'] > 0 else False
+        spy_above = sp_i['price'] > sp_i['sma200'] if sp_i['sma200'] > 0 else False
+        if rsp_above and spy_above: breadth_regime = 'BROAD BULL'
+        elif not rsp_above and spy_above: breadth_regime = 'NARROW LEADERSHIP'
+        elif rsp_above and not spy_above: breadth_regime = 'ROTATION'
+        else: breadth_regime = 'BROAD WEAKNESS'
+        rsp_pct = rsp.get('pct_above_sma200', 0)
+        spy_pct = sp_i.get('pct_above_sma200', 0)
+        gap = spy_pct - rsp_pct
+        status['breadth_regime'] = breadth_regime
+        status['leadership_gap'] = gap
+        if breadth_regime == 'NARROW LEADERSHIP':
+            alerts.append(('[WARN] NARROW LEADERSHIP',
+                f"RSP {rsp_pct:+.1f}% vs SMA200 | SPY {spy_pct:+.1f}% | Gap: {gap:+.1f}\n"
+                f"   Mega-caps carrying, avg stock broken. RSI dip-buys underperform ~25pp.",'warning'))
+        elif breadth_regime == 'BROAD WEAKNESS':
+            alerts.append(('[WARN] BROAD WEAKNESS',
+                f"RSP {rsp_pct:+.1f}% + SPY {spy_pct:+.1f}% both below SMA200\n"
+                f"   Crisis mode. GLD/BTAL gates should be firing.",'warning'))
 
     return alerts, status
 
@@ -405,11 +510,42 @@ MARKET SIGNAL MONITOR - {timing}
     # --- OTHER ETFs ---
     body += f"\n{'='*70}\nOTHER ETFs\n{'='*70}\n"
     body += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}\n" + "-"*50 + "\n"
-    for t in ['XLV','XLU','XLE','TMV','VOOV','VOOG','VTV','QQQE','BOIL','EURL','YINN','KORU','INDL','EDC']:
+    for t in ['XLV','XLU','XLE','TMV','VOOV','VOOG','VTV','QQQE','BOIL','EURL','YINN','KORU','INDL','EDC','ILS','RSP']:
         if t in indicators:
             i=indicators[t]
             p=f"${i['price']:.2f}" if i['price']<1000 else f"${i['price']:,.0f}"
             body += f"{t:<10} {p:>12} {i['rsi10']:>10.1f} {i.get('pct_above_sma200',0):>+11.1f}%\n"
+
+    # --- MARKET BREADTH REGIME ---
+    breadth = status.get('breadth_regime')
+    if breadth:
+        gap = status.get('leadership_gap', 0)
+        body += f"\n{'='*70}\nMARKET BREADTH REGIME\n{'='*70}\n"
+        rsp_i = indicators.get('RSP',{})
+        spy_i2 = indicators.get('SPY',{})
+        iwm_i = indicators.get('IWM',{})
+        body += f"  RSP vs SMA200: {rsp_i.get('pct_above_sma200',0):+.1f}%\n"
+        body += f"  SPY vs SMA200: {spy_i2.get('pct_above_sma200',0):+.1f}%\n"
+        body += f"  IWM vs SMA200: {iwm_i.get('pct_above_sma200',0):+.1f}%\n"
+        body += f"  Leadership Gap (SPY-RSP): {gap:+.1f}pp\n"
+        body += f"  Regime: {breadth}\n"
+        guidance = {
+            'BROAD BULL': 'Breadth healthy. RSI dip-buys at full conviction.',
+            'NARROW LEADERSHIP': 'Mega-caps carrying, avg stock broken. RSI dip-buys underperform ~25pp. Reduce leverage.',
+            'ROTATION': 'Equal-weight healthier than SPY/QQQ. Broadening. Favors IWM/RSP.',
+            'BROAD WEAKNESS': 'Both broken. Crisis mode. GLD/BTAL regime detection should be firing.',
+        }
+        body += f"  -> {guidance.get(breadth,'')}\n"
+
+    # --- SPHB/SPLV RISK APPETITE ---
+    ratio_val = status.get('sphb_splv_ratio')
+    ratio_rsi = status.get('sphb_splv_rsi')
+    if ratio_val and ratio_rsi:
+        body += f"\n RISK APPETITE: SPHB/SPLV Ratio={ratio_val:.3f}  RSI={ratio_rsi:.1f}\n"
+        if ratio_rsi < 25: body += "   -> EXHAUSTION: TQQQ 10d 75.5% WR (n=53) -- MANUAL TRADE\n"
+        elif ratio_rsi < 35: body += "   -> WEAKENING -- approaching exhaustion zone\n"
+        elif ratio_rsi > 70: body += "   -> STRONG RISK-ON\n"
+        else: body += "   -> NEUTRAL\n"
 
     # --- SMH/SOXL LEVELS ---
     if 'SMH' in indicators:
@@ -486,83 +622,26 @@ MARKET SIGNAL MONITOR - {timing}
     # --- ROLLING BETA ---
     rb=status.get('rolling_betas')
     if rb:
-        beta_regime = rb.get('regime', 'UNKNOWN')
-        blend_w = rb.get('blend_weights', {})
         body += f"\n{'='*70}\nROLLING BETA vs SPY\n{'='*70}\n"
         body += "  Beta = how much each group moves per 1% SPY move.\n"
-        body += "  Blend weights are REGIME-CONDITIONAL (not static):\n"
-        body += f"  Current regime: {beta_regime}\n"
-        body += f"  Weights:  Eq1x {blend_w.get('Equity 1x',0):.0%}"
-        body += f" | Lev {blend_w.get('Lev Equity',0):.0%}"
-        body += f" | MF {blend_w.get('MF/Alts',0):.0%}"
-        body += f" | Gold {blend_w.get('Gold/Commod',0):.0%}"
-        body += f" | Vol {blend_w.get('Vol/Hedge',0):.0%}"
-        body += f" | Bonds {blend_w.get('Bonds (net)',0):.0%}"
-        body += f" | Ccy {blend_w.get('Currency',0):.0%}\n"
-        body += "  (Weights from actual Q1 2026 Roth Composer export)\n"
-        body += "  Vol/Hedge = UVXY only. Bonds (net) = TLT+SHY+TMV (TMV is -3x TLT).\n\n"
-        body += f"{'Group':<15} {'63d':>8} {'126d':>8} {'252d':>8}  {'Blend Wt':>8}\n" + "-"*57 + "\n"
-        for g in ['Equity 1x','Lev Equity','MF/Alts','Gold/Commod','Vol/Hedge','Bonds (net)','Currency','Est. Blend']:
-            row=f"{g:<15}"
+        body += "  Blend >2.0 = portfolio is leveraged SPY (diversification minimal).\n"
+        body += "  MF Rotation / BTAL should be NEGATIVE (hedge value).\n\n"
+        body += f"{'Group':<20} {'63d':>8} {'126d':>8} {'252d':>8}\n" + "-"*50 + "\n"
+        for g in ['Equity Sleeve','MF Rotation','GLD','KMLM','BTAL','Est. Blend']:
+            row=f"{g:<20}"
             for w in ['63d','126d','252d']:
                 v=rb.get(w,{}).get(g)
                 row += f" {v:>+7.2f}" if v is not None else f" {'N/A':>7}"
-            if g != 'Est. Blend':
-                bwt = blend_w.get(g, 0)
-                row += f"  {bwt:>7.0%}"
-            else:
+            if g=='Est. Blend':
                 b63=rb.get('63d',{}).get('Est. Blend')
-                tgt_map = {
-                    'BULL + VOL COMPRESS': (0.70, 1.00),
-                    'BULL + VOL EXPAND':   (0.50, 0.80),
-                    'BEAR RECOVERY':       (0.25, 0.50),
-                    'BEAR DEFENSIVE':      (0.00, 0.25),
-                }
-                tgt = tgt_map.get(beta_regime)
-                if b63 is not None and tgt:
-                    lo, hi = tgt
-                    if lo <= b63 <= hi: row += " ON TGT"
-                    elif b63 < lo: row += "  UNDER"
-                    else: row += "   OVER"
-                else:
-                    row += ""
+                if b63 and b63>2.0: row+="  << HIGH LEVERAGE"
+                elif b63 and b63>1.5: row+="  << ELEVATED"
             body += row+"\n"
-            if g=='Currency': body += "-"*57+"\n"
+            if g=='BTAL': body += "-"*50+"\n"
         b63=rb.get('63d',{}).get('Est. Blend'); b252=rb.get('252d',{}).get('Est. Blend')
-        # Regime targets (from Holy Grail framework + actual Q1 2026 data)
-        targets = {
-            'BULL + VOL COMPRESS': (0.70, 1.00, 'Capture equity premium, alts dampen vol'),
-            'BULL + VOL EXPAND':   (0.50, 0.80, 'Stress rising, start de-risking'),
-            'BEAR RECOVERY':       (0.25, 0.50, 'Bouncing but not confirmed, cautious'),
-            'BEAR DEFENSIVE':      (0.00, 0.25, 'Full protection, near market-neutral'),
-        }
-        tgt = targets.get(beta_regime)
-        if b63 is not None and tgt:
-            lo, hi, desc = tgt
-            if lo <= b63 <= hi:
-                grade = 'ON TARGET'
-                note = f'Beta {b63:+.2f} is within {lo:.2f}-{hi:.2f} range for {beta_regime}'
-            elif b63 < lo:
-                grade = 'UNDER (too defensive)'
-                note = f'Beta {b63:+.2f} below target {lo:.2f}-{hi:.2f}. May be leaving returns on table.'
-            else:
-                grade = 'OVER (too aggressive)'
-                note = f'Beta {b63:+.2f} above target {lo:.2f}-{hi:.2f}. Insufficient hedging for regime.'
-            body += f"\n  REGIME TARGET: {beta_regime}\n"
-            body += f"  Target beta:   {lo:.2f} to {hi:.2f} ({desc})\n"
-            body += f"  Actual (63d):  {b63:+.2f}\n"
-            body += f"  Grade:         {grade}\n"
-            body += f"  {note}\n"
         if b63 and b252:
-            body += f"\n  Trend: {b252:+.2f} (252d) -> {b63:+.2f} (63d)\n"
-        body += f"""
-  ALL REGIME TARGETS (Holy Grail framework):
-  BULL+VOL COMPRESS:  0.70 - 1.00  (max equity, alts as ballast)
-  BULL+VOL EXPAND:    0.50 - 0.80  (stress rising, de-risk)
-  BEAR RECOVERY:      0.25 - 0.50  (cautious, bouncing)
-  BEAR DEFENSIVE:     0.00 - 0.25  (full protection)
-  [Calibrated from actual Q1 2026 Roth Composer export. Recalibrate quarterly.]
-"""
+            body += f"\nTrend: {b252:+.2f} (252d) -> {b63:+.2f} (63d)\n"
+            if b63>2.0: body += "WARNING: HIGH leverage. Holy Grail diversification minimal.\n  -> Consider increasing KMLM/CTA/GLD, reducing equity sleeve.\n"
 
     # --- GLD & MINERS ---
     body += f"\n{'='*70}\nGLD & MINERS STATUS\n{'='*70}\n"
@@ -604,7 +683,7 @@ def send_email(subject, body):
         print(f"Email failed: {e}"); return False
 
 def main():
-    print(f"Signal Monitor v4.2 at {datetime.now()}")
+    print(f"Signal Monitor v4.3 at {datetime.now()}")
     print(f"Mode: {'PRE-CLOSE' if IS_PRECLOSE else 'MARKET CLOSE'}")
     tickers = [
         'SMH','SPY','QQQ','IWM','XLP','XLU','XLV',
@@ -616,33 +695,13 @@ def main():
         'XLE','XLF',
         'GDX','GDXJ','JNUG','NUGT',
         'UPRO','CTA','DBMF','BTAL','KMLM',
-        'UUP','SHY','DBC',
+        # v4.3 additions
+        'RSP','ILS','SPLV','SPHB','VIXM',
     ]
     print("Downloading market data...")
     data = download_data(tickers)
     print(f"Downloaded {len(data)} tickers")
-
-    # Determine regime FIRST so rolling beta uses correct blend weights
-    regime = 'UNKNOWN'
-    if 'SPY' in data and 'QQQ' in data:
-        spy_c = data['SPY']['Close']
-        qqq_c = data['QQQ']['Close']
-        spy_price = sf(spy_c.iloc[-1])
-        spy_sma200 = sf(spy_c.rolling(200).mean().iloc[-1]) if len(spy_c)>=200 else 0
-        spy_ema20 = sf(spy_c.ewm(span=20,adjust=False).mean().iloc[-1])
-        qqq_rets = qqq_c.pct_change()
-        std10 = sf(qqq_rets.rolling(10).std().iloc[-1])
-        std50 = sf(qqq_rets.rolling(50).std().iloc[-1])
-        vol_exp = (std10/std50 > 1.0) if std50 > 0 else False
-        above200 = spy_price > spy_sma200 if spy_sma200 > 0 else False
-        above_ema20 = spy_price > spy_ema20 if spy_ema20 > 0 else False
-        if above200 and not vol_exp: regime = 'BULL + VOL COMPRESS'
-        elif above200 and vol_exp: regime = 'BULL + VOL EXPAND'
-        elif not above200 and above_ema20: regime = 'BEAR RECOVERY'
-        elif not above200: regime = 'BEAR DEFENSIVE'
-    print(f"Regime: {regime}")
-
-    rolling_betas = calculate_rolling_betas(data, regime=regime)
+    rolling_betas = calculate_rolling_betas(data)
     alerts, status = check_signals(data)
     status['rolling_betas'] = rolling_betas
     if alerts:
