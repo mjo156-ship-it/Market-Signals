@@ -1,43 +1,45 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Comprehensive Market Signal Monitor v4.3
+Comprehensive Market Signal Monitor v4.4
 ========================================
 Groups 1-12: Core RSI signals
-Group 13: Deep Value (MaRet/CumRet crash+drawdown)
+Group 13: UVXY Vol Regime Shift (v4.4)
+Group 13b: Deep Value (MaRet/CumRet crash+drawdown)
 Group 14: Crisis Alpha v2 (vol compression regime)
 Group 15: Signal Degradation (trailing WR monitoring)
 Group 17: DFEN (RSI+SMA200+Bollinger Band)
 Group 18: GLD & Miners
-Group 19: HYG Credit Euphoria (NEW - audit Mar 24)
-Group 20: USMV Overbought -> UVXY (NEW - audit Mar 24)
-Group 21: UCO+USDU -> TMV (softer oil shock) (NEW - audit Mar 24)
-Group 22: GDXJ Oversold (enhanced from G18) (NEW - audit Mar 24)
-Group 23: GLD Oversold Dip-Buy (NEW - audit Mar 24)
-Group 24: ILS Cat Bond Monitor (NEW - Mar 25)
-Group 27: SPHB/SPLV Ratio RSI (NEW - Mar 25)
-Group 28: Vol Recovery Alpha (NEW - Mar 25)
-Group 29: UVXY SMA200 Cross -> SOXL 5d (NEW - Mar 25)
+Group 19A/B/C: MOVE Index (v4.4)
+Group 21b: Multi-Oversold Breadth (v4.4)
+Group 30: DRIF Velocity Filter (v4.4)
 + Rolling Beta vs SPY
 + TLT bond momentum banner
-+ Market Breadth Regime (RSP/IWM/SPY)
++ FRED Credit Spread monitor
++ Hormuz transit (IMF PortWatch)
++ Market Breadth Intelligence (ZBT/A/D lines)
++ Rolling Brier Score persistence
 
 SCHEDULE: Two emails daily (weekdays)
 - 3:15 PM ET: Pre-close preview
 - 4:05 PM ET: Market close confirmation
 """
-import os, sys, smtplib
+import os, sys, smtplib, json
 import yfinance as yf
 import pandas as pd
 import numpy as np
+import requests as req_lib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from datetime import datetime
+from datetime import datetime, timedelta
 
 SENDER_EMAIL = os.environ.get('SENDER_EMAIL', '')
 SENDER_PASSWORD = os.environ.get('SENDER_PASSWORD', '')
 RECIPIENT_EMAIL = os.environ.get('RECIPIENT_EMAIL', '')
 PHONE_EMAIL = os.environ.get('PHONE_EMAIL', '')
+FRED_API_KEY = os.environ.get('FRED_API_KEY', '')
+BRIER_JSON_PATH = os.environ.get('BRIER_JSON_PATH', './brier_scores.json')
+BREADTH_CACHE_DIR = os.environ.get('BREADTH_CACHE_DIR', './breadth_cache')
 IS_PRECLOSE = len(sys.argv) > 1 and sys.argv[1] == 'preclose'
 
 def calculate_rsi_wilder(prices, period):
@@ -138,6 +140,12 @@ def check_signals(data):
             bb_pctb = (price-bb_lower)/(bb_upper-bb_lower) if (bb_upper-bb_lower)>0 else 0.5
             bb_width = (bb_upper-bb_lower)/bb_sma*100 if bb_sma>0 else 0
             chg5d = sf((close.iloc[-1]/close.iloc[-5]-1))*100 if len(close)>5 else 0
+            # DRIF velocity indicators
+            cum_ret_5d = sf((close.iloc[-1]/close.iloc[-6]-1))*100 if len(close)>6 else 0
+            cum_ret_7d = sf((close.iloc[-1]/close.iloc[-8]-1))*100 if len(close)>8 else 0
+            rsi_series_full = calculate_rsi_wilder(close, 10)
+            rsi_5d_ago = sf(rsi_series_full.iloc[-6]) if len(rsi_series_full)>6 else 50
+            rsi_velocity = rsi10 - rsi_5d_ago
             indicators[ticker] = {
                 'price':price,'rsi10':rsi10,'rsi50':rsi50,
                 'sma200':sma200,'sma50':sma50,'ema9':ema9,'ema20':ema20,'ema21':ema21,
@@ -146,6 +154,7 @@ def check_signals(data):
                 'std_10':std_10,'std_50':std_50,'vol_ratio':vol_ratio,
                 'bb_sma':bb_sma,'bb_upper':bb_upper,'bb_lower':bb_lower,
                 'bb_pctb':bb_pctb,'bb_width':bb_width,'chg5d':chg5d,
+                'cum_ret_5d':cum_ret_5d,'cum_ret_7d':cum_ret_7d,'rsi_velocity':rsi_velocity,
             }
             if sma200>0: indicators[ticker]['pct_above_sma200']=(price/sma200-1)*100
             else: indicators[ticker]['pct_above_sma200']=0
@@ -312,146 +321,72 @@ def check_signals(data):
     gld_r2=indicators.get('GLD',{}).get('rsi10',50); usdu_r2=indicators.get('USDU',{}).get('rsi10',50)
     if gld_r2>75 and usdu_r2>60: alerts.append(('[HEDGE] MINER SHORT WINDOW',f"GLD={gld_r2:.1f}>75+USDU={usdu_r2:.1f}>60 | JDST 5d 59% WR n=34",'hedge'))
 
-    # === GROUP 19: HYG Credit Euphoria (Audit Mar 24) ===
-    if 'HYG' in data and 'HYG' in indicators:
-        hyg = indicators['HYG']
-        hyg_rsi7 = sf(calculate_rsi_wilder(data['HYG']['Close'], 7).iloc[-1])
-        if hyg_rsi7 > 85 and hyg['price'] > hyg['sma200']:
-            alerts.append(('[BUY] CREDIT EUPHORIA [T1]',
-                f"HYG RSI(7)={hyg_rsi7:.1f}>85 + HYG>SMA200\n"
-                f"   -> TQQQ 1d: 80.6% WR, +1.01% avg (n=36) | Regime stable 80/81%",'buy'))
+    # UCO>75 -> TMV
+    uco_r=indicators.get('UCO',{}).get('rsi10',50)
+    if uco_r>75: alerts.append(('[BUY] UCO>75 -> TMV',f"UCO RSI={uco_r:.1f} | Oil->Bond weakness",'buy'))
 
-    # === GROUP 20: USMV Overbought -> UVXY (Audit Mar 24) ===
-    usmv_r = indicators.get('USMV',{}).get('rsi10',50)
-    if usmv_r > 82:
-        alerts.append(('[HEDGE] USMV COMPLACENCY [T1]',
-            f"USMV RSI={usmv_r:.1f}>82 -> UVXY 1d: 75% WR +3.20% (n=24)",'hedge'))
+    # === GROUP 13: UVXY Vol Regime Shift (v4.4) ===
+    if 'UVXY' in indicators:
+        uvxy=indicators['UVXY']
+        uvxy_pct=uvxy.get('pct_above_sma200', -999)
+        status['uvxy_vol_regime']={'price':uvxy['price'],'sma200':uvxy['sma200'],'pct_above':uvxy_pct,'active':uvxy_pct>0}
+        if uvxy_pct>=30: alerts.append(('[BUY] VOL REGIME EXTREME',f"UVXY {uvxy_pct:+.1f}% above SMA200 | SPY 20d: 94% WR +7.3% | 40d/60d: 100% | n=18\n   TQQQ 60d: 100% +65% | SOXL 60d: 96% +81%",'buy'))
+        elif uvxy_pct>=20: alerts.append(('[BUY] VOL REGIME HIGH',f"UVXY {uvxy_pct:+.1f}% above SMA200 | SPY 20d: 92% WR +6.2% | 60d: 100%\n   Wilson CI 20d: (74%, 98%) | n=24",'buy'))
+        elif uvxy_pct>=0: alerts.append(('[BUY] VOL REGIME SHIFT',f"UVXY {uvxy_pct:+.1f}% above SMA200 | SPY 20d: 83% WR +4.3% | 60d: 92%\n   Edge vs UC: +3.3% (20d), +6.8% (60d) | n=52",'buy'))
+        elif uvxy_pct>=-10: alerts.append(('[WATCH] VOL REGIME APPROACHING',f"UVXY {uvxy_pct:+.1f}% vs SMA200 | Threshold: ${uvxy['sma200']:.2f}",'watch'))
 
-    # === GROUP 21: UCO+USDU -> TMV (Softer Oil Shock, Audit Mar 24) ===
-    uco_r = indicators.get('UCO',{}).get('rsi10',50)
-    usdu_r3 = indicators.get('USDU',{}).get('rsi10',50)
-    if uco_r > 75 and usdu_r3 > 55:
-        alerts.append(('[SHORT] OIL+DOLLAR -> TMV [T1]',
-            f"UCO RSI={uco_r:.1f}>75 + USDU RSI={usdu_r3:.1f}>55\n"
-            f"   -> TMV 10d: 75.4% WR, +6.97% avg (n=57) | Regime stable",'short'))
-    elif uco_r > 75:
-        alerts.append(('[WATCH] UCO>75',f"UCO RSI={uco_r:.1f} | Oil strong but USDU={usdu_r3:.1f}<55 -- no TMV signal",'watch'))
+    # === GROUP 19: MOVE Index (v4.4) ===
+    if '^MOVE' in indicators and '^MOVE' in data:
+        move=indicators['^MOVE']
+        mc=data['^MOVE']['Close']
+        move_price=move['price']; move_rsi=move['rsi10']
+        move_chg_20d=0
+        if len(mc)>=21:
+            prev=sf(mc.iloc[-21])
+            if prev>0: move_chg_20d=((move_price/prev)-1)*100
+        status['move_index']={'price':move_price,'rsi':move_rsi,'change_20d_pct':round(move_chg_20d,1)}
+        if move_chg_20d>50: alerts.append(('[BUY] MOVE EXTREME SPIKE [19B]',f"MOVE 20d Δ={move_chg_20d:+.1f}% | SPY 20d: 86% WR +5.29% (n=69)\n   QQQ 20d: 83% WR +5.90%  |  Wilson CI: [76%-93%]",'buy'))
+        elif move_price>115: alerts.append(('[BUY] MOVE ELEVATED [19A]',f"MOVE={move_price:.0f}>115 | SPY 20d: 72% WR +2.07% (n=389d/29 ep)",'buy'))
+        # 19C: RSI was >79 recently and now <60
+        move_rsi_series=calculate_rsi_wilder(mc,10)
+        if len(move_rsi_series)>=10:
+            was_ob=float(move_rsi_series.iloc[-10:].max())>79
+            if was_ob and move_rsi<60: alerts.append(('[BUY] MOVE VOL CRUSH [19C]',f"MOVE RSI dropped from >79 to {move_rsi:.1f} | SPY 10d: 92% WR +2.28%\n   UVXY 10d: -16.8% avg | n=24",'buy'))
+        # GLD combo
+        if move_price>100 and spy_r<25: alerts.append(('[BUY] MOVE+SPY GLD COMBO',f"MOVE={move_price:.0f}>100 + SPY RSI={spy_r:.1f}<25 | GLD 20d: 100% WR +6.43% (n=15)",'buy'))
 
-    # === GROUP 23: GLD Oversold Dip-Buy (Audit Mar 24) ===
-    gld_r3 = indicators.get('GLD',{}).get('rsi10',50)
-    if gld_r3 < 20:
-        alerts.append(('[BUY] GLD DEEP OVERSOLD [T2]',
-            f"GLD RSI={gld_r3:.1f}<20\n"
-            f"   -> TQQQ 10d: 70.6% WR +4.83% (n=17 episodes) | PF=5.99\n"
-            f"   -> GLD 10d: 75.0% WR +2.25% (n=60) | Post-2020: 92.3% WR",'buy'))
-    elif gld_r3 < 22:
-        alerts.append(('[BUY] GLD OVERSOLD',
-            f"GLD RSI={gld_r3:.1f}<22 -> TQQQ 10d: 73.3% WR +4.94% (n=86)",'buy'))
-    elif gld_r3 < 25 and gld_r3 >= 22:
-        alerts.append(('[WATCH] GLD WEAK',
-            f"GLD RSI={gld_r3:.1f}<25 -> TQQQ 10d: 73.1% WR +4.77% (n=134)",'watch'))
+    # === GROUP 21b: Multi-Oversold Breadth (v4.4) ===
+    usmv_r2=indicators.get('USMV',{}).get('rsi10',50)
+    vtv_r=indicators.get('VTV',{}).get('rsi10',50)
+    voov_r=indicators.get('VOOV',{}).get('rsi10',50)
+    upro_r=indicators.get('UPRO',{}).get('rsi10',50)
+    if all(r<30 for r in [spy_r,usmv_r2,vtv_r,voov_r,upro_r]):
+        hyg_r2=indicators.get('HYG',{}).get('rsi10',50)
+        msg=f"SPY+USMV+VTV+VOOV+UPRO all RSI<30 | UPRO 5d: 77.8% WR (n=45, 23 ep)"
+        if hyg_r2<30: msg+=' | HYG RSI<30 confirmed — higher conviction'
+        alerts.append(('[BUY] MULTI-OS BREADTH [21b]',msg,'buy'))
 
-    # === GROUP 24: ILS Cat Bond Monitor (Mar 25) ===
-    if 'ILS' in data and len(data['ILS']) >= 6:
-        ils_close = data['ILS']['Close']
-        ils_5d = sf((ils_close.iloc[-1] / ils_close.iloc[-5] - 1)) * 100
-        ils_price = sf(ils_close.iloc[-1])
-        if ils_5d < -3:
-            alerts.append(('[WARN] ILS DRAWDOWN',
-                f"ILS 5d: {ils_5d:+.1f}% | Cat bond event likely\n"
-                f"   Price: ${ils_price:.2f} | $87K Fidelity position\n"
-                f"   DO NOT SELL -- drawdowns recover 1-3 months",'warning'))
-        elif ils_5d < -1.5:
-            alerts.append(('[WATCH] ILS WEAKNESS',f"ILS 5d: {ils_5d:+.1f}% -- monitor for cat bond event",'watch'))
-        # Hurricane season banner
-        if 6 <= datetime.now().month <= 11:
-            alerts.append(('[WATCH] HURRICANE SEASON',f"ILS $87K at elevated nat-cat risk (Jun-Nov)",'watch'))
-
-    # === GROUP 27: SPHB/SPLV Ratio RSI (Mar 25) ===
-    if 'SPHB' in data and 'SPLV' in data:
-        sphb_c = data['SPHB']['Close']
-        splv_c = data['SPLV']['Close']
-        ratio = sphb_c / splv_c
-        ratio_rsi = sf(calculate_rsi_wilder(ratio, 10).iloc[-1])
-        ratio_val = sf(ratio.iloc[-1])
-        spy_not_os = indicators.get('SPY',{}).get('rsi10',50) > 30
-        qqq_not_os = indicators.get('QQQ',{}).get('rsi10',50) > 30
-        unique_tag = " (SPY/QQQ NOT oversold -- UNIQUE)" if spy_not_os and qqq_not_os else ""
-        if ratio_rsi < 25:
-            alerts.append(('[BUY] RISK ROTATION EXHAUSTION [T2]',
-                f"SPHB/SPLV ratio RSI={ratio_rsi:.1f}<25 | Ratio={ratio_val:.3f}{unique_tag}\n"
-                f"   -> TQQQ 10d: 75.5% WR +6.09% (n=53) | Post-2020: 84.6% WR\n"
-                f"   -> Manual overlay -- same as Double Signal workflow",'buy'))
-        elif ratio_rsi < 30:
-            alerts.append(('[WATCH] RISK ROTATION WEAKENING',f"SPHB/SPLV ratio RSI={ratio_rsi:.1f} approaching exhaustion",'watch'))
-        status['sphb_splv_ratio'] = ratio_val
-        status['sphb_splv_rsi'] = ratio_rsi
-
-    # === GROUP 28: Vol Recovery Alpha (Mar 25) ===
-    if 'UVXY' in indicators and 'VIXM' in indicators:
-        uvxy_i = indicators['UVXY']
-        vixm_i = indicators['VIXM']
-        uvxy_above_200 = uvxy_i['price'] > uvxy_i['sma200'] if uvxy_i['sma200'] > 0 else False
-        vixm_below_50 = vixm_i['price'] < vixm_i['sma50'] if vixm_i['sma50'] > 0 else False
-        if uvxy_above_200 and vixm_below_50:
-            alerts.append(('[BUY] VOL RECOVERY ALPHA [T2]',
-                f"UVXY ${uvxy_i['price']:.2f} > SMA200 ${uvxy_i['sma200']:.2f} (still elevated)\n"
-                f"   + VIXM ${vixm_i['price']:.2f} < SMA50 ${vixm_i['sma50']:.2f} (normalizing)\n"
-                f"   -> SOXL 10d: 90.3% WR +13.67% (n=31) | 20d: 100% WR +24.53%\n"
-                f"   -> Zero overlap with RSI dip-buys | Composer-native",'buy'))
-        elif uvxy_above_200 and not vixm_below_50:
-            alerts.append(('[WATCH] VOL STILL ELEVATED',
-                f"UVXY ${uvxy_i['price']:.2f} > SMA200 -- crisis residual\n"
-                f"   VIXM ${vixm_i['price']:.2f} still above SMA50 -- waiting for normalization",'watch'))
-
-    # === GROUP 29: UVXY SMA200 Cross -> SOXL 5d Manual (Mar 25) ===
-    if 'UVXY' in data and len(data['UVXY']) >= 201:
-        uvxy_c = data['UVXY']['Close']
-        uvxy_sma200s = uvxy_c.rolling(200).mean()
-        today_above = sf(uvxy_c.iloc[-1]) > sf(uvxy_sma200s.iloc[-1])
-        yest_below = sf(uvxy_c.iloc[-2]) <= sf(uvxy_sma200s.iloc[-2]) if len(uvxy_c) > 1 else False
-        if today_above and yest_below:
-            alerts.append(('[BUY] UVXY SMA200 CROSS -- MANUAL 5d TRADE',
-                f"UVXY just crossed ABOVE SMA(200)!\n"
-                f"   -> BUY SOXL, HOLD 5 TRADING DAYS, EXIT\n"
-                f"   -> 80% WR, +8.3% avg, +10.3% med, PF=6.75 (n=10)\n"
-                f"   -> Alt: FAS for tighter losses (PF=16.70)\n"
-                f"   -> Size: 5% max ($110K on $2.2M)",'buy'))
-        elif today_above:
-            days_above = 0
-            for i in range(len(uvxy_c)-1, max(len(uvxy_c)-20, 200), -1):
-                if sf(uvxy_c.iloc[i]) > sf(uvxy_sma200s.iloc[i]):
-                    days_above += 1
-                else: break
-            if days_above <= 5:
-                exit_msg = "EXIT TODAY" if days_above == 5 else f"{5-days_above} days remaining"
-                alerts.append(('[WATCH] UVXY ABOVE SMA200',
-                    f"UVXY above SMA200 for {days_above} day(s)\n"
-                    f"   SOXL 5d hold: Day {days_above}/5 -- {exit_msg}",'watch'))
-
-    # === MARKET BREADTH REGIME (RSP/IWM/SPY) ===
-    if 'RSP' in indicators and 'SPY' in indicators:
-        rsp = indicators['RSP']
-        sp_i = indicators['SPY']
-        rsp_above = rsp['price'] > rsp['sma200'] if rsp['sma200'] > 0 else False
-        spy_above = sp_i['price'] > sp_i['sma200'] if sp_i['sma200'] > 0 else False
-        if rsp_above and spy_above: breadth_regime = 'BROAD BULL'
-        elif not rsp_above and spy_above: breadth_regime = 'NARROW LEADERSHIP'
-        elif rsp_above and not spy_above: breadth_regime = 'ROTATION'
-        else: breadth_regime = 'BROAD WEAKNESS'
-        rsp_pct = rsp.get('pct_above_sma200', 0)
-        spy_pct = sp_i.get('pct_above_sma200', 0)
-        gap = spy_pct - rsp_pct
-        status['breadth_regime'] = breadth_regime
-        status['leadership_gap'] = gap
-        if breadth_regime == 'NARROW LEADERSHIP':
-            alerts.append(('[WARN] NARROW LEADERSHIP',
-                f"RSP {rsp_pct:+.1f}% vs SMA200 | SPY {spy_pct:+.1f}% | Gap: {gap:+.1f}\n"
-                f"   Mega-caps carrying, avg stock broken. RSI dip-buys underperform ~25pp.",'warning'))
-        elif breadth_regime == 'BROAD WEAKNESS':
-            alerts.append(('[WARN] BROAD WEAKNESS',
-                f"RSP {rsp_pct:+.1f}% + SPY {spy_pct:+.1f}% both below SMA200\n"
-                f"   Crisis mode. GLD/BTAL gates should be firing.",'warning'))
+    # === GROUP 30: DRIF Velocity Filter (v4.4) ===
+    drif_status={}
+    for ticker_d,lever,thresholds in [
+        ('SPY','UPRO',[(25,'cum_ret_5d',-5,'100%',10,'55.6%',9),(30,'cum_ret_7d',-5,'76.1%',46,'56.2%',32)]),
+        ('QQQ','TQQQ',[(25,'cum_ret_7d',-8,'87.5%',16,'57.1%',7)]),
+        ('SMH','SOXL',[(25,'cum_ret_5d',-5,'68.8%',16,'16.7%',6)]),
+    ]:
+        if ticker_d not in indicators: continue
+        ind=indicators[ticker_d]; rsi=ind['rsi10']; vel=ind.get('rsi_velocity',0)
+        drif_status[ticker_d]={'rsi':rsi,'cum_ret_5d':ind.get('cum_ret_5d',0),'cum_ret_7d':ind.get('cum_ret_7d',0),'velocity':vel,'gate':'N/A','label':'NOT OVERSOLD'}
+        for rsi_t,ret_f,ret_g,p_wr,p_n,f_wr,f_n in thresholds:
+            if rsi<rsi_t:
+                ret_val=ind.get(ret_f,0)
+                if ret_val>ret_g:
+                    drif_status[ticker_d].update({'gate':'PASS','label':'STABILIZED DIP'})
+                    alerts.append((f'[BUY] DRIF: {ticker_d} CONFIRMED',f"{ticker_d} RSI={rsi:.1f} + {ret_f.replace('cum_ret_','')}d ret={ret_val:+.1f}% > {ret_g}%\n   VELOCITY GATE PASSED: {p_wr} WR 5d (n={p_n})\n   Long {lever} — stabilized dip, not falling knife",'buy'))
+                else:
+                    drif_status[ticker_d].update({'gate':'FAIL','label':'FALLING KNIFE'})
+                    alerts.append((f'[WARN] DRIF: {ticker_d} FALLING KNIFE',f"{ticker_d} RSI={rsi:.1f} BUT {ret_f.replace('cum_ret_','')}d ret={ret_val:+.1f}% < {ret_g}%\n   VELOCITY GATE FAILED: Only {f_wr} WR (n={f_n})\n   Wait for stabilization before {lever} entry",'warning'))
+                break
+    status['drif_velocity']=drif_status
 
     return alerts, status
 
@@ -510,42 +445,11 @@ MARKET SIGNAL MONITOR - {timing}
     # --- OTHER ETFs ---
     body += f"\n{'='*70}\nOTHER ETFs\n{'='*70}\n"
     body += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}\n" + "-"*50 + "\n"
-    for t in ['XLV','XLU','XLE','TMV','VOOV','VOOG','VTV','QQQE','BOIL','EURL','YINN','KORU','INDL','EDC','ILS','RSP']:
+    for t in ['XLV','XLU','XLE','TMV','VOOV','VOOG','VTV','QQQE','BOIL','EURL','YINN','KORU','INDL','EDC']:
         if t in indicators:
             i=indicators[t]
             p=f"${i['price']:.2f}" if i['price']<1000 else f"${i['price']:,.0f}"
             body += f"{t:<10} {p:>12} {i['rsi10']:>10.1f} {i.get('pct_above_sma200',0):>+11.1f}%\n"
-
-    # --- MARKET BREADTH REGIME ---
-    breadth = status.get('breadth_regime')
-    if breadth:
-        gap = status.get('leadership_gap', 0)
-        body += f"\n{'='*70}\nMARKET BREADTH REGIME\n{'='*70}\n"
-        rsp_i = indicators.get('RSP',{})
-        spy_i2 = indicators.get('SPY',{})
-        iwm_i = indicators.get('IWM',{})
-        body += f"  RSP vs SMA200: {rsp_i.get('pct_above_sma200',0):+.1f}%\n"
-        body += f"  SPY vs SMA200: {spy_i2.get('pct_above_sma200',0):+.1f}%\n"
-        body += f"  IWM vs SMA200: {iwm_i.get('pct_above_sma200',0):+.1f}%\n"
-        body += f"  Leadership Gap (SPY-RSP): {gap:+.1f}pp\n"
-        body += f"  Regime: {breadth}\n"
-        guidance = {
-            'BROAD BULL': 'Breadth healthy. RSI dip-buys at full conviction.',
-            'NARROW LEADERSHIP': 'Mega-caps carrying, avg stock broken. RSI dip-buys underperform ~25pp. Reduce leverage.',
-            'ROTATION': 'Equal-weight healthier than SPY/QQQ. Broadening. Favors IWM/RSP.',
-            'BROAD WEAKNESS': 'Both broken. Crisis mode. GLD/BTAL regime detection should be firing.',
-        }
-        body += f"  -> {guidance.get(breadth,'')}\n"
-
-    # --- SPHB/SPLV RISK APPETITE ---
-    ratio_val = status.get('sphb_splv_ratio')
-    ratio_rsi = status.get('sphb_splv_rsi')
-    if ratio_val and ratio_rsi:
-        body += f"\n RISK APPETITE: SPHB/SPLV Ratio={ratio_val:.3f}  RSI={ratio_rsi:.1f}\n"
-        if ratio_rsi < 25: body += "   -> EXHAUSTION: TQQQ 10d 75.5% WR (n=53) -- MANUAL TRADE\n"
-        elif ratio_rsi < 35: body += "   -> WEAKENING -- approaching exhaustion zone\n"
-        elif ratio_rsi > 70: body += "   -> STRONG RISK-ON\n"
-        else: body += "   -> NEUTRAL\n"
 
     # --- SMH/SOXL LEVELS ---
     if 'SMH' in indicators:
@@ -661,6 +565,158 @@ MARKET SIGNAL MONITOR - {timing}
             elif r>79: flag="High - momentum"
             body += f"  {t:<6} ${i['price']:>9.2f} {r:>8.1f} {i.get('pct_above_sma200',0):>+9.1f}%  {flag}\n"
 
+    # === v4.4 NEW EMAIL SECTIONS ===
+
+    # --- UVXY VOL REGIME SHIFT ---
+    uvxy_regime=status.get('uvxy_vol_regime',{})
+    if uvxy_regime:
+        up=uvxy_regime.get('price',0); us=uvxy_regime.get('sma200',0); ua=uvxy_regime.get('pct_above',0)
+        if ua>=30: ulbl="EXTREME"
+        elif ua>=20: ulbl="HIGH"
+        elif ua>=0: ulbl="ACTIVE"
+        elif ua>=-10: ulbl="APPROACHING"
+        else: ulbl="INACTIVE"
+        body += f"\n{'='*70}\nUVXY VOL REGIME SHIFT\n{'='*70}\n"
+        body += f"Status:         {ulbl}\n"
+        body += f"UVXY Price:     ${up:.2f}\n"
+        body += f"SMA(200):       ${us:.2f}\n"
+        body += f"% Above SMA200: {ua:+.1f}%\n\n"
+        body += f"Key Thresholds:\n"
+        body += f"  Signal ON:      ${us:.2f}  (UVXY > SMA200)\n"
+        body += f"  High Conviction:${us*1.20:.2f}  (20% above -> 92% WR 20d)\n"
+        body += f"  Extreme:        ${us*1.30:.2f}  (30% above -> 94% WR, 100% at 40d+)\n"
+        body += f"\n  When active: SPY 83-94% WR 20d, 92-100% WR 60d\n"
+        body += f"  Action: Favor UPRO/TQQQ/SOXL over defensive positioning\n"
+
+    # --- DRIF VELOCITY FILTER ---
+    drif=status.get('drif_velocity',{})
+    if drif:
+        body += f"\n{'='*70}\nDRIF VELOCITY FILTER (Crash Speed Gate)\n{'='*70}\n"
+        body += f"{'Ticker':<8} {'RSI':>6} {'5d Ret':>8} {'7d Ret':>8} {'Vel':>6}  {'Gate':<6} {'Status':<20}\n"
+        body += "-"*70 + "\n"
+        for td in ['SPY','QQQ','SMH']:
+            if td in drif:
+                dd=drif[td]
+                gi={'PASS':'PASS','FAIL':'FAIL'}.get(dd['gate'],'---')
+                body += f"{td:<8} {dd['rsi']:>6.1f} {dd['cum_ret_5d']:>+7.1f}% {dd['cum_ret_7d']:>+7.1f}% {dd['velocity']:>+5.0f}  {gi:<6} {dd['label']:<20}\n"
+        body += "\n  Composer gate: RSI(10) < 25 AND cumulative-return(5d) > -5%\n"
+
+    # --- MOVE INDEX ---
+    move_st=status.get('move_index',{})
+    if move_st:
+        body += f"\n{'='*70}\nMOVE INDEX (Rates Volatility)\n{'='*70}\n"
+        body += f"Price:    {move_st.get('price',0):.2f}  |  RSI: {move_st.get('rsi',0):.1f}  |  20d Change: {move_st.get('change_20d_pct',0):+.1f}%\n"
+        body += f"19A (>115): {'ACTIVE' if move_st.get('price',0)>115 else 'Inactive'} | 19B (20d>50%): {'ACTIVE' if move_st.get('change_20d_pct',0)>50 else 'Inactive'}\n"
+
+    # --- FRED CREDIT SPREAD ---
+    if FRED_API_KEY:
+        try:
+            fred_params={"series_id":"BAMLH0A1HYBB","api_key":FRED_API_KEY,"file_type":"json",
+                "observation_start":(datetime.now()-timedelta(days=365)).strftime("%Y-%m-%d"),"sort_order":"desc"}
+            fred_resp=req_lib.get("https://api.stlouisfed.org/fred/series/observations",params=fred_params,timeout=10)
+            fred_data=fred_resp.json().get("observations",[])
+            fred_df=pd.DataFrame(fred_data)
+            fred_df=fred_df[fred_df["value"]!="."]
+            fred_df["value"]=fred_df["value"].astype(float)
+            fred_df=fred_df.sort_values("date")
+            if len(fred_df)>=20:
+                cur_oas=float(fred_df.iloc[-1]["value"])
+                chg20=float(cur_oas-fred_df.iloc[-20]["value"])
+                lvl="COMPLACENT" if cur_oas<2.0 else "NORMAL" if cur_oas<3.5 else "ELEVATED" if cur_oas<5.0 else "CRISIS"
+                trnd="SPIKE" if chg20>0.80 else "DRIFT_UP" if chg20>0.30 else "COMPRESSING" if chg20<-0.30 else "STABLE"
+                body += f"\n{'='*70}\nCREDIT SPREAD MONITOR (BB OAS)\n{'='*70}\n"
+                body += f"BB OAS:     {cur_oas:.2f}%  [{lvl}]\n"
+                body += f"Trend:      {trnd}  (20d: {chg20:+.2f}%)\n"
+                body += f"As of:      {fred_df.iloc[-1]['date']}\n"
+        except Exception as e:
+            print(f"FRED credit spread error: {e}")
+
+    # --- HORMUZ TRANSIT ---
+    try:
+        hz_params={
+            "where":"portid='chokepoint6' AND date >= TIMESTAMP '2026-01-01'",
+            "outFields":"date,n_total,n_tanker,n_container",
+            "orderByFields":"date ASC","resultRecordCount":500,"f":"json",
+        }
+        hz_resp=req_lib.get("https://services9.arcgis.com/weJ1QsnbMYJlCHdG/ArcGIS/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query",params=hz_params,timeout=15)
+        hz_feats=hz_resp.json().get("features",[])
+        if hz_feats:
+            hz_rows=[{"date":datetime.fromtimestamp(f["attributes"]["date"]/1000).strftime("%Y-%m-%d"),
+                       "total":f["attributes"].get("n_total",0) or 0,
+                       "tankers":f["attributes"].get("n_tanker",0) or 0,
+                       "container":f["attributes"].get("n_container",0) or 0} for f in hz_feats]
+            hz_df=pd.DataFrame(hz_rows)
+            crisis_dt=pd.Timestamp("2026-02-28")
+            pre_c=hz_df[pd.to_datetime(hz_df["date"])<crisis_dt]
+            pre_avg=round(pre_c.tail(30)["total"].mean(),1) if len(pre_c)>=7 else 138
+            last7=hz_df.tail(7); avg7=round(last7["total"].mean(),1)
+            latest_hz=hz_df.iloc[-1]
+            pct_n=round((avg7/pre_avg)*100,1) if pre_avg>0 else 0
+            crday=(pd.Timestamp(latest_hz["date"])-crisis_dt).days
+            if avg7>=70: hz_reg="REOPENING"
+            elif avg7>=30: hz_reg="PARTIAL"
+            elif avg7>=5: hz_reg="TRICKLE"
+            else: hz_reg="CLOSED"
+            body += f"\n{'='*70}\nSTRAIT OF HORMUZ — DAY {crday}\n{'='*70}\n"
+            body += f"Status:        {hz_reg}\n"
+            body += f"Latest:        {latest_hz['total']} vessels ({latest_hz['tankers']} tankers) on {latest_hz['date']}\n"
+            body += f"7d Average:    {avg7} vessels/day\n"
+            body += f"Pre-crisis:    {pre_avg} vessels/day\n"
+            body += f"% of Normal:   {pct_n}%\n\nLast 7 days:\n"
+            for _,row in last7.iterrows():
+                body += f"  {row['date']}: {int(row['total']):>3} total  ({int(row['tankers'])} tankers)\n"
+    except Exception as e:
+        print(f"Hormuz data error: {e}")
+
+    # --- MARKET BREADTH (ZBT / A/D Lines) ---
+    breadth_file=os.path.join(BREADTH_CACHE_DIR,'daily_breadth.csv')
+    if os.path.exists(breadth_file):
+        try:
+            bdf=pd.read_csv(breadth_file,parse_dates=["date"])
+            if len(bdf)>0:
+                total=bdf["nyse_advances"]+bdf["nyse_declines"]
+                bdf["adv_ratio"]=np.where(total>0,bdf["nyse_advances"]/total,np.nan)
+                bdf["zbt_ema"]=bdf["adv_ratio"].ewm(alpha=0.1,adjust=False).mean()
+                zv=bdf["zbt_ema"].iloc[-1]; ar=bdf["adv_ratio"].iloc[-1]
+                zz="OVERSOLD" if zv<0.40 else "THRUST" if zv>=0.615 else "NEUTRAL"
+                body += f"\n{'='*70}\nMARKET BREADTH INTELLIGENCE\n{'='*70}\n"
+                body += f"ZBT Zone:       {zz}\n"
+                body += f"Advance Ratio:  {ar:.4f}\n"
+                body += f"10d EMA:        {zv:.4f}  (oversold <0.40, thrust >0.615)\n"
+                for tier,label in [("large","Large"),("mid","Mid"),("small","Small")]:
+                    ac,dc=f"{tier}_advances",f"{tier}_declines"
+                    if ac in bdf.columns:
+                        net=bdf[ac]-bdf[dc]; adl=net.cumsum()
+                        w=min(50,len(adl))
+                        if w>=10:
+                            slope=np.polyfit(np.arange(w),adl.tail(w).values,1)[0]
+                            body += f"  {label:8s} A/D: {'UP' if slope>0 else 'DOWN':4s}  Slope: {slope:>8.1f}\n"
+        except Exception as e:
+            print(f"Breadth data error: {e}")
+
+    # --- ROLLING BRIER SCORES ---
+    if os.path.exists(BRIER_JSON_PATH):
+        try:
+            with open(BRIER_JSON_PATH,'r') as bf: brier_hist=json.load(bf)
+            if brier_hist:
+                latest_bd=sorted(brier_hist.keys())[-1]
+                latest_bs=brier_hist[latest_bd]
+                degraded=[]
+                body += f"\n{'='*70}\nSIGNAL CALIBRATION (Rolling Brier)\n{'='*70}\n"
+                body += f"As of: {latest_bd}\n"
+                body += f"{'Signal':<28} {'WR':>5} {'Trail':>5} {'BSS':>6} {'Health':>8}\n"+"-"*58+"\n"
+                for sid,s in sorted(latest_bs.items(),key=lambda x:{'critical':0,'warning':1,'healthy':2}.get(x[1].get('health',''),9)):
+                    awr=s.get('actual_wr',0); twr=s.get('trail_wr',0); bss=s.get('bss',0)
+                    hlth=s.get('health','?'); act='*' if s.get('active') else ' '
+                    body += f"{act}{sid:<27} {awr:>4.0%} {twr:>4.0%} {bss:>+5.3f} {hlth:>8}\n"
+                    if awr>0 and twr<awr-0.15 and s.get('n',0)>=15: degraded.append((sid,awr,twr))
+                if degraded:
+                    body += "\nDEGRADATION ALERTS:\n"
+                    for sid,awr,twr in degraded:
+                        body += f"  {sid}: Trail WR ({twr:.0%}) is {(awr-twr)*100:.0f}pp below overall ({awr:.0%})\n"
+        except Exception as e:
+            print(f"Brier scores error: {e}")
+
     if is_preclose:
         body += f"\n{'='*70}\nNOTE: PRE-CLOSE preview. Signals may change by close.\nFinal confirmation at 4:05 PM ET.\n{'='*70}\n"
     return body
@@ -683,20 +739,21 @@ def send_email(subject, body):
         print(f"Email failed: {e}"); return False
 
 def main():
-    print(f"Signal Monitor v4.3 at {datetime.now()}")
+    print(f"Signal Monitor v4.4 at {datetime.now()}")
     print(f"Mode: {'PRE-CLOSE' if IS_PRECLOSE else 'MARKET CLOSE'}")
     tickers = [
         'SMH','SPY','QQQ','IWM','XLP','XLU','XLV',
-        'GLD','TLT','HYG','LQD','TMV','USDU','UCO','BOIL',
-        'UVXY','EDC','YINN','KORU','EURL','INDL','BTC-USD',
+        'GLD','TLT','HYG','LQD','TMV','SHY','USDU','UCO','BOIL',
+        'UVXY','VIXM','SVXY',
+        'EDC','YINN','KORU','EURL','INDL','BTC-USD',
         'AMD','NVDA','NAIL','CURE','FAS','LABU',
-        'TQQQ','SOXL','TECL','DRN','DFEN',
+        'TQQQ','SOXL','SOXS','TECL','DRN','DFEN',
         'VOOV','VOOG','VTV','QQQE','USMV',
         'XLE','XLF',
         'GDX','GDXJ','JNUG','NUGT',
         'UPRO','CTA','DBMF','BTAL','KMLM',
-        # v4.3 additions
-        'RSP','ILS','SPLV','SPHB','VIXM',
+        'RSP','SPHB','SPLV',
+        '^MOVE',
     ]
     print("Downloading market data...")
     data = download_data(tickers)
