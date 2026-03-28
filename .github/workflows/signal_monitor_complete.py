@@ -42,6 +42,20 @@ BRIER_JSON_PATH = os.environ.get('BRIER_JSON_PATH', './brier_scores.json')
 BREADTH_CACHE_DIR = os.environ.get('BREADTH_CACHE_DIR', './breadth_cache')
 IS_PRECLOSE = len(sys.argv) > 1 and sys.argv[1] == 'preclose'
 
+# Broad market tickers for breadth computation (ZBT, McClellan, %Above50SMA)
+BREADTH_TICKERS = [
+    'AAPL','MSFT','GOOGL','AMZN','NVDA','META','TSLA','BRK-B','UNH','JNJ',
+    'JPM','V','PG','HD','MA','ABBV','MRK','PEP','KO','COST',
+    'AVGO','LLY','WMT','MCD','CSCO','TMO','ABT','CRM','ACN','DHR',
+    'TXN','NEE','LIN','PM','UNP','RTX','HON','AMGN','LOW','SBUX',
+    'FTNT','ODFL','DECK','POOL','WST','GNRC','MPWR','PAYC','ENPH','DXCM',
+    'ALGN','MKTX','TER','ZBRA','PODD','TECH','LULU','FICO','CPRT','IDXX',
+    'RMD','CSGP','TRMB','NDSN','WSO','EPAM','KEYS','CDW','PCAR',
+    'F','GM','FCX','NUE','CLF','AA','RIG','HAL','SLB',
+    'DVN','FANG','OXY','MPC','VLO','PSX','CF','MOS','IFF','EMN',
+    'IP','PKG','FMC','CE','HUN','OLN','CC','AXTA','RPM',
+]
+
 def calculate_rsi_wilder(prices, period):
     delta = prices.diff()
     gain = delta.where(delta > 0, 0)
@@ -106,6 +120,145 @@ def calculate_rolling_betas(data):
             if valid: blend += gb * bw
         results[wname]['Est. Blend'] = round(blend, 3)
     return results
+
+
+def compute_market_breadth(breadth_data):
+    """Compute ZBT, McClellan Oscillator, %Above50SMA from broad market data."""
+    if not breadth_data:
+        return {}
+    # Build daily advance/decline from all breadth tickers
+    # Get a reference date index from any ticker
+    ref_ticker = next(iter(breadth_data))
+    dates = breadth_data[ref_ticker].index
+    
+    daily = []
+    for i in range(1, len(dates)):
+        adv, dec = 0, 0
+        for ticker, df in breadth_data.items():
+            try:
+                c = df['Close']
+                if isinstance(c, pd.DataFrame): c = c.iloc[:,0]
+                today = float(c.iloc[i]) if i < len(c) and not pd.isna(c.iloc[i]) else None
+                yesterday = float(c.iloc[i-1]) if (i-1) < len(c) and not pd.isna(c.iloc[i-1]) else None
+                if today is None or yesterday is None: continue
+                if today > yesterday: adv += 1
+                elif today < yesterday: dec += 1
+            except: pass
+        total = adv + dec
+        ratio = adv / total if total > 0 else 0.5
+        daily.append({'date': dates[i], 'adv': adv, 'dec': dec, 'ratio': ratio, 'net': adv - dec})
+    
+    if not daily:
+        return {}
+    bdf = pd.DataFrame(daily)
+    
+    # ZBT: 10-day EMA of advance ratio
+    bdf['zbt_ema'] = bdf['ratio'].ewm(alpha=1.0/10, adjust=False).mean()
+    zbt_val = float(bdf['zbt_ema'].iloc[-1])
+    zbt_ratio = float(bdf['ratio'].iloc[-1])
+    zbt_oversold_recent = bool((bdf['zbt_ema'].tail(10) < 0.40).any())
+    if zbt_val < 0.40: zbt_zone = 'OVERSOLD'
+    elif zbt_val >= 0.615: zbt_zone = 'THRUST'
+    else: zbt_zone = 'NEUTRAL'
+    
+    # Check for thrust: was oversold (<0.40) and surged to >0.615 within 10 days
+    zbt_thrust = False
+    if zbt_val >= 0.615 and zbt_oversold_recent:
+        zbt_thrust = True
+    
+    # McClellan Oscillator: 19d EMA - 39d EMA of net advances
+    bdf['ema19'] = bdf['net'].ewm(span=19, adjust=False).mean()
+    bdf['ema39'] = bdf['net'].ewm(span=39, adjust=False).mean()
+    bdf['mcclellan'] = bdf['ema19'] - bdf['ema39']
+    mcl_val = float(bdf['mcclellan'].iloc[-1])
+    mcl_prev = float(bdf['mcclellan'].iloc[-2]) if len(bdf) >= 2 else mcl_val
+    mcl_direction = 'RISING' if mcl_val > mcl_prev else 'FALLING'
+    if mcl_val < -100: mcl_zone = 'OVERSOLD'
+    elif mcl_val > 100: mcl_zone = 'OVERBOUGHT'
+    elif mcl_val > 0: mcl_zone = 'POSITIVE'
+    else: mcl_zone = 'NEGATIVE'
+    
+    # McClellan Summation Index (cumulative)
+    mcl_summation = float(bdf['mcclellan'].cumsum().iloc[-1])
+    
+    # %Above 50-day SMA
+    above50, total50 = 0, 0
+    for ticker, df in breadth_data.items():
+        try:
+            c = df['Close']
+            if isinstance(c, pd.DataFrame): c = c.iloc[:,0]
+            if len(c) >= 50:
+                sma50 = float(c.rolling(50).mean().iloc[-1])
+                if not pd.isna(sma50):
+                    total50 += 1
+                    if float(c.iloc[-1]) > sma50:
+                        above50 += 1
+        except: pass
+    pct_above_50 = (above50 / total50 * 100) if total50 > 0 else 0
+    
+    return {
+        'zbt_ema': round(zbt_val, 4),
+        'zbt_ratio': round(zbt_ratio, 4),
+        'zbt_zone': zbt_zone,
+        'zbt_thrust': zbt_thrust,
+        'zbt_oversold_recent': zbt_oversold_recent,
+        'mcclellan': round(mcl_val, 1),
+        'mcl_ema19': round(float(bdf['ema19'].iloc[-1]), 1),
+        'mcl_ema39': round(float(bdf['ema39'].iloc[-1]), 1),
+        'mcl_direction': mcl_direction,
+        'mcl_zone': mcl_zone,
+        'mcl_summation': round(mcl_summation, 0),
+        'pct_above_50sma': round(pct_above_50, 1),
+        'above50_count': above50,
+        'above50_total': total50,
+        'adv': int(bdf['adv'].iloc[-1]),
+        'dec': int(bdf['dec'].iloc[-1]),
+    }
+
+
+def compute_fibonacci_levels(data):
+    """Compute Fibonacci retracement levels for SPY, QQQ, SMH."""
+    fib_results = {}
+    for sym in ['SPY', 'QQQ', 'SMH']:
+        if sym not in data:
+            continue
+        df = data[sym]
+        c = df['Close']
+        if isinstance(c, pd.DataFrame): c = c.iloc[:,0]
+        close = float(c.iloc[-1])
+        
+        sym_fibs = {}
+        for label, days in [('30d', 30), ('60d', 60)]:
+            if len(df) < days:
+                continue
+            recent = df.tail(days)
+            high_col = recent['High']
+            low_col = recent['Low']
+            if isinstance(high_col, pd.DataFrame): high_col = high_col.iloc[:,0]
+            if isinstance(low_col, pd.DataFrame): low_col = low_col.iloc[:,0]
+            high = float(high_col.max())
+            low = float(low_col.min())
+            diff = high - low
+            is_up = close > (high + low) / 2
+            
+            levels = {}
+            for pct in [0.236, 0.382, 0.500, 0.618, 0.786]:
+                if is_up:
+                    level = high - diff * pct
+                else:
+                    level = low + diff * pct
+                dist = (close - level) / close * 100
+                near = abs(dist) < 1.5
+                levels[f'{pct*100:.1f}'] = {'level': round(level, 2), 'dist_pct': round(dist, 1), 'near': near}
+            
+            sym_fibs[label] = {
+                'high': round(high, 2), 'low': round(low, 2),
+                'close': round(close, 2),
+                'trend': 'UP' if is_up else 'DOWN',
+                'levels': levels,
+            }
+        fib_results[sym] = sym_fibs
+    return fib_results
 
 
 def check_signals(data):
@@ -492,6 +645,36 @@ MARKET SIGNAL MONITOR - {timing}
     }
     body += f"   -> {regime_meaning.get(regime,'Check conditions manually')}\n"
 
+    # Crisis Alpha regime commentary
+    body += f"\n  WHAT THIS MEANS RIGHT NOW:\n"
+    if regime=='BULL + VOL COMPRESS':
+        body += f"  Market structure is ideal: price above long-term trend, volatility contracting.\n"
+        body += f"  This is the regime where leveraged equity (UPRO/TQQQ) has the highest risk-adjusted\n"
+        body += f"  returns. RSI dip-buys have full historical edge. Your Non-Equity Sleeve should be\n"
+        body += f"  in T3-T5 tiers (commodities/dollar/SHY) — vol instruments have no edge here.\n"
+        body += f"  Portfolio beta target: 0.70-1.00.\n"
+    elif regime=='BULL + VOL EXPAND':
+        body += f"  Price still above SMA200 (trend intact) but short-term volatility is elevated.\n"
+        body += f"  This is the transition zone — not yet defensive, but stress is building.\n"
+        body += f"  RSI dip-buys still work but with wider drawdowns. Consider reducing position\n"
+        body += f"  sizes on leveraged entries. VIXM/BTAL become relevant hedges.\n"
+        body += f"  Non-Equity Sleeve may be nearing T1-T2 (vol/hedge tiers).\n"
+        body += f"  Portfolio beta target: 0.50-0.80.\n"
+    elif regime=='BEAR RECOVERY':
+        body += f"  SPY is below the 200-day SMA (bear territory) but holding above EMA20,\n"
+        body += f"  which suggests a bounce is underway. This is the most dangerous regime to\n"
+        body += f"  trade — could be a genuine recovery or a bear market rally.\n"
+        body += f"  Dip-buys here have lower conviction. Wait for SMA200 reclaim before adding\n"
+        body += f"  aggressively to leveraged positions. GLD and BTAL provide protection.\n"
+        body += f"  Portfolio beta target: 0.25-0.50.\n"
+    elif regime=='BEAR DEFENSIVE':
+        body += f"  SPY is below both SMA200 and EMA20 — full bear regime. Capital preservation\n"
+        body += f"  is priority. Your Non-Equity Sleeve waterfall should be fully engaged\n"
+        body += f"  (VIXM if VIX>25, SH if RSI>79, else commodities/SHY).\n"
+        body += f"  DO NOT buy dips in leveraged equity unless DRIF gate PASSES.\n"
+        body += f"  Favor GLD, BTAL, KMLM, SHY. Wait for EMA20 crossover as first recovery signal.\n"
+        body += f"  Portfolio beta target: 0.00-0.25.\n"
+
     body += f"\n DEEP VALUE TRIGGER PROXIMITY:\n"
     body += f"   (Distance from each trigger. Negative = trigger has FIRED)\n"
     dv = []
@@ -600,6 +783,23 @@ MARKET SIGNAL MONITOR - {timing}
                 gi={'PASS':'PASS','FAIL':'FAIL'}.get(dd['gate'],'---')
                 body += f"{td:<8} {dd['rsi']:>6.1f} {dd['cum_ret_5d']:>+7.1f}% {dd['cum_ret_7d']:>+7.1f}% {dd['velocity']:>+5.0f}  {gi:<6} {dd['label']:<20}\n"
         body += "\n  Composer gate: RSI(10) < 25 AND cumulative-return(5d) > -5%\n"
+        # DRIF commentary
+        any_pass=any(drif[t].get('gate')=='PASS' for t in ['SPY','QQQ','SMH'] if t in drif)
+        any_fail=any(drif[t].get('gate')=='FAIL' for t in ['SPY','QQQ','SMH'] if t in drif)
+        any_os=any(drif[t].get('gate') in ('PASS','FAIL') for t in ['SPY','QQQ','SMH'] if t in drif)
+        if any_pass and not any_fail:
+            body += "\n  INTERPRETATION: Dip is stabilizing — price found a floor even though RSI\n"
+            body += "  is deeply oversold. Historically, stabilized dips recover reliably.\n"
+            body += "  This is the textbook leveraged entry point. DRIF confirms your RSI signal.\n"
+        elif any_fail:
+            body += "\n  INTERPRETATION: Price is in free-fall — RSI is oversold but the decline\n"
+            body += "  is accelerating, not stabilizing. Falling knives have dramatically worse\n"
+            body += "  win rates (SMH: only 16.7% when gate fails). WAIT for velocity to slow.\n"
+            body += "  The dip-buy fires when cumulative return improves above the gate threshold,\n"
+            body += "  indicating selling exhaustion. Patience here protects capital.\n"
+        elif not any_os:
+            body += "\n  INTERPRETATION: SPY/QQQ/SMH not oversold — velocity gate inactive.\n"
+            body += "  No dip-buy conditions present. Normal operations.\n"
 
     # --- MOVE INDEX ---
     move_st=status.get('move_index',{})
@@ -607,6 +807,26 @@ MARKET SIGNAL MONITOR - {timing}
         body += f"\n{'='*70}\nMOVE INDEX (Rates Volatility)\n{'='*70}\n"
         body += f"Price:    {move_st.get('price',0):.2f}  |  RSI: {move_st.get('rsi',0):.1f}  |  20d Change: {move_st.get('change_20d_pct',0):+.1f}%\n"
         body += f"19A (>115): {'ACTIVE' if move_st.get('price',0)>115 else 'Inactive'} | 19B (20d>50%): {'ACTIVE' if move_st.get('change_20d_pct',0)>50 else 'Inactive'}\n"
+        # MOVE commentary
+        mp=move_st.get('price',0); mc=move_st.get('change_20d_pct',0)
+        if mc>50:
+            body += f"\n  INTERPRETATION: MOVE spiked {mc:+.0f}% in 20 days — extreme rates volatility.\n"
+            body += f"  This is the strongest contrarian equity signal (86% WR 20d). Bond market\n"
+            body += f"  panic tends to be transitory, and equities recover strongly once rates vol\n"
+            body += f"  normalizes. The edge is at 20d hold, NOT next-day (only 58% at 5d).\n"
+            body += f"  Key combo: If SPY RSI drops below 25, the GLD trade becomes near-certain\n"
+            body += f"  (100% WR 20d, n=15). Monitor RSI(10) on MOVE for 19C setup.\n"
+        elif mp>115:
+            body += f"\n  INTERPRETATION: MOVE elevated at {mp:.0f} — rates market is stressed.\n"
+            body += f"  This is a moderate contrarian buy signal (72% WR 20d). Not as powerful\n"
+            body += f"  as the extreme spike signal, but still positive expected value.\n"
+            body += f"  Rates vol spikes tend to resolve. Equities recover as Treasury market\n"
+            body += f"  finds equilibrium. Hold period matters: edge builds over 10-20 days.\n"
+        elif mp<90:
+            body += f"\n  INTERPRETATION: MOVE subdued at {mp:.0f} — rates market calm.\n"
+            body += f"  No MOVE-based signal active. Low MOVE supports risk-on positioning.\n"
+        else:
+            body += f"\n  INTERPRETATION: MOVE at {mp:.0f} — normal range, no signal active.\n"
 
     # --- FRED CREDIT SPREAD ---
     if FRED_API_KEY:
@@ -631,68 +851,130 @@ MARKET SIGNAL MONITOR - {timing}
         except Exception as e:
             print(f"FRED credit spread error: {e}")
 
-    # --- HORMUZ TRANSIT ---
+    # --- HORMUZ TRANSIT (HormuzTracker.com API — daily updates, CC BY 4.0) ---
     try:
-        hz_params={
-            "where":"portid='chokepoint6' AND date >= TIMESTAMP '2026-01-01'",
-            "outFields":"date,n_total,n_tanker,n_container",
-            "orderByFields":"date ASC","resultRecordCount":500,"f":"json",
-        }
-        hz_resp=req_lib.get("https://services9.arcgis.com/weJ1QsnbMYJlCHdG/ArcGIS/rest/services/Daily_Chokepoints_Data/FeatureServer/0/query",params=hz_params,timeout=15)
-        hz_feats=hz_resp.json().get("features",[])
-        if hz_feats:
-            hz_rows=[{"date":datetime.fromtimestamp(f["attributes"]["date"]/1000).strftime("%Y-%m-%d"),
-                       "total":f["attributes"].get("n_total",0) or 0,
-                       "tankers":f["attributes"].get("n_tanker",0) or 0,
-                       "container":f["attributes"].get("n_container",0) or 0} for f in hz_feats]
-            hz_df=pd.DataFrame(hz_rows)
-            crisis_dt=pd.Timestamp("2026-02-28")
-            pre_c=hz_df[pd.to_datetime(hz_df["date"])<crisis_dt]
-            pre_avg=round(pre_c.tail(30)["total"].mean(),1) if len(pre_c)>=7 else 138
-            last7=hz_df.tail(7); avg7=round(last7["total"].mean(),1)
-            latest_hz=hz_df.iloc[-1]
-            pct_n=round((avg7/pre_avg)*100,1) if pre_avg>0 else 0
-            crday=(pd.Timestamp(latest_hz["date"])-crisis_dt).days
-            if avg7>=70: hz_reg="REOPENING"
-            elif avg7>=30: hz_reg="PARTIAL"
-            elif avg7>=5: hz_reg="TRICKLE"
-            else: hz_reg="CLOSED"
-            body += f"\n{'='*70}\nSTRAIT OF HORMUZ — DAY {crday}\n{'='*70}\n"
-            body += f"Status:        {hz_reg}\n"
-            body += f"Latest:        {latest_hz['total']} vessels ({latest_hz['tankers']} tankers) on {latest_hz['date']}\n"
-            body += f"7d Average:    {avg7} vessels/day\n"
-            body += f"Pre-crisis:    {pre_avg} vessels/day\n"
-            body += f"% of Normal:   {pct_n}%\n\nLast 7 days:\n"
-            for _,row in last7.iterrows():
-                body += f"  {row['date']}: {int(row['total']):>3} total  ({int(row['tankers'])} tankers)\n"
+        hz_resp=req_lib.get("https://www.hormuztracker.com/api/data",timeout=15)
+        hz_data=hz_resp.json()
+        hz_crisis=hz_data.get('crisis',{})
+        hz_ships=hz_crisis.get('shipCount',{})
+        hz_meta=hz_data.get('meta',{})
+        hz_day=hz_meta.get('day',0)
+        hz_current=hz_ships.get('current',0)
+        hz_baseline=hz_ships.get('baseline',138)
+        hz_drop=hz_ships.get('dropPercent',0)
+        hz_status=hz_crisis.get('hormuzStatus','unknown')
+        hz_severity=hz_crisis.get('severityScore',0)
+        hz_verified=hz_ships.get('lastVerified','')[:10]
+        hz_trapped=hz_crisis.get('shipsTrapped',{})
+        hz_tl=hz_crisis.get('timeline',[])
+
+        body += f"\n{'='*70}\nSTRAIT OF HORMUZ — DAY {hz_day}\n{'='*70}\n"
+        body += f"Status:        {'🔴 CLOSED' if hz_status=='closed' else '🟡 RESTRICTED' if hz_status=='restricted' else '🟢 OPEN'}  (Severity: {hz_severity}/10)\n"
+        body += f"Ship Count:    ~{hz_current}/day  (baseline: {hz_baseline}/day, ↓{hz_drop}%)\n"
+        body += f"Verified:      {hz_verified}\n"
+        body += f"Trapped:       ~{hz_trapped.get('insideGulf',0):,} inside Gulf | {hz_trapped.get('seafarersStranded',0):,} seafarers stranded\n"
+
+        # Kill-switch assessment
+        if hz_current >= 70:
+            body += f"\n🟢 KILL-SWITCH TRIGGERED — transit >70/day, blockade may be breaking\n"
+            body += f"   → Watch for insurance reinstatement and carrier resumption.\n"
+            body += f"   → If sustained 5 days: UNG/SLV/VLO short, oil longs at risk.\n"
+        elif hz_current >= 20:
+            body += f"\n🟡 PARTIAL REOPENING — transit rising but below commercial viability\n"
+            body += f"   → Permission-based transit only. Insurance still withdrawn.\n"
+            body += f"   → Brent likely stays elevated until insurance reinstated.\n"
+        else:
+            body += f"\n❌ Kill-switch NOT triggered (need >70/day sustained 5 days)\n"
+            body += f"   → Blockade intact. Dead-hand framework applies: insurance/reinsurance\n"
+            body += f"     breakdown keeps strait commercially closed even if military situation\n"
+            body += f"     improves. Reinstating P&I cover takes weeks after physical resolution.\n"
+            body += f"   → Your Hormuz positions (UNG/SLV/VLO/STNG/CF/MOS) remain supported.\n"
+
+        # Latest timeline events
+        if hz_tl:
+            body += f"\nLatest developments:\n"
+            for evt in hz_tl[-3:]:
+                body += f"  Day {evt.get('day','')} ({evt.get('date','')}):\n"
+                body += f"    {evt.get('event','')}\n"
+                body += f"    Impact: {evt.get('impact','')}\n"
+
+        body += f"\nSource: HormuzTracker.com (updated daily, CC BY 4.0)\n"
     except Exception as e:
         print(f"Hormuz data error: {e}")
 
-    # --- MARKET BREADTH (ZBT / A/D Lines) ---
-    breadth_file=os.path.join(BREADTH_CACHE_DIR,'daily_breadth.csv')
-    if os.path.exists(breadth_file):
-        try:
-            bdf=pd.read_csv(breadth_file,parse_dates=["date"])
-            if len(bdf)>0:
-                total=bdf["nyse_advances"]+bdf["nyse_declines"]
-                bdf["adv_ratio"]=np.where(total>0,bdf["nyse_advances"]/total,np.nan)
-                bdf["zbt_ema"]=bdf["adv_ratio"].ewm(alpha=0.1,adjust=False).mean()
-                zv=bdf["zbt_ema"].iloc[-1]; ar=bdf["adv_ratio"].iloc[-1]
-                zz="OVERSOLD" if zv<0.40 else "THRUST" if zv>=0.615 else "NEUTRAL"
-                body += f"\n{'='*70}\nMARKET BREADTH INTELLIGENCE\n{'='*70}\n"
-                body += f"ZBT Zone:       {zz}\n"
-                body += f"Advance Ratio:  {ar:.4f}\n"
-                body += f"10d EMA:        {zv:.4f}  (oversold <0.40, thrust >0.615)\n"
-                for tier,label in [("large","Large"),("mid","Mid"),("small","Small")]:
-                    ac,dc=f"{tier}_advances",f"{tier}_declines"
-                    if ac in bdf.columns:
-                        net=bdf[ac]-bdf[dc]; adl=net.cumsum()
-                        w=min(50,len(adl))
-                        if w>=10:
-                            slope=np.polyfit(np.arange(w),adl.tail(w).values,1)[0]
-                            body += f"  {label:8s} A/D: {'UP' if slope>0 else 'DOWN':4s}  Slope: {slope:>8.1f}\n"
-        except Exception as e:
-            print(f"Breadth data error: {e}")
+    # --- MARKET INTERNALS (ZBT, McClellan, %Above50SMA, Fibonacci) ---
+    breadth = status.get('breadth', {})
+    if breadth:
+        body += f"\n{'='*70}\nMARKET INTERNALS\n{'='*70}\n"
+        # ZBT
+        zbt_icon = {'OVERSOLD':'🔴','THRUST':'🟢','NEUTRAL':'⚪'}.get(breadth.get('zbt_zone',''),'⚪')
+        body += f"\nBREADTH INDICATORS\n"
+        body += f"  ZBT (10d EMA):         {breadth.get('zbt_ema',0):.4f}   {zbt_icon} {breadth.get('zbt_zone','?')}"
+        if breadth.get('zbt_oversold_recent') and breadth.get('zbt_zone') != 'OVERSOLD':
+            body += " (was oversold in last 10d — watch for thrust)"
+        if breadth.get('zbt_thrust'):
+            body += "\n  *** ZBT THRUST SIGNAL *** — extremely rare, historically near-100% forward returns"
+        body += f"\n  McClellan Oscillator:  {breadth.get('mcclellan',0):>+7.1f}   {breadth.get('mcl_zone','?')} ({breadth.get('mcl_direction','?')})"
+        body += f"\n    19d EMA: {breadth.get('mcl_ema19',0):>+7.1f}  |  39d EMA: {breadth.get('mcl_ema39',0):>+7.1f}  |  Summation: {breadth.get('mcl_summation',0):>+.0f}"
+        body += f"\n  %Above 50d SMA:        {breadth.get('pct_above_50sma',0):>5.1f}%   ({breadth.get('above50_count',0)}/{breadth.get('above50_total',0)})"
+        pct50 = breadth.get('pct_above_50sma', 50)
+        if pct50 < 25:
+            body += "  🔴 WASHED OUT"
+        elif pct50 < 40:
+            body += "  🟡 WEAK"
+        elif pct50 > 75:
+            body += "  🟡 OVEREXTENDED"
+        body += f"\n\n  Advancing: {breadth.get('adv',0)}  |  Declining: {breadth.get('dec',0)}  |  Ratio: {breadth.get('zbt_ratio',0):.3f}\n"
+
+        # Market internals interpretation
+        body += f"\n  INTERPRETATION:\n"
+        if breadth.get('zbt_zone') == 'OVERSOLD' and breadth.get('mcl_zone') == 'OVERSOLD':
+            body += f"  Breadth deeply oversold across multiple measures. This is the setup that\n"
+            body += f"  precedes ZBT thrust signals. If ZBT surges from <0.40 to >0.615 within\n"
+            body += f"  10 days, it's one of the most reliable buy signals in market history.\n"
+            body += f"  RSI dip-buy signals have maximum conviction when breadth confirms.\n"
+        elif pct50 < 30:
+            body += f"  Only {pct50:.0f}% of stocks above 50d SMA — breadth washed out.\n"
+            body += f"  Consistent with broad selling pressure, not just mega-cap rotation.\n"
+            body += f"  Pairs well with dip-buy signals if McClellan starts improving.\n"
+        elif breadth.get('mcl_direction') == 'FALLING' and pct50 > 60:
+            body += f"  Breadth momentum deteriorating despite healthy %Above50. Early warning\n"
+            body += f"  that rally may be narrowing. Watch for %Above50 to follow McClellan down.\n"
+        elif breadth.get('zbt_zone') == 'THRUST':
+            body += f"  ZBT thrust signal fired — historically extremely bullish. Near-100% forward\n"
+            body += f"  returns at 6 and 12 months. Maximum conviction for equity exposure.\n"
+        else:
+            body += f"  Breadth in normal range. No extreme readings. Standard signal operations.\n"
+
+    # --- FIBONACCI CONTEXT ---
+    fib = status.get('fibonacci', {})
+    if fib:
+        body += f"\n{'─'*50}\nFIBONACCI CONTEXT\n"
+        for sym in ['SPY', 'QQQ', 'SMH']:
+            if sym not in fib:
+                continue
+            for period, pdata in fib[sym].items():
+                close = pdata['close']
+                trend = pdata['trend']
+                body += f"\n  {sym} ({period}): High={pdata['high']:.2f} Low={pdata['low']:.2f} Close={close:.2f} [{trend}]\n"
+                for pct_label, lvl in pdata['levels'].items():
+                    near_marker = " ◄ NEAR" if lvl['near'] else ""
+                    body += f"    {pct_label:>5}% ret: {lvl['level']:>8.2f}  ({lvl['dist_pct']:+.1f}%){near_marker}\n"
+                # One-line interpretation for the 30d window
+                if period == '30d':
+                    l236 = pdata['levels'].get('23.6', {})
+                    l382 = pdata['levels'].get('38.2', {})
+                    l618 = pdata['levels'].get('61.8', {})
+                    if trend == 'DOWN':
+                        if l236.get('dist_pct', 0) < -1:
+                            body += f"    → Below 23.6% retracement. Downtrend intact, no meaningful bounce yet.\n"
+                        elif l236.get('near'):
+                            body += f"    → Testing 23.6% retracement. Shallow bounce — needs {l382.get('level',0):.0f} (38.2%) for healthy correction.\n"
+                        elif l382.get('near'):
+                            body += f"    → At 38.2% retracement — correction zone. Watch for reversal or continuation.\n"
+                        elif l618.get('near'):
+                            body += f"    → Deep retracement at 61.8%. Prior trend likely resuming if this holds.\n"
+                break  # Only show 30d in main section, 60d available in fib dict
 
     # --- ROLLING BRIER SCORES ---
     if os.path.exists(BRIER_JSON_PATH):
@@ -758,9 +1040,36 @@ def main():
     print("Downloading market data...")
     data = download_data(tickers)
     print(f"Downloaded {len(data)} tickers")
+
+    # Download breadth tickers for Market Internals (ZBT, McClellan, %Above50SMA)
+    print("Downloading breadth tickers...")
+    breadth_raw = download_data(BREADTH_TICKERS, period='60d')
+    print(f"Downloaded {len(breadth_raw)} breadth tickers")
+
     rolling_betas = calculate_rolling_betas(data)
     alerts, status = check_signals(data)
     status['rolling_betas'] = rolling_betas
+
+    # Compute Market Internals
+    breadth = compute_market_breadth(breadth_raw)
+    status['breadth'] = breadth
+    if breadth:
+        print(f"  ZBT: {breadth['zbt_ema']:.4f} ({breadth['zbt_zone']}) | McClellan: {breadth['mcclellan']:+.1f} | %Above50: {breadth['pct_above_50sma']:.1f}%")
+        # Add breadth-based alerts
+        if breadth['zbt_thrust']:
+            alerts.append(('[BUY] ZBT THRUST SIGNAL','ZBT surged from oversold to >0.615 — historically near-100% forward returns\n   Extremely rare. Maximum conviction for equity exposure.','buy'))
+        if breadth['zbt_zone'] == 'OVERSOLD':
+            alerts.append(('[WATCH] ZBT OVERSOLD','ZBT EMA < 0.40 — breadth precondition for thrust signal\n   Monitor for rapid recovery to >0.615 within 10 days','watch'))
+        if breadth['mcclellan'] < -100:
+            alerts.append(('[WATCH] McCLELLAN OVERSOLD',f"McClellan Oscillator at {breadth['mcclellan']:+.1f} — breadth capitulation\n   Pairs with RSI dip-buys for high conviction. Watch for zero crossover.",'watch'))
+        elif breadth['mcclellan'] > 100:
+            alerts.append(('[WATCH] McCLELLAN OVERBOUGHT',f"McClellan Oscillator at {breadth['mcclellan']:+.1f} — breadth stretched\n   Pairs with SPY RSI>79 for hedge signals.",'watch'))
+        if breadth['pct_above_50sma'] < 25:
+            alerts.append(('[WATCH] BREADTH WASHED OUT',f"Only {breadth['pct_above_50sma']:.0f}% above 50d SMA — broad selling\n   Supports dip-buy signals if McClellan starts improving.",'watch'))
+
+    # Compute Fibonacci levels
+    fib = compute_fibonacci_levels(data)
+    status['fibonacci'] = fib
     if alerts:
         buy_n=len([a for a in alerts if a[2]=='buy'])
         exit_n=len([a for a in alerts if a[2] in ['exit','short']])
