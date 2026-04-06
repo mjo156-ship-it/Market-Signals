@@ -1,13 +1,15 @@
-# Signal Monitor v4.0 - Updated 2026-03-05
-# Monitors Oil Supply Shock, Dispersion Regime, Commodity Playbook,
-# KOLD Oil Reversal, AND Combo Signals + all existing signals
+# Signal Monitor v4.5 - Updated 2026-04-05
+# Monitors all backtested signals across 60+ tickers
+# v4.5: FXY carry trade, CPER copper regime, LABU/SOXL dip buy,
+#        UVXY SMA200 cross, Bayesian Kelly on alerts
+#        First email changed to 11:00 AM ET (was 3:15 PM)
 
 name: Signal Monitor
 
 on:
   schedule:
-    # 3:15 PM Eastern = 20:15 UTC (pre-close preview)
-    - cron: '15 20 * * 1-5'
+    # 11:00 AM Eastern = 16:00 UTC (mid-day preview)
+    - cron: '00 16 * * 1-5'
     # 4:05 PM Eastern = 21:05 UTC (market close confirmation)
     - cron: '05 21 * * 1-5'
   workflow_dispatch:
@@ -36,17 +38,37 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install yfinance pandas numpy
+          pip install yfinance pandas numpy scipy requests
+      
+      - name: Restore cached data
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./data/breadth
+            ./brier_scores.json
+          key: signal-data-${{ github.run_number }}
+          restore-keys: |
+            signal-data-
+
+      - name: Fetch Polygon breadth data
+        if: env.POLYGON_API_KEY != ''
+        env:
+          POLYGON_API_KEY: ${{ secrets.POLYGON_API_KEY }}
+        run: |
+          python .github/workflows/fetch_polygon_grouped.py || echo "Polygon fetch failed — using yfinance fallback"
       
       - name: Determine run mode
         id: mode
         run: |
+          # Check if this is the 11:00 AM run (16:00 UTC)
           HOUR=$(date -u +%H)
           MINUTE=$(date -u +%M)
           
+          # If manually triggered, use the input
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
-          elif [ "$HOUR" == "20" ] && [ "$MINUTE" -lt "30" ]; then
+          # If it's around 16:00 UTC (11:00 AM ET), it's preclose
+          elif [ "$HOUR" == "16" ] && [ "$MINUTE" -lt "30" ]; then
             echo "mode=preclose" >> $GITHUB_OUTPUT
           else
             echo "mode=close" >> $GITHUB_OUTPUT
@@ -60,7 +82,7 @@ jobs:
           PHONE_EMAIL: ${{ secrets.PHONE_EMAIL }}
         run: |
           if [ "${{ steps.mode.outputs.mode }}" == "preclose" ]; then
-            python .github/workflows/signal_monitor_complete-4.py preclose
+            python .github/workflows/signal_monitor_complete.py preclose
           else
             python .github/workflows/signal_monitor_complete.py
           fi
