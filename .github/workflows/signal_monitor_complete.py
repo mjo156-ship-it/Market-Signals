@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive Market Signal Monitor v4.5
+Comprehensive Market Signal Monitor v4.7
 ========================================
 Monitors all backtested trading signals and sends alerts.
 
@@ -8,6 +8,13 @@ SCHEDULE: Two emails daily (weekdays)
 - 11:00 AM ET: Mid-day preview
 - 4:05 PM ET: Market close confirmation
 
+v4.7: Composer dry-run trades in daily emails (close email only)
+      Portfolio & symphony win rate tracking (daily/weekly/monthly)
+      Composer API integration for live portfolio data
+v4.6: SPY/TLT Mid-Month Contrarian Rotation (Group 25)
+      Robot James signal: buy MTD loser on trading day 15, hold through month-end
+      63.7% WR, Sharpe 1.03, MaxDD -8.6%, SPY R=-0.03, n=281
+      Manual execution only — daily rebalance kills edge
 v4.5: FXY carry trade (Group 20), CPER copper regime (Group 21),
       LABU/SOXL 3x dip buy, UVXY SMA200 cross (Group 29),
       Bayesian Kelly on alerts, confidence tier labels,
@@ -20,10 +27,12 @@ v4.2: Rolling beta, GLD & miners (Group 18)
 """
 
 import os
+import json
 import yfinance as yf
 import pandas as pd
 import numpy as np
 import smtplib
+import requests as req_lib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
@@ -34,6 +43,11 @@ SENDER_PASSWORD = os.environ.get('SENDER_PASSWORD', '')
 RECIPIENT_EMAIL = os.environ.get('RECIPIENT_EMAIL', '')
 PHONE_EMAIL = os.environ.get('PHONE_EMAIL', '')
 IS_PRECLOSE = len(sys.argv) > 1 and sys.argv[1] == 'preclose'
+
+# Composer API (optional — set COMPOSER_KEY_ID and COMPOSER_KEY_SECRET)
+COMPOSER_KEY_ID = os.environ.get('COMPOSER_KEY_ID', '')
+COMPOSER_KEY_SECRET = os.environ.get('COMPOSER_KEY_SECRET', '')
+COMPOSER_BASE = "https://api.composer.trade/api/v0.1"
 
 def calculate_rsi_wilder(prices, period):
     delta = prices.diff()
@@ -418,6 +432,43 @@ def check_signals(data):
     if 'SPY' in indicators and indicators['SPY']['cumRet10d'] < -5 and usdu_r > 70:
         alerts.append(('[EXIT] DANGER: KNIFE+DOLLAR', f"SPY CumRet10d={indicators['SPY']['cumRet10d']:.1f}%+USDU>{usdu_r:.1f} | 20% WR", 'exit'))
 
+    # === GROUP 25: SPY/TLT Mid-Month Contrarian Rotation ===
+    # Robot James signal. Trading day 15: buy the MTD loser, hold through month-end.
+    # 63.7% WR, Sharpe 1.03, MaxDD -8.6%, SPY R = -0.03, n=281
+    # MANUAL EXECUTION ONLY — daily rebalance kills the edge.
+    if 'SPY' in data and 'TLT' in data:
+        try:
+            spy_cl = data['SPY']['Close']
+            tlt_cl = data['TLT']['Close']
+            if isinstance(spy_cl, pd.DataFrame): spy_cl = spy_cl.iloc[:, 0]
+            if isinstance(tlt_cl, pd.DataFrame): tlt_cl = tlt_cl.iloc[:, 0]
+            today = spy_cl.index[-1]
+            cur_month = today.month; cur_year = today.year
+            spy_month = spy_cl[(spy_cl.index.month == cur_month) & (spy_cl.index.year == cur_year)]
+            tlt_month = tlt_cl[(tlt_cl.index.month == cur_month) & (tlt_cl.index.year == cur_year)]
+            td_num = len(spy_month)
+            if len(spy_month) >= 1 and len(tlt_month) >= 1:
+                spy_mtd = (sf(spy_cl.iloc[-1]) / sf(spy_month.iloc[0]) - 1) * 100
+                tlt_mtd = (sf(tlt_cl.iloc[-1]) / sf(tlt_month.iloc[0]) - 1) * 100
+                pick = 'TLT' if spy_mtd > tlt_mtd else 'SPY'
+                status['midmonth'] = {'td': td_num, 'spy_mtd': round(spy_mtd, 2), 'tlt_mtd': round(tlt_mtd, 2), 'pick': pick}
+                if td_num == 15:
+                    alerts.append(('[BUY] MID-MONTH ROTATION [T1]',
+                        f"Trading day 15! SPY MTD={spy_mtd:+.2f}% vs TLT MTD={tlt_mtd:+.2f}%\n"
+                        f"   → Buy {pick} tomorrow, hold through month-end\n"
+                        f"   63.7% WR, +0.63% avg, Sharpe 1.03, SPY R=-0.03 | n=281\n"
+                        f"   MANUAL EXECUTION ONLY", 'buy'))
+                elif td_num == 14:
+                    alerts.append(('[WATCH] MID-MONTH PREVIEW',
+                        f"Trading day 14 — signal fires TOMORROW\n"
+                        f"   Current: SPY MTD={spy_mtd:+.2f}% vs TLT MTD={tlt_mtd:+.2f}% | Leaning: {pick}", 'watch'))
+                elif td_num == 16:
+                    alerts.append(('[WATCH] MID-MONTH REMINDER',
+                        f"Trading day 16 — signal fired yesterday\n"
+                        f"   Should be holding: {pick} through month-end", 'watch'))
+        except Exception as e:
+            print(f"Error in Group 25 mid-month: {e}")
+
     # === Regime ===
     spy_d = indicators.get('SPY', {})
 
@@ -511,7 +562,7 @@ def compute_rolling_betas(data, regime='UNKNOWN'):
     return results
 
 
-def format_email(alerts, status, data, is_preclose=False):
+def format_email(alerts, status, data, is_preclose=False, composer_trades=None, composer_perf=None):
     now = datetime.now()
     timing = "MID-DAY PREVIEW (11:00 AM)" if is_preclose else "MARKET CLOSE CONFIRMATION (4:05 PM)"
     indicators = status.get('indicators', {})
@@ -618,6 +669,20 @@ MARKET SIGNAL MONITOR - {timing}
         c = indicators['CPER']
         body += f"\n{'='*70}\nCPER COPPER REGIME (Group 21)\n{'='*70}\nCPER: ${c['price']:.2f} {'> EMA9' if c['above_ema9'] else '< EMA9'} | SPY {'> EMA9' if indicators.get('SPY',{}).get('above_ema9') else '< EMA9'}\n"
 
+    # Mid-Month Rotation (Group 25)
+    mm = status.get('midmonth', {})
+    if mm:
+        td = mm['td']; spy_mtd = mm['spy_mtd']; tlt_mtd = mm['tlt_mtd']; pick = mm['pick']
+        days_to = 15 - td
+        body += f"\n{'='*70}\nMID-MONTH ROTATION (Group 25)\n{'='*70}\n"
+        body += f"Trading Day:  {td} of month\nSPY MTD:      {spy_mtd:+.2f}%\nTLT MTD:      {tlt_mtd:+.2f}%\nCurrent Lean: Buy {pick} (the MTD loser)\n"
+        if days_to > 0:
+            body += f"Signal In:    {days_to} trading day(s)\n"
+        elif days_to == 0:
+            body += f">>> SIGNAL DAY — EXECUTE TOMORROW <<<\n"
+        else:
+            body += f"Signal Fired: {abs(days_to)} day(s) ago — should be holding {pick}\n"
+
     # DRIF
     drif = status.get('drif', {})
     if drif:
@@ -654,6 +719,63 @@ MARKET INTERNALS (Polygon Breadth)
                 body += " *** ZBT THRUST SIGNAL — historically near-100% forward returns ***\n"
         except Exception as e:
             print(f"  Breadth JSON read error: {e}")
+
+    # Composer Dry-Run Trades (close email only)
+    if composer_trades and not is_preclose:
+        body += f"\n{'='*70}\nCOMPOSER PENDING TRADES (Dry Run)\n{'='*70}\n"
+        for acct in composer_trades:
+            body += f"\n  {acct['account']}:\n"
+            for sym in acct['symphonies']:
+                trades = sym['trades']
+                if not trades:
+                    continue
+                body += f"  {sym['symphony']} (${sym['value']:,.0f})\n"
+                for t in trades:
+                    arrow = '→' if t['prev_weight'] != t['next_weight'] else '='
+                    body += f"    {t['side']:>4} {t['ticker']:<6} ${abs(t['notional']):>10,.2f}  {t['prev_weight']:>5.1f}% {arrow} {t['next_weight']:>5.1f}%\n"
+        body += f"\n  NOTE: Trades execute at next rebalance. Dry-run is a preview, not a commitment.\n"
+
+    # Composer Portfolio Performance & Win Rates
+    if composer_perf:
+        body += f"\n{'='*70}\nPORTFOLIO PERFORMANCE & WIN RATES\n{'='*70}\n"
+
+        # Per-account summary
+        for acct in composer_perf.get('accounts', []):
+            wr = acct.get('win_rates', {})
+            body += f"\n  {acct['account']}: ${acct['value']:,.0f} | Today: {acct['today_pct']:+.2f}%\n"
+
+            if wr:
+                streak = wr.get('streak', 0)
+                streak_str = f"+{streak}d" if streak > 0 else f"{streak}d"
+                streak_label = "winning" if streak > 0 else "losing"
+                body += f"  Win Rates: "
+                parts = []
+                if 'daily_20d' in wr: parts.append(f"20d:{wr['daily_20d']:.0f}%")
+                if 'daily_60d' in wr: parts.append(f"60d:{wr['daily_60d']:.0f}%")
+                if 'daily_all' in wr: parts.append(f"All:{wr['daily_all']:.0f}%")
+                body += ' | '.join(parts)
+                if 'weekly_12w' in wr: body += f" | Wk(12w):{wr['weekly_12w']:.0f}%"
+                if 'monthly_all' in wr: body += f" | Mo:{wr['monthly_all']:.0f}%"
+                body += f" | Streak: {streak_str} ({streak_label})\n"
+
+            # Symphony table
+            syms = acct.get('symphonies', [])
+            if syms:
+                body += f"  {'Symphony':<28} {'Value':>10} {'Today':>8} {'Ann.Ret':>8} {'Sharpe':>7} {'MaxDD':>7}\n"
+                body += f"  {'-'*68}\n"
+                for s in sorted(syms, key=lambda x: -(x.get('value') or 0)):
+                    name = s['name'][:27]
+                    body += f"  {name:<28} ${s['value']:>9,.0f} {s['today_pct']:>+7.2f}% {s['ann_return']:>+7.1f}% {s['sharpe']:>6.2f} {s['max_dd']:>+6.1f}%\n"
+
+        # Consolidated win rates
+        cwr = composer_perf.get('consolidated_wr', {})
+        if cwr:
+            body += f"\n  CONSOLIDATED WIN RATES:\n"
+            parts = []
+            if 'daily_20d' in cwr: parts.append(f"20d: {cwr['daily_20d']:.0f}%")
+            if 'daily_60d' in cwr: parts.append(f"60d: {cwr['daily_60d']:.0f}%")
+            if 'daily_all' in cwr: parts.append(f"All-time: {cwr['daily_all']:.0f}%")
+            body += f"  Daily: {' | '.join(parts)}\n"
 
     # Fibonacci
     body += f"\n{'='*70}\nFIBONACCI CONTEXT\n{'='*70}\n"
@@ -696,9 +818,204 @@ def send_email(subject, body):
         print(f"Email failed: {e}"); return False
 
 
+# =============================================================================
+# COMPOSER API — DRY RUN + PERFORMANCE
+# =============================================================================
+def _composer_get(path, timeout=15):
+    if not COMPOSER_KEY_ID or not COMPOSER_KEY_SECRET:
+        return None
+    try:
+        resp = req_lib.get(f"{COMPOSER_BASE}{path}",
+            headers={"x-api-key-id": COMPOSER_KEY_ID, "authorization": f"Bearer {COMPOSER_KEY_SECRET}"},
+            timeout=timeout)
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as e:
+        print(f"  Composer API error ({path}): {e}")
+        return None
+
+def _composer_post(path, payload=None, timeout=15):
+    if not COMPOSER_KEY_ID or not COMPOSER_KEY_SECRET:
+        return None
+    try:
+        resp = req_lib.post(f"{COMPOSER_BASE}{path}",
+            headers={"x-api-key-id": COMPOSER_KEY_ID, "authorization": f"Bearer {COMPOSER_KEY_SECRET}",
+                      "content-type": "application/json"},
+            json=payload or {}, timeout=timeout)
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as e:
+        print(f"  Composer API error ({path}): {e}")
+        return None
+
+
+def fetch_composer_dry_run():
+    """Fetch pending rebalance trades from Composer dry-run API."""
+    if not COMPOSER_KEY_ID:
+        return None
+    import time as _t
+    print("  Fetching Composer dry-run trades...")
+    result = _composer_post("/dry-run", {"send_segment_event": False})
+    if not result:
+        return None
+
+    trades_by_account = []
+    for acct in result:
+        acct_name = acct.get('account_name', acct.get('account_type', 'Unknown'))
+        dry_run = acct.get('dry_run_result', {})
+        acct_trades = []
+        for sym_id, details in dry_run.items():
+            sym_name = details.get('symphony_name', sym_id[:12])
+            rebalanced = details.get('rebalanced', False)
+            trades = details.get('recommended_trades', [])
+            sym_val = details.get('symphony_value', 0)
+            if trades:
+                acct_trades.append({
+                    'symphony': sym_name,
+                    'value': sym_val,
+                    'rebalanced': rebalanced,
+                    'trades': [{
+                        'ticker': t.get('ticker', ''),
+                        'notional': t.get('notional', 0),
+                        'quantity': t.get('quantity', 0),
+                        'side': 'BUY' if t.get('notional', 0) > 0 else 'SELL',
+                        'prev_weight': round((t.get('prev_weight', 0) or 0) * 100, 1),
+                        'next_weight': round((t.get('next_weight', 0) or 0) * 100, 1),
+                    } for t in trades if abs(t.get('notional', 0)) > 1],
+                })
+        if acct_trades:
+            trades_by_account.append({'account': acct_name, 'symphonies': acct_trades})
+
+    print(f"  Composer dry-run: {sum(len(a['symphonies']) for a in trades_by_account)} symphonies with pending trades")
+    return trades_by_account
+
+
+def fetch_composer_performance():
+    """Fetch portfolio history and compute win rates."""
+    if not COMPOSER_KEY_ID:
+        return None
+    import time as _t
+    print("  Fetching Composer performance data...")
+
+    acct_resp = _composer_get("/accounts/list")
+    if not acct_resp or 'accounts' not in acct_resp:
+        return None
+
+    all_performance = []
+    consolidated_daily_rets = []
+
+    for acct in acct_resp['accounts']:
+        aid = acct['account_uuid']
+        atype = acct.get('account_type', 'Unknown')
+        _t.sleep(1.1)
+
+        # Get symphony stats (has today's change, annualized return, sharpe, etc.)
+        sym_stats = _composer_get(f"/portfolio/accounts/{aid}/symphony-stats-meta")
+        _t.sleep(1.1)
+
+        # Get portfolio history for win rate calculation
+        port_hist = _composer_get(f"/portfolio/accounts/{aid}/portfolio-history")
+        _t.sleep(1.1)
+
+        # Get total stats
+        total_stats = _composer_get(f"/portfolio/accounts/{aid}/total-stats")
+
+        # Compute portfolio-level win rates from history
+        portfolio_wr = {}
+        if port_hist and 'series' in port_hist and len(port_hist['series']) > 5:
+            vals = np.array(port_hist['series'], dtype=float)
+            daily_rets = np.diff(vals) / vals[:-1]
+            consolidated_daily_rets.extend(daily_rets.tolist())
+
+            n = len(daily_rets)
+            # Daily win rate (trailing windows)
+            if n >= 20:
+                portfolio_wr['daily_20d'] = round(np.mean(daily_rets[-20:] > 0) * 100, 1)
+            if n >= 60:
+                portfolio_wr['daily_60d'] = round(np.mean(daily_rets[-60:] > 0) * 100, 1)
+            portfolio_wr['daily_all'] = round(np.mean(daily_rets > 0) * 100, 1)
+
+            # Weekly win rate (group into 5-day blocks)
+            if n >= 10:
+                weekly_rets = []
+                for i in range(0, n - 4, 5):
+                    chunk = vals[i:i+6]
+                    if len(chunk) >= 2:
+                        weekly_rets.append(chunk[-1] / chunk[0] - 1)
+                if weekly_rets:
+                    portfolio_wr['weekly_all'] = round(np.mean(np.array(weekly_rets) > 0) * 100, 1)
+                    if len(weekly_rets) >= 12:
+                        portfolio_wr['weekly_12w'] = round(np.mean(np.array(weekly_rets[-12:]) > 0) * 100, 1)
+
+            # Monthly win rate (group into ~21-day blocks)
+            if n >= 42:
+                monthly_rets = []
+                for i in range(0, n - 20, 21):
+                    chunk = vals[i:i+22]
+                    if len(chunk) >= 2:
+                        monthly_rets.append(chunk[-1] / chunk[0] - 1)
+                if monthly_rets:
+                    portfolio_wr['monthly_all'] = round(np.mean(np.array(monthly_rets) > 0) * 100, 1)
+
+            # Current streak
+            streak = 0
+            for r in reversed(daily_rets):
+                if r > 0:
+                    streak += 1
+                else:
+                    break
+            if streak == 0:
+                for r in reversed(daily_rets):
+                    if r <= 0:
+                        streak -= 1
+                    else:
+                        break
+            portfolio_wr['streak'] = streak
+
+        # Parse symphonies
+        symphonies = []
+        if sym_stats and 'symphonies' in sym_stats:
+            for s in sym_stats['symphonies']:
+                symphonies.append({
+                    'name': s.get('name', 'Unknown'),
+                    'value': s.get('value', 0),
+                    'today_pct': round((s.get('last_percent_change', 0) or 0) * 100, 2),
+                    'ann_return': round((s.get('annualized_rate_of_return', 0) or 0) * 100, 1),
+                    'sharpe': round(s.get('sharpe_ratio', 0) or 0, 2),
+                    'max_dd': round((s.get('max_drawdown', 0) or 0) * 100, 1),
+                })
+
+        acct_value = total_stats.get('portfolio_value', 0) if total_stats else 0
+        acct_today_pct = total_stats.get('todays_percent_change', 0) if total_stats else 0
+        label = 'Roth IRA' if 'roth' in atype.lower() else 'Traditional IRA' if 'trad' in atype.lower() else atype
+
+        all_performance.append({
+            'account': label,
+            'value': acct_value,
+            'today_pct': round(acct_today_pct * 100, 2) if acct_today_pct and abs(acct_today_pct) < 1 else round(acct_today_pct, 2) if acct_today_pct else 0,
+            'win_rates': portfolio_wr,
+            'symphonies': symphonies,
+        })
+
+    # Consolidated win rates
+    consolidated_wr = {}
+    if consolidated_daily_rets:
+        dr = np.array(consolidated_daily_rets)
+        n = len(dr)
+        if n >= 20:
+            consolidated_wr['daily_20d'] = round(np.mean(dr[-20:] > 0) * 100, 1)
+        if n >= 60:
+            consolidated_wr['daily_60d'] = round(np.mean(dr[-60:] > 0) * 100, 1)
+        consolidated_wr['daily_all'] = round(np.mean(dr > 0) * 100, 1)
+
+    print(f"  Composer performance: {len(all_performance)} accounts, {sum(len(a['symphonies']) for a in all_performance)} symphonies")
+    return {'accounts': all_performance, 'consolidated_wr': consolidated_wr}
+
+
 def main():
-    print(f"Signal Monitor v4.5 at {datetime.now()}")
+    print(f"Signal Monitor v4.7 at {datetime.now()}")
     print(f"Mode: {'MID-DAY (11:00 AM)' if IS_PRECLOSE else 'MARKET CLOSE (4:05 PM)'}")
+    print(f"Composer API: {'configured' if COMPOSER_KEY_ID else 'not set'}")
     tickers = [
         'SMH','SPY','QQQ','IWM','XLP','XLU','XLV',
         'GLD','TLT','HYG','LQD','TMV','USDU','UCO','USO','BOIL',
@@ -715,12 +1032,24 @@ def main():
     data = download_data(tickers)
     print(f"Downloaded {len(data)} tickers")
     alerts, status = check_signals(data)
+
+    # Composer data (close email only for dry-run, both for performance)
+    composer_trades = None
+    composer_perf = None
+    if COMPOSER_KEY_ID:
+        try:
+            composer_perf = fetch_composer_performance()
+            if not IS_PRECLOSE:
+                composer_trades = fetch_composer_dry_run()
+        except Exception as e:
+            print(f"  Composer fetch error: {e}")
+
     bc = len([a for a in alerts if a[2]=='buy'])
     ec = len([a for a in alerts if a[2] in ['exit','short']])
     urgency = "EXIT SIGNALS" if ec>0 else "BUY SIGNALS" if bc>0 else "WATCH" if alerts else "No Alerts"
     timing = "MID-DAY" if IS_PRECLOSE else "CLOSE"
     subject = f"[{timing}] Market Signals: {len(alerts)} Alert(s) - {urgency}" if alerts else f"[{timing}] Market Signals: No Alerts"
-    body = format_email(alerts, status, data, IS_PRECLOSE)
+    body = format_email(alerts, status, data, IS_PRECLOSE, composer_trades, composer_perf)
     send_email(subject, body)
     print(f"\n{len(alerts)} signal(s) detected")
     for t, m, _ in alerts: print(f"  {t}")
