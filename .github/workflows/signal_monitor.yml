@@ -1,5 +1,8 @@
-# Signal Monitor v4.5 - Updated 2026-04-05
+# Signal Monitor v4.7 - Updated 2026-04-13
 # Monitors all backtested signals across 60+ tickers
+# v4.7: Composer dry-run trades in daily emails (close only),
+#        portfolio & symphony win rate tracking,
+#        Composer API integration for live portfolio data
 # v4.5: FXY carry trade, CPER copper regime, LABU/SOXL dip buy,
 #        UVXY SMA200 cross, Bayesian Kelly on alerts
 #        First email changed to 11:00 AM ET (was 3:15 PM)
@@ -80,6 +83,8 @@ jobs:
           SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
           RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
           PHONE_EMAIL: ${{ secrets.PHONE_EMAIL }}
+          COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
+          COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
         run: |
           if [ "${{ steps.mode.outputs.mode }}" == "preclose" ]; then
             python .github/workflows/signal_monitor_complete.py preclose
