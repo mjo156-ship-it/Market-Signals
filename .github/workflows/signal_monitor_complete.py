@@ -720,8 +720,8 @@ MARKET INTERNALS (Polygon Breadth)
         except Exception as e:
             print(f"  Breadth JSON read error: {e}")
 
-    # Composer Dry-Run Trades (close email only)
-    if composer_trades and not is_preclose:
+    # Composer Dry-Run Trades (both emails — see pending trades before close)
+    if composer_trades:
         body += f"\n{'='*70}\nCOMPOSER PENDING TRADES (Dry Run)\n{'='*70}\n"
         for acct in composer_trades:
             body += f"\n  {acct['account']}:\n"
@@ -1039,8 +1039,7 @@ def main():
     if COMPOSER_KEY_ID:
         try:
             composer_perf = fetch_composer_performance()
-            if not IS_PRECLOSE:
-                composer_trades = fetch_composer_dry_run()
+            composer_trades = fetch_composer_dry_run()
         except Exception as e:
             print(f"  Composer fetch error: {e}")
 
