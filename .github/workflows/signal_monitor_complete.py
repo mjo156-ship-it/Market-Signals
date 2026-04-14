@@ -74,6 +74,32 @@ def bayesian_kelly(wins, losses, avg_win, avg_loss):
     kelly_samples = np.array([max(0, (b*p - (1-p)) / b) for p in p_samples])
     return round(float(np.mean(kelly_samples)) * 100, 0)
 
+def compute_calendar_position():
+    """Intramonth momentum cycle (Nathan, Suominen & Tasa 2026).
+    T-9 to T-4 = institutional selling pressure window."""
+    today = datetime.now()
+    if today.month == 12:
+        month_end = datetime(today.year + 1, 1, 1) - timedelta(days=1)
+    else:
+        month_end = datetime(today.year, today.month + 1, 1) - timedelta(days=1)
+    trading_days = 0
+    d = today
+    while d <= month_end:
+        if d.weekday() < 5:
+            trading_days += 1
+        d += timedelta(days=1)
+    in_window = 4 <= trading_days <= 9
+    if trading_days >= 10:
+        zone = f"EARLY MONTH (T-{trading_days}) — Normal returns"
+        emoji = "🟢"
+    elif in_window:
+        zone = f"SELLING PRESSURE WINDOW (T-{trading_days}) — Lev equity suppressed"
+        emoji = "🟡"
+    else:
+        zone = f"LATE MONTH (T-{trading_days}) — Pressure clearing"
+        emoji = "🟢"
+    return {'days': trading_days, 'zone': zone, 'emoji': emoji, 'in_window': in_window}
+
 def download_data(tickers, period='2y'):
     data = {}
     for ticker in tickers:
@@ -575,6 +601,16 @@ MARKET SIGNAL MONITOR - {timing}
 {'='*70}
 
 """
+    # Intramonth momentum cycle
+    cal = compute_calendar_position()
+    body += f"{cal['emoji']} INTRAMONTH CYCLE: T-{cal['days']} | {cal['zone']}\n"
+    if cal['in_window']:
+        body += f"   Dip-buy conviction: BOOSTED (buying forced institutional selling)\n"
+        body += f"   TQQQ avg +0.08%/day in window vs +0.26%/day outside\n"
+    else:
+        body += f"   Dip-buy conviction: Normal\n"
+    body += "\n"
+
     if alerts:
         for cat, types in [("BUY SIGNALS:", ['buy']), ("EXIT/SHORT SIGNALS:", ['exit','short']), ("WARNINGS/WATCH:", ['warning','hedge','watch'])]:
             filtered = [a for a in alerts if a[2] in types]
