@@ -759,6 +759,56 @@ MARKET INTERNALS (Polygon Breadth)
     # Composer Dry-Run Trades (both emails — see pending trades before close)
     if composer_trades:
         body += f"\n{'='*70}\nCOMPOSER PENDING TRADES (Dry Run)\n{'='*70}\n"
+
+        # First: consolidated net portfolio view (what you'll hold AFTER trades)
+        net_positions = {}  # ticker → {current_notional, trade_notional, next_notional, next_weight_sum, sym_count}
+        total_portfolio = 0
+
+        for acct in composer_trades:
+            for sym in acct['symphonies']:
+                sym_val = sym.get('value', 0) or 0
+                total_portfolio += sym_val
+                for t in sym.get('trades', []):
+                    ticker = t['ticker']
+                    notional = t.get('notional', 0)
+                    next_wt = t.get('next_weight', 0) / 100  # convert from pct
+                    if ticker not in net_positions:
+                        net_positions[ticker] = {'trade_notional': 0, 'next_notional': 0, 'sym_count': 0}
+                    net_positions[ticker]['trade_notional'] += notional
+                    net_positions[ticker]['next_notional'] += sym_val * next_wt
+                    net_positions[ticker]['sym_count'] += 1
+
+        if net_positions:
+            # Sort by absolute post-trade value
+            sorted_net = sorted(net_positions.items(), key=lambda x: -abs(x[1]['next_notional']))
+
+            body += f"\n  NET PORTFOLIO AFTER TRADES (all symphonies combined):\n"
+            body += f"  {'Ticker':<8} {'Post-Trade $':>12} {'% Portfolio':>12} {'Net Change':>12} {'# Syms':>7}\n"
+            body += f"  {'-'*55}\n"
+
+            # Flag volatile instruments
+            volatile = {'UVXY', 'SOXL', 'TQQQ', 'SOXS', 'UPRO', 'TECL', 'LABU', 'NAIL', 'FAS', 'CURE', 'TMV', 'BOIL'}
+
+            for ticker, pos in sorted_net:
+                post_val = pos['next_notional']
+                pct = (post_val / total_portfolio * 100) if total_portfolio > 0 else 0
+                net_chg = pos['trade_notional']
+                flag = ' ⚠️' if ticker in volatile and abs(pct) > 10 else ''
+                if abs(post_val) < 1:
+                    continue
+                body += f"  {ticker:<8} ${post_val:>11,.0f} {pct:>+11.1f}% ${net_chg:>+11,.0f} {pos['sym_count']:>6}{flag}\n"
+
+            # Concentration warnings
+            warnings = [(t, p['next_notional']/total_portfolio*100) for t, p in net_positions.items()
+                        if t in volatile and total_portfolio > 0 and abs(p['next_notional']/total_portfolio*100) > 8]
+            if warnings:
+                body += f"\n  ⚠️ CONCENTRATION WARNINGS:\n"
+                for t, pct in sorted(warnings, key=lambda x: -abs(x[1])):
+                    body += f"    {t}: {pct:+.1f}% of portfolio — high-vol instrument, monitor closely\n"
+
+        body += f"\n  {'─'*55}\n"
+        body += f"  Per-symphony detail:\n"
+
         for acct in composer_trades:
             body += f"\n  {acct['account']}:\n"
             for sym in acct['symphonies']:
