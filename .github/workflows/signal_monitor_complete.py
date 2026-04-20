@@ -7,7 +7,7 @@ Monitors all backtested trading signals and sends alerts.
 SCHEDULE: Two emails daily (weekdays)
 - 11:00 AM ET: Mid-day preview
 - 4:05 PM ET: Market close confirmation
-
+Ca
 v4.8: Validated signal additions (Groups 31-37):
       - Group 31: Key OB alert system (always fires on key ticker RSI>79 / XLP>76)
       - Group 32: QQQ>79 streak-aware (Day 1 / Day 2 EXCLUDE / Day 3+ differentiation)
