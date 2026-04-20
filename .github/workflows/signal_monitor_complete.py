@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive Market Signal Monitor v4.7
+Comprehensive Market Signal Monitor v4.8
 ========================================
 Monitors all backtested trading signals and sends alerts.
 
@@ -8,6 +8,15 @@ SCHEDULE: Two emails daily (weekdays)
 - 11:00 AM ET: Mid-day preview
 - 4:05 PM ET: Market close confirmation
 
+v4.8: Validated signal additions (Groups 31-37):
+      - Group 31: Key OB alert system (always fires on key ticker RSI>79 / XLP>76)
+      - Group 32: QQQ>79 streak-aware (Day 1 / Day 2 EXCLUDE / Day 3+ differentiation)
+      - Group 33: Deep RSI>=82 / >=85 (T1 ROBUST, strongest single-factor edges)
+      - Group 34: Breadth-conditioned OB (RSP/SPY and QQQE/QQQ divergence)
+      - Group 35: Volume-conditioned OB (low vol confirmation)
+      - Group 36: Core 4x stretched persistence override
+      - Group 37: QQQ-QQQE RSI divergence (mega-cap driven)
+      All passed pre/post-2020 + Bonferroni + bootstrap + MC + synthetic null tests
 v4.7: Composer dry-run trades in daily emails (close email only)
       Portfolio & symphony win rate tracking (daily/weekly/monthly)
       Composer API integration for live portfolio data
@@ -73,6 +82,86 @@ def bayesian_kelly(wins, losses, avg_win, avg_loss):
     p_samples = np.random.beta(wins + 1, losses + 1, 5000)
     kelly_samples = np.array([max(0, (b*p - (1-p)) / b) for p in p_samples])
     return round(float(np.mean(kelly_samples)) * 100, 0)
+
+# ═══════════════════════════════════════════════════════════════════
+# v4.8 HELPER FUNCTIONS (validated signal framework)
+# ═══════════════════════════════════════════════════════════════════
+
+def compute_qqq_streak_from_history(qqq_df, threshold=79):
+    """Compute current QQQ>threshold streak day from historical RSI.
+    Returns 0 if not currently firing, or N = consecutive days including today.
+    Self-contained — no state file required, works across GitHub Actions runs."""
+    try:
+        close = qqq_df['Close']
+        if isinstance(close, pd.DataFrame):
+            close = close.iloc[:, 0]
+        rsi = calculate_rsi_wilder(close, 10)
+        streak = 0
+        for i in range(len(rsi) - 1, max(len(rsi) - 30, 0) - 1, -1):
+            v = sf(rsi.iloc[i])
+            if v > threshold:
+                streak += 1
+            else:
+                break
+        return streak
+    except Exception as e:
+        print(f"  streak compute error: {e}")
+        return 0
+
+
+def compute_breadth_divergence(data):
+    """Compute RSP/SPY and QQQE/QQQ 10-day ratio changes for narrow-breadth signals."""
+    result = {'rsp_spy_10d': None, 'qqqe_qqq_10d': None}
+    try:
+        for num_tkr, den_tkr, key in [('RSP', 'SPY', 'rsp_spy_10d'),
+                                       ('QQQE', 'QQQ', 'qqqe_qqq_10d')]:
+            if num_tkr not in data or den_tkr not in data:
+                continue
+            n_df = data[num_tkr]; d_df = data[den_tkr]
+            if len(n_df) <= 10 or len(d_df) <= 10:
+                continue
+            n_c = n_df['Close']; d_c = d_df['Close']
+            if isinstance(n_c, pd.DataFrame): n_c = n_c.iloc[:, 0]
+            if isinstance(d_c, pd.DataFrame): d_c = d_c.iloc[:, 0]
+            n_t = sf(n_c.iloc[-1]); d_t = sf(d_c.iloc[-1])
+            n_10 = sf(n_c.iloc[-11]); d_10 = sf(d_c.iloc[-11])
+            if d_t > 0 and d_10 > 0 and n_10 > 0:
+                result[key] = round(((n_t / d_t) / (n_10 / d_10) - 1) * 100, 2)
+    except Exception as e:
+        print(f"  breadth divergence error: {e}")
+    return result
+
+
+def compute_qqq_volume_ratio(data):
+    """Compute QQQ volume vs 20d avg and consecutive low-vol day count."""
+    try:
+        if 'QQQ' not in data:
+            return None, 0
+        qqq_df = data['QQQ']
+        if 'Volume' not in qqq_df.columns or len(qqq_df) < 22:
+            return None, 0
+        vol = qqq_df['Volume']
+        if isinstance(vol, pd.DataFrame): vol = vol.iloc[:, 0]
+        vol_today = sf(vol.iloc[-1])
+        vol_20d_avg = sf(vol.iloc[-21:-1].mean())
+        if vol_20d_avg <= 0:
+            return None, 0
+        ratio = round(vol_today / vol_20d_avg, 2)
+        low_vol_days = 0
+        for i in range(10):
+            if len(vol) < 22 + i:
+                break
+            v_i = sf(vol.iloc[-(1 + i)])
+            v_avg_i = sf(vol.iloc[-(21 + i):-(1 + i)].mean())
+            if v_avg_i > 0 and v_i < v_avg_i:
+                low_vol_days += 1
+            else:
+                break
+        return ratio, low_vol_days
+    except Exception as e:
+        print(f"  volume compute error: {e}")
+        return None, 0
+
 
 def compute_calendar_position():
     """Intramonth momentum cycle (Nathan, Suominen & Tasa 2026).
@@ -208,9 +297,7 @@ def check_signals(data):
     if any(r(t) > 79 for t in ['XLP','XLU','XLV']) and r('SPY') < 79 and r('QQQ') < 79:
         alerts.append(('[BUY] DEFENSIVE ROTATION [T2]', f"Defensive OB, SPY/QQQ not | TQQQ 20d: 70% WR +5%", 'buy'))
 
-    # === GROUP 4: Vol Hedge ===
-    if r('QQQ') > 79:
-        alerts.append(('[HEDGE] QQQ OB -> UVXY', f"QQQ RSI={r('QQQ'):.1f}>79 | UVXY 5d: 67% WR n=93", 'hedge'))
+    # === GROUP 4: QQQ Dip Buy (OB vol hedge now routed through v4.8 Group 32 streak-aware) ===
     if r('QQQ') < 20:
         bk = int(bayesian_kelly(12, 0, 5.4, 3.7))
         alerts.append(('[BUY] QQQ DIP BUY [T1]', f"QQQ RSI={r('QQQ'):.1f}<20 | TQQQ 100% WR n=12 | BK={bk}%", 'buy'))
@@ -535,6 +622,138 @@ def check_signals(data):
         alerts.append(('[WARN] BEAR DEFENSIVE', f"SPY below SMA200+EMA20 -> SHY/GLD defensive", 'warning'))
     elif not a200 and a_e20:
         alerts.append(('[WATCH] BEAR RECOVERY', f"SPY below SMA200 but above EMA20", 'watch'))
+
+    # ═══════════════════════════════════════════════════════════════════
+    # v4.8 VALIDATED SIGNAL ADDITIONS (Groups 31-37)
+    # All passed: pre/post-2020 stability, Bonferroni/Holm/BH, bootstrap CI,
+    # Monte Carlo null, block bootstrap, synthetic null (3 methods)
+    # ═══════════════════════════════════════════════════════════════════
+
+    # === GROUP 31: Key OB Alert System (mandatory floor — always emit) ===
+    KEY_OB_79 = ['QQQ','SPY','VTV','VOOV','VOOG','QQQE','XLY','FAS','TQQQ','TECL']
+    KEY_OB_76 = ['XLP']
+    key_ob_fires = []
+    for tkr in KEY_OB_79:
+        v = r(tkr)
+        if v > 79:
+            key_ob_fires.append((tkr, v, 79))
+    for tkr in KEY_OB_76:
+        v = r(tkr)
+        if v > 76:
+            key_ob_fires.append((tkr, v, 76))
+    if key_ob_fires:
+        msg_parts = [f"{t} RSI={v:.1f}>{th}" for t, v, th in key_ob_fires]
+        alerts.append(('[OB ALERT] Key Tickers Overbought',
+                       ' | '.join(msg_parts),
+                       'warning'))
+    status['key_ob_fires'] = [{'ticker': t, 'rsi': round(v, 1), 'threshold': th}
+                               for t, v, th in key_ob_fires]
+
+    # === GROUP 32: QQQ>79 Streak-Aware Signal [T1 ROBUST] ===
+    qqq_streak = compute_qqq_streak_from_history(data.get('QQQ'), threshold=79) if 'QQQ' in data else 0
+    status['qqq_79_streak_day'] = qqq_streak
+
+    if qqq_streak == 1:
+        bk = int(bayesian_kelly(36, 13, 3.1, 2.5))
+        alerts.append(('[HEDGE] QQQ>79 DAY 1 -> UVXY [T1 ROBUST]',
+                       f"Fresh Day 1 fire | QQQ={r('QQQ'):.1f}>79 | UVXY 1d: 74% WR +3.1% worst -9.66% | n=49 | BK={bk}%",
+                       'hedge'))
+    elif qqq_streak == 2:
+        alerts.append(('[SKIP] QQQ>79 DAY 2 — EXCLUDE standalone',
+                       f"Day 2 of streak | FAILED validation: 50% WR, 0% avg, worst -10.5% | n=30 | Use only with Core 4x confirm (Group 36)",
+                       'watch'))
+    elif qqq_streak >= 3:
+        bk = int(bayesian_kelly(35, 17, 3.4, 2.0))
+        alerts.append(('[HEDGE] QQQ>79 DAY 3+ -> UVXY [T1]',
+                       f"Day {qqq_streak} of streak | UVXY 1d: 67% WR +3.4% worst -4.95% | n=52 | BK={bk}%",
+                       'hedge'))
+
+    # === GROUP 33: Deep OB Levels RSI>=82 / >=85 [T1 ROBUST] ===
+    if r('QQQ') >= 85:
+        bk = int(bayesian_kelly(18, 4, 5.5, 2.0))
+        alerts.append(('[HEDGE] QQQ RSI>=85 EXTREME -> UVXY [T1 ROBUST]',
+                       f"QQQ={r('QQQ'):.1f}>=85 | UVXY 1d: 82% WR +5.5% worst -2.63% | n=22 | BK={bk}% | DEEPEST EDGE",
+                       'hedge'))
+    elif r('QQQ') >= 82:
+        bk = int(bayesian_kelly(39, 13, 4.3, 2.5))
+        alerts.append(('[HEDGE] QQQ RSI>=82 DEEP -> UVXY [T1 ROBUST]',
+                       f"QQQ={r('QQQ'):.1f}>=82 | UVXY 1d: 75% WR +4.3% worst -8.67% | n=52 | BK={bk}%",
+                       'hedge'))
+
+    # === GROUP 34: Breadth-Conditioned OB [T1 ROBUST] ===
+    breadth_div = compute_breadth_divergence(data)
+    status['breadth_divergence'] = breadth_div
+
+    if r('QQQ') > 79:
+        qqqe_qqq = breadth_div.get('qqqe_qqq_10d')
+        rsp_spy = breadth_div.get('rsp_spy_10d')
+
+        if qqqe_qqq is not None and qqqe_qqq < -2.0:
+            bk = int(bayesian_kelly(14, 4, 3.0, 1.5))
+            alerts.append(('[HEDGE] QQQ>79 + VERY NARROW TECH [T1 ROBUST]',
+                           f"QQQ>79 + QQQE/QQQ 10d={qqqe_qqq:+.1f}%<-2 | UVXY 1d: 78% WR +3.0% worst -0.89% | n=18 | BK={bk}% | TIGHTEST TAIL",
+                           'hedge'))
+        elif qqqe_qqq is not None and qqqe_qqq < -1.0:
+            alerts.append(('[HEDGE] QQQ>79 + NARROW TECH [T1 ROBUST]',
+                           f"QQQ>79 + QQQE/QQQ 10d={qqqe_qqq:+.1f}%<-1 | UVXY 1d: 64% WR +2.0% | n=44",
+                           'hedge'))
+
+        if rsp_spy is not None and rsp_spy < -1.0:
+            bk = int(bayesian_kelly(18, 8, 2.5, 1.5))
+            alerts.append(('[HEDGE] QQQ>79 + VERY NARROW BREADTH [T1 ROBUST]',
+                           f"QQQ>79 + RSP/SPY 10d={rsp_spy:+.1f}%<-1 | UVXY 1d: 69% WR +2.5% worst -2.1% | n=26 | BK={bk}%",
+                           'hedge'))
+        elif rsp_spy is not None and rsp_spy < -0.5:
+            alerts.append(('[HEDGE] QQQ>79 + NARROW BREADTH [T1 ROBUST]',
+                           f"QQQ>79 + RSP/SPY 10d={rsp_spy:+.1f}%<-0.5 | UVXY 1d: 62% WR +2.7% | n=50",
+                           'hedge'))
+
+    # === GROUP 35: Volume-Conditioned OB [T1 ROBUST] ===
+    vol_ratio, low_vol_consecutive = compute_qqq_volume_ratio(data)
+    status['qqq_vol_ratio_20d'] = vol_ratio
+    status['qqq_low_vol_consecutive'] = low_vol_consecutive
+
+    if r('QQQ') > 79 and vol_ratio is not None:
+        if vol_ratio < 0.85:
+            alerts.append(('[HEDGE] QQQ>79 + VERY LOW VOL [T1 ROBUST]',
+                           f"QQQ>79 + vol={vol_ratio:.2f}x<85% of 20d | UVXY 1d: 69% WR +2.5% worst -6.30% | n=42",
+                           'hedge'))
+        elif vol_ratio < 1.0:
+            alerts.append(('[HEDGE] QQQ>79 + LOW VOL [T1 ROBUST]',
+                           f"QQQ>79 + vol={vol_ratio:.2f}x<20d avg | UVXY 1d: 68% WR +2.0% worst -9.83% | n=72",
+                           'hedge'))
+
+    if low_vol_consecutive >= 5 and r('QQQ') > 79:
+        alerts.append(('[CONFIRM] 5-day low vol streak + QQQ>79',
+                       f"{low_vol_consecutive} consecutive sessions below 20d vol avg | LPL-style mechanical rally pattern",
+                       'watch'))
+
+    # === GROUP 36: Core 4x Stretched Persistence [T2 VALIDATED] ===
+    core_4x_fires = all(r(t) > 79 for t in ['TQQQ','QQQ','SOXL','TECL'])
+    full_complex = ['TQQQ','QQQ','SOXL','TECL','UPRO','SPHB','VOOG','SPY','IWM']
+    complex_count = sum(1 for t in full_complex if r(t) > 79)
+    status['core_4x_active'] = core_4x_fires
+    status['ob_complex_count'] = complex_count
+
+    if core_4x_fires and qqq_streak >= 2:
+        alerts.append(('[HEDGE] CORE 4x DAY 2+ PERSISTENT [T2]',
+                       f"Core 4x all>79, Day {qqq_streak} of streak | UVXY 1d: 75% WR +4.1% worst -0.32% | n=7 (small-n caveat)",
+                       'hedge'))
+    if complex_count >= 8 and qqq_streak >= 2:
+        alerts.append(('[HEDGE] 8+ TICKER OB PERSISTENCE [T2]',
+                       f"{complex_count}/9 tickers >79, Day {qqq_streak} | UVXY 1d: 75% WR +3.5% worst -1.55% | n=8",
+                       'hedge'))
+
+    # === GROUP 37: QQQ-QQQE RSI Divergence (Mega-Cap Driven) [T1 ROBUST] ===
+    qqq_rsi_v = r('QQQ')
+    qqqe_rsi_v = r('QQQE')
+    rsi_div_val = qqq_rsi_v - qqqe_rsi_v
+    status['qqq_qqqe_rsi_div'] = round(rsi_div_val, 2)
+
+    if qqq_rsi_v > 79 and rsi_div_val > 5:
+        alerts.append(('[HEDGE] QQQ>79 + RSI DIV>5 MEGA-CAP DRIVEN [T1 ROBUST]',
+                       f"QQQ-QQQE RSI diff={rsi_div_val:+.1f}>5 | Mega-cap driven rally | UVXY 1d: 65% WR +2.8% | n=66",
+                       'hedge'))
 
     return alerts, status
 
@@ -1099,11 +1318,11 @@ def fetch_composer_performance():
 
 
 def main():
-    print(f"Signal Monitor v4.7 at {datetime.now()}")
+    print(f"Signal Monitor v4.8 at {datetime.now()}")
     print(f"Mode: {'MID-DAY (11:00 AM)' if IS_PRECLOSE else 'MARKET CLOSE (4:05 PM)'}")
     print(f"Composer API: {'configured' if COMPOSER_KEY_ID else 'not set'}")
     tickers = [
-        'SMH','SPY','QQQ','IWM','XLP','XLU','XLV',
+        'SMH','SPY','QQQ','IWM','XLP','XLU','XLV','XLY',
         'GLD','TLT','HYG','LQD','TMV','USDU','UCO','USO','BOIL',
         'UVXY','VIXM','SVXY','EDC','YINN','KORU','EURL','INDL',
         'BTC-USD','AMD','NVDA',
