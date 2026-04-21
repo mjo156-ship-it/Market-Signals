@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_utc": "2026-04-21T20:50:10.389067+00:00",
-    "generated_et": "2026-04-21 15:50:10 ET",
-    "ticker_count": 52,
+    "generated_utc": "2026-04-21T21:40:29.939719+00:00",
+    "generated_et": "2026-04-21 16:40:29 ET",
+    "ticker_count": 51,
     "version": "1.1"
   },
   "signals": {
@@ -162,8 +162,8 @@
         "supply_shock": false
       },
       "weather": {
-        "current_temp": 42.6,
-        "temp_change_7d": 11.6,
+        "current_temp": 42.7,
+        "temp_change_7d": 11.5,
         "severe_cold": false,
         "is_winter": false
       },
@@ -953,23 +953,23 @@
       "ret_20d": 8.22
     },
     "BTC-USD": {
-      "price": 75761.12,
-      "change_pct": -0.15,
-      "rsi10": 61.1,
-      "ema9": 74792.76,
-      "ema20": 73158.68,
-      "ema50": 72085.21,
-      "ema200": 82701.07,
-      "sma50": 70698.67,
-      "sma200": 86103.97,
+      "price": 75605.59,
+      "change_pct": -0.35,
+      "rsi10": 60.4,
+      "ema9": 74761.66,
+      "ema20": 73143.87,
+      "ema50": 72079.11,
+      "ema200": 82699.52,
+      "sma50": 70695.56,
+      "sma200": 86103.19,
       "ema_cross": "BULL",
       "above_sma200": false,
-      "vs_sma200": -12.0,
-      "vs_sma50": 7.2,
-      "ret_1d": -0.15,
-      "ret_5d": 0.81,
-      "ret_10d": 3.71,
-      "ret_20d": 11.28
+      "vs_sma200": -12.2,
+      "vs_sma50": 6.9,
+      "ret_1d": -0.35,
+      "ret_5d": 0.6,
+      "ret_10d": 3.49,
+      "ret_20d": 11.06
     },
     "AMD": {
       "price": 284.49,
@@ -1027,25 +1027,6 @@
       "ret_5d": 1.02,
       "ret_10d": 3.63,
       "ret_20d": 4.84
-    },
-    "VOOG": {
-      "price": 76.25,
-      "change_pct": -83.44,
-      "rsi10": 7.9,
-      "ema9": 373.34,
-      "ema20": 401.77,
-      "ema50": 417.94,
-      "ema200": 418.55,
-      "sma50": 421.77,
-      "sma200": 428.41,
-      "ema_cross": "BEAR",
-      "above_sma200": false,
-      "vs_sma200": -82.2,
-      "vs_sma50": -81.9,
-      "ret_1d": -83.44,
-      "ret_5d": -83.04,
-      "ret_10d": -81.72,
-      "ret_20d": -81.73
     },
     "VTV": {
       "price": 202.97,
