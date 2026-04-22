@@ -545,42 +545,9 @@ def check_signals(data):
     if 'SPY' in indicators and indicators['SPY']['cumRet10d'] < -5 and usdu_r > 70:
         alerts.append(('[EXIT] DANGER: KNIFE+DOLLAR', f"SPY CumRet10d={indicators['SPY']['cumRet10d']:.1f}%+USDU>{usdu_r:.1f} | 20% WR", 'exit'))
 
-    # === GROUP 25: SPY/TLT Mid-Month Contrarian Rotation ===
-    # Robot James signal. Trading day 15: buy the MTD loser, hold through month-end.
-    # 63.7% WR, Sharpe 1.03, MaxDD -8.6%, SPY R = -0.03, n=281
-    # MANUAL EXECUTION ONLY — daily rebalance kills the edge.
-    if 'SPY' in data and 'TLT' in data:
-        try:
-            spy_cl = data['SPY']['Close']
-            tlt_cl = data['TLT']['Close']
-            if isinstance(spy_cl, pd.DataFrame): spy_cl = spy_cl.iloc[:, 0]
-            if isinstance(tlt_cl, pd.DataFrame): tlt_cl = tlt_cl.iloc[:, 0]
-            today = spy_cl.index[-1]
-            cur_month = today.month; cur_year = today.year
-            spy_month = spy_cl[(spy_cl.index.month == cur_month) & (spy_cl.index.year == cur_year)]
-            tlt_month = tlt_cl[(tlt_cl.index.month == cur_month) & (tlt_cl.index.year == cur_year)]
-            td_num = len(spy_month)
-            if len(spy_month) >= 1 and len(tlt_month) >= 1:
-                spy_mtd = (sf(spy_cl.iloc[-1]) / sf(spy_month.iloc[0]) - 1) * 100
-                tlt_mtd = (sf(tlt_cl.iloc[-1]) / sf(tlt_month.iloc[0]) - 1) * 100
-                pick = 'TLT' if spy_mtd > tlt_mtd else 'SPY'
-                status['midmonth'] = {'td': td_num, 'spy_mtd': round(spy_mtd, 2), 'tlt_mtd': round(tlt_mtd, 2), 'pick': pick}
-                if td_num == 15:
-                    alerts.append(('[BUY] MID-MONTH ROTATION [T1]',
-                        f"Trading day 15! SPY MTD={spy_mtd:+.2f}% vs TLT MTD={tlt_mtd:+.2f}%\n"
-                        f"   → Buy {pick} tomorrow, hold through month-end\n"
-                        f"   63.7% WR, +0.63% avg, Sharpe 1.03, SPY R=-0.03 | n=281\n"
-                        f"   MANUAL EXECUTION ONLY", 'buy'))
-                elif td_num == 14:
-                    alerts.append(('[WATCH] MID-MONTH PREVIEW',
-                        f"Trading day 14 — signal fires TOMORROW\n"
-                        f"   Current: SPY MTD={spy_mtd:+.2f}% vs TLT MTD={tlt_mtd:+.2f}% | Leaning: {pick}", 'watch'))
-                elif td_num == 16:
-                    alerts.append(('[WATCH] MID-MONTH REMINDER',
-                        f"Trading day 16 — signal fired yesterday\n"
-                        f"   Should be holding: {pick} through month-end", 'watch'))
-        except Exception as e:
-            print(f"Error in Group 25 mid-month: {e}")
+    # Group 25 (SPY/TLT 2-way mid-month) superseded by the Robot James
+    # 4-way ensemble (SPY/QQQ/SMH/TLT). See rj_compute_state() in main() —
+    # it writes state + generates TD1/TD15/EOM action alerts directly.
 
     # === Regime ===
     spy_d = indicators.get('SPY', {})
@@ -1112,7 +1079,328 @@ def format_hormuz_block(hz, prev_row, today_row):
     return "\n".join(lines)
 
 
-def format_email(alerts, status, data, is_preclose=False, composer_trades=None, composer_perf=None, hormuz_block=""):
+# =============================================================================
+# ROBOT JAMES MODULE
+# =============================================================================
+# Ensemble 50/50 mom+below-SMA base + 4-way EO strict overlay.
+#
+# Base (TD1 -> TD15 close):
+#   - Momentum-60d pick: highest trailing 60-day return from SPY/QQQ/SMH
+#   - Below-SMA50 pick:  most-below-SMA50 from SPY/QQQ/SMH
+#   - If rules AGREE -> 60% that equity + 40% GLD
+#   - If rules DISAGREE -> 30% mom_pick + 30% sma_pick + 40% GLD
+#
+# Overlay (TD15 -> EOM close):
+#   - 4-way EO strict: biggest MTD lagger among SPY/QQQ/SMH/TLT
+#   - TLT lagger -> 100% TMF (no gate)
+#   - Equity lagger -> 100% leveraged ETF only if below SMA50; else STRICT SKIP
+#     (hold base through EOM - the skip is the point, not a bug)
+#
+# Execution: MOC by 3:50 PM ET. After-hours fallback if missed.
+#
+# State schema matches chf_dashboard_server.py's _rj_compute_state_live() so
+# the dashboard's /api/robot_james endpoint can read the file this writes.
+# =============================================================================
+RJ_STATE_FILE = os.environ.get('ROBOT_JAMES_STATE', 'robot_james_state.json')
+RJ_LEV_MAP = {'SPY': 'UPRO', 'QQQ': 'TQQQ', 'SMH': 'SOXL', 'TLT': 'TMF'}
+
+
+def _rj_safe_close(data, ticker):
+    """Return Close series or None."""
+    if ticker not in data:
+        return None
+    df = data[ticker]
+    if len(df) == 0:
+        return None
+    close = df['Close']
+    if isinstance(close, pd.DataFrame):
+        close = close.iloc[:, 0]
+    return close
+
+
+def rj_compute_state(data):
+    """Compute full Robot James state. Returns None if SPY data missing.
+    Writes to RJ_STATE_FILE as a side effect so the dashboard can consume it."""
+    try:
+        spy = _rj_safe_close(data, 'SPY')
+        if spy is None or len(spy) < 61:
+            print("[RJ] insufficient SPY data")
+            return None
+
+        ref = pd.Timestamp.today().normalize()
+        trading_days = sorted(spy.index.normalize().unique().tolist())
+        month_start = ref.replace(day=1)
+        tds_past = [d for d in trading_days
+                    if pd.Timestamp(d).normalize() >= month_start
+                    and pd.Timestamp(d).normalize() <= ref]
+        if not tds_past:
+            print("[RJ] no trading days this month yet")
+            return None
+
+        current_td = len(tds_past)
+        td1_date = pd.Timestamp(tds_past[0]).normalize()
+
+        # Project forward: how many trading days this whole month?
+        next_month = (month_start + pd.DateOffset(months=1)).replace(day=1)
+        all_tds = [d for d in trading_days
+                   if pd.Timestamp(d).normalize() >= month_start
+                   and pd.Timestamp(d).normalize() < next_month]
+        last_known = pd.Timestamp(trading_days[-1]).normalize()
+        if last_known < next_month - pd.Timedelta(days=1):
+            scan = last_known + pd.Timedelta(days=1)
+            while scan < next_month:
+                if scan.weekday() < 5:
+                    all_tds.append(scan)
+                scan += pd.Timedelta(days=1)
+        all_tds = sorted(set(all_tds))
+        total_tds = len(all_tds)
+        td14 = pd.Timestamp(all_tds[13]).normalize() if total_tds >= 14 else None
+        td15 = pd.Timestamp(all_tds[14]).normalize() if total_tds >= 15 else None
+        eom = pd.Timestamp(all_tds[-1]).normalize() if total_tds >= 1 else None
+
+        latest = trading_days[-1]
+
+        # --- Base picks (SPY/QQQ/SMH) ---
+        mom60, below_sma = {}, {}
+        for t in ['SPY', 'QQQ', 'SMH']:
+            c = _rj_safe_close(data, t)
+            if c is None or len(c) < 61:
+                continue
+            c_sub = c[c.index <= latest]
+            if len(c_sub) < 61:
+                continue
+            mom60[t] = float(c_sub.iloc[-1] / c_sub.iloc[-61] - 1)
+            sma50 = c_sub.rolling(50).mean()
+            if pd.notna(sma50.iloc[-1]) and sma50.iloc[-1] > 0:
+                below_sma[t] = float(c_sub.iloc[-1] / sma50.iloc[-1] - 1)
+
+        mom_pick = max(mom60, key=mom60.get) if mom60 else 'SPY'
+        sma_pick = min(below_sma, key=below_sma.get) if below_sma else 'SPY'
+        agree = (mom_pick == sma_pick)
+        weights = {mom_pick: 0.60} if agree else {mom_pick: 0.30, sma_pick: 0.30}
+
+        # --- Overlay projection (SPY/QQQ/SMH/TLT MTD lagger) ---
+        # "if TD15 were today" - use MTD through yesterday so projection is stable
+        yesterday = trading_days[-2] if len(trading_days) >= 2 else trading_days[-1]
+        mtd = {}
+        for t in ['SPY', 'QQQ', 'SMH', 'TLT']:
+            c = _rj_safe_close(data, t)
+            if c is None:
+                continue
+            idx = c.index.normalize()
+            td1_sub = c[idx <= td1_date]
+            yday_sub = c[idx <= pd.Timestamp(yesterday).normalize()]
+            if len(td1_sub) == 0 or len(yday_sub) == 0:
+                continue
+            mtd[t] = float(yday_sub.iloc[-1] / td1_sub.iloc[-1] - 1)
+
+        lagger = min(mtd, key=mtd.get) if mtd else 'TLT'
+
+        # Gate check - only matters for equity laggers
+        gate_status = {}
+        strict_skip = False
+        skip_reason = None
+        signal_asset = None
+
+        if lagger == 'TLT':
+            signal_asset = 'TMF'  # no gate
+        elif lagger in ('SPY', 'QQQ', 'SMH'):
+            c = _rj_safe_close(data, lagger)
+            if c is not None:
+                c_sub = c[c.index.normalize() <= pd.Timestamp(latest).normalize()]
+                sma50 = c_sub.rolling(50).mean()
+                if pd.notna(sma50.iloc[-1]) and sma50.iloc[-1] > 0:
+                    pct = float(c_sub.iloc[-1] / sma50.iloc[-1] - 1)
+                    gate_status[lagger] = pct
+                    if c_sub.iloc[-1] < sma50.iloc[-1]:
+                        signal_asset = RJ_LEV_MAP[lagger]
+                    else:
+                        strict_skip = True
+                        skip_reason = f"{lagger} is {pct*100:+.1f}% vs SMA50 (above trend) - gate FAIL"
+
+        # Fill gate status for all equity candidates (dashboard display)
+        for t in ['SPY', 'QQQ', 'SMH']:
+            if t not in gate_status:
+                c = _rj_safe_close(data, t)
+                if c is not None:
+                    c_sub = c[c.index.normalize() <= pd.Timestamp(latest).normalize()]
+                    sma50 = c_sub.rolling(50).mean()
+                    if pd.notna(sma50.iloc[-1]) and sma50.iloc[-1] > 0:
+                        gate_status[t] = float(c_sub.iloc[-1] / sma50.iloc[-1] - 1)
+
+        # --- Action type ---
+        if current_td == 1:
+            atype, severity = 'TD1_SET_BASE', 'action_required'
+        elif current_td == 15:
+            atype, severity = 'TD15_OVERLAY', 'action_required'
+        elif eom is not None and ref == eom:
+            atype, severity = 'EOM_ROTATE_BACK', 'action_required'
+        else:
+            atype, severity = 'HOLD', 'none'
+
+        next_date, next_type = None, None
+        if current_td < 15 and td15 is not None:
+            next_date, next_type = td15, 'TD15_OVERLAY'
+        elif current_td < total_tds and eom is not None:
+            next_date, next_type = eom, 'EOM_ROTATE_BACK'
+        days_until = (next_date - ref).days if next_date is not None else None
+
+        state = {
+            'ref_date': str(ref.date()),
+            'computed_at': datetime.now().isoformat(timespec='seconds'),
+            'current_td': current_td,
+            'total_tds_this_month': total_tds,
+            'td1_date': str(td1_date.date()) if td1_date is not None else None,
+            'td14_date': str(td14.date()) if td14 is not None else None,
+            'td15_date': str(td15.date()) if td15 is not None else None,
+            'eom_date': str(eom.date()) if eom is not None else None,
+            'is_td1': current_td == 1,
+            'is_td15': current_td == 15,
+            'is_eom': eom is not None and ref == eom,
+            'projected_base': {
+                'mom_pick': mom_pick,
+                'below_sma_pick': sma_pick,
+                'weights': weights,
+                'gld_weight': 0.40,
+                'rules_agree': agree,
+                'agree_ticker': mom_pick if agree else None,
+                'mom60_values': mom60,
+                'below_sma_values': below_sma,
+            },
+            'projected_overlay': {
+                'lagger': lagger,
+                'mtd_values': mtd,
+                'signal_asset': signal_asset,
+                'gate_status': gate_status,
+                'strict_skip': strict_skip,
+                'skip_reason': skip_reason,
+            },
+            'action': {
+                'type': atype,
+                'severity': severity,
+                'next_decision_date': str(next_date.date()) if next_date is not None else None,
+                'next_decision_type': next_type,
+                'days_until_next_decision': days_until,
+            },
+        }
+
+        # Write state file so the dashboard can consume it
+        try:
+            with open(RJ_STATE_FILE, 'w') as f:
+                json.dump(state, f, indent=2)
+        except Exception as e:
+            print(f"[RJ] state file write failed: {e}")
+
+        return state
+    except Exception as e:
+        print(f"[RJ] compute error: {e}")
+        return None
+
+
+def _rj_pct(v):
+    """Format a fraction as +X.XX% with sign, or '--' if None."""
+    if v is None:
+        return '--'
+    return f"{v*100:+.2f}%"
+
+
+def format_rj_block(state):
+    """Render the Robot James section for the email body.
+    Matches the v4.8 template style (ASCII, bracketed prefixes)."""
+    if state is None:
+        return ""
+
+    td = state.get('current_td', 0)
+    total = state.get('total_tds_this_month', 21)
+    pb = state.get('projected_base', {})
+    ov = state.get('projected_overlay', {})
+    action = state.get('action', {})
+
+    lines = [
+        "=" * 70,
+        f"ROBOT JAMES - TD {td} of {total}",
+        "=" * 70,
+    ]
+
+    # Current position description
+    if td > 15 and ov.get('signal_asset') and not ov.get('strict_skip'):
+        position = f"100% {ov['signal_asset']} (overlay active - lagger was {ov.get('lagger')})"
+    elif td > 15 and ov.get('strict_skip'):
+        position = (f"Strict skip - holding base "
+                    f"(30% {pb.get('mom_pick')} + 30% {pb.get('below_sma_pick')} + 40% GLD)")
+    elif pb.get('rules_agree'):
+        position = f"60% {pb.get('agree_ticker')} + 40% GLD (rules agree)"
+    elif pb.get('mom_pick') and pb.get('below_sma_pick'):
+        position = (f"30% {pb.get('mom_pick')} + 30% {pb.get('below_sma_pick')} + 40% GLD "
+                    f"(rules disagree)")
+    else:
+        position = "Unknown"
+
+    lines.append(f"Position: {position}")
+    lines.append("")
+
+    # Action banner
+    atype = action.get('type')
+    if atype == 'TD1_SET_BASE':
+        lines.append("[ACTION] TD1 - Set new base at MOC today")
+    elif atype == 'TD15_OVERLAY':
+        if ov.get('strict_skip'):
+            lines.append(f"[ACTION] TD15 - STRICT SKIP (hold base). {ov.get('skip_reason')}")
+        elif ov.get('signal_asset'):
+            lines.append(f"[ACTION] TD15 - Rotate to 100% {ov['signal_asset']} at MOC today")
+    elif atype == 'EOM_ROTATE_BACK':
+        lines.append("[ACTION] EOM - Rotate back to cash/base at MOC today")
+    elif atype == 'HOLD':
+        lines.append("[HOLD] No action today - hold current position")
+
+    # Next decision
+    nd_date = action.get('next_decision_date')
+    nd_type = action.get('next_decision_type')
+    nd_days = action.get('days_until_next_decision')
+    if nd_date:
+        lines.append(f"Next: {nd_type} on {nd_date} ({nd_days}d)")
+    lines.append("")
+
+    # Base picks table
+    lines.append("Base picks (SPY/QQQ/SMH):")
+    mom_vals = pb.get('mom60_values', {})
+    below_vals = pb.get('below_sma_values', {})
+    mom_pick = pb.get('mom_pick')
+    sma_pick = pb.get('below_sma_pick')
+    for t in ['SPY', 'QQQ', 'SMH']:
+        mom_marker = "  <- MOM" if t == mom_pick else ""
+        sma_marker = "  <- BELOW-SMA" if t == sma_pick else ""
+        lines.append(f"  {t}: 60d mom {_rj_pct(mom_vals.get(t))}{mom_marker}  |  "
+                     f"vs SMA50 {_rj_pct(below_vals.get(t))}{sma_marker}")
+    if pb.get('rules_agree'):
+        lines.append(f"  -> RULES AGREE on {pb.get('agree_ticker')}: 60% + 40% GLD")
+    else:
+        lines.append(f"  -> RULES DISAGREE: 30% {mom_pick} + 30% {sma_pick} + 40% GLD")
+    lines.append("")
+
+    # Overlay projection
+    lines.append("Overlay projection (if TD15 were today):")
+    mtd = ov.get('mtd_values', {})
+    gate = ov.get('gate_status', {})
+    lagger = ov.get('lagger')
+    for t in ['SPY', 'QQQ', 'SMH', 'TLT']:
+        lagger_marker = "  <- LAGGER" if t == lagger else ""
+        gate_val = _rj_pct(gate.get(t)) if t != 'TLT' else 'n/a'
+        lines.append(f"  {t}: MTD {_rj_pct(mtd.get(t))}{lagger_marker}  |  "
+                     f"vs SMA50 {gate_val}")
+
+    if ov.get('strict_skip'):
+        lines.append(f"  -> STRICT SKIP: {ov.get('skip_reason')}")
+    elif ov.get('signal_asset'):
+        lines.append(f"  -> Would rotate to: {ov['signal_asset']}")
+    lines.append("")
+
+    lines.append("MANUAL execution only - daily rebalance in Composer destroys the edge.")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def format_email(alerts, status, data, is_preclose=False, composer_trades=None, composer_perf=None, hormuz_block="", rj_block=""):
     now = datetime.now()
     timing = "MID-DAY PREVIEW (11:00 AM)" if is_preclose else "MARKET CLOSE CONFIRMATION (4:05 PM)"
     indicators = status.get('indicators', {})
@@ -1135,7 +1423,12 @@ MARKET SIGNAL MONITOR - {timing}
         body += f"   Dip-buy conviction: Normal\n"
     body += "\n"
 
-    # Hormuz intelligence block — injected right after intramonth context,
+    # Robot James — injected after intramonth context, before Hormuz.
+    # Leads the email on action days because subject line already flags them.
+    if rj_block:
+        body += rj_block + "\n"
+
+    # Hormuz intelligence block — injected right after RJ,
     # before the main signal alerts panel
     if hormuz_block:
         body += hormuz_block + "\n"
@@ -1234,19 +1527,9 @@ MARKET SIGNAL MONITOR - {timing}
         c = indicators['CPER']
         body += f"\n{'='*70}\nCPER COPPER REGIME (Group 21)\n{'='*70}\nCPER: ${c['price']:.2f} {'> EMA9' if c['above_ema9'] else '< EMA9'} | SPY {'> EMA9' if indicators.get('SPY',{}).get('above_ema9') else '< EMA9'}\n"
 
-    # Mid-Month Rotation (Group 25)
-    mm = status.get('midmonth', {})
-    if mm:
-        td = mm['td']; spy_mtd = mm['spy_mtd']; tlt_mtd = mm['tlt_mtd']; pick = mm['pick']
-        days_to = 15 - td
-        body += f"\n{'='*70}\nMID-MONTH ROTATION (Group 25)\n{'='*70}\n"
-        body += f"Trading Day:  {td} of month\nSPY MTD:      {spy_mtd:+.2f}%\nTLT MTD:      {tlt_mtd:+.2f}%\nCurrent Lean: Buy {pick} (the MTD loser)\n"
-        if days_to > 0:
-            body += f"Signal In:    {days_to} trading day(s)\n"
-        elif days_to == 0:
-            body += f">>> SIGNAL DAY — EXECUTE TOMORROW <<<\n"
-        else:
-            body += f"Signal Fired: {abs(days_to)} day(s) ago — should be holding {pick}\n"
+    # Mid-Month Rotation section superseded by Robot James block at the top
+    # of the email (see rj_block injection). status['midmonth'] is no longer
+    # populated; the 4-way ensemble renders in its own section instead.
 
     # DRIF
     drif = status.get('drif', {})
@@ -1642,6 +1925,7 @@ def main():
         'BTAL','DBMF','KMLM','CTA','FNGO','SLV','UUP','DBC',
         'RSP','SPHB','SPLV','^MOVE','SHY',
         'FXY','CPER','COPX','ILS',
+        'TMF',  # Robot James overlay (leveraged bonds)
     ]
     print("Downloading market data...")
     data = download_data(tickers)
@@ -1665,6 +1949,40 @@ def main():
     except Exception as e:
         print(f"[Hormuz] unexpected error: {e}")
 
+    # Robot James — compute state + render email block. Writes state file so
+    # the dashboard's /api/robot_james endpoint can consume it. Action-day
+    # alerts are injected into the main alerts list so subject-line summary
+    # flags TD1 / TD15 / EOM appropriately.
+    rj_block = ""
+    try:
+        rj_state = rj_compute_state(data)
+        if rj_state:
+            rj_block = format_rj_block(rj_state)
+            atype = (rj_state.get('action') or {}).get('type')
+            pb = rj_state.get('projected_base', {})
+            ov = rj_state.get('projected_overlay', {})
+            if atype == 'TD1_SET_BASE':
+                if pb.get('rules_agree'):
+                    msg = f"Set base at MOC: 60% {pb.get('agree_ticker')} + 40% GLD (rules agree)"
+                else:
+                    msg = f"Set base at MOC: 30% {pb.get('mom_pick')} + 30% {pb.get('below_sma_pick')} + 40% GLD"
+                alerts = [('[ACTION] ROBOT JAMES TD1', msg, 'buy')] + alerts
+            elif atype == 'TD15_OVERLAY':
+                if ov.get('strict_skip'):
+                    msg = f"STRICT SKIP: {ov.get('skip_reason')}. Hold base through EOM."
+                    alerts = [('[WATCH] ROBOT JAMES TD15 SKIP', msg, 'watch')] + alerts
+                elif ov.get('signal_asset'):
+                    msg = f"Rotate to 100% {ov['signal_asset']} at MOC (lagger: {ov.get('lagger')})"
+                    alerts = [('[ACTION] ROBOT JAMES TD15', msg, 'buy')] + alerts
+            elif atype == 'EOM_ROTATE_BACK':
+                alerts = [('[ACTION] ROBOT JAMES EOM',
+                          'Rotate back to cash/base at MOC — prepare for new TD1 tomorrow',
+                          'exit')] + alerts
+            print(f"[RJ] TD {rj_state.get('current_td')}/{rj_state.get('total_tds_this_month')} "
+                  f"action={atype} state written to {RJ_STATE_FILE}")
+    except Exception as e:
+        print(f"[RJ] unexpected error: {e}")
+
     # Composer data (close email only for dry-run, both for performance)
     composer_trades = None
     composer_perf = None
@@ -1680,7 +1998,7 @@ def main():
     urgency = "EXIT SIGNALS" if ec>0 else "BUY SIGNALS" if bc>0 else "WATCH" if alerts else "No Alerts"
     timing = "MID-DAY" if IS_PRECLOSE else "CLOSE"
     subject = f"[{timing}] Market Signals: {len(alerts)} Alert(s) - {urgency}" if alerts else f"[{timing}] Market Signals: No Alerts"
-    body = format_email(alerts, status, data, IS_PRECLOSE, composer_trades, composer_perf, hormuz_block)
+    body = format_email(alerts, status, data, IS_PRECLOSE, composer_trades, composer_perf, hormuz_block, rj_block)
     send_email(subject, body)
     print(f"\n{len(alerts)} signal(s) detected")
     for t, m, _ in alerts: print(f"  {t}")
