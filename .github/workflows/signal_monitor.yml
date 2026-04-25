@@ -1,11 +1,18 @@
-# Signal Monitor v4.8 - Updated 2026-04-19
-# Monitors all backtested signals including new v4.8 Groups 31-37
-# Schedule: Mid-day preview at 11:00 AM ET + Market close at 4:05 PM ET
+# Signal Monitor v5.1 - Updated 2026-04-25
+# Three emails daily (weekdays):
+#   9:45 AM ET  - Post-open snapshot (open mode)
+#   11:00 AM ET - Mid-day preview (preclose mode)
+#   4:05 PM ET  - Market close confirmation (close mode)
 
 name: Signal Monitor
 
 on:
   schedule:
+    # 9:45 AM Eastern = 13:45 UTC (post-open snapshot)
+    # Note: ET is UTC-4 during DST (Mar-Nov) and UTC-5 in winter.
+    # GitHub cron is UTC only -- this fires at 9:45 AM ET during DST,
+    # 8:45 AM ET in winter. Adjust if you want strict 9:45 ET year-round.
+    - cron: '45 13 * * 1-5'
     # 11:00 AM Eastern = 15:00 UTC (mid-day preview)
     - cron: '00 15 * * 1-5'
     # 4:05 PM Eastern = 20:05 UTC (market close confirmation)
@@ -18,6 +25,7 @@ on:
         default: 'close'
         type: choice
         options:
+          - open
           - preclose
           - close
 
@@ -46,7 +54,10 @@ jobs:
 
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
-          # If it's around 15:00 UTC (11:00 AM ET), it's mid-day preview
+          # 13:45 UTC = 9:45 AM ET (DST) -- post-open
+          elif [ "$HOUR" == "13" ] && [ "$MINUTE" -ge "30" ]; then
+            echo "mode=open" >> $GITHUB_OUTPUT
+          # 15:00 UTC = 11:00 AM ET (DST) -- mid-day preview
           elif [ "$HOUR" == "15" ] && [ "$MINUTE" -lt "30" ]; then
             echo "mode=preclose" >> $GITHUB_OUTPUT
           else
@@ -62,7 +73,10 @@ jobs:
           COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
           COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
         run: |
-          if [ "${{ steps.mode.outputs.mode }}" == "preclose" ]; then
+          MODE="${{ steps.mode.outputs.mode }}"
+          if [ "$MODE" == "open" ]; then
+            python .github/workflows/signal_monitor_complete.py open
+          elif [ "$MODE" == "preclose" ]; then
             python .github/workflows/signal_monitor_complete.py preclose
           else
             python .github/workflows/signal_monitor_complete.py
