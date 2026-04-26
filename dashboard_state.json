@@ -1,7 +1,7 @@
 {
-  "generated_at_local": "2026-04-26T20:34:28.286811",
-  "generated_at_utc": "2026-04-26T20:34:28.286815Z",
-  "mode": "open",
+  "generated_at_local": "2026-04-26T20:58:24.219303",
+  "generated_at_utc": "2026-04-26T20:58:24.219306Z",
+  "mode": "preclose",
   "summary": {
     "total_alerts": 3,
     "buy_count": 0,
@@ -10,18 +10,18 @@
   },
   "alerts": [
     {
-      "title": "\u00f0\u0178\u201d\u00b4 SOXL EXIT",
+      "title": "\ud83d\udd34 SOXL EXIT",
       "message": "SMH 42.0% above SMA(200) - SELL SOXL",
       "category": "exit"
     },
     {
-      "title": "\u00f0\u0178\u0178\u00a1 VOL HEDGE",
-      "message": "QQQ RSI=79.6 > 79 \u00e2\u2020\u2019 Long UVXY 5d: 67% win, +33% CAGR",
+      "title": "\ud83d\udfe1 VOL HEDGE",
+      "message": "QQQ RSI=79.6 > 79 \u2192 Long UVXY 5d: 67% win, +33% CAGR",
       "category": "hedge"
     },
     {
-      "title": "\u00f0\u0178\u0178\u00a1 AMD EXTENDED",
-      "message": "AMD RSI=93.2 > 85 \u00e2\u2020\u2019 Consider taking profits",
+      "title": "\ud83d\udfe1 AMD EXTENDED",
+      "message": "AMD RSI=93.2 > 85 \u2192 Consider taking profits",
       "category": "warning"
     }
   ],
@@ -216,13 +216,13 @@
       "pct_above_sma200": -14.27
     },
     "BTC-USD": {
-      "price": 78375.39,
-      "rsi10": 66.8,
-      "rsi50": 52.2,
-      "sma200": 84979.01,
-      "sma50": 71563.71,
-      "ema21": 74950.65,
-      "pct_above_sma200": -7.77
+      "price": 78252.28,
+      "rsi10": 66.4,
+      "rsi50": 52.1,
+      "sma200": 84978.4,
+      "sma50": 71561.25,
+      "ema21": 74939.46,
+      "pct_above_sma200": -7.92
     },
     "AMD": {
       "price": 347.81,
