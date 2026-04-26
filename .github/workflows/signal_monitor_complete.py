@@ -594,15 +594,15 @@ def check_signals(data):
         
         # EXIT Signals
         if smh['pct_above_sma200'] >= 40:
-            alerts.append(('ðŸ”´ SOXL EXIT', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - SELL SOXL", 'exit'))
+            alerts.append(('🔴 SOXL EXIT', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - SELL SOXL", 'exit'))
         elif smh['pct_above_sma200'] >= 35:
-            alerts.append(('ðŸŸ¡ SOXL WARNING', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - Approaching sell zone", 'warning'))
+            alerts.append(('🟡 SOXL WARNING', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - Approaching sell zone", 'warning'))
         elif smh['pct_above_sma200'] >= 30:
-            alerts.append(('ðŸŸ¡ SOXL TRIM', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - Consider trimming 25-50%", 'warning'))
+            alerts.append(('🟡 SOXL TRIM', f"SMH {smh['pct_above_sma200']:.1f}% above SMA(200) - Consider trimming 25-50%", 'warning'))
         
         # Death Cross
         if smh['sma50'] < smh['sma200'] and smh['sma200'] > 0:
-            alerts.append(('ðŸ”´ DEATH CROSS', f"SMH SMA(50) below SMA(200) - Bearish trend", 'exit'))
+            alerts.append(('🔴 DEATH CROSS', f"SMH SMA(50) below SMA(200) - Bearish trend", 'exit'))
         
         # BUY Signals - Days below SMA200
         if 'SMH' in data:
@@ -625,9 +625,9 @@ def check_signals(data):
             
             if days_below >= 100:
                 if smh['rsi50'] < 45:
-                    alerts.append(('ðŸŸ¢ SOXL STRONG BUY', f"SMH {days_below} days below SMA(200) + RSI(50)={smh['rsi50']:.1f} < 45 | 97% win, +81% avg", 'buy'))
+                    alerts.append(('🟢 SOXL STRONG BUY', f"SMH {days_below} days below SMA(200) + RSI(50)={smh['rsi50']:.1f} < 45 | 97% win, +81% avg", 'buy'))
                 else:
-                    alerts.append(('ðŸŸ¢ SOXL ACCUMULATE', f"SMH {days_below} days below SMA(200) | 85% win, +54% avg", 'buy'))
+                    alerts.append(('🟢 SOXL ACCUMULATE', f"SMH {days_below} days below SMA(200) | 85% win, +54% avg", 'buy'))
             
             status['smh_days_below_sma200'] = days_below
     
@@ -640,23 +640,23 @@ def check_signals(data):
         
         # Double Signal: GLD > 79 AND USDU < 25
         if gld['rsi10'] > 79 and usdu['rsi10'] < 25:
-            alerts.append(('ðŸŸ¢ðŸ”¥ DOUBLE SIGNAL ACTIVE', 
+            alerts.append(('🟢🔥 DOUBLE SIGNAL ACTIVE', 
                 f"GLD RSI={gld['rsi10']:.1f} > 79 AND USDU RSI={usdu['rsi10']:.1f} < 25\n"
-                f"   â†’ Long TQQQ: 88% win, +7% avg (5d)\n"
-                f"   â†’ Long UPRO: 85% win, +5.2% avg (5d)\n"
-                f"   â†’ AMD/NVDA: 86% win, +5-8% avg (5d)", 'buy'))
+                f"   → Long TQQQ: 88% win, +7% avg (5d)\n"
+                f"   → Long UPRO: 85% win, +5.2% avg (5d)\n"
+                f"   → AMD/NVDA: 86% win, +5-8% avg (5d)", 'buy'))
             
             # Triple Signal: Add XLP > 65
             if 'XLP' in indicators and indicators['XLP']['rsi10'] > 65:
                 xlp = indicators['XLP']
-                alerts.append(('ðŸŸ¢ðŸ”¥ðŸ”¥ TRIPLE SIGNAL ACTIVE', 
+                alerts.append(('🟢🔥🔥 TRIPLE SIGNAL ACTIVE', 
                     f"GLD RSI={gld['rsi10']:.1f} + USDU RSI={usdu['rsi10']:.1f} + XLP RSI={xlp['rsi10']:.1f}\n"
-                    f"   â†’ Long TQQQ: 100% win, +11.6% avg (5d) - RARE!", 'buy'))
+                    f"   → Long TQQQ: 100% win, +11.6% avg (5d) - RARE!", 'buy'))
         
         # Individual GLD overbought
         elif gld['rsi10'] > 79:
-            alerts.append(('ðŸŸ¢ GLD OVERBOUGHT', 
-                f"GLD RSI={gld['rsi10']:.1f} > 79 â†’ Long TQQQ: 72% win, +3.2% avg (5d)", 'buy'))
+            alerts.append(('🟢 GLD OVERBOUGHT', 
+                f"GLD RSI={gld['rsi10']:.1f} > 79 → Long TQQQ: 72% win, +3.2% avg (5d)", 'buy'))
     
     # =========================================================================
     # SIGNAL GROUP 3: Defensive Rotation
@@ -672,8 +672,8 @@ def check_signals(data):
         qqq_ob = 'QQQ' in indicators and indicators['QQQ']['rsi10'] > 79
         
         if not spy_ob and not qqq_ob:
-            alerts.append(('ðŸŸ¢ DEFENSIVE ROTATION', 
-                f"Defensive sector overbought, SPY/QQQ not â†’ Long TQQQ 20d: 70% win, +5% avg", 'buy'))
+            alerts.append(('🟢 DEFENSIVE ROTATION', 
+                f"Defensive sector overbought, SPY/QQQ not → Long TQQQ 20d: 70% win, +5% avg", 'buy'))
     
     # =========================================================================
     # SIGNAL GROUP 4: Volatility Hedge Signals
@@ -682,12 +682,12 @@ def check_signals(data):
         qqq = indicators['QQQ']
         
         if qqq['rsi10'] > 79:
-            alerts.append(('ðŸŸ¡ VOL HEDGE', 
-                f"QQQ RSI={qqq['rsi10']:.1f} > 79 â†’ Long UVXY 5d: 67% win, +33% CAGR", 'hedge'))
+            alerts.append(('🟡 VOL HEDGE', 
+                f"QQQ RSI={qqq['rsi10']:.1f} > 79 → Long UVXY 5d: 67% win, +33% CAGR", 'hedge'))
         
         if qqq['rsi10'] < 20:
-            alerts.append(('ðŸŸ¢ QQQ DIP BUY', 
-                f"QQQ RSI={qqq['rsi10']:.1f} < 20 â†’ Long TQQQ 5d: 69% win, +26% CAGR", 'buy'))
+            alerts.append(('🟢 QQQ DIP BUY', 
+                f"QQQ RSI={qqq['rsi10']:.1f} < 20 → Long TQQQ 5d: 69% win, +26% CAGR", 'buy'))
     
     # =========================================================================
     # SIGNAL GROUP 5: SOXS Short Signals
@@ -697,14 +697,14 @@ def check_signals(data):
         usdu = indicators['USDU']
         
         if smh['rsi10'] > 79 and usdu['rsi10'] > 70:
-            alerts.append(('ðŸ”´ SOXS SIGNAL', 
+            alerts.append(('🔴 SOXS SIGNAL', 
                 f"SMH RSI={smh['rsi10']:.1f} > 79 AND USDU RSI={usdu['rsi10']:.1f} > 70\n"
-                f"   â†’ Long SOXS 5d: 100% win, +9.5% avg", 'short'))
+                f"   → Long SOXS 5d: 100% win, +9.5% avg", 'short'))
         
         if 'IWM' in indicators and smh['rsi10'] > 79 and indicators['IWM']['rsi10'] < 50:
-            alerts.append(('ðŸ”´ SOXS DIVERGENCE', 
+            alerts.append(('🔴 SOXS DIVERGENCE', 
                 f"SMH RSI={smh['rsi10']:.1f} > 79 AND IWM RSI={indicators['IWM']['rsi10']:.1f} < 50\n"
-                f"   â†’ Long SOXS 5d: 86% win, +6.9% avg", 'short'))
+                f"   → Long SOXS 5d: 86% win, +6.9% avg", 'short'))
     
     # =========================================================================
     # SIGNAL GROUP 6: BTC Signals
@@ -713,16 +713,16 @@ def check_signals(data):
         btc = indicators['BTC-USD']
         
         if btc['rsi10'] > 79:
-            alerts.append(('ðŸŸ¢ BTC MOMENTUM', 
-                f"BTC RSI={btc['rsi10']:.1f} > 79 â†’ Hold/Add BTC: 67% win, +5.2% avg (5d)", 'buy'))
+            alerts.append(('🟢 BTC MOMENTUM', 
+                f"BTC RSI={btc['rsi10']:.1f} > 79 → Hold/Add BTC: 67% win, +5.2% avg (5d)", 'buy'))
         
         if btc['rsi10'] < 30:
             uvxy_low = 'UVXY' in indicators and indicators['UVXY']['rsi10'] < 40
             if uvxy_low:
-                alerts.append(('ðŸŸ¢ BTC DIP BUY', 
-                    f"BTC RSI={btc['rsi10']:.1f} < 30 AND UVXY < 40 â†’ Buy BTC: 77% win, +4.1% avg (5d)", 'buy'))
+                alerts.append(('🟢 BTC DIP BUY', 
+                    f"BTC RSI={btc['rsi10']:.1f} < 30 AND UVXY < 40 → Buy BTC: 77% win, +4.1% avg (5d)", 'buy'))
             else:
-                alerts.append(('ðŸŸ¡ BTC OVERSOLD', 
+                alerts.append(('🟡 BTC OVERSOLD', 
                     f"BTC RSI={btc['rsi10']:.1f} < 30 (wait for UVXY < 40 for better signal)", 'watch'))
     
     # =========================================================================
@@ -732,21 +732,21 @@ def check_signals(data):
         spy = indicators['SPY']
         
         if spy['rsi10'] > 85:
-            alerts.append(('ðŸ”´ UPRO EXIT', 
-                f"SPY RSI={spy['rsi10']:.1f} > 85 â†’ Trim/Exit UPRO: Only 36% win, -3.5% avg (5d)", 'exit'))
+            alerts.append(('🔴 UPRO EXIT', 
+                f"SPY RSI={spy['rsi10']:.1f} > 85 → Trim/Exit UPRO: Only 36% win, -3.5% avg (5d)", 'exit'))
         elif spy['rsi10'] > 82:
-            alerts.append(('ðŸŸ¡ UPRO CAUTION', 
-                f"SPY RSI={spy['rsi10']:.1f} > 82 â†’ Watch UPRO: 49% win at 5d", 'warning'))
+            alerts.append(('🟡 UPRO CAUTION', 
+                f"SPY RSI={spy['rsi10']:.1f} > 82 → Watch UPRO: 49% win at 5d", 'warning'))
         
         if spy['rsi10'] < 21:
-            alerts.append(('ðŸŸ¢ UPRO STRONG BUY', 
-                f"SPY RSI={spy['rsi10']:.1f} < 21 â†’ Add UPRO: 94% win, +8.9% avg (5d)", 'buy'))
+            alerts.append(('🟢 UPRO STRONG BUY', 
+                f"SPY RSI={spy['rsi10']:.1f} < 21 → Add UPRO: 94% win, +8.9% avg (5d)", 'buy'))
         elif spy['rsi10'] < 25:
-            alerts.append(('ðŸŸ¢ UPRO BUY', 
-                f"SPY RSI={spy['rsi10']:.1f} < 25 â†’ Add UPRO: 74% win, +3.9% avg (5d)", 'buy'))
+            alerts.append(('🟢 UPRO BUY', 
+                f"SPY RSI={spy['rsi10']:.1f} < 25 → Add UPRO: 74% win, +3.9% avg (5d)", 'buy'))
         elif spy['rsi10'] < 30:
-            alerts.append(('ðŸŸ¢ UPRO CONSIDER', 
-                f"SPY RSI={spy['rsi10']:.1f} < 30 â†’ Consider UPRO: 69% win, +4.3% avg (5d)", 'buy'))
+            alerts.append(('🟢 UPRO CONSIDER', 
+                f"SPY RSI={spy['rsi10']:.1f} < 30 → Consider UPRO: 69% win, +4.3% avg (5d)", 'buy'))
     
     # =========================================================================
     # SIGNAL GROUP 8: AMD/NVDA Specific
@@ -754,14 +754,14 @@ def check_signals(data):
     if 'AMD' in indicators:
         amd = indicators['AMD']
         if amd['rsi10'] > 85:
-            alerts.append(('ðŸŸ¡ AMD EXTENDED', 
-                f"AMD RSI={amd['rsi10']:.1f} > 85 â†’ Consider taking profits", 'warning'))
+            alerts.append(('🟡 AMD EXTENDED', 
+                f"AMD RSI={amd['rsi10']:.1f} > 85 → Consider taking profits", 'warning'))
     
     if 'NVDA' in indicators:
         nvda = indicators['NVDA']
         if nvda['rsi10'] > 85:
-            alerts.append(('ðŸŸ¡ NVDA EXTENDED', 
-                f"NVDA RSI={nvda['rsi10']:.1f} > 85 â†’ Consider taking profits", 'warning'))
+            alerts.append(('🟡 NVDA EXTENDED', 
+                f"NVDA RSI={nvda['rsi10']:.1f} > 85 → Consider taking profits", 'warning'))
     
     # =========================================================================
     # SIGNAL GROUP 9: NAIL (3x Homebuilders) Signals
@@ -776,20 +776,20 @@ def check_signals(data):
             xlf = indicators['XLF']
             
             if gld['rsi10'] > 79 and usdu['rsi10'] < 25 and xlf['rsi10'] < 70:
-                alerts.append(('ðŸŸ¢ NAIL SIGNAL', 
+                alerts.append(('🟢 NAIL SIGNAL', 
                     f"GLD>{gld['rsi10']:.0f} + USDU<{usdu['rsi10']:.0f} + XLF<{xlf['rsi10']:.0f}\n"
-                    f"   â†’ Long NAIL: 90% win, +4.9% avg (5d), +14.4% avg (10d) | n=10", 'buy'))
+                    f"   → Long NAIL: 90% win, +4.9% avg (5d), +14.4% avg (10d) | n=10", 'buy'))
             
             # Warning: XLF strong + USDU weak = danger for NAIL
             if xlf['rsi10'] > 70 and usdu['rsi10'] < 25:
-                alerts.append(('ðŸ”´ NAIL DANGER', 
+                alerts.append(('🔴 NAIL DANGER', 
                     f"XLF RSI={xlf['rsi10']:.1f} > 70 + USDU < 25 = Historically BAD for NAIL\n"
-                    f"   â†’ 11% win, -11.5% avg (5d) | Consider exit", 'exit'))
+                    f"   → 11% win, -11.5% avg (5d) | Consider exit", 'exit'))
         
         # NAIL overbought/oversold
         if nail['rsi10'] > 79:
-            alerts.append(('ðŸ”´ NAIL OVERBOUGHT', 
-                f"NAIL RSI={nail['rsi10']:.1f} > 79 â†’ Consider exit", 'warning'))
+            alerts.append(('🔴 NAIL OVERBOUGHT', 
+                f"NAIL RSI={nail['rsi10']:.1f} > 79 → Consider exit", 'warning'))
     
     # =========================================================================
     # SIGNAL GROUP 10: CURE (3x Healthcare) Signals
@@ -798,18 +798,18 @@ def check_signals(data):
         cure = indicators['CURE']
         
         if cure['rsi10'] < 21:
-            alerts.append(('ðŸŸ¢ CURE STRONG BUY', 
-                f"CURE RSI={cure['rsi10']:.1f} < 21 â†’ Buy CURE: 85% win, +7.3% avg (5d) | n=33", 'buy'))
+            alerts.append(('🟢 CURE STRONG BUY', 
+                f"CURE RSI={cure['rsi10']:.1f} < 21 → Buy CURE: 85% win, +7.3% avg (5d) | n=33", 'buy'))
         elif cure['rsi10'] < 25:
-            alerts.append(('ðŸŸ¢ CURE BUY', 
-                f"CURE RSI={cure['rsi10']:.1f} < 25 â†’ Buy CURE: 81% win, +5.4% avg (5d) | n=70", 'buy'))
+            alerts.append(('🟢 CURE BUY', 
+                f"CURE RSI={cure['rsi10']:.1f} < 25 → Buy CURE: 81% win, +5.4% avg (5d) | n=70", 'buy'))
         
         if cure['rsi10'] > 79:
-            alerts.append(('ðŸ”´ CURE OVERBOUGHT', 
-                f"CURE RSI={cure['rsi10']:.1f} > 79 â†’ Exit CURE: Only 40% win (5d) | n=95", 'exit'))
+            alerts.append(('🔴 CURE OVERBOUGHT', 
+                f"CURE RSI={cure['rsi10']:.1f} > 79 → Exit CURE: Only 40% win (5d) | n=95", 'exit'))
         elif cure['rsi10'] > 85:
-            alerts.append(('ðŸ”´ CURE SELL', 
-                f"CURE RSI={cure['rsi10']:.1f} > 85 â†’ Sell CURE: Only 33% win (5d) | n=15", 'exit'))
+            alerts.append(('🔴 CURE SELL', 
+                f"CURE RSI={cure['rsi10']:.1f} > 85 → Sell CURE: Only 33% win (5d) | n=15", 'exit'))
     
     # =========================================================================
     # SIGNAL GROUP 11: FAS (3x Financials) Signals
@@ -823,20 +823,20 @@ def check_signals(data):
             usdu = indicators['USDU']
             
             if gld['rsi10'] > 79 and usdu['rsi10'] < 25:
-                alerts.append(('ðŸŸ¢ FAS SIGNAL', 
+                alerts.append(('🟢 FAS SIGNAL', 
                     f"GLD>{gld['rsi10']:.0f} + USDU<{usdu['rsi10']:.0f}\n"
-                    f"   â†’ Long FAS 10d: 92% win, +5.8% avg | n=13", 'buy'))
+                    f"   → Long FAS 10d: 92% win, +5.8% avg | n=13", 'buy'))
         
         if fas['rsi10'] < 30:
-            alerts.append(('ðŸŸ¢ FAS BUY', 
-                f"FAS RSI={fas['rsi10']:.1f} < 30 â†’ Buy FAS: 63% win, +3.3% avg (5d) | n=195", 'buy'))
+            alerts.append(('🟢 FAS BUY', 
+                f"FAS RSI={fas['rsi10']:.1f} < 30 → Buy FAS: 63% win, +3.3% avg (5d) | n=195", 'buy'))
         
         if fas['rsi10'] > 82:
-            alerts.append(('ðŸ”´ FAS OVERBOUGHT', 
-                f"FAS RSI={fas['rsi10']:.1f} > 82 â†’ Exit FAS: Only 38% win (5d) | n=40", 'exit'))
+            alerts.append(('🔴 FAS OVERBOUGHT', 
+                f"FAS RSI={fas['rsi10']:.1f} > 82 → Exit FAS: Only 38% win (5d) | n=40", 'exit'))
         elif fas['rsi10'] > 85:
-            alerts.append(('ðŸ”´ FAS SELL', 
-                f"FAS RSI={fas['rsi10']:.1f} > 85 â†’ Sell FAS: Only 8% win! (5d) | n=12", 'exit'))
+            alerts.append(('🔴 FAS SELL', 
+                f"FAS RSI={fas['rsi10']:.1f} > 85 → Sell FAS: Only 8% win! (5d) | n=12", 'exit'))
     
     # =========================================================================
     # SIGNAL GROUP 12: LABU (3x Biotech) Signals
@@ -845,20 +845,20 @@ def check_signals(data):
         labu = indicators['LABU']
         
         if labu['rsi10'] < 21:
-            alerts.append(('ðŸŸ¢ LABU STRONG BUY', 
-                f"LABU RSI={labu['rsi10']:.1f} < 21 â†’ Buy LABU: 73% win, +11.2% avg (5d) | n=11", 'buy'))
+            alerts.append(('🟢 LABU STRONG BUY', 
+                f"LABU RSI={labu['rsi10']:.1f} < 21 → Buy LABU: 73% win, +11.2% avg (5d) | n=11", 'buy'))
         elif labu['rsi10'] < 25:
-            alerts.append(('ðŸŸ¢ LABU BUY', 
-                f"LABU RSI={labu['rsi10']:.1f} < 25 â†’ Buy LABU: 66% win, +5.7% avg (5d) | n=59", 'buy'))
+            alerts.append(('🟢 LABU BUY', 
+                f"LABU RSI={labu['rsi10']:.1f} < 25 → Buy LABU: 66% win, +5.7% avg (5d) | n=59", 'buy'))
         
         if labu['rsi10'] > 70:
-            alerts.append(('ðŸŸ¡ LABU EXTENDED', 
-                f"LABU RSI={labu['rsi10']:.1f} > 70 â†’ Caution: 42% win (5d) | n=180", 'warning'))
+            alerts.append(('🟡 LABU EXTENDED', 
+                f"LABU RSI={labu['rsi10']:.1f} > 70 → Caution: 42% win (5d) | n=180", 'warning'))
         
         # LABU extreme extension warning
         if labu.get('pct_above_sma200', 0) > 80:
-            alerts.append(('ðŸŸ¡ LABU EXTREME', 
-                f"LABU {labu['pct_above_sma200']:.0f}% above SMA(200) â†’ Very extended, consider profits", 'warning'))
+            alerts.append(('🟡 LABU EXTREME', 
+                f"LABU {labu['pct_above_sma200']:.0f}% above SMA(200) → Very extended, consider profits", 'warning'))
     
     return alerts, status
 
@@ -1225,17 +1225,17 @@ MARKET SIGNAL MONITOR - {timing}
         warning_alerts = [a for a in alerts if a[2] in ['warning', 'hedge', 'watch']]
         
         if buy_alerts:
-            body += "ðŸŸ¢ BUY SIGNALS:\n" + "-"*50 + "\n"
+            body += "🟢 BUY SIGNALS:\n" + "-"*50 + "\n"
             for title, msg, _ in buy_alerts:
                 body += f"{title}\n{msg}\n\n"
         
         if exit_alerts:
-            body += "ðŸ”´ EXIT/SHORT SIGNALS:\n" + "-"*50 + "\n"
+            body += "🔴 EXIT/SHORT SIGNALS:\n" + "-"*50 + "\n"
             for title, msg, _ in exit_alerts:
                 body += f"{title}\n{msg}\n\n"
         
         if warning_alerts:
-            body += "ðŸŸ¡ WARNINGS/WATCH:\n" + "-"*50 + "\n"
+            body += "🟡 WARNINGS/WATCH:\n" + "-"*50 + "\n"
             for title, msg, _ in warning_alerts:
                 body += f"{title}\n{msg}\n\n"
     else:
@@ -1282,13 +1282,13 @@ CURRENT INDICATOR STATUS
             # Signal status
             rsi_val = ind['rsi10']
             if rsi_val < 21:
-                signal = "ðŸŸ¢ OVERSOLD"
+                signal = "🟢 OVERSOLD"
             elif rsi_val < 30:
-                signal = "ðŸŸ¢ Watch"
+                signal = "🟢 Watch"
             elif rsi_val > 85:
-                signal = "ðŸ”´ OVERBOUGHT"
+                signal = "🔴 OVERBOUGHT"
             elif rsi_val > 79:
-                signal = "ðŸŸ¡ Extended"
+                signal = "🟡 Extended"
             else:
                 signal = ""
             
@@ -1569,17 +1569,17 @@ def main():
         buy_count = len([a for a in alerts if a[2] == 'buy'])
         exit_count = len([a for a in alerts if a[2] in ['exit', 'short']])
         if exit_count > 0:
-            emoji = "ðŸ”´"
+            emoji = "🔴"
             urgency = "EXIT SIGNALS"
         elif buy_count > 0:
-            emoji = "ðŸŸ¢"
+            emoji = "🟢"
             urgency = "BUY SIGNALS"
         else:
-            emoji = "ðŸŸ¡"
+            emoji = "🟡"
             urgency = "WATCH"
         subject = f"{emoji} [{timing_label}] Market Signals: {len(alerts)} Alert(s) - {urgency}"
     else:
-        subject = f"ðŸ“Š [{timing_label}] Market Signals: No Alerts"
+        subject = f"📊 [{timing_label}] Market Signals: No Alerts"
 
     # Body: prepend RJ block (preclose action OR hold-day info) or postclose confirmation
     # Then Hormuz intel block (if available)
