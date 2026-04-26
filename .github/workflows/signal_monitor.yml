@@ -1,21 +1,27 @@
-# Signal Monitor v5.1 - Updated 2026-04-25
-# Three emails daily (weekdays):
+# Signal Monitor v5.2 - Updated 2026-04-25
+# Three emails daily (weekdays) + JSON state committed back to this repo.
+#
 #   9:45 AM ET  - Post-open snapshot (open mode)
 #   11:00 AM ET - Mid-day preview (preclose mode)
 #   4:05 PM ET  - Market close confirmation (close mode)
+#
+# After each run, dashboard_state.json is committed back to this repo's
+# main branch so it's readable at:
+#   https://raw.githubusercontent.com/<owner>/<repo>/main/dashboard_state.json
 
 name: Signal Monitor
 
+# Required for the workflow to push commits back to this repo
+permissions:
+  contents: write
+
 on:
   schedule:
-    # 9:45 AM Eastern = 13:45 UTC (post-open snapshot)
-    # Note: ET is UTC-4 during DST (Mar-Nov) and UTC-5 in winter.
-    # GitHub cron is UTC only -- this fires at 9:45 AM ET during DST,
-    # 8:45 AM ET in winter. Adjust if you want strict 9:45 ET year-round.
+    # 9:45 AM Eastern = 13:45 UTC (post-open snapshot, DST)
     - cron: '45 13 * * 1-5'
-    # 11:00 AM Eastern = 15:00 UTC (mid-day preview)
+    # 11:00 AM Eastern = 15:00 UTC (mid-day preview, DST)
     - cron: '00 15 * * 1-5'
-    # 4:05 PM Eastern = 20:05 UTC (market close confirmation)
+    # 4:05 PM Eastern = 20:05 UTC (market close confirmation, DST)
     - cron: '05 20 * * 1-5'
   workflow_dispatch:
     inputs:
@@ -80,4 +86,31 @@ jobs:
             python .github/workflows/signal_monitor_complete.py preclose
           else
             python .github/workflows/signal_monitor_complete.py
+          fi
+
+      # Commit the JSON state file back to this repo so it's readable
+      # at a stable raw.githubusercontent.com URL.
+      - name: Commit dashboard state
+        if: success()
+        env:
+          RUN_MODE: ${{ steps.mode.outputs.mode }}
+        run: |
+          set -e
+          if [ ! -f dashboard_state.json ]; then
+            echo "No dashboard_state.json produced -- skipping commit"
+            exit 0
+          fi
+
+          git config user.name "signal-monitor-bot"
+          git config user.email "signal-monitor-bot@users.noreply.github.com"
+          git add dashboard_state.json
+
+          if git diff --cached --quiet; then
+            echo "No state change to commit"
+          else
+            git commit -m "state update $(date -u +%Y-%m-%dT%H:%M:%SZ) [$RUN_MODE]"
+            # Pull-rebase in case multiple runs land close together
+            git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+            git push origin "HEAD:${GITHUB_REF_NAME:-main}"
+            echo "State committed"
           fi
