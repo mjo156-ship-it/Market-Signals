@@ -1347,6 +1347,90 @@ Final confirmation email will be sent at 4:05 PM ET.
     
     return body
 
+
+def write_state_json(alerts, status, mode, hormuz_data=None, rj_state=None,
+                     path='dashboard_state.json'):
+    """
+    Serialize current signal state to JSON for external consumers.
+
+    Writes to ./dashboard_state.json in the current working directory.
+    A separate workflow step copies this file to a public mirror repo
+    so it's accessible at a stable raw.githubusercontent.com URL.
+    """
+    indicators = status.get('indicators', {}) or {}
+
+    state = {
+        'generated_at_local': datetime.now().isoformat(),
+        'generated_at_utc': datetime.utcnow().isoformat() + 'Z',
+        'mode': mode,
+        'summary': {
+            'total_alerts': len(alerts),
+            'buy_count': len([a for a in alerts if a[2] == 'buy']),
+            'exit_count': len([a for a in alerts if a[2] in ('exit', 'short')]),
+            'warning_count': len([a for a in alerts if a[2] in ('warning', 'hedge', 'watch')]),
+        },
+        'alerts': [
+            {'title': str(t), 'message': str(m), 'category': str(c)}
+            for (t, m, c) in alerts
+        ],
+        'indicators': {},
+        'smh_days_below_sma200': int(status.get('smh_days_below_sma200', 0) or 0),
+    }
+
+    # Flatten indicators to JSON-safe values, drop NaN
+    def _safe_num(v, places=2):
+        try:
+            f = float(v)
+            if f != f:  # NaN check
+                return None
+            return round(f, places)
+        except (TypeError, ValueError):
+            return None
+
+    for ticker, ind in indicators.items():
+        state['indicators'][ticker] = {
+            'price':              _safe_num(ind.get('price'), 2),
+            'rsi10':              _safe_num(ind.get('rsi10'), 1),
+            'rsi50':              _safe_num(ind.get('rsi50'), 1),
+            'sma200':             _safe_num(ind.get('sma200'), 2),
+            'sma50':              _safe_num(ind.get('sma50'), 2),
+            'ema21':              _safe_num(ind.get('ema21'), 2),
+            'pct_above_sma200':   _safe_num(ind.get('pct_above_sma200'), 2),
+        }
+
+    # Robot James snapshot (subset of full state, enough for dashboard reads)
+    if rj_state is not None:
+        try:
+            state['robot_james'] = {
+                'current_td': rj_state.get('current_td'),
+                'total_tds_this_month': rj_state.get('total_tds_this_month'),
+                'action_type': (rj_state.get('action') or {}).get('type'),
+                'phase': rj_state.get('phase'),
+            }
+        except Exception:
+            pass
+
+    # Hormuz snapshot (top-line numbers only)
+    if hormuz_data is not None:
+        try:
+            state['hormuz'] = {
+                'as_of': hormuz_data.get('as_of'),
+                'total_transits': hormuz_data.get('total_transits'),
+                'attacks': (hormuz_data.get('attacks') or {}).get('value'),
+            }
+        except Exception:
+            pass
+
+    try:
+        with open(path, 'w') as f:
+            json.dump(state, f, indent=2, default=str)
+        print(f"[STATE] Wrote {path}")
+    except Exception as e:
+        print(f"[STATE] Failed to write {path}: {e}")
+
+    return path
+
+
 def send_email(subject, body):
     """Send email alert"""
     if not SENDER_EMAIL or not SENDER_PASSWORD or not RECIPIENT_EMAIL:
@@ -1507,7 +1591,15 @@ def main():
     if hormuz_block:
         body_prefix += hormuz_block + "\n"
     body = body_prefix + format_email(alerts, status, mode_str)
-    
+
+    # Write machine-readable state for external consumers (dashboard mirror, etc.)
+    try:
+        write_state_json(alerts, status, mode_str,
+                         hormuz_data=hormuz_data,
+                         rj_state=rj_state)
+    except Exception as e:
+        print(f"[STATE] Unexpected error writing state: {e}")
+
     send_email(subject, body)
     
     print(f"\n{len(alerts)} signal(s) detected")
