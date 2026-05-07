@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated_utc": "2026-05-07T20:16:10.735156+00:00",
-    "generated_et": "2026-05-07 15:16:10 ET",
+    "generated_utc": "2026-05-07T21:04:40.268085+00:00",
+    "generated_et": "2026-05-07 16:04:40 ET",
     "ticker_count": 52,
     "version": "1.1"
   },
@@ -100,7 +100,7 @@
         "status": "INACTIVE"
       },
       "FNGO": {
-        "rsi10": 76.4,
+        "rsi10": 76.0,
         "below_sma200": false,
         "bear_ema": false,
         "status": "INACTIVE"
@@ -167,8 +167,8 @@
         "supply_shock": false
       },
       "weather": {
-        "current_temp": 57.5,
-        "temp_change_7d": -2.4,
+        "current_temp": 57.7,
+        "temp_change_7d": -2.6,
         "severe_cold": false,
         "is_winter": false
       },
@@ -828,23 +828,23 @@
       "ret_20d": 10.9
     },
     "FNGO": {
-      "price": 128.12,
-      "change_pct": -0.42,
-      "rsi10": 76.4,
-      "ema9": 123.08,
-      "ema20": 117.01,
-      "ema50": 109.58,
+      "price": 128.0,
+      "change_pct": -0.51,
+      "rsi10": 76.0,
+      "ema9": 123.06,
+      "ema20": 117.0,
+      "ema50": 109.57,
       "ema200": 107.98,
-      "sma50": 104.31,
+      "sma50": 104.3,
       "sma200": 114.67,
       "ema_cross": "BULL",
       "above_sma200": true,
-      "vs_sma200": 11.7,
-      "vs_sma50": 22.8,
-      "ret_1d": -0.42,
-      "ret_5d": 8.0,
-      "ret_10d": 10.72,
-      "ret_20d": 27.72
+      "vs_sma200": 11.6,
+      "vs_sma50": 22.7,
+      "ret_1d": -0.51,
+      "ret_5d": 7.9,
+      "ret_10d": 10.61,
+      "ret_20d": 27.6
     },
     "HIBL": {
       "price": 99.84,
@@ -961,23 +961,23 @@
       "ret_20d": 2.37
     },
     "BTC-USD": {
-      "price": 80159.28,
-      "change_pct": -1.56,
-      "rsi10": 63.3,
-      "ema9": 79351.86,
-      "ema20": 77719.96,
-      "ema50": 75151.17,
-      "ema200": 82068.81,
-      "sma50": 73239.65,
-      "sma200": 83145.05,
+      "price": 79842.71,
+      "change_pct": -1.95,
+      "rsi10": 61.3,
+      "ema9": 79288.54,
+      "ema20": 77689.81,
+      "ema50": 75138.76,
+      "ema200": 82065.66,
+      "sma50": 73233.31,
+      "sma200": 83143.46,
       "ema_cross": "BULL",
       "above_sma200": false,
-      "vs_sma200": -3.6,
-      "vs_sma50": 9.4,
-      "ret_1d": -1.56,
-      "ret_5d": 1.91,
-      "ret_10d": 3.61,
-      "ret_20d": 3.93
+      "vs_sma200": -4.0,
+      "vs_sma50": 9.0,
+      "ret_1d": -1.95,
+      "ret_5d": 1.51,
+      "ret_10d": 3.2,
+      "ret_20d": 3.52
     },
     "AMD": {
       "price": 408.46,
