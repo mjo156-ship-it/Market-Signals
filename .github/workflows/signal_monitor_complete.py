@@ -73,21 +73,46 @@ COMPASS = "\U0001F9ED" # 🧭
 # ════════════════════════════════════════════════════════════════════
 def load_dashboard_data():
     """Try the 3 data sources in order. Returns (data_dict, raw_data, source_label)."""
-    # 1. Live dashboard via HTTP
+    # 1. Live dashboard via HTTP — use /api/email-state which bundles
+    #    indicators + signals + composer portfolio + dry-run preview
+    try:
+        r = req_lib.get(f"{DASHBOARD_URL}/api/email-state", timeout=30)
+        if r.status_code == 200:
+            data = r.json()
+            print(f"Loaded data from dashboard at {DASHBOARD_URL}/api/email-state")
+            return data, None, 'dashboard-email-state'
+    except Exception as e:
+        print(f"Dashboard /api/email-state unavailable ({e}); trying /api/data")
+
+    # 1b. Older dashboards may not have /api/email-state — try /api/data + /api/composer
     try:
         r = req_lib.get(f"{DASHBOARD_URL}/api/data", timeout=30)
         if r.status_code == 200:
             data = r.json()
-            print(f"Loaded data from dashboard at {DASHBOARD_URL}")
-            return data, None, 'dashboard-http'
+            print(f"Loaded data from {DASHBOARD_URL}/api/data (legacy endpoint)")
+            # Try to add composer portfolio + dry-run separately
+            try:
+                cr = req_lib.get(f"{DASHBOARD_URL}/api/composer", timeout=30)
+                if cr.status_code == 200:
+                    data['composer'] = cr.json()
+            except Exception:
+                pass
+            try:
+                dr = req_lib.get(f"{DASHBOARD_URL}/api/composer-dry-run", timeout=30)
+                if dr.status_code == 200:
+                    dr_data = dr.json()
+                    # Reconstruct raw response from parsed rotations isn't easy,
+                    # so pass the parsed structure under a new key the formatter reads
+                    data['composer_dry_run_parsed'] = dr_data
+            except Exception:
+                pass
+            return data, None, 'dashboard-http-legacy'
     except Exception as e:
         print(f"Dashboard HTTP unavailable ({e}); trying local import")
 
     # 2. Local import
     try:
         from chf_dashboard_server import fetch_all
-        # fetch_all() returns (data, raw); some versions return only data.
-        # Try both signatures.
         result = fetch_all()
         if isinstance(result, tuple) and len(result) == 2:
             data, raw = result
@@ -97,14 +122,70 @@ def load_dashboard_data():
         print("Loaded data via direct import of chf_dashboard_server")
         return data, raw, 'dashboard-local'
     except Exception as e:
-        print(f"Local import unavailable ({e}); falling back to yfinance")
+        print(f"Local import unavailable ({e}); falling back to direct fetches")
 
-    # 3. Standalone fallback — only basic indicators
-    return _fallback_yfinance(), None, 'yfinance-fallback'
+    # 3. Standalone fallback — basic indicators + direct Composer dry-run + Hormuz
+    return _fallback_full(), None, 'standalone-fallback'
 
 
-def _fallback_yfinance():
-    """Minimal yfinance fallback — only used if dashboard is completely unavailable."""
+def _fallback_full():
+    """
+    Standalone fallback used when the dashboard is unreachable.
+    Pulls what it can directly:
+      - Basic indicators from yfinance (universe of ~50 tickers)
+      - Hormuz transit data from public Windward snapshot URL (if available)
+      - Composer dry-run preview from API (if COMPOSER_KEY_ID is set)
+      - Composer portfolio (account-level summary) from /accounts endpoint
+
+    What this can't reconstruct without the dashboard:
+      - calendar_cycle, midmonth, breadth_regime, rolling_betas, drif,
+        move_index, fibonacci, uvxy_vol_regime, vix_term_structure
+      - Per-symphony Sharpe/MaxDD/CAGR (those need the dashboard's portfolio history)
+
+    Those sections will simply not appear in the email — better to omit than to
+    fabricate placeholder data.
+    """
+    data = {'signals': []}
+
+    # ── A. yfinance basic indicators ──
+    data['indicators'] = _fetch_yfinance_indicators()
+
+    # ── B. Hormuz from public Windward snapshot (if available) ──
+    try:
+        hormuz = _fetch_hormuz_snapshot()
+        if hormuz:
+            data['hormuz'] = hormuz
+    except Exception as e:
+        print(f"  Hormuz fetch failed: {e}")
+
+    # ── C. Composer dry-run + portfolio (if credentials available) ──
+    if os.environ.get('COMPOSER_KEY_ID'):
+        try:
+            from composer_dry_run import (fetch_dry_run_preview,
+                                           parse_dry_run_response,
+                                           aggregate_net_trade_flow,
+                                           compute_concentration_warnings)
+            # Need account UUIDs first — pull from /accounts
+            portfolio = _fetch_composer_portfolio_basic()
+            if portfolio:
+                data['composer'] = portfolio
+                account_uuids = [a.get('account_uuid')
+                                  for a in portfolio.get('accounts', [])
+                                  if a.get('account_uuid')]
+                if account_uuids:
+                    raw = fetch_dry_run_preview(account_uuids=account_uuids)
+                    if raw:
+                        data['composer_dry_run'] = raw
+        except Exception as e:
+            print(f"  Composer fallback failed: {e}")
+    else:
+        print("  COMPOSER_KEY_ID not set — skipping dry-run preview in fallback")
+
+    return data
+
+
+def _fetch_yfinance_indicators():
+    """Basic yfinance fetch — price, RSI(10), SMA200 for ~50 tickers."""
     import yfinance as yf
 
     tickers = [
@@ -139,7 +220,111 @@ def _fallback_yfinance():
             }
         except Exception:
             continue
-    return {'indicators': indicators, 'signals': [], 'source': 'fallback'}
+    return indicators
+
+
+def _fetch_hormuz_snapshot():
+    """
+    Fetch Hormuz transit data from the public GitHub snapshot.
+    Returns a dict in the shape the email formatter expects, or None.
+
+    The dashboard server's compute_hormuz() function reads the same snapshot
+    and adds derived fields. This is a simplified version for the fallback path.
+    """
+    snapshot_url = os.environ.get(
+        'HORMUZ_SNAPSHOT_URL',
+        'https://raw.githubusercontent.com/mjo156-ship-it/Market-Signals/refs/heads/main/data/snapshot.json'
+    )
+    try:
+        r = req_lib.get(snapshot_url, timeout=15)
+        if r.status_code != 200:
+            return None
+        snap = r.json()
+        # Try common nesting patterns — the snapshot schema may have varied
+        h = (snap.get('hormuz')
+             or snap.get('signals', {}).get('hormuz')
+             or snap.get('signals', {}).get('hormuz_windward'))
+        if not h:
+            return None
+
+        # Normalize to the dict shape fmt_hormuz expects
+        return {
+            'latest_date': h.get('latest_date') or h.get('date'),
+            'blockade_active': h.get('blockade_active', False),
+            'transits': h.get('transits') or {},
+            'vessels_in_gulf': h.get('vessels_in_gulf', '—'),
+            'dark_activity': h.get('dark_activity', '—'),
+            'dark_change_str': h.get('dark_change_str', ''),
+            'attacks_total': h.get('attacks_total', '—'),
+            'attacks_change_str': h.get('attacks_change_str', 'unchanged'),
+            'iran_flagged': h.get('iran_flagged', '—'),
+            'risk_tiers_str': h.get('risk_tiers_str', '—'),
+            'summary': h.get('summary') or h.get('daily_summary'),
+        }
+    except Exception as e:
+        print(f"  Hormuz snapshot fetch error: {e}")
+        return None
+
+
+def _fetch_composer_portfolio_basic():
+    """
+    Fetch the user's account list from Composer's /accounts endpoint, returning
+    the minimal portfolio dict needed for dry-run filtering and totals.
+
+    Returns dict like {'accounts': [{'account_uuid': str, 'account_type': str,
+                                      'portfolio_value': float}, ...]} or None.
+    """
+    key_id = os.environ.get('COMPOSER_KEY_ID', '')
+    key_secret = os.environ.get('COMPOSER_KEY_SECRET', '')
+    if not (key_id and key_secret):
+        return None
+    base = 'https://api.composer.trade/api/v0.1'
+    try:
+        r = req_lib.get(
+            f"{base}/accounts",
+            headers={'x-api-key-id': key_id,
+                      'authorization': f'Bearer {key_secret}'},
+            timeout=15,
+        )
+        r.raise_for_status()
+        accts_raw = r.json()
+    except Exception as e:
+        print(f"  Composer /accounts error: {e}")
+        return None
+
+    # /accounts returns a list with broker_account_uuid, broker, account_type, etc.
+    accounts = []
+    for a in (accts_raw if isinstance(accts_raw, list) else accts_raw.get('accounts', [])):
+        uuid = a.get('broker_account_uuid') or a.get('account_uuid')
+        if not uuid:
+            continue
+
+        # Fetch the holdings to get portfolio_value
+        portfolio_value = 0
+        try:
+            hr = req_lib.get(
+                f"{base}/accounts/{uuid}/holdings",
+                headers={'x-api-key-id': key_id,
+                          'authorization': f'Bearer {key_secret}'},
+                timeout=15,
+            )
+            if hr.status_code == 200:
+                hjson = hr.json()
+                portfolio_value = (hjson.get('total_value')
+                                    or hjson.get('account_value')
+                                    or sum(h.get('market_value', 0)
+                                            for h in hjson.get('holdings', [])))
+        except Exception:
+            pass
+
+        accounts.append({
+            'account_uuid': uuid,
+            'account_type': a.get('account_type') or a.get('account_name') or 'Account',
+            'account_name': a.get('account_type') or a.get('account_name') or 'Account',
+            'portfolio_value': portfolio_value,
+        })
+
+    return {'accounts': accounts} if accounts else None
 
 
 # ════════════════════════════════════════════════════════════════════
@@ -492,6 +677,52 @@ def fmt_portfolio_performance(data):
     return out
 
 
+def _format_preparsed_dry_run(pre_parsed):
+    """
+    Render dry-run preview from already-parsed data returned by /api/composer-dry-run.
+    Unlike the raw-response path, this gives us pre-computed warnings (with the
+    dashboard's authoritative total_portfolio_value denominator) and pre-computed
+    net_flow — we just need to format them.
+    """
+    from composer_dry_run import (format_concentration_warnings,
+                                    aggregate_net_trade_flow)
+    from collections import defaultdict
+
+    rotations = pre_parsed.get('rotations', [])
+    warnings = pre_parsed.get('warnings')
+    pre_net_flow = pre_parsed.get('net_flow', [])
+
+    if not rotations:
+        return ("\n" + "=" * 70 + "\n"
+                "🧭 COMPOSER NEXT-REBALANCE PREVIEW\n"
+                "=" * 70 + "\n"
+                "No symphonies returned from dashboard dry-run.\n")
+
+    # Reuse the main formatter's layout but inject pre-computed warnings/flow.
+    # Easiest path: call format_dry_run_for_email with rotations alone (it will
+    # recompute warnings using rotation_sum fallback), then if we have better
+    # pre-computed warnings, swap that section.
+    body = format_dry_run_for_email(rotations)
+
+    if warnings:
+        # Replace the locally-computed warning block with the dashboard's
+        # authoritative version (uses real total_portfolio_value denominator)
+        formatted_warnings = format_concentration_warnings(warnings)
+        # Find and replace the existing warning block in body
+        import re
+        pattern = re.compile(
+            r'\n=+\n\*\*\* RISK CONCENTRATION WARNINGS \*\*\*\n=+\n.*?(?=\n── PORTFOLIO NET TRADE FLOW)',
+            re.DOTALL,
+        )
+        if formatted_warnings:
+            body = pattern.sub(formatted_warnings + '\n', body, count=1)
+        else:
+            # No warnings — strip any warning block that was locally computed
+            body = pattern.sub('', body, count=1)
+
+    return body
+
+
 def fmt_composer_rebalance_preview(data):
     """
     Real Composer dry-run preview — calls /api/v0.1/dry-run for the EXACT trades
@@ -515,13 +746,21 @@ def fmt_composer_rebalance_preview(data):
         if total_pv <= 0:
             total_pv = None
 
-    # 1. Pre-computed by dashboard
+    # 1. Pre-computed and pre-parsed by dashboard's /api/composer-dry-run
+    #    (legacy path when /api/email-state isn't available)
+    pre_parsed = data.get('composer_dry_run_parsed')
+    if pre_parsed and pre_parsed.get('rotations'):
+        # Already includes warnings and net_flow — render manually since we
+        # don't have the raw parse output to feed format_dry_run_for_email
+        return _format_preparsed_dry_run(pre_parsed)
+
+    # 2. Pre-computed by dashboard (raw API response in composer_dry_run)
     pre = data.get('composer_dry_run')
     if pre:
         parsed = parse_dry_run_response(pre)
         return format_dry_run_for_email(parsed, total_portfolio_value=total_pv)
 
-    # 2. Local fetch
+    # 3. Local fetch (direct Composer API)
     if not DRY_RUN_AVAILABLE:
         return ''
     if not os.environ.get('COMPOSER_KEY_ID'):
