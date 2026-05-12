@@ -169,9 +169,9 @@ def _fallback_full():
             portfolio = _fetch_composer_portfolio_basic()
             if portfolio:
                 data['composer'] = portfolio
-                account_uuids = [a.get('account_uuid')
+                account_uuids = [a.get('id') or a.get('account_uuid')
                                   for a in portfolio.get('accounts', [])
-                                  if a.get('account_uuid')]
+                                  if (a.get('id') or a.get('account_uuid'))]
                 if account_uuids:
                     raw = fetch_dry_run_preview(account_uuids=account_uuids)
                     if raw:
@@ -185,7 +185,11 @@ def _fallback_full():
 
 
 def _fetch_yfinance_indicators():
-    """Basic yfinance fetch — price, RSI(10), SMA200 for ~50 tickers."""
+    """Basic yfinance fetch — price, RSI(10), SMA200 for ~50 tickers.
+
+    Returns dict in the same shape fetch_all() produces (uses `rsi`,
+    `pctAboveSma200`, `vsSma200`, etc.) so downstream formatters work
+    identically across data sources."""
     import yfinance as yf
 
     tickers = [
@@ -214,9 +218,15 @@ def _fetch_yfinance_indicators():
             rs = ag / al
             rsi = float((100 - 100/(1+rs)).iloc[-1])
             sma200 = float(close.rolling(200).mean().iloc[-1])
+            sma50 = float(close.rolling(50).mean().iloc[-1])
+            pct_above = (price/sma200 - 1) * 100 if sma200 > 0 else 0
             indicators[t] = {
-                'price': price, 'rsi10': rsi, 'sma200': sma200,
-                'pct_above_sma200': (price/sma200 - 1) * 100 if sma200 > 0 else 0,
+                'price': round(price, 2),
+                'rsi': round(rsi, 1),
+                'sma200': round(sma200, 2),
+                'sma50': round(sma50, 2),
+                'pctAboveSma200': round(pct_above, 1),
+                'vsSma200': round(pct_above, 1),
             }
         except Exception:
             continue
@@ -327,6 +337,28 @@ def _fetch_composer_portfolio_basic():
     return {'accounts': accounts} if accounts else None
 
 
+def _ind_get(ind, *keys, default=0):
+    """Safe lookup across possible key spellings.
+    Dashboard uses: 'rsi', 'pctAboveSma200', 'sma200', 'cumRet5d', etc.
+    Fallback yfinance builder uses: 'rsi10', 'pct_above_sma200', 'sma200'.
+    This helper tries each key in order until one returns a non-None value."""
+    if not ind:
+        return default
+    for k in keys:
+        v = ind.get(k)
+        if v is not None:
+            return v
+    return default
+
+
+def _rsi(ind):
+    return _ind_get(ind, 'rsi', 'rsi10', default=0)
+
+
+def _pct_above_sma200(ind):
+    return _ind_get(ind, 'pctAboveSma200', 'pct_above_sma200', 'vsSma200', default=0)
+
+
 # ════════════════════════════════════════════════════════════════════
 # SECTION FORMATTERS
 # ════════════════════════════════════════════════════════════════════
@@ -335,20 +367,24 @@ def fmt_header(title, char='='):
 
 
 def fmt_calendar_banner(data):
-    """Top banner: intramonth cycle position with dip-buy boost note."""
+    """Top banner: intramonth cycle position with dip-buy boost note.
+
+    Reads from data['calendar_cycle'] which has keys:
+      trading_days_left, zone ('early'/'window'/'late'), desc, color,
+      in_window, dip_buy_boost, window_dates, month.
+    """
     cc = data.get('calendar_cycle')
     if not cc:
         return ''
 
-    label = cc.get('label', '')
-    cycle = cc.get('cycle', '')
-    if not label:
+    desc = cc.get('desc') or ''
+    if not desc:
         return ''
 
-    out = f"\n{YELLOW} INTRAMONTH CYCLE: {label}\n"
-    if cc.get('in_selling_window'):
-        out += f"  Dip-buy conviction: BOOSTED (buying forced institutional selling)\n"
-        out += f"  TQQQ avg +0.08%/day in window vs +0.26%/day outside\n"
+    out = f"\n{YELLOW} INTRAMONTH CYCLE: {desc}\n"
+    if cc.get('in_window') or cc.get('dip_buy_boost'):
+        out += "  Dip-buy conviction: BOOSTED (buying forced institutional selling)\n"
+        out += "  TQQQ avg +0.08%/day in window vs +0.26%/day outside\n"
     return out
 
 
@@ -379,28 +415,100 @@ def fmt_alerts(data):
 
 
 def fmt_hormuz(data):
-    """Strait of Hormuz Windward intelligence header."""
+    """Strait of Hormuz Windward intelligence header.
+
+    data['hormuz'] shape:
+      {
+        'current': int (total transits today),
+        'baseline': int (138),
+        'updated': str date,
+        'source': str,
+        'windward': {
+          'vessels_in_gulf': {'value', 'sub', 'delta'},
+          'inbound': {'value', 'sub'},
+          'outbound': {'value', 'sub'},
+          'dark_activity': {'value', 'sub', 'delta'},
+          'attacks': {'value', 'sub'},
+          'total_transits': int,
+          'intel_summary': str,
+          'risk': {...},
+          'fleet': {...},
+          'flags': [{flag, count}, ...],
+          'blockade_active': bool,
+          'iran_flagged': int,
+          'as_of': str,
+        }
+      }
+    """
     h = data.get('hormuz')
     if not h:
         return ''
-    status_emoji = RED if h.get('blockade_active') else GREEN
-    status_label = "BLOCKADE ACTIVE" if h.get('blockade_active') else "OPERATIONAL"
+    w = h.get('windward') or {}
+
+    blockade = w.get('blockade_active', False)
+    status_emoji = RED if blockade else GREEN
+    status_label = "BLOCKADE ACTIVE" if blockade else "OPERATIONAL"
+    as_of = w.get('as_of') or h.get('updated', 'N/A')
 
     out = fmt_header(f"{SHIP} STRAIT OF HORMUZ — WINDWARD INTELLIGENCE")
-    out += f"Data as of: {h.get('latest_date', 'N/A')}   |   {status_emoji} {status_label}\n\n"
+    out += f"Data as of: {as_of}   |   {status_emoji} {status_label}\n\n"
 
-    transits = h.get('transits', {})
-    if transits:
-        out += f" Total transits:   {transits.get('total','-')}  ({transits.get('breakdown_str','')})\n"
-    out += f" Vessels in Gulf:  {h.get('vessels_in_gulf','-')}\n"
-    out += f" Dark activity:    {h.get('dark_activity','-')} ({h.get('dark_change_str','')})\n"
-    out += f" Attacks (total):  {h.get('attacks_total','-')} ({h.get('attacks_change_str','unchanged')})\n"
-    out += f" Iran-flagged:     {h.get('iran_flagged','-')}\n"
-    out += f" Risk tiers:       {h.get('risk_tiers_str','-')}\n"
+    # Transits
+    inbound = w.get('inbound') or {}
+    outbound = w.get('outbound') or {}
+    total_t = w.get('total_transits') or h.get('current')
+    if total_t is not None:
+        breakdown = ''
+        if inbound.get('value') is not None or outbound.get('value') is not None:
+            in_v = inbound.get('value', 0) or 0
+            out_v = outbound.get('value', 0) or 0
+            breakdown = f' ({in_v} in / {out_v} out)'
+        out += f" Total transits:   {total_t}{breakdown}   (baseline ~{h.get('baseline', 138)})\n"
 
-    if h.get('summary'):
-        out += f"\n Daily Intelligence Summary:\n   {h['summary']}\n"
-    out += f"\n Source: insights.windward.ai\n"
+    # Vessels in Gulf
+    vig = w.get('vessels_in_gulf') or {}
+    if vig.get('value') is not None:
+        sub = vig.get('sub') or ''
+        delta = vig.get('delta') or ''
+        suffix = f" {sub}".strip() if sub else ''
+        suffix += f" ({delta})" if delta else ''
+        out += f" Vessels in Gulf:  {vig['value']}{suffix}\n"
+
+    # Dark activity
+    dark = w.get('dark_activity') or {}
+    if dark.get('value') is not None:
+        delta = dark.get('delta') or ''
+        suffix = f" ({delta})" if delta else ''
+        out += f" Dark activity:    {dark['value']}{suffix}\n"
+
+    # Attacks
+    attacks = w.get('attacks') or {}
+    if attacks.get('value') is not None:
+        sub = attacks.get('sub') or ''
+        suffix = f" ({sub})" if sub else ''
+        out += f" Attacks (total):  {attacks['value']}{suffix}\n"
+
+    # Iran-flagged
+    iran = w.get('iran_flagged')
+    if iran is not None:
+        out += f" Iran-flagged:     {iran}\n"
+
+    # Risk tiers
+    risk = w.get('risk') or {}
+    if risk:
+        # risk is a dict like {'high': N, 'moderate': M, 'low': L}
+        parts = []
+        if 'high' in risk: parts.append(f"{risk['high']} High")
+        if 'moderate' in risk: parts.append(f"{risk['moderate']} Mod")
+        if 'low' in risk: parts.append(f"{risk['low']} Low")
+        if parts:
+            out += f" Risk tiers:       {' / '.join(parts)}\n"
+
+    # Intel summary
+    summary = w.get('intel_summary')
+    if summary:
+        out += f"\n Daily Intelligence Summary:\n   {summary}\n"
+    out += f"\n Source: {h.get('source', 'insights.windward.ai')}\n"
     return out
 
 
@@ -408,15 +516,15 @@ def fmt_indicators_table(data, tickers, title):
     indicators = data.get('indicators', {})
     out = fmt_header(title)
     out += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}\n"
-    out += "-"*50 + "\n"
+    out += "-" * 50 + "\n"
     for t in tickers:
         ind = indicators.get(t)
         if not ind:
             continue
         price = ind.get('price', 0)
         price_str = f"${price:,.0f}" if price >= 1000 else f"${price:.2f}"
-        rsi = ind.get('rsi10', 0)
-        pct = ind.get('pct_above_sma200', 0)
+        rsi = _rsi(ind)
+        pct = _pct_above_sma200(ind)
         out += f"{t:<10} {price_str:>12} {rsi:>10.1f} {pct:>+11.1f}%\n"
     return out
 
@@ -425,14 +533,14 @@ def fmt_3x_leveraged(data):
     indicators = data.get('indicators', {})
     out = fmt_header("3x LEVERAGED ETFs")
     out += f"{'Ticker':<10} {'Price':>12} {'RSI(10)':>10} {'vs SMA200':>12}  Signal\n"
-    out += "-"*65 + "\n"
+    out += "-" * 65 + "\n"
     for t in ['NAIL', 'CURE', 'FAS', 'LABU', 'TQQQ', 'SOXL', 'TECL', 'DRN']:
         ind = indicators.get(t)
         if not ind:
             continue
         price = ind.get('price', 0)
-        rsi = ind.get('rsi10', 0)
-        pct = ind.get('pct_above_sma200', 0)
+        rsi = _rsi(ind)
+        pct = _pct_above_sma200(ind)
         if rsi < 21:
             sig = f"{GREEN} OVERSOLD"
         elif rsi < 30:
@@ -455,8 +563,8 @@ def fmt_smh_levels(data):
     out = fmt_header("SMH/SOXL LEVELS")
     out += f"Current Price:    ${ind.get('price', 0):.2f}\n"
     out += f"SMA(200):         ${sma200:.2f}\n"
-    out += f"% Above SMA200:   {ind.get('pct_above_sma200', 0):+.1f}%\n"
-    out += f"\nKey Levels:\n"
+    out += f"% Above SMA200:   {_pct_above_sma200(ind):+.1f}%\n"
+    out += "\nKey Levels:\n"
     out += f"  30% (Trim):     ${sma200 * 1.30:.2f}\n"
     out += f"  35% (Warning):  ${sma200 * 1.35:.2f}\n"
     out += f"  40% (Sell):     ${sma200 * 1.40:.2f}\n"
@@ -464,47 +572,74 @@ def fmt_smh_levels(data):
 
 
 def fmt_crisis_alpha_regime(data):
-    """Crisis Alpha Regime block from breadth_inline / breadth_regime."""
-    inline = data.get('breadth_inline')
+    """Market breadth + regime block.
+
+    data['breadth_regime'] is a STRING label: 'BROAD BULL', 'NARROW LEADERSHIP',
+      'ROTATION', 'BROAD WEAKNESS', or 'UNKNOWN'.
+    data['breadth_inline'] keys: zbt_ema, zbt_ratio, zbt_zone, zbt_thrust,
+      mcclellan, mcl_ema19, mcl_ema39, mcl_direction, mcl_zone,
+      pct_above_50sma, above50_n, above50_total, adv, dec.
+    data['leadership_gap'], data['sphb_splv'] also available if relevant.
+    """
     regime = data.get('breadth_regime')
-    if not inline and not regime:
+    inline = data.get('breadth_inline')
+    if not regime and not inline:
         return ''
 
-    out = fmt_header(f"CRISIS ALPHA REGIME: {regime.get('label','UNKNOWN') if regime else 'UNKNOWN'}")
+    label = regime if isinstance(regime, str) else (
+        regime.get('label', 'UNKNOWN') if isinstance(regime, dict) else 'UNKNOWN'
+    )
+    out = fmt_header(f"BREADTH REGIME: {label}")
     if inline:
-        for asset_label in ['SPY', 'QQQ', 'SMH']:
-            row = inline.get(asset_label.lower())
-            if row:
-                out += (f"{asset_label}: MaRet(10d)={row.get('maret','?')}/day | "
-                        f"CumRet 10/30/50d: {row.get('cum10','?')}/"
-                        f"{row.get('cum30','?')}/{row.get('cum50','?')} | "
-                        f"VolR: {row.get('volr','?')}\n")
-    # DFEN BB if available
-    dfen = data.get('indicators', {}).get('DFEN')
-    if dfen:
-        out += (f"\nDFEN BB: Price=${dfen.get('price',0):.2f} RSI={dfen.get('rsi10',0):.1f} | "
-                f"Upper={dfen.get('bb_upper','?')} SMA20={dfen.get('bb_mid','?')} "
-                f"Lower={dfen.get('bb_lower','?')} | %B={dfen.get('bb_pct_b','?')} "
-                f"Width={dfen.get('bb_width','?')}\n")
+        zbt = inline.get('zbt_ema')
+        zbt_zone = inline.get('zbt_zone')
+        mcl = inline.get('mcclellan')
+        mcl_zone = inline.get('mcl_zone')
+        pct50 = inline.get('pct_above_50sma')
+        adv = inline.get('adv')
+        dec = inline.get('dec')
+        thrust_mark = ' [THRUST]' if inline.get('zbt_thrust') else ''
+        if zbt is not None:
+            out += f"ZBT EMA: {zbt:.4f} [{zbt_zone}]{thrust_mark}\n"
+        if mcl is not None:
+            out += f"McClellan: {mcl:+.1f} [{mcl_zone}] | EMA19/39: {inline.get('mcl_ema19','?')}/{inline.get('mcl_ema39','?')} | {inline.get('mcl_direction','')}\n"
+        if pct50 is not None:
+            out += f"%Above 50-SMA: {pct50:.1f}% ({inline.get('above50_n','?')}/{inline.get('above50_total','?')})\n"
+        if adv is not None and dec is not None:
+            out += f"Advances/Declines: {adv}/{dec}\n"
+
+    # SPHB/SPLV risk appetite if present
+    sphb = data.get('sphb_splv')
+    if sphb and isinstance(sphb, dict):
+        out += f"\nSPHB/SPLV ratio: {sphb.get('ratio', '?')} [{sphb.get('label', '')}]\n"
+
     return out
 
 
 def fmt_rolling_beta(data):
-    """Rolling beta vs SPY table."""
+    """Rolling beta vs SPY table.
+
+    data['rolling_betas'] is a list of rows with keys:
+      name (group name), b63, b126, b252, c63, c126, c252, blend_wt.
+    The last row has is_blend=True and represents 'Est. Blend'.
+    """
     betas = data.get('rolling_betas', [])
     if not betas:
         return ''
     out = fmt_header("ROLLING BETA vs SPY")
     out += f"{'Group':<26} {'63d':>8} {'126d':>8} {'252d':>8}\n"
-    out += "-"*50 + "\n"
+    out += "-" * 52 + "\n"
     for row in betas:
-        name = row.get('group', '?')
-        b63 = row.get('beta_63d', '?')
-        b126 = row.get('beta_126d', '?')
-        b252 = row.get('beta_252d', '?')
+        name = row.get('name', '?')
+        b63 = row.get('b63')
+        b126 = row.get('b126')
+        b252 = row.get('b252')
         b63s = f"{b63:+.2f}" if isinstance(b63, (int, float)) else '?'
         b126s = f"{b126:+.2f}" if isinstance(b126, (int, float)) else '?'
         b252s = f"{b252:+.2f}" if isinstance(b252, (int, float)) else '?'
+        # Visual separator before blend row
+        if row.get('is_blend'):
+            out += "-" * 52 + "\n"
         out += f"{name:<26} {b63s:>8} {b126s:>8} {b252s:>8}\n"
     return out
 
@@ -521,38 +656,61 @@ def fmt_gold_miners(data):
         ind = indicators.get(t)
         if not ind:
             continue
-        out += (f"  {t:>4} ${ind.get('price', 0):>9.2f} RSI={ind.get('rsi10', 0):.1f} "
-                f"{ind.get('pct_above_sma200', 0):+.1f}%\n")
+        out += (f"  {t:>4} ${ind.get('price', 0):>9.2f} RSI={_rsi(ind):.1f} "
+                f"{_pct_above_sma200(ind):+.1f}%\n")
     return out
 
 
 def fmt_uvxy_vol_regime(data):
-    """UVXY Vol Regime Shift block."""
+    """UVXY Vol Regime Shift block.
+
+    data['uvxy_vol_regime'] keys: price, sma200, pct_above, tier, tier_color,
+    threshold_signal, threshold_high, threshold_extreme.
+    """
     uv = data.get('uvxy_vol_regime')
     if not uv:
         return ''
     out = fmt_header("UVXY VOL REGIME SHIFT")
     out += (f"UVXY: ${uv.get('price', 0):.2f} | SMA200: ${uv.get('sma200', 0):.2f} | "
-            f"{uv.get('pct_vs_sma200', 0):+.1f}%\n")
-    if uv.get('signal'):
-        out += f"Signal: {uv['signal']}\n"
+            f"{uv.get('pct_above', 0):+.1f}%\n")
+    tier = uv.get('tier')
+    if tier:
+        out += f"Tier: {tier}"
+        if uv.get('threshold_high'):
+            out += f" (HIGH threshold: ${uv['threshold_high']:.2f}, EXTREME: ${uv.get('threshold_extreme', 0):.2f})"
+        out += "\n"
     return out
 
 
 def fmt_vix_term_structure(data):
-    """VIX Term Structure (Group 13 / dashboard v4.6+)."""
+    """VIX Term Structure block.
+
+    data['vix_structure'] keys: curve (list), regime, pct_spread, spreads, vix.
+    """
     vts = data.get('vix_structure') or data.get('vix_term_structure')
     if not vts:
         return ''
     out = fmt_header("VIX TERM STRUCTURE")
-    if 'ratio' in vts and vts.get('ratio'):
-        out += (f"VIX3M/VIX: {vts['ratio']:.2f} ({vts.get('zone','neutral').upper()})\n")
-        if vts.get('days_in_current_zone'):
-            out += f"Days in zone: {vts['days_in_current_zone']}\n"
-        if vts.get('percentile_5y') is not None:
-            out += f"5y percentile: {vts['percentile_5y']:.0f}th\n"
-    if 'fb_spread_pct' in vts:
-        out += f"VIX9D/VIX1Y front/back: {vts['fb_spread_pct']:+.1f}%\n"
+    regime = vts.get('regime', '?').replace('_', ' ')
+    out += f"Regime: {regime}\n"
+    if vts.get('vix') is not None:
+        out += f"VIX: {vts['vix']:.2f}\n"
+    if vts.get('pct_spread') is not None:
+        out += f"Front/back spread: {vts['pct_spread']:+.1f}%\n"
+
+    # Curve
+    curve = vts.get('curve', [])
+    if curve:
+        curve_str = ' | '.join(f"{p['label']}={p['value']:.2f}" for p in curve)
+        out += f"Curve: {curve_str}\n"
+
+    # Bounce zone (Group 13 — if present)
+    if 'ratio' in vts and vts.get('ratio') is not None:
+        out += f"VIX3M/VIX ratio: {vts['ratio']:.2f}"
+        if vts.get('zone'):
+            out += f" ({vts['zone'].upper()})"
+        out += "\n"
+
     return out
 
 
@@ -576,61 +734,94 @@ def fmt_midmonth(data):
 
 
 def fmt_drif(data):
-    """DRIF Velocity Filter table."""
+    """DRIF Velocity Filter table.
+
+    data['drif'] is a dict keyed by ticker (SPY, QQQ, SMH) with values:
+      {ticker, lever, rsi, velocity, cumRet5d, cumRet7d, gate, label,
+       level, passWr, passN, failWr, failN, retField, retGate, retVal, hold}
+    """
     drif = data.get('drif')
-    if not drif or not drif.get('rows'):
+    if not drif or not isinstance(drif, dict):
         return ''
     out = fmt_header("DRIF VELOCITY FILTER")
     out += f"{'Ticker':<8} {'RSI':>6} {'5d Ret':>8} {'7d Ret':>8} {'Vel':>6}  {'Gate':>5}  Status\n"
-    out += "-"*70 + "\n"
-    for r in drif['rows']:
-        out += (f"{r.get('ticker',''):<8} "
+    out += "-" * 70 + "\n"
+    for ticker in ['SPY', 'QQQ', 'SMH']:
+        r = drif.get(ticker)
+        if not r:
+            continue
+        out += (f"{r.get('ticker', ticker):<8} "
                 f"{r.get('rsi', 0):>6.1f} "
-                f"{r.get('ret5', 0):>+7.1f}% "
-                f"{r.get('ret7', 0):>+7.1f}% "
+                f"{r.get('cumRet5d', 0):>+7.1f}% "
+                f"{r.get('cumRet7d', 0):>+7.1f}% "
                 f"{r.get('velocity', 0):>+6.0f}  "
                 f"{r.get('gate', '---'):>5}  "
-                f"{r.get('status', '')}\n")
+                f"{r.get('label', '')}\n")
     return out
 
 
 def fmt_move_index(data):
-    """MOVE Index block."""
+    """MOVE Index block.
+
+    data['move_index'] keys: price, rsi, sma200, pct_above_sma200,
+    change_20d_pct, 19A_active, 19B_active, 19C_active, 19C_ready.
+    """
     mv = data.get('move_index')
     if not mv:
         return ''
     out = fmt_header("MOVE INDEX")
-    out += (f"Price: {mv.get('price', 0):.2f} | RSI: {mv.get('rsi10', 0):.1f} | "
-            f"20d: {mv.get('cum_20d', 0):+.1f}%\n")
-    out += (f"19A(>115):{'on' if mv.get('group_19a') else '-'} | "
-            f"19B(20d>50%):{'on' if mv.get('group_19b') else '-'} | "
-            f"19C(crush):{'on' if mv.get('group_19c') else '-'}\n")
+    out += (f"Price: {mv.get('price', 0):.2f} | RSI: {mv.get('rsi', 0):.1f} | "
+            f"20d: {mv.get('change_20d_pct', 0):+.1f}%\n")
+    out += (f"19A(>115):{'ON' if mv.get('19A_active') else '-'} | "
+            f"19B(20d>50%):{'ON' if mv.get('19B_active') else '-'} | "
+            f"19C(crush):{'ON' if mv.get('19C_active') else '-'}\n")
     return out
 
 
 def fmt_fibonacci(data):
-    """Fibonacci retracement levels for SPY/QQQ/SMH."""
+    """Fibonacci retracement levels for SPY/QQQ/SMH.
+
+    data['fibonacci'] keyed by 'SPY'/'QQQ'/'SMH' with shape:
+      {high, low, close, trend ('UP'/'DOWN'),
+       levels: {'23.6': {level, dist, near}, '38.2': ..., '50.0': ..., '61.8': ...}}
+    """
     fib = data.get('fibonacci')
     if not fib:
         return ''
     out = fmt_header("FIBONACCI CONTEXT")
     for sym in ['SPY', 'QQQ', 'SMH']:
-        f = fib.get(sym) or fib.get(sym.lower())
+        f = fib.get(sym)
         if not f:
             continue
         out += (f"\n{sym} (30d): H={f.get('high', 0):.2f} L={f.get('low', 0):.2f} "
-                f"C={f.get('close', 0):.2f} [{f.get('direction','?')}]\n")
-        for lvl in [23.6, 38.2, 50.0, 61.8]:
-            key = f'level_{int(lvl*10)}'
-            v = f.get(key)
-            distance = f.get(f'pct_{int(lvl*10)}')
-            if v is not None and distance is not None:
-                out += f"   {lvl:>5.1f}%: ${v:.2f} ({distance:+.1f}%)\n"
+                f"C={f.get('close', 0):.2f} [{f.get('trend', '?')}]\n")
+        levels = f.get('levels') or {}
+        for pct_str in ['23.6', '38.2', '50.0', '61.8']:
+            entry = levels.get(pct_str)
+            if not entry:
+                continue
+            lvl = entry.get('level')
+            dist = entry.get('dist')
+            if lvl is not None and dist is not None:
+                near_mark = ' ★' if entry.get('near') else ''
+                out += f"   {pct_str:>5}%: ${lvl:>8.2f} ({dist:+.1f}%){near_mark}\n"
     return out
 
 
 def fmt_portfolio_performance(data):
-    """Per-account portfolio performance with win rates and per-symphony stats."""
+    """Per-account portfolio performance with win rates and per-symphony stats.
+
+    data['composer']['accounts'] is a list with keys:
+      type, source, value, today_dollar, today_pct, win_rates (dict),
+      symphonies (list).
+
+    Each win_rates dict has keys: daily_20d, daily_60d, daily_all,
+      weekly_all, weekly_12w, monthly_all, streak_days, streak_direction, max_dd.
+
+    Each symphony has keys:
+      id, name, value, pct_of_account, twr_annualized, sharpe, max_dd,
+      last_pct_change, next_rebalance, may_rebalance_today, holdings.
+    """
     composer = data.get('composer') or data.get('portfolio')
     if not composer:
         return ''
@@ -640,40 +831,55 @@ def fmt_portfolio_performance(data):
 
     out = fmt_header("PORTFOLIO PERFORMANCE & WIN RATES")
     for acct in accounts:
-        name = acct.get('account_type', acct.get('name', 'Account'))
-        value = acct.get('portfolio_value', 0)
+        name = acct.get('type') or acct.get('account_type') or 'Account'
+        value = acct.get('value', 0)
         today_pct = acct.get('today_pct', 0)
-        out += f"\n {name}: ${value:,.0f} | Today: {today_pct:+.2f}%\n"
+        source = acct.get('source', '')
+        source_label = f" [{source}]" if source else ''
+        out += f"\n {name}{source_label}: ${value:,.0f} | Today: {today_pct:+.2f}%\n"
 
-        wr = acct.get('win_rates', {})
+        wr = acct.get('win_rates') or {}
         if wr:
-            streak = acct.get('streak_str', '')
-            out += (f" Win Rates: 20d:{wr.get('20d', 0)}% | 60d:{wr.get('60d', 0)}% | "
-                    f"All:{wr.get('all', 0)}% | Wk(12w):{wr.get('week', 0)}% | "
-                    f"Mo:{wr.get('month', 0)}% | Streak: {streak}\n")
+            wr_parts = []
+            if 'daily_20d' in wr: wr_parts.append(f"20d:{wr['daily_20d']:.0f}%")
+            if 'daily_60d' in wr: wr_parts.append(f"60d:{wr['daily_60d']:.0f}%")
+            if 'daily_all' in wr: wr_parts.append(f"All:{wr['daily_all']:.0f}%")
+            if 'weekly_12w' in wr: wr_parts.append(f"Wk(12w):{wr['weekly_12w']:.0f}%")
+            if 'monthly_all' in wr: wr_parts.append(f"Mo:{wr['monthly_all']:.0f}%")
+            streak = wr.get('streak')
+            if streak is not None:
+                streak_dir = 'winning' if streak > 0 else ('losing' if streak < 0 else 'none')
+                wr_parts.append(f"Streak: {streak:+d}d ({streak_dir})")
+            if wr_parts:
+                out += f" Win Rates: {' | '.join(wr_parts)}\n"
 
         symphonies = acct.get('symphonies', [])
         if symphonies:
-            out += f" {'Symphony':<32} {'Value':>10} {'Today':>8} {'Ann.Ret':>8} {'Sharpe':>7} {'MaxDD':>7}\n"
-            out += " " + "-"*78 + "\n"
+            out += f" {'Symphony':<32} {'Value':>11} {'Today':>8} {'Ann.Ret':>9} {'Sharpe':>7} {'MaxDD':>7}\n"
+            out += " " + "-" * 78 + "\n"
             for s in symphonies:
                 sname = (s.get('name', ''))[:30]
-                sv = s.get('value', 0)
-                spct = s.get('today_pct', 0)
-                ar = s.get('ann_ret', 0)
-                sh = s.get('sharpe', 0)
-                dd = s.get('max_dd', 0)
-                ar_str = f"{ar:+.1f}%" if isinstance(ar, (int, float)) else '?'
-                sh_str = f"{sh:.2f}" if isinstance(sh, (int, float)) else '?'
-                dd_str = f"{dd:+.1f}%" if isinstance(dd, (int, float)) else '?'
-                out += f" {sname:<32} ${sv:>9,.0f} {spct:>+7.2f}% {ar_str:>8} {sh_str:>7} {dd_str:>7}\n"
+                sv = s.get('value', 0) or 0
+                spct = (s.get('last_pct_change') or 0) * 100 if s.get('last_pct_change') is not None else 0
+                # twr_annualized is in decimal form (0.42 = 42%); convert to %
+                ann = s.get('twr_annualized')
+                ar_str = f"{ann*100:+.1f}%" if isinstance(ann, (int, float)) else '—'
+                sh = s.get('sharpe')
+                sh_str = f"{sh:.2f}" if isinstance(sh, (int, float)) else '—'
+                # max_dd from Composer is already a decimal % (e.g. -0.115 = -11.5%)
+                dd = s.get('max_dd')
+                dd_str = f"{dd*100:+.1f}%" if isinstance(dd, (int, float)) else '—'
+                out += f" {sname:<32} ${sv:>10,.0f} {spct:>+7.2f}% {ar_str:>9} {sh_str:>7} {dd_str:>7}\n"
 
-    consolidated = composer.get('consolidated_win_rates', {})
+    consolidated = composer.get('consolidated', {})
     if consolidated:
-        out += (f"\n CONSOLIDATED WIN RATES:\n"
-                f" Daily: 20d: {consolidated.get('20d', 0)}% | "
-                f"60d: {consolidated.get('60d', 0)}% | "
-                f"All-time: {consolidated.get('all', 0)}%\n")
+        total = consolidated.get('total_value', 0)
+        today_pct = consolidated.get('today_pct', 0)
+        goal_pct = consolidated.get('goal_8m_pct')
+        out += f"\n CONSOLIDATED TOTAL: ${total:,.0f} | Today: {today_pct:+.2f}%"
+        if goal_pct is not None:
+            out += f" | $8M goal: {goal_pct:.1f}%"
+        out += "\n"
     return out
 
 
@@ -729,20 +935,19 @@ def fmt_composer_rebalance_preview(data):
     each symphony will execute at next rebalance.
 
     Source priority (in order):
-      1. data['composer_dry_run'] — pre-computed by dashboard server (preferred,
-         shares the cache with /api/composer)
-      2. Local fetch via composer_dry_run.fetch_dry_run_preview() — direct API call
+      1. data['composer_dry_run'] — pre-computed by dashboard server (preferred)
+      2. data['composer_dry_run_parsed'] — from legacy /api/composer-dry-run
+      3. Local fetch via composer_dry_run.fetch_dry_run_preview() — direct API
          using COMPOSER_KEY_ID/SECRET env vars
 
     Total portfolio value (for concentration % calculations) is read from
-    data['composer'] when available — sums portfolio_value across all accounts.
+    data['composer'] when available — sums 'value' across all accounts.
     """
     # Compute total portfolio value for concentration warnings
     total_pv = None
     composer = data.get('composer') or data.get('portfolio')
     if composer and composer.get('accounts'):
-        total_pv = sum(a.get('portfolio_value', 0) or 0
-                       for a in composer['accounts'])
+        total_pv = sum(a.get('value', 0) or 0 for a in composer['accounts'])
         if total_pv <= 0:
             total_pv = None
 
@@ -750,8 +955,6 @@ def fmt_composer_rebalance_preview(data):
     #    (legacy path when /api/email-state isn't available)
     pre_parsed = data.get('composer_dry_run_parsed')
     if pre_parsed and pre_parsed.get('rotations'):
-        # Already includes warnings and net_flow — render manually since we
-        # don't have the raw parse output to feed format_dry_run_for_email
         return _format_preparsed_dry_run(pre_parsed)
 
     # 2. Pre-computed by dashboard (raw API response in composer_dry_run)
@@ -766,10 +969,11 @@ def fmt_composer_rebalance_preview(data):
     if not os.environ.get('COMPOSER_KEY_ID'):
         return ''
 
+    # Pull Composer account IDs only (Fidelity/E*Trade accounts don't have one)
     account_uuids = None
     if composer and composer.get('accounts'):
-        account_uuids = [a.get('account_uuid') for a in composer['accounts']
-                         if a.get('account_uuid')]
+        account_uuids = [a.get('id') for a in composer['accounts']
+                         if a.get('id') and a.get('source') == 'Composer']
         if not account_uuids:
             account_uuids = None
 
