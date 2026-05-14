@@ -1487,7 +1487,7 @@ Final confirmation email will be sent at 4:05 PM ET.
 
 
 def write_state_json(alerts, status, mode, hormuz_data=None, rj_state=None,
-                     path='dashboard_state.json'):
+                     composer_summary=None, path='dashboard_state.json'):
     """
     Serialize current signal state to JSON for external consumers.
 
@@ -1555,6 +1555,17 @@ def write_state_json(alerts, status, mode, hormuz_data=None, rj_state=None,
                 'as_of': hormuz_data.get('as_of'),
                 'total_transits': hormuz_data.get('total_transits'),
                 'attacks': (hormuz_data.get('attacks') or {}).get('value'),
+            }
+        except Exception:
+            pass
+
+    # Composer dry-run preview summary (top-line counts + total $)
+    if composer_summary is not None:
+        try:
+            state['composer_dry_run'] = {
+                'symphonies_evaluated':   int(composer_summary.get('symphonies_evaluated', 0)),
+                'symphonies_rebalancing': int(composer_summary.get('symphonies_rebalancing', 0)),
+                'total_pv':               _safe_num(composer_summary.get('total_pv'), 2),
             }
         except Exception:
             pass
@@ -1726,7 +1737,49 @@ def main():
                   f"action={rj_state['action']['type']}")
     except Exception as e:
         print(f"[RJ] Error computing state: {e}")
-    
+
+    # =========================================================================
+    # COMPOSER DRY-RUN PREVIEW
+    # =========================================================================
+    # Asks Composer's API what each symphony will trade at next rebalance.
+    # Self-contained: no Composer creds → graceful skip with empty block.
+    composer_block = ""
+    composer_summary = None
+    try:
+        # Importable because composer_dry_run.py sits next to this script
+        import sys as _sys
+        _here = os.path.dirname(os.path.abspath(__file__))
+        if _here not in _sys.path:
+            _sys.path.insert(0, _here)
+        from composer_dry_run import (
+            fetch_dry_run_preview,
+            parse_dry_run_response,
+            format_dry_run_for_email,
+        )
+
+        raw = fetch_dry_run_preview()  # account_uuids=None → all accounts on the API key
+        if raw is None:
+            print("[Composer] dry-run unavailable (no API key, network error, or auth failure)")
+        else:
+            parsed = parse_dry_run_response(raw)
+            if not parsed:
+                print(f"[Composer] dry-run returned 0 symphonies "
+                      f"(accounts in response: {len(raw)})")
+            else:
+                will_rebalance = sum(1 for r in parsed if r.get('will_rebalance'))
+                total_pv = sum((r.get('symphony_value') or 0) for r in parsed)
+                composer_summary = {
+                    'symphonies_evaluated': len(parsed),
+                    'symphonies_rebalancing': will_rebalance,
+                    'total_pv': round(float(total_pv), 2),
+                }
+                composer_block = format_dry_run_for_email(parsed,
+                                                          total_portfolio_value=total_pv)
+                print(f"[Composer] dry-run: {len(parsed)} symphonies, "
+                      f"{will_rebalance} rebalancing, total_pv=${total_pv:,.0f}")
+    except Exception as e:
+        print(f"[Composer] error: {e}")
+
     # Mode label for subject line
     if IS_OPEN:
         timing_label = "OPEN"
@@ -1767,13 +1820,16 @@ def main():
         body_prefix = rj_postclose_block + "\n\n"
     if hormuz_block:
         body_prefix += hormuz_block + "\n"
+    if composer_block:
+        body_prefix += composer_block + "\n"
     body = body_prefix + format_email(alerts, status, mode_str)
 
     # Write machine-readable state for external consumers (dashboard mirror, etc.)
     try:
         write_state_json(alerts, status, mode_str,
                          hormuz_data=hormuz_data,
-                         rj_state=rj_state)
+                         rj_state=rj_state,
+                         composer_summary=composer_summary)
     except Exception as e:
         print(f"[STATE] Unexpected error writing state: {e}")
 
