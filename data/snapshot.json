@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated_utc": "2026-05-14T20:27:14.935459+00:00",
-    "generated_et": "2026-05-14 15:27:14 ET",
+    "generated_utc": "2026-05-14T21:07:52.189720+00:00",
+    "generated_et": "2026-05-14 16:07:52 ET",
     "ticker_count": 52,
     "version": "1.1"
   },
@@ -100,7 +100,7 @@
         "status": "INACTIVE"
       },
       "FNGO": {
-        "rsi10": 80.8,
+        "rsi10": 80.9,
         "below_sma200": false,
         "bear_ema": false,
         "status": "INACTIVE"
@@ -172,8 +172,8 @@
         "supply_shock": false
       },
       "weather": {
-        "current_temp": 60.9,
-        "temp_change_7d": 16.4,
+        "current_temp": 60.0,
+        "temp_change_7d": 17.2,
         "severe_cold": false,
         "is_winter": false
       },
@@ -264,10 +264,10 @@
       "ret_20d": 27.16
     },
     "IWM": {
-      "price": 284.48,
-      "change_pct": 0.64,
+      "price": 284.45,
+      "change_pct": 0.63,
       "rsi10": 64.2,
-      "ema9": 282.45,
+      "ema9": 282.44,
       "ema20": 278.02,
       "ema50": 269.22,
       "ema200": 250.86,
@@ -277,10 +277,10 @@
       "above_sma200": true,
       "vs_sma200": 13.8,
       "vs_sma50": 8.0,
-      "ret_1d": 0.64,
-      "ret_5d": 0.79,
-      "ret_10d": 2.34,
-      "ret_20d": 5.38
+      "ret_1d": 0.63,
+      "ret_5d": 0.78,
+      "ret_10d": 2.33,
+      "ret_20d": 5.37
     },
     "XLP": {
       "price": 84.98,
@@ -834,23 +834,23 @@
       "ret_20d": -0.47
     },
     "FNGO": {
-      "price": 138.54,
-      "change_pct": 1.49,
-      "rsi10": 80.8,
-      "ema9": 131.74,
-      "ema20": 124.37,
-      "ema50": 114.29,
+      "price": 138.77,
+      "change_pct": 1.66,
+      "rsi10": 80.9,
+      "ema9": 131.79,
+      "ema20": 124.39,
+      "ema50": 114.3,
       "ema200": 109.35,
-      "sma50": 108.07,
+      "sma50": 108.08,
       "sma200": 115.28,
       "ema_cross": "BULL",
       "above_sma200": true,
-      "vs_sma200": 20.2,
-      "vs_sma50": 28.2,
-      "ret_1d": 1.49,
-      "ret_5d": 8.23,
-      "ret_10d": 16.78,
-      "ret_20d": 19.55
+      "vs_sma200": 20.4,
+      "vs_sma50": 28.4,
+      "ret_1d": 1.66,
+      "ret_5d": 8.41,
+      "ret_10d": 16.97,
+      "ret_20d": 19.75
     },
     "HIBL": {
       "price": 104.79,
@@ -967,23 +967,23 @@
       "ret_20d": -7.08
     },
     "BTC-USD": {
-      "price": 81266.58,
-      "change_pct": 2.51,
-      "rsi10": 60.1,
-      "ema9": 80462.12,
-      "ema20": 79263.46,
-      "ema50": 76529.45,
-      "ema200": 81982.37,
-      "sma50": 74756.76,
-      "sma200": 82103.14,
+      "price": 81390.42,
+      "change_pct": 2.67,
+      "rsi10": 60.5,
+      "ema9": 80486.89,
+      "ema20": 79275.26,
+      "ema50": 76534.3,
+      "ema200": 81983.6,
+      "sma50": 74759.23,
+      "sma200": 82103.75,
       "ema_cross": "BULL",
       "above_sma200": false,
-      "vs_sma200": -1.0,
-      "vs_sma50": 8.7,
-      "ret_1d": 2.51,
-      "ret_5d": 0.75,
-      "ret_10d": 1.8,
-      "ret_20d": 4.92
+      "vs_sma200": -0.9,
+      "vs_sma50": 8.9,
+      "ret_1d": 2.67,
+      "ret_5d": 0.9,
+      "ret_10d": 1.96,
+      "ret_20d": 5.08
     },
     "AMD": {
       "price": 449.7,
