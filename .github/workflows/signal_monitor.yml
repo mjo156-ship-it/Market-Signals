@@ -78,6 +78,7 @@ jobs:
           PHONE_EMAIL: ${{ secrets.PHONE_EMAIL }}
           COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
           COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
+          COMPOSER_DEBUG: '1'  # TEMPORARY — diagnostic for PR #4 Composer integration; remove before merging
         run: |
           MODE="${{ steps.mode.outputs.mode }}"
           if [ "$MODE" == "open" ]; then

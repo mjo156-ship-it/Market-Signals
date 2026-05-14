@@ -92,6 +92,9 @@ def _composer_post(path, body, timeout=30):
         return None
 
 
+_DEBUG = os.environ.get('COMPOSER_DEBUG') == '1'
+
+
 def _composer_get(path, timeout=15):
     """Authenticated GET to Composer API."""
     if not COMPOSER_KEY_ID or not COMPOSER_KEY_SECRET:
@@ -105,6 +108,9 @@ def _composer_get(path, timeout=15):
             },
             timeout=timeout,
         )
+        if _DEBUG:
+            print(f"[Composer DEBUG] GET {path} → status={r.status_code} "
+                  f"body[:300]={r.text[:300]!r}")
         r.raise_for_status()
         return r.json()
     except Exception as e:
@@ -118,6 +124,14 @@ def list_account_uuids():
     Composer's /accounts/list returns {accounts: [{account_uuid, account_type, ...}]}.
     """
     resp = _composer_get('/accounts/list')
+    if _DEBUG:
+        if resp is None:
+            print("[Composer DEBUG] /accounts/list returned None")
+        else:
+            keys = sorted(resp.keys()) if isinstance(resp, dict) else f'(non-dict: {type(resp).__name__})'
+            n_accts = len(resp.get('accounts', [])) if isinstance(resp, dict) else 0
+            sample_keys = sorted(resp['accounts'][0].keys()) if (isinstance(resp, dict) and resp.get('accounts')) else None
+            print(f"[Composer DEBUG] /accounts/list resp keys={keys} accounts_len={n_accts} sample_acct_keys={sample_keys}")
     if not resp or 'accounts' not in resp:
         return None
     return [a.get('account_uuid') for a in resp['accounts'] if a.get('account_uuid')]
