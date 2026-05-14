@@ -77,6 +77,13 @@ def _composer_post(path, body, timeout=30):
             },
             timeout=timeout,
         )
+        if os.environ.get('COMPOSER_DEBUG') == '1':
+            # Redact account_uuids in echoed body — they're sensitive
+            safe_body = dict(body)
+            if 'account_uuids' in safe_body:
+                safe_body['account_uuids'] = f"[{len(safe_body['account_uuids'])} UUIDs redacted]"
+            print(f"[Composer DEBUG] POST {path} body={safe_body} → status={r.status_code} "
+                  f"resp[:400]={r.text[:400]!r}")
         r.raise_for_status()
         return r.json()
     except req_lib.HTTPError as e:
