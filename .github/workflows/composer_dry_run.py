@@ -92,6 +92,37 @@ def _composer_post(path, body, timeout=30):
         return None
 
 
+def _composer_get(path, timeout=15):
+    """Authenticated GET to Composer API."""
+    if not COMPOSER_KEY_ID or not COMPOSER_KEY_SECRET:
+        return None
+    try:
+        r = req_lib.get(
+            f"{COMPOSER_BASE}{path}",
+            headers={
+                "x-api-key-id": COMPOSER_KEY_ID,
+                "authorization": f"Bearer {COMPOSER_KEY_SECRET}",
+            },
+            timeout=timeout,
+        )
+        r.raise_for_status()
+        return r.json()
+    except Exception as e:
+        print(f"  Composer GET error ({path}): {e}")
+        return None
+
+
+def list_account_uuids():
+    """Return all broker_account_uuids associated with the API key, or None on failure.
+
+    Composer's /accounts/list returns {accounts: [{account_uuid, account_type, ...}]}.
+    """
+    resp = _composer_get('/accounts/list')
+    if not resp or 'accounts' not in resp:
+        return None
+    return [a.get('account_uuid') for a in resp['accounts'] if a.get('account_uuid')]
+
+
 # ════════════════════════════════════════════════════════════════════
 # DRY-RUN PREVIEW
 # ════════════════════════════════════════════════════════════════════
@@ -100,8 +131,8 @@ def fetch_dry_run_preview(account_uuids=None):
     Fetch dry-run rebalance preview for all symphonies in given accounts.
 
     Args:
-        account_uuids: list of broker account UUIDs to evaluate. If None, evaluates
-                       all accounts associated with the API key.
+        account_uuids: list of broker account UUIDs to evaluate. If None, the
+                       accounts list is auto-discovered via /accounts/list.
 
     Returns:
         list of dicts, one per account, each with shape:
@@ -124,11 +155,22 @@ def fetch_dry_run_preview(account_uuids=None):
                 'dry_run_missing_symphonies': {symphony_id: error_msg},
                 'dry_run_total_symphonies': int,
             }
-        Returns None on auth failure or API error.
+        Returns None on auth failure or API error, or [] if no accounts found.
     """
-    body = {'send_segment_event': False}
-    if account_uuids:
-        body['account_uuids'] = list(account_uuids)
+    # Composer's /dry-run does NOT auto-evaluate "all accounts" when the body
+    # omits account_uuids — it returns []. So when caller passes None, discover
+    # them explicitly via /accounts/list first.
+    if not account_uuids:
+        discovered = list_account_uuids()
+        if discovered is None:
+            return None
+        if not discovered:
+            return []
+        account_uuids = discovered
+    body = {
+        'send_segment_event': False,
+        'account_uuids': list(account_uuids),
+    }
     return _composer_post('/dry-run', body)
 
 
