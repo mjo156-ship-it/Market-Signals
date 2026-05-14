@@ -55,6 +55,40 @@ def calculate_sma(prices, period):
 def calculate_ema(prices, period):
     return prices.ewm(span=period, adjust=False).mean()
 
+def detrended_zscore(numerator, denominator, lookback=504):
+    """Detrended z-score of a price ratio against a rolling linear-regression channel.
+
+    Matches Andrei Sota's "trend channel" framing — secular trend in the ratio is
+    removed via linear regression over the trailing `lookback` days, and the z-score
+    measures today's stretch from the projected trend line in residual-sigma units.
+
+    Used by SIGNAL GROUP 13 (Z-Score Ratio Signals).
+    """
+    df = pd.concat([numerator, denominator], axis=1).dropna()
+    if len(df) < lookback + 1:
+        return pd.Series(index=df.index, dtype=float)
+    ratio = df.iloc[:, 0] / df.iloc[:, 1]
+
+    n = lookback
+    x = np.arange(n)
+    x_mean = x.mean()
+    x_var = ((x - x_mean) ** 2).sum()
+
+    z_series = pd.Series(index=ratio.index, dtype=float)
+    arr = ratio.values
+
+    for i in range(n, len(ratio)):
+        y = arr[i-n:i]
+        y_mean = y.mean()
+        slope = ((x - x_mean) * (y - y_mean)).sum() / x_var
+        intercept = y_mean - slope * x_mean
+        pred_today = intercept + slope * n
+        residuals = y - (intercept + slope * x)
+        sd = residuals.std()
+        z_series.iloc[i] = (arr[i] - pred_today) / sd if sd > 0 else np.nan
+
+    return z_series
+
 def get_data():
     """Download all required data"""
     tickers = [
@@ -63,19 +97,23 @@ def get_data():
         'HYG', 'LQD', 'TLT',                   # Credit/Bonds
         'UCO', 'GLD',                          # Commodities
         'EDC', 'YINN',                         # EM/China
-        '^VIX'                                 # Volatility
+        '^VIX',                                # Volatility
+        'RSP', 'QQQE',                         # Equal-weight indexes (Group 13 z-score ratios)
     ]
-    
+
+    # 5y of history: 504-day trend channel needs ~2y just for the regression window;
+    # extra history lets us locate last_fire dates that may go back several years
+    # (e.g. QQQE/QQQ last fired 2023-07-06).
     data = {}
     for ticker in tickers:
         try:
-            df = yf.download(ticker, period="2y", progress=False)
+            df = yf.download(ticker, period="5y", progress=False)
             if not df.empty:
                 df.columns = df.columns.get_level_values(0)
                 data[ticker.replace('^', '')] = df['Close']
         except:
             pass
-    
+
     return pd.DataFrame(data)
 
 def analyze_signals(df):
@@ -302,7 +340,77 @@ def analyze_signals(df):
         if gld.get('RSI10', 50) < 21:
             alerts.append(f"🟢 GOLD OVERSOLD: GLD RSI(10) = {gld['RSI10']:.1f} < 21")
             alerts.append("   → Long TQQQ 10 days | CAGR: +19%, Win: 70%")
-    
+
+    # =========================================================================
+    # SIGNAL GROUP 13: Z-Score Ratio Signals (Tier 2, manual execution)
+    # =========================================================================
+    # Detrended 504-day trend-channel z-score on price ratios.
+    # Validated 2026-05-13 — stress test P(>QQQ) = 98.2% (regime-conditional bootstrap, 3000 trials).
+    # MANUAL EXECUTION only (no Composer automation: SMA-based proxies failed in current regime).
+    # Default holding when no signal active: 100% QQQ.
+    # On fire: rotate to 100% TQQQ, hold 20 trading days, return to QQQ.
+    # Sleeve sizing: 5-8% initial, scale to 12-15% after 2-3 confirming live fires.
+    zscore_status = {}
+    for ratio_name, num_t, den_t, threshold, direction, action_text in [
+        ('QQQ_SPY',  'QQQ',  'SPY', 1.5,  'ge', 'Long TQQQ 20d (vs QQQ default): +7.30pp edge, Sharpe 1.06, MDD parity | n=45 ep'),
+        ('QQQ_RSP',  'QQQ',  'RSP', -1.5, 'le', 'Long TQQQ 20d (vs QQQ default): +11.47pp edge, MDD -52% | n=35 ep'),
+        ('QQQE_QQQ', 'QQQE', 'QQQ', -2.5, 'le', 'Long TQQQ 20d (vs QQQ default): borderline Tier 3, regime-concentrated | n=14 ep'),
+    ]:
+        if num_t not in df.columns or den_t not in df.columns:
+            continue
+        try:
+            num_close = df[num_t].dropna()
+            den_close = df[den_t].dropna()
+            # Need 504-day regression window plus at least 1 valid output day
+            if len(num_close) < 510 or len(den_close) < 510:
+                continue
+
+            z_series = detrended_zscore(num_close, den_close, lookback=504)
+            z_clean = z_series.dropna()
+            if z_clean.empty:
+                continue
+
+            z_today = float(z_clean.iloc[-1])
+
+            if direction == 'ge':
+                fire_series = z_clean >= threshold
+            else:
+                fire_series = z_clean <= threshold
+            fired_today = bool(fire_series.iloc[-1])
+
+            fire_dates = z_clean.index[fire_series]
+            last_fire_str = 'never'
+            days_since = -1
+            if len(fire_dates) > 0:
+                last_fire = fire_dates[-1]
+                last_fire_str = last_fire.strftime('%Y-%m-%d')
+                days_since = (z_clean.index[-1] - last_fire).days
+
+            zscore_status[ratio_name] = {
+                'z_today': z_today,
+                'threshold': threshold,
+                'direction': direction,
+                'fired_today': fired_today,
+                'last_fire': last_fire_str,
+                'days_since_fire': days_since,
+            }
+
+            arrow = '≥' if direction == 'ge' else '≤'
+            if fired_today:
+                alerts.append(f"🟢 Z-SCORE {ratio_name} FIRED: {num_t}/{den_t} detrended z = {z_today:+.2f}σ {arrow} {threshold}σ")
+                alerts.append(f"   → {action_text}")
+                alerts.append(f"   → Hold 20 trading days from entry, then return to QQQ default")
+                alerts.append(f"   → Last fire: {last_fire_str} ({days_since}d ago)")
+            else:
+                gap = z_today - threshold
+                approaching = (direction == 'ge' and z_today >= threshold - 0.2) or \
+                              (direction == 'le' and z_today <= threshold + 0.2)
+                if approaching:
+                    alerts.append(f"🟡 Z-SCORE {ratio_name} APPROACHING: {num_t}/{den_t} z = {z_today:+.2f}σ (threshold {arrow} {threshold}σ, gap {gap:+.2f}σ)")
+        except Exception as e:
+            print(f"Error computing z-score for {ratio_name}: {e}")
+            continue
+
     # =========================================================================
     # BUILD STATUS SUMMARY
     # =========================================================================
@@ -332,11 +440,26 @@ def analyze_signals(df):
             rsi = indicators[ticker].get('RSI10', 0)
             flag = "🔴" if rsi > 79 else ("🟢" if rsi < 25 else "  ")
             status_lines.append(f"  {flag} {ticker}: {rsi:.1f}")
-    
+
     status_lines.append("")
     status_lines.append("RSI > 79 = Overbought | RSI < 25 = Oversold")
     status_lines.append("=" * 70)
-    
+
+    # Z-Score Ratio Signals (Group 13, Tier 2 manual execution)
+    if zscore_status:
+        status_lines.append("")
+        status_lines.append("Z-SCORE RATIO SIGNALS (Tier 2, manual execution)")
+        status_lines.append("-" * 70)
+        for ratio_name, info in zscore_status.items():
+            arrow = '≥' if info['direction'] == 'ge' else '≤'
+            fire_marker = '★ FIRED' if info['fired_today'] else 'inactive'
+            status_lines.append(
+                f"  {ratio_name:<10} z = {info['z_today']:+.2f}σ  "
+                f"(trigger {arrow} {info['threshold']}σ)  {fire_marker}  "
+                f"| last fire: {info['last_fire']} ({info['days_since_fire']}d ago)"
+            )
+        status_lines.append("=" * 70)
+
     return alerts, status_lines
 
 def send_email(subject, body):
