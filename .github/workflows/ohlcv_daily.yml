@@ -1,0 +1,83 @@
+# Daily OHLCV updater
+# - 5 PM ET weekdays    → --mode=append   (one new bar per ticker)
+# - 6:30 PM ET Fridays  → --mode=rewrite  (refresh full history; captures
+#                                          retroactive Adj Close adjustments)
+# Manual workflow_dispatch supports append / rewrite / backfill.
+
+name: OHLCV Daily Update
+
+on:
+  schedule:
+    - cron: '0 21 * * 1-5'      # 21:00 UTC = 5 PM ET (DST) / 4 PM ET (STD), weekdays
+    - cron: '30 22 * * 5'       # 22:30 UTC = 6:30 PM ET (DST) / 5:30 PM ET (STD), Fridays
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Update mode'
+        required: false
+        default: 'append'
+        type: choice
+        options:
+          - append
+          - rewrite
+          - backfill
+
+permissions:
+  contents: write
+
+jobs:
+  update-ohlcv:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install yfinance pandas numpy requests
+
+      - name: Pick mode (cron-aware)
+        id: pickmode
+        run: |
+          # workflow_dispatch → use input mode (no default-string magic
+          # needed because GitHub fills in the input default 'append').
+          # Friday 22:30 UTC schedule → rewrite. Everything else → append.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ inputs.mode }}" >> "$GITHUB_OUTPUT"
+          else
+            HOUR_UTC=$(date -u +%H)
+            DOW=$(date -u +%u)   # 1=Mon..7=Sun
+            if [ "$DOW" = "5" ] && [ "$HOUR_UTC" = "22" ]; then
+              echo "mode=rewrite" >> "$GITHUB_OUTPUT"
+            else
+              echo "mode=append" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Update OHLCV
+        env:
+          MODE: ${{ steps.pickmode.outputs.mode }}
+        run: |
+          echo "Running with mode=${MODE}"
+          python scripts/update_ohlcv.py --mode="${MODE}"
+
+      - name: Commit changes
+        env:
+          MODE: ${{ steps.pickmode.outputs.mode }}
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/ohlcv/
+          if git diff --staged --quiet; then
+            echo "No OHLCV changes to commit"
+          else
+            git commit -m "OHLCV update: ${MODE} mode, $(date -u +%Y-%m-%d)"
+            git pull --rebase
+            git push
+            echo "OHLCV changes pushed"
+          fi
