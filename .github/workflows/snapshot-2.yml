@@ -534,11 +534,25 @@ jobs:
               print(f"  Weather: {weather['current_temp']}°F, 7d change: {weather['temp_change_7d']:+.1f}°F")
           PYEOF
 
+      - name: Archive daily snapshot (close run only)
+        run: |
+          # Only archive on the final run of the day (post-close).
+          # UTC hour 20 = 4 PM ET during DST; 21 = 4 PM ET during STD.
+          HOUR_UTC=$(date -u +%H)
+          if [ "$HOUR_UTC" = "20" ] || [ "$HOUR_UTC" = "21" ]; then
+            mkdir -p data/history
+            DATE=$(TZ=America/New_York date +%Y-%m-%d)
+            cp data/snapshot.json "data/history/${DATE}.json"
+            echo "Archived to data/history/${DATE}.json"
+          else
+            echo "Not close run (UTC hour ${HOUR_UTC}); skipping archive"
+          fi
+
       - name: Commit snapshot
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add data/snapshot.json
+          git add data/snapshot.json data/history/ 2>/dev/null || git add data/snapshot.json
           if git diff --staged --quiet; then
             echo "No changes"
           else
