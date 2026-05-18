@@ -536,16 +536,20 @@ jobs:
 
       - name: Archive daily snapshot (close run only)
         run: |
-          # Only archive on the final run of the day (post-close).
-          # UTC hour 20 = 4 PM ET during DST; 21 = 4 PM ET during STD.
+          # Archive exactly once per day on the final scheduled tick (21:15 UTC).
+          # The hour-21 cron is `0,15 21 * * 1-5`, so MIN>=15 uniquely identifies
+          # the 21:15 tick (the 21:00 tick has MIN<15). MIN>=15 (not =15 exactly)
+          # tolerates GitHub Actions cron drift, which can delay a tick 5-15 min.
+          # 21:15 UTC = 5:15 PM ET (DST) / 4:15 PM ET (STD) — post-close either way.
           HOUR_UTC=$(date -u +%H)
-          if [ "$HOUR_UTC" = "20" ] || [ "$HOUR_UTC" = "21" ]; then
+          MIN_UTC=$(date -u +%M)
+          if [ "$HOUR_UTC" = "21" ] && [ "$MIN_UTC" -ge "15" ]; then
             mkdir -p data/history
             DATE=$(TZ=America/New_York date +%Y-%m-%d)
             cp data/snapshot.json "data/history/${DATE}.json"
             echo "Archived to data/history/${DATE}.json"
           else
-            echo "Not close run (UTC hour ${HOUR_UTC}); skipping archive"
+            echo "Not close run (UTC ${HOUR_UTC}:${MIN_UTC}); skipping archive"
           fi
 
       - name: Commit snapshot
