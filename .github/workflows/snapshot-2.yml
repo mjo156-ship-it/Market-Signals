@@ -51,7 +51,7 @@ jobs:
           TICKERS = [
               'SPY','QQQ','SMH','IWM',
               'XLP','XLU','XLV','XLF','XLE',
-              'GLD','TLT','HYG','LQD','TMV','USDU','BND',
+              'GLD','TLT','HYG','LQD','CORP','TMV','USDU','BND',
               'UCO','BOIL','DBC',
               'UVXY','SVXY','VIXY','VIXM',
               'TQQQ','SOXL','SOXS','TECL','FAS','UPRO',
@@ -404,6 +404,7 @@ jobs:
           gld_r=rsi('GLD'); usdu_r=rsi('USDU'); xlp_r=rsi('XLP')
           spy_r=rsi('SPY'); qqq_r=rsi('QQQ'); smh_r=rsi('SMH')
           xlf_r=rsi('XLF'); uvxy_r=rsi('UVXY'); vixm_r=rsi('VIXM')
+          corp_r=rsi('CORP')
 
           playbook = {
               'GLD_RSI_gt_79':  {'value':gld_r,  'threshold':79, 'active': gld_r>79 if gld_r else False},
@@ -416,6 +417,12 @@ jobs:
               'XLF_RSI_gt_70':  {'value':xlf_r,  'threshold':70, 'active': xlf_r>70 if xlf_r else False},
               'UVXY_RSI_gt_82': {'value':uvxy_r, 'threshold':82, 'active': uvxy_r>82 if uvxy_r else False},
               'VIXM_RSI_lt_25': {'value':vixm_r, 'threshold':25, 'active': vixm_r<25 if vixm_r else False},
+              # Risk-on: when SPY RSI is below CORP (investment-grade credit) RSI,
+              # credit is leading equity strength — historically a "risk-on" cue.
+              # value = SPY_RSI - CORP_RSI (negative → SPY below CORP → active).
+              'SPY_RSI_lt_CORP_RSI': {'value': (spy_r - corp_r) if (spy_r is not None and corp_r is not None) else None,
+                                       'threshold': 0,
+                                       'active': (spy_r is not None and corp_r is not None and spy_r < corp_r)},
           }
 
           ga = gld_r and gld_r>79
@@ -472,6 +479,10 @@ jobs:
               alerts.append('TRIPLE SIGNAL: GLD/USDU/XLP → TQQQ high conviction')
           if combos['xlp_cascade']['active']:
               alerts.append('XLP CASCADE: RSI>75 → UVXY 1-day hold')
+
+          # Risk-on signal: SPY RSI below CORP (investment-grade credit) RSI
+          if playbook['SPY_RSI_lt_CORP_RSI']['active']:
+              alerts.append(f'🟢 RISK-ON: SPY RSI({spy_r:.1f}) < CORP RSI({corp_r:.1f}) — credit leading equity')
 
           # Natgas alerts
           if natgas.get('kold', {}).get('signal') == 'ACTIVE':
