@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_utc": "2026-05-25T16:38:01.412404+00:00",
-    "generated_et": "2026-05-25 11:38:01 ET",
-    "ticker_count": 53,
+    "generated_utc": "2026-05-25T17:11:43.603902+00:00",
+    "generated_et": "2026-05-25 12:11:43 ET",
+    "ticker_count": 52,
     "version": "1.1"
   },
   "signals": {
@@ -28,7 +28,7 @@
         "active": false
       },
       "SPY_RSI_gt_79": {
-        "value": 68.8,
+        "value": null,
         "threshold": 79,
         "active": false
       },
@@ -58,7 +58,7 @@
         "active": false
       },
       "SPY_RSI_lt_CORP_RSI": {
-        "value": 19.4,
+        "value": null,
         "threshold": 0,
         "active": false
       }
@@ -204,25 +204,6 @@
     ]
   },
   "indicators": {
-    "SPY": {
-      "price": 745.64,
-      "change_pct": 0.39,
-      "rsi10": 68.8,
-      "ema9": 739.73,
-      "ema20": 730.41,
-      "ema50": 709.96,
-      "ema200": 672.56,
-      "sma50": 696.49,
-      "sma200": 676.25,
-      "ema_cross": "BULL",
-      "above_sma200": true,
-      "vs_sma200": 10.3,
-      "vs_sma50": 7.1,
-      "ret_1d": 0.39,
-      "ret_5d": 0.88,
-      "ret_10d": 1.09,
-      "ret_20d": 4.44
-    },
     "QQQ": {
       "price": 717.54,
       "change_pct": 0.42,
@@ -984,23 +965,23 @@
       "ret_20d": -5.26
     },
     "BTC-USD": {
-      "price": 77554.0,
-      "change_pct": 0.74,
-      "rsi10": 48.2,
-      "ema9": 77353.19,
-      "ema20": 77845.08,
-      "ema50": 76769.29,
-      "ema200": 81493.31,
-      "sma50": 76942.95,
-      "sma200": 80407.05,
+      "price": 77649.11,
+      "change_pct": 0.87,
+      "rsi10": 48.7,
+      "ema9": 77372.21,
+      "ema20": 77854.14,
+      "ema50": 76773.02,
+      "ema200": 81494.26,
+      "sma50": 76944.86,
+      "sma200": 80407.52,
       "ema_cross": "BEAR",
       "above_sma200": false,
-      "vs_sma200": -3.5,
-      "vs_sma50": 0.8,
-      "ret_1d": 0.74,
-      "ret_5d": 0.12,
-      "ret_10d": -1.91,
-      "ret_20d": -4.17
+      "vs_sma200": -3.4,
+      "vs_sma50": 0.9,
+      "ret_1d": 0.87,
+      "ret_5d": 0.25,
+      "ret_10d": -1.79,
+      "ret_20d": -4.05
     },
     "AMD": {
       "price": 467.51,
