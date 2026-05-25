@@ -1,19 +1,14 @@
 {
-  "generated_at_local": "2026-05-22T21:16:39.057750",
-  "generated_at_utc": "2026-05-22T21:16:39.057760Z",
+  "generated_at_local": "2026-05-25T16:08:58.342984",
+  "generated_at_utc": "2026-05-25T16:08:58.342993Z",
   "mode": "close",
   "summary": {
-    "total_alerts": 3,
+    "total_alerts": 2,
     "buy_count": 1,
     "exit_count": 1,
-    "warning_count": 1
+    "warning_count": 0
   },
   "alerts": [
-    {
-      "title": "\ud83d\udea2 HORMUZ TRANSIT LOW",
-      "message": "Only 12 transits today (baseline ~138). Dead-hand framework still in force \u2014 insurance withdrawn.",
-      "category": "watch"
-    },
     {
       "title": "\ud83d\udd34 SOXL EXIT",
       "message": "SMH 50.8% above SMA(200) - SELL SOXL",
@@ -216,13 +211,13 @@
       "pct_above_sma200": -16.64
     },
     "BTC-USD": {
-      "price": 75905.84,
-      "rsi10": 36.1,
-      "rsi50": 49.2,
-      "sma200": 80787.01,
-      "sma50": 76391.21,
-      "ema21": 78128.88,
-      "pct_above_sma200": -6.04
+      "price": 77522.01,
+      "rsi10": 48.0,
+      "rsi50": 50.6,
+      "sma200": 80406.89,
+      "sma50": 76942.31,
+      "ema21": 77840.98,
+      "pct_above_sma200": -3.59
     },
     "AMD": {
       "price": 467.51,
@@ -404,8 +399,8 @@
     "phase": null
   },
   "hormuz": {
-    "as_of": "21 May 2026",
-    "total_transits": 12,
+    "as_of": "24 May 2026",
+    "total_transits": 16,
     "attacks": 37
   },
   "zscore_signals": {
