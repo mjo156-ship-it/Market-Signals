@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-05-25T22:15:56.648718+00:00",
+  "timestamp": "2026-05-26T22:27:10.413290+00:00",
   "mode": "append",
   "succeeded": [
     "AMD",
@@ -10,6 +10,7 @@
     "BOIL",
     "BOND",
     "BTAL",
+    "BTC-USD",
     "CORP",
     "CPER",
     "CRAK",
@@ -93,15 +94,13 @@
     "XLY",
     "YINN"
   ],
-  "skipped": [
-    "BTC-USD"
-  ],
+  "skipped": [],
   "failed": [],
   "warnings": [],
   "counts": {
     "total": 91,
-    "ok": 90,
-    "skipped": 1,
+    "ok": 91,
+    "skipped": 0,
     "failed": 0
   }
 }
