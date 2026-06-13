@@ -1,7 +1,10 @@
 {
-  "timestamp": "2026-06-12T22:43:50.446422+00:00",
-  "mode": "rewrite",
+  "timestamp": "2026-06-13T00:03:07.935512+00:00",
+  "mode": "append",
   "succeeded": [
+    "BTC-USD"
+  ],
+  "skipped": [
     "AMD",
     "AMZN",
     "AVGO",
@@ -10,7 +13,6 @@
     "BOIL",
     "BOND",
     "BTAL",
-    "BTC-USD",
     "CORP",
     "CPER",
     "CRAK",
@@ -94,13 +96,12 @@
     "XLY",
     "YINN"
   ],
-  "skipped": [],
   "failed": [],
   "warnings": [],
   "counts": {
     "total": 91,
-    "ok": 91,
-    "skipped": 0,
+    "ok": 1,
+    "skipped": 90,
     "failed": 0
   }
 }
