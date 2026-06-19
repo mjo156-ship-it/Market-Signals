@@ -1,6 +1,6 @@
 {
-  "generated_at_local": "2026-06-18T22:15:32.428082",
-  "generated_at_utc": "2026-06-18T22:15:32.428089Z",
+  "generated_at_local": "2026-06-19T16:20:46.132950",
+  "generated_at_utc": "2026-06-19T16:20:46.132958Z",
   "mode": "close",
   "summary": {
     "total_alerts": 2,
@@ -16,7 +16,7 @@
     },
     {
       "title": "\ud83d\udfe2 Z-SCORE QQQ_SPY FIRED",
-      "message": "QQQ/SPY detrended z = +3.43\u03c3 \u2265 1.5\u03c3\n   \u2192 Long TQQQ 20d (vs QQQ default): +7.30pp edge, Sharpe 1.06, MDD parity | n=45 ep\n   \u2192 Hold 20 trading days from entry, then return to QQQ default\n   \u2192 Last fire: 2026-06-18 (0d ago)",
+      "message": "QQQ/SPY detrended z = +3.30\u03c3 \u2265 1.5\u03c3\n   \u2192 Long TQQQ 20d (vs QQQ default): +7.30pp edge, Sharpe 1.06, MDD parity | n=45 ep\n   \u2192 Hold 20 trading days from entry, then return to QQQ default\n   \u2192 Last fire: 2026-06-18 (0d ago)",
       "category": "buy"
     }
   ],
@@ -32,12 +32,12 @@
     },
     "SPY": {
       "price": 746.74,
-      "rsi10": 52.8,
-      "rsi50": 57.4,
-      "sma200": 686.24,
-      "sma50": 729.66,
-      "ema21": 742.78,
-      "pct_above_sma200": 8.82
+      "rsi10": 54.2,
+      "rsi50": 57.7,
+      "sma200": 684.49,
+      "sma50": 727.82,
+      "ema21": 741.05,
+      "pct_above_sma200": 9.09
     },
     "QQQ": {
       "price": 740.62,
@@ -199,7 +199,7 @@
       "sma200": 41.25,
       "sma50": 44.81,
       "ema21": 45.43,
-      "pct_above_sma200": 12.62
+      "pct_above_sma200": 12.63
     },
     "INDL": {
       "price": 45.76,
@@ -211,13 +211,13 @@
       "pct_above_sma200": -11.05
     },
     "BTC-USD": {
-      "price": 62850.02,
-      "rsi10": 35.0,
-      "rsi50": 41.4,
-      "sma200": 77124.39,
-      "sma50": 72940.16,
-      "ema21": 66230.55,
-      "pct_above_sma200": -18.51
+      "price": 63212.45,
+      "rsi10": 37.5,
+      "rsi50": 41.7,
+      "sma200": 77118.59,
+      "sma50": 72916.97,
+      "ema21": 66137.72,
+      "pct_above_sma200": -18.03
     },
     "AMD": {
       "price": 537.37,
@@ -400,7 +400,7 @@
   },
   "zscore_signals": {
     "QQQ_SPY": {
-      "z_today": 3.433,
+      "z_today": 3.3,
       "threshold": 1.5,
       "direction": "ge",
       "fired_today": true,
