@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<!--
+  Signal Research dashboard tab (self-contained, dependency-free).
+
+  Renders the daily backtest-gated signal scan published by signal_research.py:
+  newest day on top (Firing today + Approaching/primed), with prior days in a
+  collapsible archive below.
+
+  Data source: the published JSON in this repo's data/signal_research/. By
+  default it fetches from raw.githubusercontent.com on the `main` branch (works
+  when this file is opened locally, hosted on GitHub Pages, or embedded in
+  another app). Override with query params:
+     ?branch=<branch>     e.g. ?branch=claude/price-store-daily-updates-evpzb8
+     ?base=<url-or-path>  e.g. ?base=.   (relative, when served beside the data)
+  or use the "Source" control in the header.
+
+  EMBEDDING IN chf-dashboard (Flask): everything is namespaced under
+  #signal-research-tab and a single IIFE — paste the <style> + the
+  <div id="signal-research-tab"> + the <script> into a Jinja template (or a
+  tab pane) and it runs as-is. No globals leak; no external dependencies.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Signal Research</title>
+<style>
+  #signal-research-tab {
+    --bg:#0f1419; --panel:#171d26; --panel2:#1d2530; --line:#2a3340;
+    --txt:#e6edf3; --muted:#8b98a8; --green:#3fb950; --red:#f85149;
+    --blue:#58a6ff; --amber:#d29922; --chip:#243042;
+    background:var(--bg); color:var(--txt); min-height:100vh;
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:24px; box-sizing:border-box;
+  }
+  #signal-research-tab * { box-sizing:border-box; }
+  #signal-research-tab h1 { font-size:22px; margin:0; letter-spacing:.2px; }
+  #signal-research-tab h2 { font-size:15px; margin:22px 0 10px; color:var(--txt);
+    border-left:3px solid var(--blue); padding-left:9px; }
+  #signal-research-tab .sub { color:var(--muted); font-size:13px; margin-top:4px; }
+  #signal-research-tab .head { display:flex; flex-wrap:wrap; gap:14px;
+    align-items:flex-end; justify-content:space-between; }
+  #signal-research-tab .controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  #signal-research-tab label { color:var(--muted); font-size:12px; margin-right:5px; }
+  #signal-research-tab select, #signal-research-tab input {
+    background:var(--panel2); color:var(--txt); border:1px solid var(--line);
+    border-radius:6px; padding:6px 9px; font-size:13px; }
+  #signal-research-tab input { width:120px; }
+  #signal-research-tab .panel { background:var(--panel); border:1px solid var(--line);
+    border-radius:10px; padding:16px 18px; margin-top:16px; }
+  #signal-research-tab table { width:100%; border-collapse:collapse; font-size:13px; }
+  #signal-research-tab th, #signal-research-tab td {
+    text-align:right; padding:7px 9px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  #signal-research-tab th:first-child, #signal-research-tab td:first-child,
+  #signal-research-tab th:nth-child(2), #signal-research-tab td:nth-child(2) { text-align:left; }
+  #signal-research-tab th { color:var(--muted); font-weight:600; font-size:11px;
+    text-transform:uppercase; letter-spacing:.5px; }
+  #signal-research-tab tbody tr:hover { background:var(--panel2); }
+  #signal-research-tab .pos { color:var(--green); } #signal-research-tab .neg { color:var(--red); }
+  #signal-research-tab .chip { display:inline-block; padding:1px 7px; border-radius:999px;
+    background:var(--chip); color:var(--muted); font-size:11px; }
+  #signal-research-tab .chip.long { color:var(--green); } #signal-research-tab .chip.short { color:var(--red); }
+  #signal-research-tab .chip.composer_ready { color:var(--blue); }
+  #signal-research-tab .chip.manual_swing { color:var(--amber); }
+  #signal-research-tab .empty { color:var(--muted); font-style:italic; padding:10px 2px; }
+  #signal-research-tab .archive details { border:1px solid var(--line); border-radius:8px;
+    margin-top:8px; background:var(--panel); }
+  #signal-research-tab .archive summary { cursor:pointer; padding:11px 14px; font-weight:600;
+    color:var(--txt); list-style:none; display:flex; justify-content:space-between; gap:10px; }
+  #signal-research-tab .archive summary::-webkit-details-marker { display:none; }
+  #signal-research-tab .archive summary .meta { color:var(--muted); font-weight:400; font-size:12px; }
+  #signal-research-tab .archive .body { padding:4px 14px 14px; }
+  #signal-research-tab .err { color:var(--red); }
+  #signal-research-tab .foot { color:var(--muted); font-size:11px; margin-top:22px;
+    border-top:1px solid var(--line); padding-top:12px; }
+  #signal-research-tab a { color:var(--blue); text-decoration:none; }
+</style>
+</head>
+<body>
+<div id="signal-research-tab">
+  <div class="head">
+    <div>
+      <h1>📡 Signal Research</h1>
+      <div class="sub" id="sr-sub">Loading…</div>
+    </div>
+    <div class="controls">
+      <span><label for="sr-date">Day</label><select id="sr-date"></select></span>
+      <span><label for="sr-branch">Source</label><input id="sr-branch" placeholder="branch"></span>
+    </div>
+  </div>
+
+  <div class="panel" id="sr-current"><div class="empty">Loading latest…</div></div>
+
+  <h2>Archive</h2>
+  <div class="archive" id="sr-archive"></div>
+
+  <div class="foot" id="sr-foot"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var root = document.getElementById("signal-research-tab");
+  var qs = new URLSearchParams(location.search);
+  var OWNER = "mjo156-ship-it", REPO = "Market-Signals";
+  var branch = qs.get("branch") || "main";
+  // base: explicit ?base wins; else raw GitHub for the chosen branch.
+  function baseFor(b) {
+    var explicit = qs.get("base");
+    if (explicit) return explicit.replace(/\/$/, "");
+    return "https://raw.githubusercontent.com/" + OWNER + "/" + REPO + "/" + b +
+           "/data/signal_research";
+  }
+  var BASE = baseFor(branch);
+
+  function fetchJSON(path) {
+    return fetch(BASE + "/" + path + "?t=" + Date.now()).then(function (r) {
+      if (!r.ok) throw new Error(path + " → HTTP " + r.status);
+      return r.json();
+    });
+  }
+  function el(tag, cls, html) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html != null) e.innerHTML = html;
+    return e;
+  }
+  function pct(x, dp) { return (x * 100).toFixed(dp == null ? 1 : dp) + "%"; }
+  function signed(x) { return (x >= 0 ? "+" : "") + pct(x); }
+  function esc(s) { return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+
+  function table(rows) {
+    if (!rows || !rows.length) return el("div", "empty", "Nothing here.");
+    var t = el("table");
+    t.innerHTML =
+      "<thead><tr><th>Signal</th><th>Ticker</th><th>Instrument</th><th>Dir</th>" +
+      "<th>Mode</th><th>Horizon</th><th>Win%</th><th>Avg</th><th>Edge</th>" +
+      "<th>N</th><th>Score</th></tr></thead>";
+    var tb = el("tbody");
+    rows.forEach(function (r) {
+      var b = r.backtest || {};
+      var tr = el("tr");
+      tr.innerHTML =
+        "<td>" + esc(r.name) + "<div class='sub' style='font-size:11px'>" +
+          esc(r.family) + " · " + esc(r.today_value || "") + "</div></td>" +
+        "<td><b>" + esc(r.ticker) + "</b></td>" +
+        "<td>" + esc(r.suggested_instrument) + "</td>" +
+        "<td><span class='chip " + esc(r.direction) + "'>" + esc(r.direction) + "</span></td>" +
+        "<td><span class='chip " + esc(r.mode) + "'>" +
+          esc((r.mode || "").replace("_", " ")) + "</span></td>" +
+        "<td>" + esc(r.horizon_days) + "d</td>" +
+        "<td>" + (b.win_rate != null ? pct(b.win_rate, 0) : "—") + "</td>" +
+        "<td class='" + (b.avg_return >= 0 ? "pos" : "neg") + "'>" +
+          (b.avg_return != null ? signed(b.avg_return) : "—") + "</td>" +
+        "<td class='" + (b.edge >= 0 ? "pos" : "neg") + "'>" +
+          (b.edge != null ? signed(b.edge) : "—") + "</td>" +
+        "<td>" + esc(b.n) + "</td>" +
+        "<td>" + (r.score != null ? r.score.toFixed(3) : "—") + "</td>";
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    return t;
+  }
+
+  function renderDay(container, p) {
+    container.innerHTML = "";
+    var s = p.summary || {};
+    container.appendChild(el("div", "sub",
+      "Data through <b>" + esc(p.data_through) + "</b> · " +
+      esc(p.universe_size) + " tickers · " +
+      (s.n_results || 0) + " firing · " + (s.n_watchlist || 0) + " approaching · " +
+      "generated " + esc((p.generated_at_utc || "").replace("T", " ").replace("+00:00", "Z"))));
+    container.appendChild(el("h2", null, "🔥 Firing today (backtest-gated)"));
+    container.appendChild(table(p.results));
+    container.appendChild(el("h2", null, "⏳ Approaching / primed"));
+    container.appendChild(table(p.watchlist));
+  }
+
+  function loadInto(container, date) {
+    container.innerHTML = "<div class='empty'>Loading " + esc(date) + "…</div>";
+    fetchJSON("history/" + date + ".json")
+      .then(function (p) { renderDay(container, p); })
+      .catch(function (e) { container.innerHTML =
+        "<div class='err'>Failed to load " + esc(date) + ": " + esc(e.message) + "</div>"; });
+  }
+
+  function buildArchive(dates) {
+    var arch = document.getElementById("sr-archive");
+    arch.innerHTML = "";
+    if (!dates.length) { arch.appendChild(el("div", "empty", "No archived days yet.")); return; }
+    dates.forEach(function (d, i) {
+      var det = el("details");
+      if (i === 0) det.open = false;
+      var sum = el("summary");
+      sum.innerHTML = "<span>" + esc(d) + "</span><span class='meta'>click to expand</span>";
+      var body = el("div", "body", "<div class='empty'>…</div>");
+      var loaded = false;
+      det.addEventListener("toggle", function () {
+        if (det.open && !loaded) { loaded = true; loadInto(body, d); }
+      });
+      det.appendChild(sum); det.appendChild(body); arch.appendChild(det);
+    });
+  }
+
+  function boot() {
+    document.getElementById("sr-sub").textContent = "Loading from " + branch + "…";
+    document.getElementById("sr-foot").innerHTML =
+      "Source: <a href='" + BASE + "/latest.json' target='_blank'>" + esc(BASE) + "</a>" +
+      " · gate: N≥25, win≥60%, edge>0 vs buy-&-hold · built by signal_research.py";
+    fetchJSON("index.json").then(function (idx) {
+      var dates = idx.dates || [];
+      var sel = document.getElementById("sr-date");
+      sel.innerHTML = "";
+      dates.forEach(function (d) {
+        var o = el("option"); o.value = d; o.textContent = d; sel.appendChild(o);
+      });
+      var latest = idx.latest || dates[0];
+      document.getElementById("sr-sub").textContent =
+        dates.length + " day(s) available · branch " + branch;
+      if (latest) { sel.value = latest; loadInto(document.getElementById("sr-current"), latest); }
+      else { document.getElementById("sr-current").innerHTML =
+        "<div class='empty'>No results published yet.</div>"; }
+      buildArchive(dates);
+      sel.onchange = function () { loadInto(document.getElementById("sr-current"), sel.value); };
+    }).catch(function (e) {
+      document.getElementById("sr-sub").innerHTML =
+        "<span class='err'>Could not load index.json from " + esc(branch) +
+        " (" + esc(e.message) + "). Try a different branch in Source.</span>";
+    });
+  }
+
+  var bi = document.getElementById("sr-branch");
+  bi.value = branch;
+  bi.addEventListener("change", function () {
+    branch = bi.value.trim() || "main"; BASE = baseFor(branch); boot();
+  });
+  boot();
+})();
+</script>
+</body>
+</html>

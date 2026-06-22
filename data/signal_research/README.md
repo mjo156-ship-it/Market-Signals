@@ -78,11 +78,26 @@ Each entry is also tagged:
 }
 ```
 
-## Building the dashboard tab (chf-dashboard)
+## Dashboard tab
 
-The tab is **not built yet** (the dashboard lives in the separate `chf-dashboard`
-repo). To add it, fetch these raw URLs and render newest-first with prior days
-archived below:
+A self-contained, dependency-free tab ships here: **[`dashboard.html`](dashboard.html)**.
+It fetches the published JSON and renders the newest day on top (🔥 Firing today
++ ⏳ Approaching/primed), with prior days in a collapsible archive below.
+
+- **Use it standalone:** open the file in a browser, or host it (e.g. GitHub
+  Pages). By default it reads the `main` branch via raw.githubusercontent.com;
+  override with `?branch=<branch>` or `?base=<url-or-path>`, or the **Source**
+  box in the header. To preview before this branch is merged, set the branch to
+  `claude/price-store-daily-updates-evpzb8`.
+- **Embed in chf-dashboard:** everything is namespaced under
+  `#signal-research-tab` (scoped CSS) and a single IIFE — paste the `<style>`,
+  the `<div id="signal-research-tab">`, and the `<script>` into a Jinja template
+  or tab pane. No globals leak, no external dependencies.
+
+### Raw data URLs (what the tab consumes)
+
+To wire it into anything else, fetch these and render newest-first with prior
+days archived below:
 
 ```
 https://raw.githubusercontent.com/mjo156-ship-it/Market-Signals/main/data/signal_research/index.json
