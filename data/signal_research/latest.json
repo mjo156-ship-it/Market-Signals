@@ -1,0 +1,204 @@
+{
+  "generated_at_utc": "2026-06-22T16:47:43+00:00",
+  "data_through": "2026-06-19",
+  "universe_size": 89,
+  "params": {
+    "min_sample": 25,
+    "win_rate_min": 0.6
+  },
+  "summary": {
+    "n_results": 3,
+    "n_watchlist": 6,
+    "by_family": {
+      "mean_reversion": 1,
+      "volatility_breakout": 2
+    },
+    "by_mode": {
+      "composer_ready": 3
+    }
+  },
+  "results": [
+    {
+      "family": "mean_reversion",
+      "name": "4+ down-day streak",
+      "ticker": "OILU",
+      "suggested_instrument": "OILU",
+      "direction": "long",
+      "horizon_days": 5,
+      "mode": "composer_ready",
+      "today_value": "down streak 4",
+      "backtest": {
+        "n": 31,
+        "win_rate": 0.71,
+        "avg_return": 0.0522,
+        "median_return": 0.0661,
+        "baseline_return": 0.0087,
+        "edge": 0.0434,
+        "fired_today": true
+      },
+      "score": 0.2416
+    },
+    {
+      "family": "volatility_breakout",
+      "name": "Donchian 52-week breakout",
+      "ticker": "EWJ",
+      "suggested_instrument": "EWJ",
+      "direction": "long",
+      "horizon_days": 20,
+      "mode": "composer_ready",
+      "today_value": "close 96.26 vs 52w high 95.88",
+      "backtest": {
+        "n": 167,
+        "win_rate": 0.647,
+        "avg_return": 0.0077,
+        "median_return": 0.015,
+        "baseline_return": 0.0025,
+        "edge": 0.0053,
+        "fired_today": true
+      },
+      "score": 0.0685
+    },
+    {
+      "family": "volatility_breakout",
+      "name": "Donchian 52-week breakout",
+      "ticker": "SMH",
+      "suggested_instrument": "SOXL",
+      "direction": "long",
+      "horizon_days": 20,
+      "mode": "composer_ready",
+      "today_value": "close 659.88 vs 52w high 649.24",
+      "backtest": {
+        "n": 195,
+        "win_rate": 0.621,
+        "avg_return": 0.0117,
+        "median_return": 0.0204,
+        "baseline_return": 0.0115,
+        "edge": 0.0002,
+        "fired_today": true
+      },
+      "score": 0.0028
+    }
+  ],
+  "watchlist": [
+    {
+      "family": "rotation",
+      "name": "Rotation: entered top-8 6-mo momentum",
+      "ticker": "FNGO",
+      "suggested_instrument": "FNGO",
+      "direction": "long",
+      "horizon_days": 21,
+      "mode": "manual_swing",
+      "today_value": "6-mo momentum n/a",
+      "backtest": {
+        "n": 57,
+        "win_rate": 0.86,
+        "avg_return": 0.1033,
+        "median_return": 0.1075,
+        "baseline_return": 0.0464,
+        "edge": 0.0569,
+        "fired_today": false
+      },
+      "score": 0.4296
+    },
+    {
+      "family": "rotation",
+      "name": "Rotation: entered top-8 12-mo momentum",
+      "ticker": "UCO",
+      "suggested_instrument": "UCO",
+      "direction": "long",
+      "horizon_days": 21,
+      "mode": "manual_swing",
+      "today_value": "12-mo momentum n/a",
+      "backtest": {
+        "n": 43,
+        "win_rate": 0.674,
+        "avg_return": 0.0601,
+        "median_return": 0.0809,
+        "baseline_return": 0.0006,
+        "edge": 0.0595,
+        "fired_today": false
+      },
+      "score": 0.3902
+    },
+    {
+      "family": "exhaustion_fade",
+      "name": "4+ up-day streak fade",
+      "ticker": "TMF",
+      "suggested_instrument": "short TMF",
+      "direction": "short",
+      "horizon_days": 5,
+      "mode": "manual_swing",
+      "today_value": "up streak 3",
+      "backtest": {
+        "n": 138,
+        "win_rate": 0.645,
+        "avg_return": 0.0134,
+        "median_return": 0.0186,
+        "baseline_return": -0.0001,
+        "edge": 0.0136,
+        "fired_today": false
+      },
+      "score": 0.1598
+    },
+    {
+      "family": "mean_reversion",
+      "name": "4+ down-day streak",
+      "ticker": "TMV",
+      "suggested_instrument": "TMV",
+      "direction": "long",
+      "horizon_days": 5,
+      "mode": "composer_ready",
+      "today_value": "down streak 3",
+      "backtest": {
+        "n": 140,
+        "win_rate": 0.607,
+        "avg_return": 0.0095,
+        "median_return": 0.0105,
+        "baseline_return": -0.0018,
+        "edge": 0.0113,
+        "fired_today": false
+      },
+      "score": 0.1337
+    },
+    {
+      "family": "rotation",
+      "name": "Rotation: entered top-8 12-mo momentum",
+      "ticker": "USO",
+      "suggested_instrument": "USO",
+      "direction": "long",
+      "horizon_days": 21,
+      "mode": "manual_swing",
+      "today_value": "12-mo momentum n/a",
+      "backtest": {
+        "n": 32,
+        "win_rate": 0.688,
+        "avg_return": 0.0169,
+        "median_return": 0.0425,
+        "baseline_return": 0.0004,
+        "edge": 0.0165,
+        "fired_today": false
+      },
+      "score": 0.0933
+    },
+    {
+      "family": "mean_reversion",
+      "name": "Bollinger %B oversold (<0)",
+      "ticker": "CTA",
+      "suggested_instrument": "CTA",
+      "direction": "long",
+      "horizon_days": 5,
+      "mode": "composer_ready",
+      "today_value": "%B 0.06",
+      "backtest": {
+        "n": 26,
+        "win_rate": 0.731,
+        "avg_return": 0.0049,
+        "median_return": 0.007,
+        "baseline_return": 0.0008,
+        "edge": 0.0041,
+        "fired_today": false
+      },
+      "score": 0.0209
+    }
+  ]
+}

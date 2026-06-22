@@ -1,0 +1,68 @@
+# Price Store -- manual seed / priming + optional nightly full refresh.
+#
+# Run this ONCE (workflow_dispatch) after merging to prime the store: with an
+# empty actions log, `--update` performs a one-time full re-pull per ticker,
+# which rewrites raw history with proper split alignment AND populates
+# actions.parquet. After priming, the post-close signal-monitor run only does
+# the light ~5-day trailing-window upsert (and re-pulls a ticker only when a
+# NEW corporate action appears), so it never has to do the heavy 91-ticker
+# pull during the time-sensitive 4:05 PM close run.
+#
+# The optional nightly schedule is a belt-and-suspenders full-universe refresh
+# (independent of the monitor) and can be removed if undesired.
+
+name: Price Store Seed/Refresh
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+    inputs:
+      tickers:
+        description: 'Comma-separated ticker subset (blank = full universe)'
+        required: false
+        default: ''
+  schedule:
+    # 02:30 UTC nightly -- well after the US close; pure backstop refresh.
+    - cron: '30 2 * * 2-6'
+
+jobs:
+  refresh-price-store:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install yfinance pandas numpy requests pandas_market_calendars duckdb pyarrow
+
+      - name: Update price store
+        run: |
+          if [ -n "${{ inputs.tickers }}" ]; then
+            python price_store.py --update --tickers "${{ inputs.tickers }}"
+          else
+            python price_store.py --update
+          fi
+
+      - name: Commit price store
+        run: |
+          git config user.name "price-store-bot"
+          git config user.email "price-store-bot@users.noreply.github.com"
+          git add data/price_store/
+          if git diff --cached --quiet; then
+            echo "No price-store changes to commit"
+          else
+            MSG="price-store refresh $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            PS=$(python -c "import json;m=json.load(open('data/price_store/_last_run.json'));c=m.get('coverage',{});a=m.get('actions_detected',[]);print('%s tickers thru %s, %s rows, %s corp-action repull(s)%s, %s quarantined' % (c.get('tickers','?'), c.get('latest_date','?'), m.get('rows_written',0), len(a), (' ('+','.join(a)+')') if a else '', m.get('quarantined',0)))" 2>/dev/null || echo 'updated')
+            git commit -m "$MSG | $PS"
+            git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+            git push origin "HEAD:${GITHUB_REF_NAME:-main}"
+            echo "Committed: $MSG | $PS"
+          fi

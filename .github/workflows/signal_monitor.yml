@@ -50,7 +50,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install yfinance pandas numpy requests
+          # pandas_market_calendars / duckdb / pyarrow are for the post-close
+          # price-store update (price_store.py); the rest are the monitor's.
+          pip install yfinance pandas numpy requests pandas_market_calendars duckdb pyarrow
 
       - name: Determine run mode
         id: mode
@@ -103,14 +105,25 @@ jobs:
 
           git config user.name "signal-monitor-bot"
           git config user.email "signal-monitor-bot@users.noreply.github.com"
-          git add dashboard_state.json
+          # dashboard_state.json every run; price store + signal research are
+          # refreshed on the post-close (close) run only -- git add is a no-op
+          # when unchanged.
+          git add dashboard_state.json data/price_store/ data/signal_research/
 
           if git diff --cached --quiet; then
             echo "No state change to commit"
           else
-            git commit -m "state update $(date -u +%Y-%m-%dT%H:%M:%SZ) [$RUN_MODE]"
+            # Build an informative message: append a price-store summary
+            # (date range, # tickers, corporate actions, quarantined rows)
+            # from the updater's manifest when the price store changed.
+            MSG="state update $(date -u +%Y-%m-%dT%H:%M:%SZ) [$RUN_MODE]"
+            if git diff --cached --name-only | grep -q '^data/price_store/'; then
+              PS=$(python -c "import json;m=json.load(open('data/price_store/_last_run.json'));c=m.get('coverage',{});a=m.get('actions_detected',[]);print('price-store: %s tickers thru %s, %s rows, %s corp-action repull(s)%s, %s quarantined' % (c.get('tickers','?'), c.get('latest_date','?'), m.get('rows_written',0), len(a), (' ('+','.join(a)+')') if a else '', m.get('quarantined',0)))" 2>/dev/null || echo 'price-store: updated')
+              MSG="$MSG | $PS"
+            fi
+            git commit -m "$MSG"
             # Pull-rebase in case multiple runs land close together
             git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
             git push origin "HEAD:${GITHUB_REF_NAME:-main}"
-            echo "State committed"
+            echo "State committed: $MSG"
           fi
