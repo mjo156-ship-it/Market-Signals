@@ -157,3 +157,35 @@ button{font-family:inherit;color:var(--text);border:none;cursor:pointer;}
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
 .center-screen p{color:var(--muted);max-width:380px;line-height:1.5;margin:0;}
 .big-num{font-size:46px;font-weight:800;}
+
+/* ---- Setup / civ selection ---- */
+#setup{position:fixed;inset:0;z-index:80;background:radial-gradient(120% 90% at 50% 0%,#16294a,#0b1220 70%);
+  overflow:auto;-webkit-overflow-scrolling:touch;}
+#setup.hidden{display:none;}
+.setup-inner{max-width:560px;margin:0 auto;padding:calc(var(--safe-top) + 22px) 16px calc(var(--safe-bot) + 90px);}
+.setup-hero{text-align:center;margin-bottom:18px;}
+.setup-logo{font-size:34px;margin-bottom:4px;}
+.setup-hero h1{font-size:30px;margin:2px 0 8px;
+  background:linear-gradient(90deg,var(--accent),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.setup-hero p{color:var(--text);font-size:14px;line-height:1.5;margin:6px 0;}
+.setup-hero p.muted{color:var(--muted);}
+.civ-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.civ-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px;
+  cursor:pointer;transition:transform .12s,border-color .12s,box-shadow .12s;border-left:4px solid var(--cc,var(--accent));}
+.civ-card:active{transform:scale(.98);}
+.civ-card.sel{border-color:var(--cc,var(--accent));box-shadow:0 0 0 2px var(--cc,var(--accent)) inset, 0 6px 20px #0006;}
+.civ-card .civ-ico{font-size:30px;line-height:1;}
+.civ-card .civ-name{font-weight:800;font-size:15px;margin:6px 0 4px;}
+.civ-card .civ-blurb{font-size:12px;color:var(--muted);line-height:1.4;}
+.civ-card .civ-bonus{font-size:11px;font-weight:700;color:var(--cc,var(--accent));margin-top:7px;}
+.civ-card.custom{grid-column:1 / -1;display:flex;align-items:center;gap:12px;text-align:left;}
+.civ-card.custom .civ-ico{font-size:26px;}
+#custom-form{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px;margin-top:10px;}
+#custom-form.hidden{display:none;}
+#custom-name{width:100%;background:#0c1626;border:1px solid var(--line);border-radius:10px;
+  padding:11px;color:var(--text);font-size:15px;font-family:inherit;}
+.focus-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:8px 12px;font-size:13px;font-weight:600;}
+.chip.sel{background:var(--accent);color:#04263b;border-color:var(--accent);}
+#start-game{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--safe-bot) + 14px);
+  max-width:528px;width:calc(100% - 32px);font-size:16px;padding:14px;box-shadow:0 8px 30px #000a;}

@@ -1,9 +1,40 @@
 # Civilization 2026 🌐
 
 A turn-based strategy game in the spirit of *Civilization II*, reimagined for
-2026. Lead a civilization out of the **Information Age**, through the **AI Age**,
-and into the **Singularity** — while surviving the modern world's defining
-risks: global pandemics, financial crises, cyber-war and climate shocks.
+2026. Begin in the **Stone Age** and lead your people across **ten eras of
+history** — discovering writing, currency, gunpowder, electricity, the
+Internet, AI and fusion — all the way to the **Singularity**. Along the way you
+must survive the modern world's defining risks: global pandemics, financial
+crises, cyber-war and climate shocks.
+
+## Choose (or create) a civilization
+
+You start by picking who you are. Each preset civilization has a distinct
+strength, and they really do play differently — the science-focused Hellenic
+League rushes to the Singularity faster, while the Imperium out-builds everyone.
+
+| Civilization | Strength |
+|---|---|
+| 🏺 Kingdom of the Nile | +25% food — fast-growing cities |
+| 🏛️ Hellenic League | +20% science |
+| 🦅 The Imperium | +18% production, 10% cheaper buildings |
+| 🐉 Silk Road Dynasty | +22% gold, bonus starting treasury |
+| ⚓ Norse Clans | cheap, rapid expansion |
+| ⛵ Maritime Republic | +gold and a permanent stability bonus |
+| ✨ **Create Your Own** | name it and choose a strength (Agrarian, Industrious, Mercantile, Scholarly, Expansionist or Resilient) |
+
+## The journey through history
+
+Research drives everything, advancing you through **10 eras** and a **43-tech
+tree**:
+
+> Stone Age → Bronze Age → Classical → Medieval → Renaissance → Industrial →
+> Modern → Information → AI → **Singularity**
+
+Early techs (Agriculture, Pottery, Writing) come quickly; later ones (Quantum
+Computing, AGI, Fusion) are the work of an age. Each unlocks new buildings —
+from Granaries and Libraries to AI Labs, Quantum Hubs and Fusion Plants — and
+permanent civilization-wide bonuses.
 
 It's a self-contained web app (no build step, no dependencies) designed
 **mobile-first for iPhone**, and installable as a PWA for full-screen, offline play.
@@ -36,10 +67,9 @@ python3 -m http.server 8000
 - **🏙️ Cities** — each city works the best surrounding tiles for **food**
   (growth), **production** (building), **gold**, and **science**. Choose what
   each city builds. Train **Settlers** to auto-expand onto good land.
-- **🧪 Tech** — research drives everything. Progress through a 15-tech tree:
-  *Computing → The Internet → Machine Learning → Quantum → AGI → Fusion →
-  Nanotech → **The Singularity***. Each tech unlocks new buildings and
-  permanent bonuses.
+- **🧪 Tech** — research drives everything. Progress through the 43-tech tree
+  spanning all ten eras, from Agriculture to **The Singularity**. Each tech
+  unlocks new buildings and permanent bonuses.
 - **📜 Log** — a running history of growth, discoveries and world events.
 - **⏭️ End Turn** — advance time. Yields are collected, cities grow, research
   progresses, and the world rolls the dice on a global event.
@@ -63,7 +93,7 @@ impose austerity — with real trade-offs.
 
 ### Winning and losing
 - **🏆 Victory**: research **The Singularity**, *or* lead the strongest
-  civilization to turn 120.
+  civilization to turn 240.
 - **💀 Defeat**: run a treasury deficit for 4 straight turns (economic collapse),
   or lose your last city.
 

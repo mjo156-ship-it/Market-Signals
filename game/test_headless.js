@@ -21,12 +21,14 @@ const gameCode = fs.readFileSync(__dirname+'/game.js','utf8');
 
 const testCode = `
   // ---- run the test inside the same scope as the game ----
-  let errors = 0, events = 0, growths = 0, techsDone = 0, ended = null;
-  const origPush = pushLog;
-  // auto-resolve any decision by choosing the first option
-  const realDecision = decision;
-  // Simulate up to 130 turns or until game over.
-  for(let i=0;i<130 && !S.over;i++){
+  let errors = 0, techsDone = 0;
+  // boot now opens the setup screen instead of starting a game, so start one
+  // explicitly (rotate through a preset civ + the default to exercise bonuses).
+  const civKeys = Object.keys(CIVS);
+  const testCiv = (typeof CIV_OVERRIDE!=='undefined' && CIV_OVERRIDE) ? CIV_OVERRIDE : CIVS[civKeys[0]];
+  newGame(testCiv);
+  // Simulate up to WIN_TURN+10 turns or until game over.
+  for(let i=0;i<WIN_TURN+10 && !S.over;i++){
     // resolve queued decisions deterministically (pick option 0)
     while(decisionQueue.length){ const d=decisionQueue.shift(); if(d.options[0]&&d.options[0].f) d.options[0].f(); }
     // act like a player: keep researching, keep each city building something, expand
