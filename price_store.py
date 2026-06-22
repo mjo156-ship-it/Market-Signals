@@ -508,6 +508,9 @@ def update_ticker(ticker: str, fetcher, trailing_days: int = TRAILING_DAYS) -> d
       1. Detect corporate actions; a newly-seen split/dividend forces a FULL
          re-pull + rewrite (raw prices shift on a split).
       2. Otherwise re-pull a trailing window and UPSERT (overwrite overlaps).
+         The window auto-extends back to the last stored bar, so an arbitrarily
+         large gap (stale CSV seed, multi-day outage) is backfilled with no
+         permanent hole -- even for tickers that have no corporate actions.
     Validates before writing; quarantines suspect rows.
     """
     info = {"ticker": ticker, "mode": None, "rows": 0, "quarantined": 0,
@@ -543,22 +546,38 @@ def update_ticker(ticker: str, fetcher, trailing_days: int = TRAILING_DAYS) -> d
         info["quarantined"] = len(quar)
         return info
 
-    # --- trailing-window upsert -----------------------------------------
+    # --- trailing-window upsert (auto-extends to backfill any gap) -------
     info["mode"] = "trailing"
     today = pd.Timestamp(_now().date())
     sessions = trading_days(today - pd.Timedelta(days=trailing_days * 3), today)
-    start = (sessions[-trailing_days] if len(sessions) >= trailing_days
-             else (sessions[0] if len(sessions) else today)).strftime("%Y-%m-%d")
+    trailing_start = (sessions[-trailing_days] if len(sessions) >= trailing_days
+                      else (sessions[0] if len(sessions) else today))
+
+    existing = read_prices_raw()
+    tk_rows = existing[existing["ticker"] == ticker]
+    last_stored = tk_rows["date"].max() if len(tk_rows) else None
+    if last_stored is None:
+        # Brand-new ticker -> pull full history.
+        start_ts = pd.Timestamp(SEED_START)
+        info["mode"] = "full_history"
+    else:
+        # Pull from the EARLIER of the trailing window and the last stored bar.
+        # This backfills any gap (e.g. a stale CSV seed, or a multi-day failed
+        # run) with no permanent hole, regardless of whether the ticker has
+        # corporate actions, while still re-pulling recent bars for self-heal.
+        start_ts = min(trailing_start, pd.Timestamp(last_stored))
+        if start_ts < trailing_start:
+            info["mode"] = "backfill"
+    start = start_ts.strftime("%Y-%m-%d")
 
     hist = fetcher.history(ticker, start=start)
     if hist is None or len(hist) == 0:
-        info["note"] = "no rows in trailing window (holiday/halt?)"
+        info["note"] = "no rows returned (holiday/halt?)"
         return info
     df = hist.reset_index().rename(columns={"index": "date"})
     df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None).dt.normalize()
 
     # prev_close (last stored bar before the window) for the first row's return
-    existing = read_prices_raw()
     prior = existing[(existing["ticker"] == ticker)
                      & (existing["date"] < df["date"].min())]
     prev_close = float(prior.sort_values("date")["close"].iloc[-1]) if len(prior) else None
@@ -912,6 +931,19 @@ def _self_test() -> int:
         check("trailing-window update self-healed the gap",
               len(healed[(healed["ticker"] == "SPY") &
                          (healed["date"] == pd.Timestamp(gap_day))]) == 1)
+
+        # 4b) LARGE staleness gap (seed older than the trailing window) on an
+        # action-less ticker -> must still backfill the whole span, no hole.
+        store = read_prices_raw()
+        store = store[~((store["ticker"] == "SPY") &
+                        (store["date"] > pd.Timestamp("2026-06-09")))]
+        _atomic_write_parquet(store, PRICES_PARQUET, _PRICE_SCHEMA)
+        update_price_store(["SPY"], fetcher=fx, write_manifest=False)  # SPY has no actions
+        bf = read_prices_raw().query("ticker=='SPY'")
+        wanted = ["2026-06-12", "2026-06-15", "2026-06-16", "2026-06-18"]
+        got = {pd.Timestamp(d) for d in bf["date"]}
+        check("large staleness gap backfilled (no permanent hole)",
+              all(pd.Timestamp(d) in got for d in wanted))
 
         # 5) simulated split: detected -> full re-pull -> no phantom return
         fx.split_on["QQQ"] = ("2026-06-18", 10.0)  # 10-for-1

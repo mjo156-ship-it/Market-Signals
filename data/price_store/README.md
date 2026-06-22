@@ -31,9 +31,12 @@ series on demand from the actions log.
 
 ## How it stays correct
 
-- **Trailing-window upsert.** Each update re-pulls ~5 trading days and
-  overwrites overlapping dates. This self-heals preliminary closes Yahoo
-  revises after hours, gaps from a failed/rate-limited run, and late prints.
+- **Trailing-window upsert (auto-extending).** Each update re-pulls ~5 trading
+  days and overwrites overlapping dates, self-healing preliminary closes Yahoo
+  revises after hours and late prints. The window **auto-extends back to the
+  last stored bar**, so an arbitrarily large gap — a stale CSV seed, or a
+  multi-day outage — is backfilled with no permanent hole, even for tickers
+  with no corporate actions (e.g. `BTC-USD`).
 - **Corporate-action detection.** Each run checks `yf.Ticker(t).actions`. A
   newly-seen split or dividend triggers a **full re-pull** of that ticker
   (raw prices shift on a split — a 10-for-1 would otherwise show a phantom
