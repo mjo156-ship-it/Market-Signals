@@ -1,0 +1,14 @@
+{
+  "name": "Civilization 2026",
+  "short_name": "Civ 2026",
+  "description": "A turn-based strategy game: lead a civilization through the AI Age and into the Singularity while surviving pandemics, financial crises and cyber-war.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

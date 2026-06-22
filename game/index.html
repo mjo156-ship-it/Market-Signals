@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1220" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Civ 2026" />
+  <title>Civilization 2026</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="icon" href="icon.svg" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Top status bar -->
+  <header id="topbar">
+    <div class="stat" id="stat-era" title="Era"><span class="ico">🌐</span><span class="val" id="val-era">Info Age</span></div>
+    <div class="stat" id="stat-turn" title="Turn"><span class="ico">⏳</span><span class="val" id="val-turn">1</span></div>
+    <div class="stat" id="stat-gold" title="Treasury (gold +/− per turn)"><span class="ico">💰</span><span class="val" id="val-gold">0</span><span class="delta" id="val-gold-delta"></span></div>
+    <div class="stat" id="stat-sci" title="Science per turn"><span class="ico">🔬</span><span class="val" id="val-sci">0</span></div>
+    <div class="stat" id="stat-pop" title="Total population"><span class="ico">👥</span><span class="val" id="val-pop">0</span></div>
+    <div class="stat" id="stat-health" title="Public health (low = pandemic risk)"><span class="ico">❤️</span><span class="val" id="val-health">100</span></div>
+    <div class="stat" id="stat-stability" title="Economic stability (low = crisis risk)"><span class="ico">🏦</span><span class="val" id="val-stab">100</span></div>
+  </header>
+
+  <!-- Research banner -->
+  <div id="research-banner" class="tap" title="Tap to choose research">
+    <div class="rb-label">Researching</div>
+    <div class="rb-name" id="rb-name">— choose —</div>
+    <div class="rb-bar"><div class="rb-fill" id="rb-fill"></div></div>
+    <div class="rb-eta" id="rb-eta"></div>
+  </div>
+
+  <!-- Main view area -->
+  <main id="view">
+    <section id="view-map" class="view active"></section>
+    <section id="view-cities" class="view"></section>
+    <section id="view-tech" class="view"></section>
+    <section id="view-log" class="view"></section>
+  </main>
+
+  <!-- Bottom tab bar -->
+  <nav id="tabs">
+    <button class="tab active" data-view="map"><span>🗺️</span>Map</button>
+    <button class="tab" data-view="cities"><span>🏙️</span>Cities</button>
+    <button class="tab" data-view="tech"><span>🧪</span>Tech</button>
+    <button class="tab" data-view="log"><span>📜</span>Log</button>
+    <button id="end-turn" class="primary"><span>⏭️</span>End Turn</button>
+  </nav>
+
+  <!-- Modal -->
+  <div id="modal-backdrop" class="hidden">
+    <div id="modal">
+      <div id="modal-head">
+        <h2 id="modal-title">Title</h2>
+        <button id="modal-close">✕</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="hidden"></div>
+
+  <script src="game.js"></script>
+</body>
+</html>
