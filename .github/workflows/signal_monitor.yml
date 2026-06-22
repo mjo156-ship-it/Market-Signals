@@ -105,9 +105,10 @@ jobs:
 
           git config user.name "signal-monitor-bot"
           git config user.email "signal-monitor-bot@users.noreply.github.com"
-          # dashboard_state.json every run; price store is refreshed on the
-          # post-close (close) run only -- git add is a no-op when unchanged.
-          git add dashboard_state.json data/price_store/
+          # dashboard_state.json every run; price store + signal research are
+          # refreshed on the post-close (close) run only -- git add is a no-op
+          # when unchanged.
+          git add dashboard_state.json data/price_store/ data/signal_research/
 
           if git diff --cached --quiet; then
             echo "No state change to commit"

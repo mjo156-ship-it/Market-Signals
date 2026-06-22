@@ -1856,5 +1856,17 @@ def main():
         except Exception as e:
             print(f"[PRICE STORE] update failed (suppressed, snapshot already written): {e}")
 
+        # Daily signal-research scan over the freshly-updated store. Separate
+        # guard so a research failure can't undo the price-store update above.
+        try:
+            import os, sys
+            sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
+                os.path.abspath(__file__)))))  # repo root (signal_research.py lives there)
+            from signal_research import run_signal_research
+            print("\n[RESEARCH] daily signal-research scan starting...")
+            run_signal_research(write=True)
+        except Exception as e:
+            print(f"[RESEARCH] scan failed (suppressed): {e}")
+
 if __name__ == "__main__":
     main()
