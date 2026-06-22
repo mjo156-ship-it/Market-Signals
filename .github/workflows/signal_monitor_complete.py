@@ -1834,10 +1834,27 @@ def main():
         print(f"[STATE] Unexpected error writing state: {e}")
 
     send_email(subject, body)
-    
+
     print(f"\n{len(alerts)} signal(s) detected")
     for title, msg, _ in alerts:
         print(f"  {title}")
+
+    # =========================================================================
+    # PRICE STORE -- refresh the self-updating historical price store on the
+    # post-close (4:05 PM ET) run only. Fully isolated: this is the LAST thing
+    # main() does and is double-wrapped (here + inside update_price_store) so a
+    # failure can NEVER prevent the signal snapshot/email above from completing.
+    # =========================================================================
+    if IS_CLOSE:
+        try:
+            import os, sys
+            sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
+                os.path.abspath(__file__)))))  # repo root (price_store.py lives there)
+            from price_store import update_price_store
+            print("\n[PRICE STORE] post-close update starting...")
+            update_price_store()
+        except Exception as e:
+            print(f"[PRICE STORE] update failed (suppressed, snapshot already written): {e}")
 
 if __name__ == "__main__":
     main()
