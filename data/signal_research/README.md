@@ -12,14 +12,23 @@ post-close run, right after the price-store update.
 | `rotation` | 3/6/12-mo cross-sectional momentum → new top-8 leaders | — |
 | `volatility_breakout` | Donchian 52-wk breakout, Bollinger squeeze breakout, low-ATR regime | — |
 | `mean_reversion` | Bollinger %B<0, distance-from-50DMA z<-2, 4+ down-day streak, capitulation volume | monitor's RSI(10) bands |
-| `macro_ratio` | detrended z-scores of HYG/TLT, XLY/XLP, SMH/SPY, GLD/SPY, CPER/GLD | monitor's QQQ/SPY, QQQ/RSP, QQQE/QQQ |
+| `exhaustion_fade` | **short side:** Bollinger %B>1, distance-from-50DMA z>+2.5, 4+ up-day streak, parabolic >25% over 50DMA | monitor's RSI(10) overbought |
+| `macro_ratio` | detrended z-scores of HYG/TLT, XLY/XLP, SMH/SPY, GLD/SPY, CPER/GLD (both extremes) | monitor's QQQ/SPY, QQQ/RSP, QQQE/QQQ |
+
+Short signals carry a suggested inverse instrument (e.g. `SPY → SPXU`, `QQQ → SQQQ`, `SMH → SOXS`), or `short <ticker>` when none is mapped.
 
 ## Backtest gate
 
 Each candidate is walk-forward backtested over full store history (rising-edge
-entries, forward `horizon`-day return vs. buy-and-hold baseline). A signal is
-surfaced only if it **fires today** AND clears: `n ≥ 25`, `win_rate ≥ 0.60`,
-`avg_return > 0`, `edge > 0`. Each result is tagged:
+entries, forward `horizon`-day return vs. buy-and-hold baseline). A signal must
+clear the gate (`n ≥ 25`, `win_rate ≥ 0.60`, `avg_return > 0`, `edge > 0`) to
+appear at all, then it is classified as:
+
+- **`results`** — the condition **fires today**.
+- **`watchlist`** — it passed the gate and is **just inside its threshold today**
+  (primed / approaching), but has not fired yet. Forward-looking context.
+
+Each entry is also tagged:
 
 - **`composer_ready`** — a pure daily-close rule you can port into a Composer symphony.
 - **`manual_swing`** — a multi-day discretionary hold.
@@ -43,16 +52,17 @@ surfaced only if it **fires today** AND clears: `n ≥ 25`, `win_rate ≥ 0.60`,
   "params": { "min_sample": 25, "win_rate_min": 0.60 },
   "summary": {
     "n_results": 3,
+    "n_watchlist": 6,
     "by_family": { "mean_reversion": 1, "volatility_breakout": 2 },
     "by_mode":   { "composer_ready": 3 }
   },
-  "results": [                            // already sorted by score (desc)
+  "results": [                            // firing today; sorted by score (desc)
     {
       "family": "mean_reversion",
       "name": "4+ down-day streak",
       "ticker": "OILU",                  // ticker the condition fired on
-      "suggested_instrument": "OILU",    // leveraged execution proxy if any
-      "direction": "long",
+      "suggested_instrument": "OILU",    // leveraged (long) / inverse (short) proxy
+      "direction": "long",               // "long" or "short"
       "horizon_days": 5,
       "mode": "composer_ready",
       "today_value": "down streak 4",    // human-readable current reading
@@ -63,7 +73,8 @@ surfaced only if it **fires today** AND clears: `n ≥ 25`, `win_rate ≥ 0.60`,
       },
       "score": 0.2416                    // edge × sqrt(n); ranking key
     }
-  ]
+  ],
+  "watchlist": [ /* same shape; passed gate, primed but fired_today=false */ ]
 }
 ```
 
@@ -79,9 +90,11 @@ https://raw.githubusercontent.com/mjo156-ship-it/Market-Signals/main/data/signal
 https://raw.githubusercontent.com/mjo156-ship-it/Market-Signals/main/data/signal_research/history/<date>.json
 ```
 
-Suggested layout: show `latest.json`'s `results` table on top (group by `mode`
-so Composer-ready vs manual-swing are distinct), then an accordion of older
-dates from `index.json["dates"]`, each lazy-loading its `history/<date>.json`.
+Suggested layout: show `latest.json`'s `results` (firing today) on top, then the
+`watchlist` (approaching/primed) below it — within each, group by `mode` so
+Composer-ready vs manual-swing are distinct, and use `direction` to badge
+long vs short fades. Below that, an accordion of older dates from
+`index.json["dates"]`, each lazy-loading its `history/<date>.json`.
 
 ## Run it manually
 

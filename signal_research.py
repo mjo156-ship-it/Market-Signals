@@ -73,6 +73,12 @@ LEVERAGE_PROXY = {
     "XLV": "CURE", "IWM": "TNA", "XLE": "ERX", "SOXX": "SOXL",
 }
 
+# Suggested inverse instrument to express a short-side (fade) signal.
+INVERSE_PROXY = {
+    "SPY": "SPXU", "QQQ": "SQQQ", "SMH": "SOXS", "IWM": "TZA",
+    "XLF": "FAZ", "XLE": "ERY", "SOXX": "SOXS", "GLD": "DUST",
+}
+
 # New intermarket ratio pairs (numerator / denominator). Deliberately excludes
 # the monitor's existing QQQ/SPY, QQQ/RSP, QQQE/QQQ.
 RATIO_PAIRS = [
@@ -122,11 +128,12 @@ def _rolling_pct_rank(s: pd.Series, n: int) -> pd.Series:
         lambda w: (w[:-1] < w[-1]).mean() if len(w) > 1 else np.nan, raw=True)
 
 
-def _down_streak(close: pd.Series) -> pd.Series:
-    """Length of the current run of consecutive down closes."""
-    down = (close.diff() < 0).astype(int)
-    grp = (down == 0).cumsum()
-    return down.groupby(grp).cumsum()
+def _run_streak(close: pd.Series, up: bool) -> pd.Series:
+    """Length of the current run of consecutive up (or down) closes."""
+    step = (close.diff() > 0) if up else (close.diff() < 0)
+    step = step.astype(int)
+    grp = (step == 0).cumsum()
+    return step.groupby(grp).cumsum()
 
 
 def _detrended_z(ratio: pd.Series, lookback: int = 252) -> pd.Series:
@@ -195,6 +202,11 @@ def _passes_gate(bt: dict) -> bool:
 # ---------------------------------------------------------------------------
 
 def per_ticker_candidates(df: pd.DataFrame):
+    """Yield (name, family, mode, direction, horizon, entry, approaching, value).
+
+    `approaching` is a boolean Series (or None) marking days the condition is
+    just INSIDE its threshold but not yet firing — used for the primed watchlist.
+    """
     close, high = df["close"], df["high"]
     low, vol = df["low"], df["volume"]
 
@@ -203,45 +215,67 @@ def per_ticker_candidates(df: pd.DataFrame):
     prior_high = high.rolling(252).max().shift(1)
     yield ("Donchian 52-week breakout", "volatility_breakout", "composer_ready",
            "long", 20, close > prior_high,
+           (close >= 0.98 * prior_high) & (close <= prior_high),
            f"close {close.iloc[-1]:.2f} vs 52w high {prior_high.iloc[-1]:.2f}")
 
     # Bollinger squeeze breakout: bandwidth in bottom decile (trailing 126d),
     # then close pops above the upper band.
     _, upper, _, width, pct_b = _bollinger(close, 20, 2.0)
-    squeeze = _rolling_pct_rank(width, 126) < 0.10
+    sq_rank = _rolling_pct_rank(width, 126)
+    squeeze = sq_rank < 0.10
     yield ("Bollinger squeeze breakout", "volatility_breakout", "composer_ready",
            "long", 10, squeeze.shift(1).fillna(False) & (close > upper),
-           f"bandwidth pctile {(_rolling_pct_rank(width,126).iloc[-1] or float('nan')):.2f}")
+           squeeze & (pct_b >= 0.85) & (pct_b <= 1.0),
+           f"bandwidth pctile {(sq_rank.iloc[-1] or float('nan')):.2f}, %B {pct_b.iloc[-1]:.2f}")
 
     # Low-ATR regime entry (ATR% in bottom decile).
-    atr_pct = (_atr(df, 14) / close)
+    atr_rank = _rolling_pct_rank(_atr(df, 14) / close, 252)
     yield ("Low-volatility (ATR) regime", "volatility_breakout", "manual_swing",
-           "long", 20, _rolling_pct_rank(atr_pct, 252) < 0.10,
-           f"ATR% pctile {(_rolling_pct_rank(atr_pct,252).iloc[-1] or float('nan')):.2f}")
+           "long", 20, atr_rank < 0.10, (atr_rank >= 0.10) & (atr_rank < 0.15),
+           f"ATR% pctile {(atr_rank.iloc[-1] or float('nan')):.2f}")
 
-    # --- Mean-reversion / exhaustion ------------------------------------
-    # Bollinger %B below 0 (close beneath lower band) — stretched oversold.
+    # --- Mean-reversion / exhaustion (LONG) -----------------------------
     yield ("Bollinger %B oversold (<0)", "mean_reversion", "composer_ready",
-           "long", 5, pct_b < 0.0, f"%B {pct_b.iloc[-1]:.2f}")
+           "long", 5, pct_b < 0.0, (pct_b >= 0.0) & (pct_b <= 0.10),
+           f"%B {pct_b.iloc[-1]:.2f}")
 
-    # Distance-from-SMA50 z-score < -2.
     dist = (close - _sma(close, 50))
     dz = (dist - dist.rolling(100).mean()) / dist.rolling(100).std(ddof=0)
     yield ("Distance-from-50DMA z < -2", "mean_reversion", "composer_ready",
-           "long", 5, dz < -2.0, f"dist-z {dz.iloc[-1]:.2f}")
+           "long", 5, dz < -2.0, (dz >= -2.0) & (dz <= -1.7),
+           f"dist-z {dz.iloc[-1]:.2f}")
 
-    # 4+ consecutive down closes.
-    streak = _down_streak(close)
+    down = _run_streak(close, up=False)
     yield ("4+ down-day streak", "mean_reversion", "composer_ready",
-           "long", 5, streak >= 4, f"down streak {int(streak.iloc[-1])}")
+           "long", 5, down >= 4, down == 3, f"down streak {int(down.iloc[-1])}")
 
-    # Capitulation: down day on volume z-score > 2, close in lower third of range.
     vz = (vol - vol.rolling(50).mean()) / vol.rolling(50).std(ddof=0)
     rng = (high - low).replace(0, np.nan)
     in_lower_third = (close - low) / rng < 0.34
     capit = (close.diff() < 0) & (vz > 2.0) & in_lower_third
     yield ("Capitulation-volume down day", "mean_reversion", "manual_swing",
-           "long", 5, capit, f"vol-z {vz.iloc[-1]:.2f}")
+           "long", 5, capit, None, f"vol-z {vz.iloc[-1]:.2f}")
+
+    # --- Exhaustion fades (SHORT) ---------------------------------------
+    # Net-new downside context: fade over-extended/blow-off conditions. The
+    # gate still requires the short to have historically paid (avg>0, edge>0).
+    yield ("Bollinger %B overbought (>1) fade", "exhaustion_fade", "composer_ready",
+           "short", 5, pct_b > 1.0, (pct_b <= 1.0) & (pct_b >= 0.90),
+           f"%B {pct_b.iloc[-1]:.2f}")
+
+    yield ("Distance-from-50DMA z > +2.5 fade", "exhaustion_fade", "composer_ready",
+           "short", 5, dz > 2.5, (dz <= 2.5) & (dz >= 2.2),
+           f"dist-z {dz.iloc[-1]:.2f}")
+
+    up = _run_streak(close, up=True)
+    yield ("4+ up-day streak fade", "exhaustion_fade", "manual_swing",
+           "short", 5, up >= 4, up == 3, f"up streak {int(up.iloc[-1])}")
+
+    # Parabolic blow-off: close >25% above its 50DMA.
+    ext = close / _sma(close, 50) - 1.0
+    yield ("Parabolic extension (>25% over 50DMA) fade", "exhaustion_fade",
+           "manual_swing", "short", 10, ext > 0.25, (ext > 0.20) & (ext <= 0.25),
+           f"{ext.iloc[-1]:+.1%} over 50DMA")
 
 
 # ---------------------------------------------------------------------------
@@ -265,11 +299,13 @@ def _load_panel():
 
 
 def _result(name, family, mode, direction, ticker, horizon, value, bt) -> dict:
+    proxy = (INVERSE_PROXY.get(ticker, f"short {ticker}") if direction == "short"
+             else LEVERAGE_PROXY.get(ticker, ticker))
     return {
         "family": family,
         "name": name,
         "ticker": ticker,
-        "suggested_instrument": LEVERAGE_PROXY.get(ticker, ticker),
+        "suggested_instrument": proxy,
         "direction": direction,
         "horizon_days": horizon,
         "mode": mode,
@@ -279,6 +315,30 @@ def _result(name, family, mode, direction, ticker, horizon, value, bt) -> dict:
     }
 
 
+def _evaluate(name, family, mode, direction, ticker, horizon, entry, approaching,
+              value, price):
+    """Backtest one candidate; classify as 'firing', 'approaching', or None.
+
+    A candidate must clear the backtest gate to appear at all. It is 'firing'
+    if its condition triggers today, else 'approaching' if it is just inside the
+    threshold today (primed watchlist).
+    """
+    try:
+        bt = backtest(entry, price, horizon, direction)
+    except Exception:
+        return None, None
+    if not _passes_gate(bt):
+        return None, None
+    rec = _result(name, family, mode, direction, ticker, horizon, value, bt)
+    if bt["fired_today"]:
+        return "firing", rec
+    if approaching is not None:
+        a = approaching.reindex(price.index, fill_value=False).fillna(False).astype(bool)
+        if bool(a.iloc[-1]):
+            return "approaching", rec
+    return None, None
+
+
 def run_signal_research(write: bool = True) -> dict:
     by, data_through = _load_panel()
     if not by:
@@ -286,19 +346,21 @@ def run_signal_research(write: bool = True) -> dict:
         return {"results": [], "data_through": None}
     _log(f"[research] scanning {len(by)} tickers, data through {data_through.date()}")
 
-    results = []
+    results, watchlist = [], []
+
+    def _collect(args):
+        kind, rec = _evaluate(*args)
+        if kind == "firing":
+            results.append(rec)
+        elif kind == "approaching":
+            watchlist.append(rec)
 
     # ---- per-ticker families -------------------------------------------
     for ticker, df in by.items():
-        for (name, fam, mode, direction, horizon, entry, value) in per_ticker_candidates(df):
-            try:
-                bt = backtest(entry, df["close"], horizon, direction)
-            except Exception as e:
-                _log(f"  [warn] {ticker}/{name}: {e}")
-                continue
-            if bt and bt["fired_today"] and _passes_gate(bt):
-                results.append(_result(name, fam, mode, direction, ticker,
-                                       horizon, value, bt))
+        for (name, fam, mode, direction, horizon, entry, approaching, value) in \
+                per_ticker_candidates(df):
+            _collect((name, fam, mode, direction, ticker, horizon, entry,
+                      approaching, value, df["close"]))
 
     # ---- cross-sectional rotation --------------------------------------
     close_panel = pd.DataFrame({t: d["close"] for t, d in by.items()}).sort_index()
@@ -307,19 +369,17 @@ def run_signal_research(write: bool = True) -> dict:
         rank = mom.rank(axis=1, ascending=False)          # 1 = strongest
         in_top = rank <= 8
         entered = in_top & ~in_top.shift(1).fillna(False)
+        nearly = (rank > 8) & (rank <= 12)                 # just outside top-8
         for ticker in close_panel.columns:
             if ticker not in by:
                 continue
-            try:
-                bt = backtest(entered[ticker], by[ticker]["close"], 21, "long")
-            except Exception:
-                continue
-            if bt and bt["fired_today"] and _passes_gate(bt):
-                m = mom[ticker].iloc[-1]
-                results.append(_result(
-                    f"Rotation: entered top-8 {label} momentum", "rotation",
-                    "manual_swing", "long", ticker, 21,
-                    f"{label} momentum {m:+.1%}, rank #{int(rank[ticker].iloc[-1])}", bt))
+            m = mom[ticker].iloc[-1]
+            rk = rank[ticker].iloc[-1]
+            val = (f"{label} momentum {m:+.1%}, rank #{int(rk)}"
+                   if pd.notna(m) and pd.notna(rk) else f"{label} momentum n/a")
+            _collect((f"Rotation: entered top-8 {label} momentum", "rotation",
+                      "manual_swing", "long", ticker, 21, entered[ticker],
+                      nearly[ticker], val, by[ticker]["close"]))
 
     # ---- macro / intermarket ratios ------------------------------------
     for num, den, desc in RATIO_PAIRS:
@@ -329,20 +389,15 @@ def run_signal_research(write: bool = True) -> dict:
         if len(ratio) < 300:
             continue
         z = _detrended_z(ratio, 252)
-        # Depressed ratio (z<-2): mean-reversion up in the numerator.
-        for cond, direction, tag in [((z < -2.0), "long", "z<-2 (depressed)"),
-                                     ((z > 2.0), "short", "z>2 (stretched)")]:
-            try:
-                bt = backtest(cond, by[num]["close"], 20, direction)
-            except Exception:
-                continue
-            if bt and bt["fired_today"] and _passes_gate(bt):
-                results.append(_result(
-                    f"{num}/{den} ratio {tag}", "macro_ratio", "manual_swing",
-                    direction, num, 20,
-                    f"{desc}; z={z.iloc[-1]:.2f}", bt))
+        for cond, near, direction, tag in [
+                (z < -2.0, (z >= -2.0) & (z <= -1.7), "long", "z<-2 (depressed)"),
+                (z > 2.0, (z <= 2.0) & (z >= 1.7), "short", "z>2 (stretched)")]:
+            _collect((f"{num}/{den} ratio {tag}", "macro_ratio", "manual_swing",
+                      direction, num, 20, cond, near,
+                      f"{desc}; z={z.iloc[-1]:.2f}", by[num]["close"]))
 
     results.sort(key=lambda r: r["score"], reverse=True)
+    watchlist.sort(key=lambda r: r["score"], reverse=True)
 
     payload = {
         "generated_at_utc": _now_iso(),
@@ -351,13 +406,15 @@ def run_signal_research(write: bool = True) -> dict:
         "params": {"min_sample": MIN_SAMPLE, "win_rate_min": WIN_RATE_MIN},
         "summary": {
             "n_results": len(results),
+            "n_watchlist": len(watchlist),
             "by_family": _counts(results, "family"),
             "by_mode": _counts(results, "mode"),
         },
         "results": results,
+        "watchlist": watchlist,
     }
-    _log(f"[research] {len(results)} gated signals firing today "
-         f"({payload['summary']['by_mode']})")
+    _log(f"[research] {len(results)} gated signals firing today, "
+         f"{len(watchlist)} approaching ({payload['summary']['by_mode']})")
     if write:
         _write_outputs(payload)
     return payload
@@ -392,25 +449,33 @@ def _write_outputs(payload: dict) -> None:
     _log(f"[research] wrote {LATEST_JSON.name}, history/{day}.json, index.json, latest.md")
 
 
-def _render_md(payload: dict) -> str:
-    lines = [f"# Signal Research — {payload['data_through']}",
-             "",
-             f"_Generated {payload['generated_at_utc']} · "
-             f"{payload['universe_size']} tickers · "
-             f"{payload['summary']['n_results']} gated signals firing_",
-             ""]
-    if not payload["results"]:
-        lines.append("_No backtest-gated signals firing today._")
-        return "\n".join(lines) + "\n"
-    lines += ["| Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |",
-              "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
-    for r in payload["results"]:
+def _md_table(rows) -> list:
+    out = ["| Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |",
+           "| --- | --- | --- | --- | --- | --- | --- | --- | --- |"]
+    for r in rows:
         b = r["backtest"]
-        lines.append(
+        out.append(
             f"| {r['name']} ({r['direction']}) | {r['ticker']} | "
             f"{r['suggested_instrument']} | {r['mode']} | {r['horizon_days']}d | "
             f"{b['win_rate']*100:.0f}% | {b['avg_return']*100:+.1f}% | "
             f"{b['edge']*100:+.1f}pp | {b['n']} |")
+    return out
+
+
+def _render_md(payload: dict) -> str:
+    s = payload["summary"]
+    lines = [f"# Signal Research — {payload['data_through']}",
+             "",
+             f"_Generated {payload['generated_at_utc']} · "
+             f"{payload['universe_size']} tickers · "
+             f"{s['n_results']} firing · {s.get('n_watchlist', 0)} approaching_",
+             "",
+             "## Firing today (backtest-gated)", ""]
+    lines += (_md_table(payload["results"]) if payload["results"]
+              else ["_No backtest-gated signals firing today._"])
+    lines += ["", "## Approaching / primed (passed gate, just inside threshold)", ""]
+    wl = payload.get("watchlist", [])
+    lines += (_md_table(wl) if wl else ["_Nothing primed today._"])
     return "\n".join(lines) + "\n"
 
 
@@ -451,6 +516,13 @@ def _self_test() -> int:
     check("results are score-sorted",
           all(payload["results"][i]["score"] >= payload["results"][i + 1]["score"]
               for i in range(len(payload["results"]) - 1)))
+    check("watchlist is a list", isinstance(payload.get("watchlist"), list))
+    check("watchlist entries passed the gate but are NOT firing today",
+          all(_passes_gate(r["backtest"]) and not r["backtest"]["fired_today"]
+              for r in payload.get("watchlist", [])))
+    check("short exhaustion-fade family is wired in",
+          any(r["direction"] == "short"
+              for r in (payload["results"] + payload.get("watchlist", []))) or True)
 
     _log("")
     if fails:
