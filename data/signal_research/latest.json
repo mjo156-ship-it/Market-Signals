@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-06-23T16:17:33+00:00",
+  "generated_at_utc": "2026-06-23T17:13:35+00:00",
   "data_through": "2026-06-23",
   "universe_size": 89,
   "params": {
@@ -27,7 +27,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +159.7%, rank #3",
+      "today_value": "6-mo momentum +157.5%, rank #3",
       "backtest": {
         "n": 135,
         "win_rate": 0.607,
@@ -47,7 +47,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 91.58 vs 52w high 91.58",
+      "today_value": "close 91.59 vs 52w high 91.58",
       "backtest": {
         "n": 331,
         "win_rate": 0.988,
@@ -67,7 +67,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 110.27 vs 52w high 110.26",
+      "today_value": "close 110.26 vs 52w high 110.26",
       "backtest": {
         "n": 364,
         "win_rate": 0.948,
@@ -89,7 +89,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +100.8%, rank #11",
+      "today_value": "12-mo momentum +100.6%, rank #11",
       "backtest": {
         "n": 80,
         "win_rate": 0.75,
@@ -109,7 +109,7 @@
       "direction": "short",
       "horizon_days": 20,
       "mode": "manual_swing",
-      "today_value": "copper/gold growth-vs-fear proxy; z=1.87",
+      "today_value": "copper/gold growth-vs-fear proxy; z=1.86",
       "backtest": {
         "n": 29,
         "win_rate": 0.621,
@@ -149,7 +149,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +47.1%, rank #12",
+      "today_value": "6-mo momentum +48.1%, rank #12",
       "backtest": {
         "n": 48,
         "win_rate": 0.625,
