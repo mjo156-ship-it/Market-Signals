@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-06-24T17:00:58+00:00",
+  "generated_at_utc": "2026-06-24T21:27:11+00:00",
   "data_through": "2026-06-24",
   "universe_size": 89,
   "params": {
@@ -8,31 +8,31 @@
   },
   "summary": {
     "n_results": 0,
-    "n_watchlist": 10,
+    "n_watchlist": 13,
     "by_family": {},
     "by_mode": {}
   },
   "results": [],
   "watchlist": [
     {
-      "family": "rotation",
-      "name": "Rotation: entered top-8 12-mo momentum",
-      "ticker": "AMD",
-      "suggested_instrument": "AMD",
+      "family": "mean_reversion",
+      "name": "4+ down-day streak",
+      "ticker": "UPRO",
+      "suggested_instrument": "UPRO",
       "direction": "long",
-      "horizon_days": 21,
-      "mode": "manual_swing",
-      "today_value": "12-mo momentum +116.3%, rank #9",
+      "horizon_days": 5,
+      "mode": "composer_ready",
+      "today_value": "down streak 3",
       "backtest": {
         "n": 98,
-        "win_rate": 0.622,
-        "avg_return": 0.0691,
-        "median_return": 0.0509,
-        "baseline_return": 0.0306,
-        "edge": 0.0385,
+        "win_rate": 0.663,
+        "avg_return": 0.0375,
+        "median_return": 0.0213,
+        "baseline_return": 0.0161,
+        "edge": 0.0214,
         "fired_today": false
       },
-      "score": 0.3811
+      "score": 0.2118
     },
     {
       "family": "mean_reversion",
@@ -75,6 +75,26 @@
       "score": 0.1459
     },
     {
+      "family": "mean_reversion",
+      "name": "4+ down-day streak",
+      "ticker": "SPY",
+      "suggested_instrument": "UPRO",
+      "direction": "long",
+      "horizon_days": 5,
+      "mode": "composer_ready",
+      "today_value": "down streak 3",
+      "backtest": {
+        "n": 180,
+        "win_rate": 0.7,
+        "avg_return": 0.0107,
+        "median_return": 0.0089,
+        "baseline_return": 0.0023,
+        "edge": 0.0084,
+        "fired_today": false
+      },
+      "score": 0.1127
+    },
+    {
       "family": "rotation",
       "name": "Rotation: entered top-8 12-mo momentum",
       "ticker": "XLU",
@@ -82,7 +102,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +98.4%, rank #12",
+      "today_value": "12-mo momentum +100.2%, rank #11",
       "backtest": {
         "n": 80,
         "win_rate": 0.75,
@@ -102,7 +122,7 @@
       "direction": "short",
       "horizon_days": 20,
       "mode": "manual_swing",
-      "today_value": "copper/gold growth-vs-fear proxy; z=1.80",
+      "today_value": "copper/gold growth-vs-fear proxy; z=1.86",
       "backtest": {
         "n": 29,
         "win_rate": 0.621,
@@ -113,6 +133,26 @@
         "fired_today": false
       },
       "score": 0.0835
+    },
+    {
+      "family": "mean_reversion",
+      "name": "4+ down-day streak",
+      "ticker": "VOO",
+      "suggested_instrument": "VOO",
+      "direction": "long",
+      "horizon_days": 5,
+      "mode": "composer_ready",
+      "today_value": "down streak 3",
+      "backtest": {
+        "n": 84,
+        "win_rate": 0.679,
+        "avg_return": 0.0075,
+        "median_return": 0.0078,
+        "baseline_return": 0.0024,
+        "edge": 0.0052,
+        "fired_today": false
+      },
+      "score": 0.0477
     },
     {
       "family": "volatility_breakout",
@@ -142,7 +182,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 82.06 vs 52w high 82.24",
+      "today_value": "close 82.07 vs 52w high 82.24",
       "backtest": {
         "n": 226,
         "win_rate": 0.717,
@@ -153,6 +193,26 @@
         "fired_today": false
       },
       "score": 0.0165
+    },
+    {
+      "family": "exhaustion_fade",
+      "name": "Bollinger %B overbought (>1) fade",
+      "ticker": "TAIL",
+      "suggested_instrument": "short TAIL",
+      "direction": "short",
+      "horizon_days": 5,
+      "mode": "composer_ready",
+      "today_value": "%B 0.97",
+      "backtest": {
+        "n": 73,
+        "win_rate": 0.712,
+        "avg_return": 0.0029,
+        "median_return": 0.008,
+        "baseline_return": 0.0013,
+        "edge": 0.0016,
+        "fired_today": false
+      },
+      "score": 0.0137
     },
     {
       "family": "mean_reversion",
@@ -182,7 +242,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +40.6%, rank #11",
+      "today_value": "6-mo momentum +40.3%, rank #11",
       "backtest": {
         "n": 48,
         "win_rate": 0.625,
@@ -202,7 +262,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B 0.09",
+      "today_value": "%B 0.06",
       "backtest": {
         "n": 35,
         "win_rate": 0.6,
