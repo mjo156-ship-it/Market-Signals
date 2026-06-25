@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-25T06:32:52.293317",
+  "timestamp": "2026-06-25T16:11:08.636718",
   "ok": [
     "AMD",
     "AMZN",
@@ -95,18 +95,12 @@
   ],
   "failed": [],
   "skipped": [],
-  "actions_detected": [
-    "PSQ",
-    "QLD",
-    "UPRO",
-    "VOOG",
-    "VOOV"
-  ],
-  "quarantined": 8,
-  "rows_written": 22623,
+  "actions_detected": [],
+  "quarantined": 0,
+  "rows_written": 458,
   "coverage": {
     "tickers": 91,
     "latest_date": "2026-06-25",
-    "total_rows": 397742
+    "total_rows": 397832
   }
 }
