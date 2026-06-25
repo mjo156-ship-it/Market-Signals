@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-06-25T16:12:59+00:00",
+  "generated_at_utc": "2026-06-25T17:06:47+00:00",
   "data_through": "2026-06-25",
   "universe_size": 89,
   "params": {
@@ -7,12 +7,98 @@
     "win_rate_min": 0.6
   },
   "summary": {
-    "n_results": 0,
-    "n_watchlist": 13,
-    "by_family": {},
-    "by_mode": {}
+    "n_results": 4,
+    "n_watchlist": 12,
+    "by_family": {
+      "mean_reversion": 3,
+      "volatility_breakout": 1
+    },
+    "by_mode": {
+      "composer_ready": 4
+    }
   },
-  "results": [],
+  "results": [
+    {
+      "family": "mean_reversion",
+      "name": "4+ down-day streak",
+      "ticker": "UPRO",
+      "suggested_instrument": "UPRO",
+      "direction": "long",
+      "horizon_days": 5,
+      "mode": "composer_ready",
+      "today_value": "down streak 4",
+      "backtest": {
+        "n": 98,
+        "win_rate": 0.663,
+        "avg_return": 0.0375,
+        "median_return": 0.0213,
+        "baseline_return": 0.0161,
+        "edge": 0.0214,
+        "fired_today": true
+      },
+      "score": 0.2118
+    },
+    {
+      "family": "mean_reversion",
+      "name": "4+ down-day streak",
+      "ticker": "SPY",
+      "suggested_instrument": "UPRO",
+      "direction": "long",
+      "horizon_days": 5,
+      "mode": "composer_ready",
+      "today_value": "down streak 4",
+      "backtest": {
+        "n": 180,
+        "win_rate": 0.7,
+        "avg_return": 0.0107,
+        "median_return": 0.0089,
+        "baseline_return": 0.0023,
+        "edge": 0.0084,
+        "fired_today": true
+      },
+      "score": 0.1127
+    },
+    {
+      "family": "mean_reversion",
+      "name": "4+ down-day streak",
+      "ticker": "VOO",
+      "suggested_instrument": "VOO",
+      "direction": "long",
+      "horizon_days": 5,
+      "mode": "composer_ready",
+      "today_value": "down streak 4",
+      "backtest": {
+        "n": 84,
+        "win_rate": 0.679,
+        "avg_return": 0.0075,
+        "median_return": 0.0078,
+        "baseline_return": 0.0024,
+        "edge": 0.0052,
+        "fired_today": true
+      },
+      "score": 0.0477
+    },
+    {
+      "family": "volatility_breakout",
+      "name": "Donchian 52-week breakout",
+      "ticker": "BIL",
+      "suggested_instrument": "BIL",
+      "direction": "long",
+      "horizon_days": 20,
+      "mode": "composer_ready",
+      "today_value": "close 91.60 vs 52w high 91.60",
+      "backtest": {
+        "n": 331,
+        "win_rate": 0.988,
+        "avg_return": 0.0013,
+        "median_return": 0.0031,
+        "baseline_return": -0.001,
+        "edge": 0.0023,
+        "fired_today": true
+      },
+      "score": 0.0418
+    }
+  ],
   "watchlist": [
     {
       "family": "rotation",
@@ -22,7 +108,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +37.3%, rank #12",
+      "today_value": "6-mo momentum +36.0%, rank #12",
       "backtest": {
         "n": 94,
         "win_rate": 0.702,
@@ -82,7 +168,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +102.5%, rank #11",
+      "today_value": "12-mo momentum +102.6%, rank #11",
       "backtest": {
         "n": 80,
         "win_rate": 0.75,
@@ -115,26 +201,6 @@
       "score": 0.0835
     },
     {
-      "family": "volatility_breakout",
-      "name": "Donchian 52-week breakout",
-      "ticker": "BIL",
-      "suggested_instrument": "BIL",
-      "direction": "long",
-      "horizon_days": 20,
-      "mode": "composer_ready",
-      "today_value": "close 91.60 vs 52w high 91.60",
-      "backtest": {
-        "n": 331,
-        "win_rate": 0.988,
-        "avg_return": 0.0013,
-        "median_return": 0.0031,
-        "baseline_return": -0.001,
-        "edge": 0.0023,
-        "fired_today": false
-      },
-      "score": 0.0418
-    },
-    {
       "family": "exhaustion_fade",
       "name": "4+ up-day streak fade",
       "ticker": "TAIL",
@@ -162,17 +228,17 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B 0.08",
+      "today_value": "%B 0.03",
       "backtest": {
         "n": 163,
         "win_rate": 0.601,
         "avg_return": 0.0225,
         "median_return": 0.0179,
         "baseline_return": 0.0211,
-        "edge": 0.0014,
+        "edge": 0.0015,
         "fired_today": false
       },
-      "score": 0.0179
+      "score": 0.0192
     },
     {
       "family": "volatility_breakout",
@@ -182,7 +248,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 82.13 vs 52w high 82.24",
+      "today_value": "close 82.12 vs 52w high 82.24",
       "backtest": {
         "n": 226,
         "win_rate": 0.717,
@@ -222,7 +288,7 @@
       "direction": "short",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B 0.93",
+      "today_value": "%B 0.95",
       "backtest": {
         "n": 73,
         "win_rate": 0.712,
@@ -242,7 +308,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +42.1%, rank #11",
+      "today_value": "6-mo momentum +42.6%, rank #11",
       "backtest": {
         "n": 48,
         "win_rate": 0.625,
@@ -262,7 +328,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 36.48 vs 52w high 37.19",
+      "today_value": "close 36.52 vs 52w high 37.19",
       "backtest": {
         "n": 47,
         "win_rate": 0.681,
