@@ -1847,7 +1847,9 @@ def main():
     # =========================================================================
     if IS_CLOSE:
         try:
-            import os, sys
+            # os/sys are module-level imports; do NOT re-import them here — a
+            # local `import os` would make `os` function-local to main() and
+            # break the earlier Composer dry-run block (UnboundLocalError).
             sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
                 os.path.abspath(__file__)))))  # repo root (price_store.py lives there)
             from price_store import update_price_store
@@ -1859,7 +1861,7 @@ def main():
         # Daily signal-research scan over the freshly-updated store. Separate
         # guard so a research failure can't undo the price-store update above.
         try:
-            import os, sys
+            # os/sys are module-level; see note above — no local re-import.
             sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(
                 os.path.abspath(__file__)))))  # repo root (signal_research.py lives there)
             from signal_research import run_signal_research
