@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-06-29T16:49:59+00:00",
+  "generated_at_utc": "2026-06-29T17:30:11+00:00",
   "data_through": "2026-06-29",
   "universe_size": 89,
   "params": {
@@ -8,7 +8,7 @@
   },
   "summary": {
     "n_results": 0,
-    "n_watchlist": 10,
+    "n_watchlist": 8,
     "by_family": {},
     "by_mode": {}
   },
@@ -22,7 +22,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +120.9%, rank #9",
+      "today_value": "12-mo momentum +125.1%, rank #9",
       "backtest": {
         "n": 98,
         "win_rate": 0.622,
@@ -62,7 +62,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +39.0%, rank #12",
+      "today_value": "6-mo momentum +40.0%, rank #12",
       "backtest": {
         "n": 94,
         "win_rate": 0.702,
@@ -75,26 +75,6 @@
       "score": 0.2598
     },
     {
-      "family": "exhaustion_fade",
-      "name": "4+ up-day streak fade",
-      "ticker": "TMV",
-      "suggested_instrument": "short TMV",
-      "direction": "short",
-      "horizon_days": 5,
-      "mode": "manual_swing",
-      "today_value": "up streak 3",
-      "backtest": {
-        "n": 96,
-        "win_rate": 0.604,
-        "avg_return": 0.0107,
-        "median_return": 0.0125,
-        "baseline_return": 0.0002,
-        "edge": 0.0105,
-        "fired_today": false
-      },
-      "score": 0.1029
-    },
-    {
       "family": "rotation",
       "name": "Rotation: entered top-8 12-mo momentum",
       "ticker": "XLU",
@@ -102,7 +82,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +105.6%, rank #10",
+      "today_value": "12-mo momentum +104.7%, rank #10",
       "backtest": {
         "n": 80,
         "win_rate": 0.75,
@@ -122,7 +102,7 @@
       "direction": "short",
       "horizon_days": 20,
       "mode": "manual_swing",
-      "today_value": "copper/gold growth-vs-fear proxy; z=1.90",
+      "today_value": "copper/gold growth-vs-fear proxy; z=1.89",
       "backtest": {
         "n": 29,
         "win_rate": 0.621,
@@ -137,32 +117,12 @@
     {
       "family": "volatility_breakout",
       "name": "Donchian 52-week breakout",
-      "ticker": "BIL",
-      "suggested_instrument": "BIL",
-      "direction": "long",
-      "horizon_days": 20,
-      "mode": "composer_ready",
-      "today_value": "close 91.63 vs 52w high 91.63",
-      "backtest": {
-        "n": 331,
-        "win_rate": 0.988,
-        "avg_return": 0.0013,
-        "median_return": 0.0031,
-        "baseline_return": -0.001,
-        "edge": 0.0023,
-        "fired_today": false
-      },
-      "score": 0.0418
-    },
-    {
-      "family": "volatility_breakout",
-      "name": "Donchian 52-week breakout",
       "ticker": "SHY",
       "suggested_instrument": "SHY",
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 82.15 vs 52w high 82.24",
+      "today_value": "close 82.16 vs 52w high 82.24",
       "backtest": {
         "n": 226,
         "win_rate": 0.717,
@@ -182,7 +142,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +43.5%, rank #10",
+      "today_value": "6-mo momentum +43.0%, rank #10",
       "backtest": {
         "n": 48,
         "win_rate": 0.625,
@@ -202,7 +162,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 36.49 vs 52w high 37.19",
+      "today_value": "close 36.45 vs 52w high 37.19",
       "backtest": {
         "n": 47,
         "win_rate": 0.681,
