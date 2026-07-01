@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-07-01T16:11:28+00:00",
+  "generated_at_utc": "2026-07-01T17:07:09+00:00",
   "data_through": "2026-07-01",
   "universe_size": 89,
   "params": {
@@ -8,7 +8,7 @@
   },
   "summary": {
     "n_results": 2,
-    "n_watchlist": 11,
+    "n_watchlist": 9,
     "by_family": {
       "mean_reversion": 2
     },
@@ -45,7 +45,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -9.47",
+      "today_value": "dist-z -9.44",
       "backtest": {
         "n": 91,
         "win_rate": 0.846,
@@ -67,7 +67,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +138.8%, rank #9",
+      "today_value": "12-mo momentum +139.0%, rank #9",
       "backtest": {
         "n": 98,
         "win_rate": 0.622,
@@ -87,7 +87,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 57.24 vs 52w high 57.46",
+      "today_value": "close 56.71 vs 52w high 57.46",
       "backtest": {
         "n": 123,
         "win_rate": 0.634,
@@ -107,7 +107,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +35.4%, rank #11",
+      "today_value": "6-mo momentum +34.8%, rank #11",
       "backtest": {
         "n": 94,
         "win_rate": 0.702,
@@ -121,33 +121,13 @@
     },
     {
       "family": "rotation",
-      "name": "Rotation: entered top-8 3-mo momentum",
-      "ticker": "NAIL",
-      "suggested_instrument": "NAIL",
-      "direction": "long",
-      "horizon_days": 21,
-      "mode": "manual_swing",
-      "today_value": "3-mo momentum +21.6%, rank #12",
-      "backtest": {
-        "n": 122,
-        "win_rate": 0.615,
-        "avg_return": 0.0477,
-        "median_return": 0.0418,
-        "baseline_return": 0.0371,
-        "edge": 0.0107,
-        "fired_today": false
-      },
-      "score": 0.1182
-    },
-    {
-      "family": "rotation",
       "name": "Rotation: entered top-8 12-mo momentum",
       "ticker": "XLU",
       "suggested_instrument": "XLU",
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +102.6%, rank #11",
+      "today_value": "12-mo momentum +102.5%, rank #11",
       "backtest": {
         "n": 80,
         "win_rate": 0.75,
@@ -167,7 +147,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 91.39 vs 52w high 91.65",
+      "today_value": "close 91.40 vs 52w high 91.65",
       "backtest": {
         "n": 331,
         "win_rate": 0.988,
@@ -187,7 +167,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 110.04 vs 52w high 110.35",
+      "today_value": "close 110.03 vs 52w high 110.35",
       "backtest": {
         "n": 366,
         "win_rate": 0.948,
@@ -207,7 +187,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 81.88 vs 52w high 82.24",
+      "today_value": "close 81.86 vs 52w high 82.24",
       "backtest": {
         "n": 226,
         "win_rate": 0.717,
@@ -220,26 +200,6 @@
       "score": 0.0165
     },
     {
-      "family": "mean_reversion",
-      "name": "Bollinger %B oversold (<0)",
-      "ticker": "BIL",
-      "suggested_instrument": "BIL",
-      "direction": "long",
-      "horizon_days": 5,
-      "mode": "composer_ready",
-      "today_value": "%B 0.07",
-      "backtest": {
-        "n": 70,
-        "win_rate": 0.643,
-        "avg_return": 0.0002,
-        "median_return": 0.0002,
-        "baseline_return": -0.0003,
-        "edge": 0.0005,
-        "fired_today": false
-      },
-      "score": 0.0042
-    },
-    {
       "family": "rotation",
       "name": "Rotation: entered top-8 6-mo momentum",
       "ticker": "UGA",
@@ -247,7 +207,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +45.5%, rank #10",
+      "today_value": "6-mo momentum +45.1%, rank #10",
       "backtest": {
         "n": 48,
         "win_rate": 0.625,
@@ -267,7 +227,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 36.49 vs 52w high 37.19",
+      "today_value": "close 36.58 vs 52w high 37.19",
       "backtest": {
         "n": 47,
         "win_rate": 0.681,
