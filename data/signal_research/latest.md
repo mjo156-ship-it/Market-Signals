@@ -1,6 +1,6 @@
 # Signal Research — 2026-07-02
 
-_Generated 2026-07-02T15:58:39+00:00 · 89 tickers · 1 firing · 8 approaching_
+_Generated 2026-07-02T16:46:42+00:00 · 89 tickers · 1 firing · 9 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -14,6 +14,7 @@ _Generated 2026-07-02T15:58:39+00:00 · 89 tickers · 1 firing · 8 approaching_
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Donchian 52-week breakout (long) | SVXY | SVXY | composer_ready | 20d | 63% | +6.6% | +2.4pp | 123 |
 | Rotation: entered top-8 6-mo momentum (long) | QLD | QLD | manual_swing | 21d | 70% | +7.9% | +2.7pp | 94 |
+| 4+ up-day streak fade (short) | TMV | short TMV | manual_swing | 5d | 60% | +1.1% | +1.1pp | 96 |
 | Rotation: entered top-8 12-mo momentum (long) | XLU | XLU | manual_swing | 21d | 75% | +2.1% | +1.0pp | 80 |
 | Rotation: entered top-8 12-mo momentum (long) | PSI | PSI | manual_swing | 21d | 64% | +3.5% | +0.9pp | 25 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 72% | +0.3% | +0.1pp | 226 |
