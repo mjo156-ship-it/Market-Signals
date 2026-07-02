@@ -1,12 +1,13 @@
 # Signal Research — 2026-07-02
 
-_Generated 2026-07-02T16:46:42+00:00 · 89 tickers · 1 firing · 9 approaching_
+_Generated 2026-07-02T21:14:58+00:00 · 89 tickers · 2 firing · 7 approaching_
 
 ## Firing today (backtest-gated)
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Rotation: entered top-8 12-mo momentum (long) | AMD | AMD | manual_swing | 21d | 62% | +6.9% | +3.9pp | 98 |
+| Capitulation-volume down day (long) | SPMO | SPMO | manual_swing | 5d | 64% | +1.4% | +0.9pp | 36 |
 
 ## Approaching / primed (passed gate, just inside threshold)
 
@@ -19,5 +20,3 @@ _Generated 2026-07-02T16:46:42+00:00 · 89 tickers · 1 firing · 9 approaching_
 | Rotation: entered top-8 12-mo momentum (long) | PSI | PSI | manual_swing | 21d | 64% | +3.5% | +0.9pp | 25 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 72% | +0.3% | +0.1pp | 226 |
 | Rotation: entered top-8 6-mo momentum (long) | UGA | UGA | manual_swing | 21d | 62% | +1.0% | +0.0pp | 48 |
-| Bollinger %B oversold (<0) (long) | DBMF | DBMF | composer_ready | 5d | 60% | +0.2% | +0.0pp | 35 |
-| Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |
