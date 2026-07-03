@@ -1,6 +1,6 @@
 {
-  "generated_at_local": "2026-07-02T21:13:22.829357",
-  "generated_at_utc": "2026-07-02T21:13:22.829366Z",
+  "generated_at_local": "2026-07-03T15:37:44.706615",
+  "generated_at_utc": "2026-07-03T15:37:44.706624Z",
   "mode": "close",
   "summary": {
     "total_alerts": 3,
@@ -216,13 +216,13 @@
       "pct_above_sma200": -10.62
     },
     "BTC-USD": {
-      "price": 61481.03,
-      "rsi10": 47.6,
-      "rsi50": 42.3,
-      "sma200": 75069.67,
-      "sma50": 67734.72,
-      "ema21": 62236.17,
-      "pct_above_sma200": -18.1
+      "price": 61981.95,
+      "rsi10": 50.3,
+      "rsi50": 42.8,
+      "sma200": 74947.51,
+      "sma50": 67353.42,
+      "ema21": 62213.41,
+      "pct_above_sma200": -17.3
     },
     "AMD": {
       "price": 517.82,
