@@ -1,6 +1,6 @@
 # Signal Research — 2026-07-06
 
-_Generated 2026-07-06T16:47:36+00:00 · 89 tickers · 2 firing · 8 approaching_
+_Generated 2026-07-06T17:38:19+00:00 · 89 tickers · 2 firing · 8 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -18,6 +18,6 @@ _Generated 2026-07-06T16:47:36+00:00 · 89 tickers · 2 firing · 8 approaching_
 | Rotation: entered top-8 12-mo momentum (long) | XLU | XLU | manual_swing | 21d | 75% | +2.1% | +1.0pp | 80 |
 | Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 332 |
 | Rotation: entered top-8 12-mo momentum (long) | PSI | PSI | manual_swing | 21d | 62% | +3.3% | +0.7pp | 26 |
+| Bollinger %B oversold (<0) (long) | MNA | MNA | composer_ready | 5d | 67% | +0.3% | +0.3pp | 113 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 72% | +0.3% | +0.1pp | 226 |
 | Rotation: entered top-8 6-mo momentum (long) | UGA | UGA | manual_swing | 21d | 62% | +1.0% | +0.0pp | 48 |
-| Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |
