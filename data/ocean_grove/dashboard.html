@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<!--
+  Ocean Grove STR dashboard tab (self-contained, dependency-free).
+
+  Renders the weekly Ocean Grove, NJ short-term-rental opportunity report
+  published by ocean_grove_str.py: newest week on top (summary + ranked
+  listings), with prior weeks in a collapsible archive below.
+
+  Data source: the published JSON in this repo's data/ocean_grove/. By default it
+  fetches from raw.githubusercontent.com on the `main` branch (works when opened
+  locally, on GitHub Pages, or embedded in another app). Override with query
+  params:
+     ?branch=<branch>     e.g. ?branch=claude/ocean-grove-str-report-6axw5s
+     ?base=<url-or-path>  e.g. ?base=.   (relative, when served beside the data)
+  or use the "Source" control in the header.
+
+  EMBEDDING as a tab: everything is namespaced under #ocean-grove-tab and a
+  single IIFE — paste the <style> + the <div id="ocean-grove-tab"> + the
+  <script> into a Jinja template or a tab pane and it runs as-is, exactly like
+  data/signal_research/dashboard.html. No globals leak; no external deps.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ocean Grove STR</title>
+<style>
+  #ocean-grove-tab {
+    --bg:#0f1419; --panel:#171d26; --panel2:#1d2530; --line:#2a3340;
+    --txt:#e6edf3; --muted:#8b98a8; --green:#3fb950; --red:#f85149;
+    --blue:#58a6ff; --amber:#d29922; --chip:#243042;
+    background:var(--bg); color:var(--txt); min-height:100vh;
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:24px; box-sizing:border-box;
+  }
+  #ocean-grove-tab * { box-sizing:border-box; }
+  #ocean-grove-tab h1 { font-size:22px; margin:0; letter-spacing:.2px; }
+  #ocean-grove-tab h2 { font-size:15px; margin:22px 0 10px; color:var(--txt);
+    border-left:3px solid var(--blue); padding-left:9px; }
+  #ocean-grove-tab .sub { color:var(--muted); font-size:13px; margin-top:4px; }
+  #ocean-grove-tab .head { display:flex; flex-wrap:wrap; gap:14px;
+    align-items:flex-end; justify-content:space-between; }
+  #ocean-grove-tab .controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  #ocean-grove-tab label { color:var(--muted); font-size:12px; margin-right:5px; }
+  #ocean-grove-tab select, #ocean-grove-tab input {
+    background:var(--panel2); color:var(--txt); border:1px solid var(--line);
+    border-radius:6px; padding:6px 9px; font-size:13px; }
+  #ocean-grove-tab input { width:150px; }
+  #ocean-grove-tab .panel { background:var(--panel); border:1px solid var(--line);
+    border-radius:10px; padding:16px 18px; margin-top:16px; }
+  #ocean-grove-tab .cards { display:flex; flex-wrap:wrap; gap:12px; margin-top:14px; }
+  #ocean-grove-tab .card { background:var(--panel); border:1px solid var(--line);
+    border-radius:10px; padding:12px 16px; min-width:150px; flex:1; }
+  #ocean-grove-tab .card .k { color:var(--muted); font-size:11px; text-transform:uppercase;
+    letter-spacing:.5px; }
+  #ocean-grove-tab .card .v { font-size:20px; font-weight:600; margin-top:3px; }
+  #ocean-grove-tab .note { background:var(--panel2); border:1px solid var(--line);
+    border-left:3px solid var(--amber); border-radius:8px; padding:11px 14px; margin-top:14px;
+    color:var(--muted); font-size:12.5px; }
+  #ocean-grove-tab table { width:100%; border-collapse:collapse; font-size:13px; }
+  #ocean-grove-tab th, #ocean-grove-tab td {
+    text-align:right; padding:7px 9px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  #ocean-grove-tab th:first-child, #ocean-grove-tab td:first-child { text-align:left; }
+  #ocean-grove-tab th { color:var(--muted); font-weight:600; font-size:11px;
+    text-transform:uppercase; letter-spacing:.5px; }
+  #ocean-grove-tab tbody tr:hover { background:var(--panel2); }
+  #ocean-grove-tab .pos { color:var(--green); } #ocean-grove-tab .neg { color:var(--red); }
+  #ocean-grove-tab .muted { color:var(--muted); }
+  #ocean-grove-tab .chip { display:inline-block; padding:1px 8px; border-radius:999px;
+    background:var(--chip); color:var(--muted); font-size:11px; }
+  #ocean-grove-tab .chip.SUSTAINABLE_BREAKEVEN { color:var(--green); }
+  #ocean-grove-tab .chip.DEPR_FUNDED_BREAKEVEN { color:var(--blue); }
+  #ocean-grove-tab .chip.NEAR_BREAKEVEN { color:var(--amber); }
+  #ocean-grove-tab .chip.CASHFLOW_NEGATIVE { color:var(--red); }
+  #ocean-grove-tab .empty { color:var(--muted); font-style:italic; padding:10px 2px; }
+  #ocean-grove-tab .archive details { border:1px solid var(--line); border-radius:8px;
+    margin-top:8px; background:var(--panel); }
+  #ocean-grove-tab .archive summary { cursor:pointer; padding:11px 14px; font-weight:600;
+    color:var(--txt); list-style:none; display:flex; justify-content:space-between; gap:10px; }
+  #ocean-grove-tab .archive summary::-webkit-details-marker { display:none; }
+  #ocean-grove-tab .archive summary .meta { color:var(--muted); font-weight:400; font-size:12px; }
+  #ocean-grove-tab .archive .body { padding:4px 14px 14px; }
+  #ocean-grove-tab .err { color:var(--red); }
+  #ocean-grove-tab .foot { color:var(--muted); font-size:11px; margin-top:22px;
+    border-top:1px solid var(--line); padding-top:12px; }
+  #ocean-grove-tab a { color:var(--blue); text-decoration:none; }
+</style>
+</head>
+<body>
+<div id="ocean-grove-tab">
+  <div class="head">
+    <div>
+      <h1>🏖️ Ocean Grove STR</h1>
+      <div class="sub" id="og-sub">Loading…</div>
+    </div>
+    <div class="controls">
+      <span><label for="og-week">Week</label><select id="og-week"></select></span>
+      <span><label for="og-branch">Source</label><input id="og-branch" placeholder="branch"></span>
+    </div>
+  </div>
+
+  <div class="panel" id="og-current"><div class="empty">Loading latest…</div></div>
+
+  <h2>Archive</h2>
+  <div class="archive" id="og-archive"></div>
+
+  <div class="foot" id="og-foot"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var qs = new URLSearchParams(location.search);
+  var OWNER = "mjo156-ship-it", REPO = "Market-Signals";
+  var branch = qs.get("branch") || "main";
+  function baseFor(b) {
+    var explicit = qs.get("base");
+    if (explicit) return explicit.replace(/\/$/, "");
+    return "https://raw.githubusercontent.com/" + OWNER + "/" + REPO + "/" + b +
+           "/data/ocean_grove";
+  }
+  var BASE = baseFor(branch);
+
+  function fetchJSON(path) {
+    return fetch(BASE + "/" + path + "?t=" + Date.now()).then(function (r) {
+      if (!r.ok) throw new Error(path + " → HTTP " + r.status);
+      return r.json();
+    });
+  }
+  function el(tag, cls, html) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html != null) e.innerHTML = html;
+    return e;
+  }
+  function esc(s) { return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function money(x) {
+    if (x == null) return "—";
+    var s = Math.abs(Math.round(x)).toLocaleString();
+    return (x < 0 ? "-$" : "$") + s;
+  }
+  function pct(x, dp) { return x == null ? "—" : (x * 100).toFixed(dp == null ? 1 : dp) + "%"; }
+  function cls(x) { return x >= 0 ? "pos" : "neg"; }
+
+  function card(k, v) {
+    return "<div class='card'><div class='k'>" + esc(k) + "</div><div class='v'>" + v + "</div></div>";
+  }
+
+  function renderWeek(container, p) {
+    container.innerHTML = "";
+    var m = p.meta || {}, s = p.summary || {}, a = p.assumptions || {};
+    var fin = (a.financing || {});
+    container.appendChild(el("div", "sub",
+      "Week of <b>" + esc(m.week_of) + "</b> · " + esc(m.market) +
+      " · " + (s.listing_count || 0) + " listings · source <b>" + esc(m.data_source) + "</b>" +
+      " · generated " + esc((m.generated_utc || "").slice(0, 16).replace("T", " ")) + " UTC"));
+
+    var cards = el("div", "cards");
+    cards.innerHTML =
+      card("Listings", (s.listing_count || 0)) +
+      card("Unlevered break-even", "<span class='pos'>" + (s.breakeven_operating_allcash || 0) + "</span>") +
+      card("Financed-sustained", (s.breakeven_sustained || 0)) +
+      card("Purchase-year break-even", "<span class='pos'>" + (s.breakeven_purchase_year || 0) + "</span>") +
+      card("Median list", money(s.median_list_price)) +
+      card("Median gross STR", money(s.median_gross_str_revenue)) +
+      card("Median NOI", money(s.median_noi)) +
+      card("Median break-even down", pct(s.median_breakeven_down_pct));
+    container.appendChild(cards);
+
+    container.appendChild(el("div", "note",
+      "100% bonus depreciation (" + pct((a.basis_split || {}).building, 0) +
+      " building basis) makes essentially every property cash-positive in the purchase year — a " +
+      "one-time tax windfall. The columns that matter are <b>stabilized after-tax</b> (self-funds " +
+      "every year?) and <b>break-even down</b> (equity needed to get there). Financing: " +
+      pct(fin.down_payment_pct, 0) + " down · " + pct(fin.mortgage_rate) + " · " +
+      (fin.term_years || 30) + "-yr · tax " + pct(a.marginal_tax_rate, 0) + "."));
+
+    container.appendChild(el("h2", null, "Listings — ranked by stabilized after-tax cash flow (financed)"));
+    container.appendChild(listingsTable(p.listings || []));
+  }
+
+  function listingsTable(rows) {
+    if (!rows.length) return el("div", "empty", "No listings.");
+    var t = el("table");
+    t.innerHTML =
+      "<thead><tr><th>Property</th><th>List</th><th>Gross STR</th><th>NOI</th><th>Cap</th>" +
+      "<th>Pre-tax CF</th><th>Yr-1 after-tax</th><th>Stabilized</th><th>BE down</th><th>Rating</th></tr></thead>";
+    var tb = el("tbody");
+    rows.forEach(function (r) {
+      var f = (r.operating_income || {}).financed || {};
+      var y = r.yields || {}, be = r.breakeven || {};
+      var url = r.url ? "<a href='" + esc(r.url) + "' target='_blank'>↗</a>" : "";
+      var tr = el("tr");
+      tr.innerHTML =
+        "<td>" + esc(r.address) + " " + url +
+          "<div class='sub' style='font-size:11px'>" + esc(r.property_type) + " · " +
+          esc(r.beds) + "bd/" + esc(r.baths) + "ba · " + (r.sqft ? r.sqft.toLocaleString() + " sqft" : "") + "</div></td>" +
+        "<td>" + money(r.list_price) + "</td>" +
+        "<td>" + money((r.str_revenue || {}).gross_annual) + "</td>" +
+        "<td>" + money(r.noi) + "</td>" +
+        "<td>" + pct(y.cap_rate) + "</td>" +
+        "<td class='" + cls(f.pretax_cash_flow) + "'>" + money(f.pretax_cash_flow) + "</td>" +
+        "<td class='" + cls(f.aftertax_cash_flow_year1) + "'>" + money(f.aftertax_cash_flow_year1) + "</td>" +
+        "<td class='" + cls(f.aftertax_cash_flow_stabilized) + "'>" + money(f.aftertax_cash_flow_stabilized) + "</td>" +
+        "<td>" + pct(be.down_payment_pct, 0) + "</td>" +
+        "<td><span class='chip " + esc(r.rating) + "'>" + esc((r.rating_label || "").replace(/^[^ ]+ /, "")) + "</span></td>";
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    return t;
+  }
+
+  function loadInto(container, week, file) {
+    container.innerHTML = "<div class='empty'>Loading " + esc(week) + "…</div>";
+    fetchJSON(file)
+      .then(function (p) { renderWeek(container, p); })
+      .catch(function (e) { container.innerHTML =
+        "<div class='err'>Failed to load " + esc(week) + ": " + esc(e.message) + "</div>"; });
+  }
+
+  function buildArchive(weeks, latest) {
+    var arch = document.getElementById("og-archive");
+    arch.innerHTML = "";
+    var prior = weeks.filter(function (w) { return w !== latest; });
+    if (!prior.length) { arch.appendChild(el("div", "empty", "No prior weeks yet.")); return; }
+    prior.forEach(function (w) {
+      var det = el("details");
+      var sum = el("summary");
+      sum.innerHTML = "<span>Week of " + esc(w) + "</span><span class='meta'>click to expand</span>";
+      var body = el("div", "body", "<div class='empty'>…</div>");
+      var loaded = false;
+      det.addEventListener("toggle", function () {
+        if (det.open && !loaded) { loaded = true; loadInto(body, w, "history/" + w + ".json"); }
+      });
+      det.appendChild(sum); det.appendChild(body); arch.appendChild(det);
+    });
+  }
+
+  function boot() {
+    document.getElementById("og-sub").textContent = "Loading from " + branch + "…";
+    document.getElementById("og-foot").innerHTML =
+      "Source: <a href='" + BASE + "/latest.json' target='_blank'>" + esc(BASE) + "</a>" +
+      " · weekly · built by ocean_grove_str.py · not investment/tax advice";
+    fetchJSON("index.json").then(function (idx) {
+      var weeks = idx.weeks || [];
+      var latest = idx.latest || weeks[0];
+      var sel = document.getElementById("og-week");
+      sel.innerHTML = "";
+      weeks.forEach(function (w) {
+        var o = el("option"); o.value = w; o.textContent = "Week of " + w; sel.appendChild(o);
+      });
+      document.getElementById("og-sub").textContent =
+        weeks.length + " week(s) available · branch " + branch;
+      if (latest) {
+        sel.value = latest;
+        loadInto(document.getElementById("og-current"), latest,
+                 latest === (idx.latest || latest) ? "latest.json" : "history/" + latest + ".json");
+      } else {
+        document.getElementById("og-current").innerHTML =
+          "<div class='empty'>No report published yet.</div>";
+      }
+      buildArchive(weeks, latest);
+      sel.onchange = function () {
+        var w = sel.value;
+        loadInto(document.getElementById("og-current"), w,
+                 w === (idx.latest) ? "latest.json" : "history/" + w + ".json");
+      };
+    }).catch(function (e) {
+      document.getElementById("og-sub").innerHTML =
+        "<span class='err'>Could not load index.json from " + esc(branch) +
+        " (" + esc(e.message) + "). Try a different branch in Source.</span>";
+    });
+  }
+
+  var bi = document.getElementById("og-branch");
+  bi.value = branch;
+  bi.addEventListener("change", function () {
+    branch = bi.value.trim() || "main"; BASE = baseFor(branch); boot();
+  });
+  boot();
+})();
+</script>
+</body>
+</html>

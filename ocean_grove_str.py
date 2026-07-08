@@ -794,6 +794,16 @@ def main():
         hist.mkdir(parents=True, exist_ok=True)
         (hist / f"{report['meta']['week_of']}.json").write_text(json.dumps(report, indent=2, default=str))
 
+    # index.json — dashboard contract: list of archived weeks (newest first) +
+    # the latest week. Mirrors data/signal_research/index.json so the dashboard
+    # tab can enumerate the weekly archive.
+    hist = out / "history"
+    weeks = sorted((p.stem for p in hist.glob("*.json")), reverse=True) if hist.exists() else []
+    latest_week = report["meta"]["week_of"]
+    if latest_week not in weeks:
+        weeks = [latest_week] + weeks
+    (out / "index.json").write_text(json.dumps({"latest": latest_week, "weeks": weeks}, indent=2))
+
     s = report["summary"]
     print(f"Ocean Grove STR Report — week of {report['meta']['week_of']} ({report['meta']['data_source']})")
     print(f"  {s['listing_count']} listings · {s['breakeven_operating_allcash']} unlevered break-even · "
