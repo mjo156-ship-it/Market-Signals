@@ -1,0 +1,59 @@
+# Ocean Grove STR Opportunity Report
+#
+# Weekly report of Ocean Grove, NJ properties for sale with a short-term-rental
+# potential assessment (earnings, operating income net of tax with 100% bonus
+# depreciation, break-even flags). Writes data/ocean_grove/{latest.json,latest.md}
+# and archives data/ocean_grove/history/<week-of>.json.
+#
+# Runs Mondays 11:10 UTC (~7:10 AM ET). To test: Actions → Ocean Grove STR Report
+# → Run workflow.
+#
+# Data source: uses the representative sample set by default. To pull real
+# listings, set an OG_LISTINGS_JSON path (committed file) or a RENTCAST_API_KEY
+# repo secret — see data/ocean_grove/README.md.
+
+name: Ocean Grove STR Report
+
+on:
+  schedule:
+    - cron: '10 11 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Generate report
+        env:
+          # Optional live data source. Leave unset to use the representative sample.
+          RENTCAST_API_KEY: ${{ secrets.RENTCAST_API_KEY }}
+        run: |
+          python3 ocean_grove_str.py
+
+      - name: Commit report
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/ocean_grove/
+          if git diff --staged --quiet; then
+            echo "No changes"
+          else
+            WEEK=$(TZ=America/New_York date +%Y-%m-%d)
+            git commit -m "🏖️ Ocean Grove STR report — week of ${WEEK}"
+            git pull --rebase
+            git push
+            echo "Report pushed"
+          fi
