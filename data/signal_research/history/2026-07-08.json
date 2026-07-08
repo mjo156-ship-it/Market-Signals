@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-07-08T15:55:09+00:00",
+  "generated_at_utc": "2026-07-08T16:26:20+00:00",
   "data_through": "2026-07-08",
   "universe_size": 89,
   "params": {
@@ -7,15 +7,16 @@
     "win_rate_min": 0.6
   },
   "summary": {
-    "n_results": 3,
-    "n_watchlist": 10,
+    "n_results": 4,
+    "n_watchlist": 8,
     "by_family": {
       "rotation": 2,
-      "exhaustion_fade": 1
+      "exhaustion_fade": 1,
+      "volatility_breakout": 1
     },
     "by_mode": {
       "manual_swing": 2,
-      "composer_ready": 1
+      "composer_ready": 2
     }
   },
   "results": [
@@ -27,7 +28,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "3-mo momentum +10.1%, rank #8",
+      "today_value": "3-mo momentum +11.0%, rank #8",
       "backtest": {
         "n": 91,
         "win_rate": 0.758,
@@ -47,7 +48,7 @@
       "direction": "short",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B 1.03",
+      "today_value": "%B 1.02",
       "backtest": {
         "n": 133,
         "win_rate": 0.602,
@@ -60,6 +61,26 @@
       "score": 0.1049
     },
     {
+      "family": "volatility_breakout",
+      "name": "Donchian 52-week breakout",
+      "ticker": "BIL",
+      "suggested_instrument": "BIL",
+      "direction": "long",
+      "horizon_days": 20,
+      "mode": "composer_ready",
+      "today_value": "close 91.46 vs 52w high 91.45",
+      "backtest": {
+        "n": 333,
+        "win_rate": 0.988,
+        "avg_return": 0.0013,
+        "median_return": 0.0031,
+        "baseline_return": -0.001,
+        "edge": 0.0023,
+        "fired_today": true
+      },
+      "score": 0.042
+    },
+    {
       "family": "rotation",
       "name": "Rotation: entered top-8 3-mo momentum",
       "ticker": "IAK",
@@ -67,7 +88,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "3-mo momentum +12.9%, rank #6",
+      "today_value": "3-mo momentum +12.7%, rank #6",
       "backtest": {
         "n": 45,
         "win_rate": 0.667,
@@ -89,7 +110,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +89.4%, rank #10",
+      "today_value": "12-mo momentum +92.8%, rank #10",
       "backtest": {
         "n": 98,
         "win_rate": 0.622,
@@ -109,7 +130,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +27.9%, rank #12",
+      "today_value": "6-mo momentum +29.6%, rank #11",
       "backtest": {
         "n": 94,
         "win_rate": 0.702,
@@ -124,32 +145,12 @@
     {
       "family": "volatility_breakout",
       "name": "Donchian 52-week breakout",
-      "ticker": "BIL",
-      "suggested_instrument": "BIL",
-      "direction": "long",
-      "horizon_days": 20,
-      "mode": "composer_ready",
-      "today_value": "close 91.45 vs 52w high 91.45",
-      "backtest": {
-        "n": 333,
-        "win_rate": 0.988,
-        "avg_return": 0.0013,
-        "median_return": 0.0031,
-        "baseline_return": -0.001,
-        "edge": 0.0023,
-        "fired_today": false
-      },
-      "score": 0.042
-    },
-    {
-      "family": "volatility_breakout",
-      "name": "Donchian 52-week breakout",
       "ticker": "DBMF",
       "suggested_instrument": "DBMF",
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 30.78 vs 52w high 31.38",
+      "today_value": "close 30.82 vs 52w high 31.38",
       "backtest": {
         "n": 28,
         "win_rate": 0.643,
@@ -169,7 +170,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +86.0%, rank #11",
+      "today_value": "12-mo momentum +89.6%, rank #11",
       "backtest": {
         "n": 26,
         "win_rate": 0.615,
@@ -202,26 +203,6 @@
       "score": 0.023
     },
     {
-      "family": "rotation",
-      "name": "Rotation: entered top-8 3-mo momentum",
-      "ticker": "VTV",
-      "suggested_instrument": "VTV",
-      "direction": "long",
-      "horizon_days": 21,
-      "mode": "manual_swing",
-      "today_value": "3-mo momentum +5.3%, rank #11",
-      "backtest": {
-        "n": 41,
-        "win_rate": 0.683,
-        "avg_return": 0.0113,
-        "median_return": 0.0157,
-        "baseline_return": 0.0087,
-        "edge": 0.0026,
-        "fired_today": false
-      },
-      "score": 0.0166
-    },
-    {
       "family": "volatility_breakout",
       "name": "Donchian 52-week breakout",
       "ticker": "SHY",
@@ -249,7 +230,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "3-mo momentum +6.8%, rank #9",
+      "today_value": "3-mo momentum +6.7%, rank #10",
       "backtest": {
         "n": 99,
         "win_rate": 0.636,
@@ -269,7 +250,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +39.2%, rank #10",
+      "today_value": "6-mo momentum +38.8%, rank #10",
       "backtest": {
         "n": 48,
         "win_rate": 0.625,
