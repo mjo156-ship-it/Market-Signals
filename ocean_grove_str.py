@@ -91,13 +91,13 @@ BONUS_DEPR_RATE      = _envf("OG_BONUS_DEPR_RATE", 1.00)   # 100% bonus, year 1
 MARGINAL_TAX_RATE    = _envf("OG_MARGINAL_TAX_RATE", 0.37)
 
 # --- Financing (drives the primary "operating break-even" definition) ---
-DOWN_PAYMENT_PCT     = _envf("OG_DOWN_PAYMENT_PCT", 0.20)
-MORTGAGE_RATE        = _envf("OG_MORTGAGE_RATE", 0.07)     # 30-yr fixed APR
+DOWN_PAYMENT_PCT     = _envf("OG_DOWN_PAYMENT_PCT", 0.25)
+MORTGAGE_RATE        = _envf("OG_MORTGAGE_RATE", 0.065)    # 30-yr fixed APR
 MORTGAGE_TERM_YEARS  = _envi("OG_MORTGAGE_TERM_YEARS", 30)
 CLOSING_COST_PCT     = _envf("OG_CLOSING_COST_PCT", 0.03)  # % of price, cash to close
 
 # --- STR operating cost assumptions ---
-MGMT_FEE_PCT         = _envf("OG_MGMT_FEE_PCT", 0.20)      # full-service PM, % of gross
+MGMT_FEE_PCT         = _envf("OG_MGMT_FEE_PCT", 0.15)      # PM / co-host, % of gross
 PLATFORM_FEE_PCT     = _envf("OG_PLATFORM_FEE_PCT", 0.03)  # Airbnb/Vrbo host fee
 CLEANING_NET_PCT     = _envf("OG_CLEANING_NET_PCT", 0.04)  # cleaning not recovered from guest
 SUPPLIES_PCT         = _envf("OG_SUPPLIES_PCT", 0.03)      # consumables / restock

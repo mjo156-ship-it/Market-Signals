@@ -89,8 +89,8 @@ Two discriminating metrics tie them together:
 
 Every assumption is echoed into `latest.json → assumptions` so results are
 reproducible. Key defaults: 40/60 land/building split, 100% bonus depreciation,
-37% blended marginal tax, 20% down / 30-yr @ 7%, 20% management. Override any via
-`OG_*` environment variables (see the `CONFIG` block in `ocean_grove_str.py`).
+37% blended marginal tax, 25% down / 30-yr @ 6.5%, 15% management. Override any
+via `OG_*` environment variables (see the `CONFIG` block in `ocean_grove_str.py`).
 
 ```bash
 # examples
