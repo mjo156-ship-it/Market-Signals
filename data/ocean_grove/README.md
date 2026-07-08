@@ -52,10 +52,24 @@ The financial engine is identical regardless of source.
 
 ## The model
 
-**STR revenue** is a seasonal buildup (Ocean Grove is an intensely seasonal shore
-market — Sat-to-Sat weekly summer bookings, quiet winters): a peak weekly rate
-(by bedroom count, or per-listing override) scaled across peak / shoulder /
-off-season weeks and occupancies.
+**STR revenue** is resolved most-specific-first: (1) a listing's
+`airdna_projected_revenue` (address-level AirDNA Rentalizer), (2) **AirDNA
+MarketMinder** figures by bedroom count from `airdna_market.json`, else (3) a
+built-in **seasonal model** — a peak weekly rate (by bedroom count, or per-listing
+override) scaled across peak / shoulder / off-season weeks and occupancies (Ocean
+Grove is intensely seasonal — Sat-to-Sat weekly summer bookings, quiet winters).
+The basis used is recorded per listing (`str_revenue.basis`) and summarized in
+`meta.revenue_source`.
+
+### Calibrating to AirDNA (recommended)
+
+If you have an AirDNA MarketMinder subscription, copy
+[`airdna_market.example.json`](airdna_market.example.json) to `airdna_market.json`
+and paste your Ocean Grove figures (Average Annual Revenue, or ADR + Occupancy)
+by bedroom count. The generator auto-detects it and calibrates every listing's
+revenue to real market data, falling back to the seasonal model for any bedroom
+count you leave blank. Override the path with `$OG_AIRDNA_JSON`. No AirDNA API is
+needed — this is a paste from the dashboard.
 
 **Operating income (NOI)** = gross STR revenue − operating expenses (management,
 platform fees, cleaning, supplies, capex reserve, property tax, insurance,

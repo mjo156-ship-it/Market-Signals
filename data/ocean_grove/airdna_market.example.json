@@ -1,0 +1,28 @@
+{
+  "_README": [
+    "AirDNA MarketMinder calibration for the Ocean Grove STR report.",
+    "TO USE: copy this file to  data/ocean_grove/airdna_market.json  and replace the",
+    "numbers below with figures from your AirDNA MarketMinder dashboard for Ocean Grove.",
+    "The generator auto-detects data/ocean_grove/airdna_market.json (override path with",
+    "$OG_AIRDNA_JSON) and calibrates every listing's STR revenue to it, falling back to",
+    "the built-in seasonal model for any bedroom count you leave out.",
+    "",
+    "Where to find each number in MarketMinder: open the Ocean Grove market, then filter",
+    "by bedroom count. Copy 'Average Annual Revenue' (best), and/or 'ADR' + 'Occupancy'.",
+    "annual_revenue wins if present; otherwise adr x occupancy x 365 is used.",
+    "occupancy is a fraction (0.55 = 55%). Delete this _README block if you like.",
+    "",
+    "The values below are ILLUSTRATIVE PLACEHOLDERS, not real AirDNA data — replace them."
+  ],
+  "market": "Ocean Grove, NJ",
+  "source": "AirDNA MarketMinder",
+  "as_of": "2026-07",
+  "by_bedroom": {
+    "0": { "annual_revenue": null, "adr": null, "occupancy": null },
+    "1": { "annual_revenue": null, "adr": null, "occupancy": null },
+    "2": { "annual_revenue": null, "adr": null, "occupancy": null },
+    "3": { "annual_revenue": null, "adr": null, "occupancy": null },
+    "4": { "annual_revenue": null, "adr": null, "occupancy": null },
+    "5": { "annual_revenue": null, "adr": null, "occupancy": null }
+  }
+}

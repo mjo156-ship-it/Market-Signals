@@ -2,12 +2,21 @@
   "meta": {
     "report": "Ocean Grove STR Opportunity Report",
     "version": "1.0",
-    "generated_utc": "2026-07-08T18:38:43.706727+00:00",
+    "generated_utc": "2026-07-08T19:02:53.511306+00:00",
     "week_of": "2026-07-06",
     "asof": "2026-07-08",
     "market": "Ocean Grove, NJ (Neptune Township, Monmouth County)",
     "data_source": "representative-sample",
     "data_source_note": "Representative sample listings \u2014 illustrative, not live MLS. Wire a live feed via $OG_LISTINGS_JSON or $RENTCAST_API_KEY.",
+    "revenue_source": {
+      "primary": "seasonal-model",
+      "by_basis": {
+        "seasonal-model": 12
+      },
+      "airdna_file": null,
+      "airdna_as_of": null,
+      "note": "STR revenue from the built-in seasonal model. Drop AirDNA MarketMinder figures into data/ocean_grove/airdna_market.json (see .example.json) to calibrate."
+    },
     "listing_count": 12
   },
   "assumptions": {
@@ -88,6 +97,7 @@
       "str_revenue": {
         "gross_annual": 35672,
         "peak_weekly": 2400,
+        "basis": "seasonal-model",
         "by_season": {
           "peak": {
             "weeks": 11,
@@ -181,6 +191,7 @@
       "str_revenue": {
         "gross_annual": 41617,
         "peak_weekly": 2800,
+        "basis": "seasonal-model",
         "by_season": {
           "peak": {
             "weeks": 11,
@@ -274,6 +285,7 @@
       "str_revenue": {
         "gross_annual": 74316,
         "peak_weekly": 5000,
+        "basis": "seasonal-model",
         "by_season": {
           "peak": {
             "weeks": 11,
@@ -367,6 +379,7 @@
       "str_revenue": {
         "gross_annual": 56480,
         "peak_weekly": 3800,
+        "basis": "seasonal-model",
         "by_season": {
           "peak": {
             "weeks": 11,
@@ -460,6 +473,7 @@
       "str_revenue": {
         "gross_annual": 74316,
         "peak_weekly": 5000,
+        "basis": "seasonal-model",
         "by_season": {
           "peak": {
             "weeks": 11,
@@ -553,6 +567,7 @@
       "str_revenue": {
         "gross_annual": 56480,
         "peak_weekly": 3800,
+        "basis": "seasonal-model",
         "by_season": {
           "peak": {
             "weeks": 11,
@@ -646,6 +661,7 @@
       "str_revenue": {
         "gross_annual": 74316,
         "peak_weekly": 5000,
+        "basis": "seasonal-model",
         "by_season": {
           "peak": {
             "weeks": 11,
@@ -739,6 +755,7 @@
       "str_revenue": {
         "gross_annual": 74316,
         "peak_weekly": 5000,
+        "basis": "seasonal-model",
         "by_season": {
           "peak": {
             "weeks": 11,
@@ -832,6 +849,7 @@
       "str_revenue": {
         "gross_annual": 101070,
         "peak_weekly": 6800,
+        "basis": "seasonal-model",
         "by_season": {
           "peak": {
             "weeks": 11,
@@ -925,6 +943,7 @@
       "str_revenue": {
         "gross_annual": 101070,
         "peak_weekly": 6800,
+        "basis": "seasonal-model",
         "by_season": {
           "peak": {
             "weeks": 11,
@@ -1018,6 +1037,7 @@
       "str_revenue": {
         "gross_annual": 130796,
         "peak_weekly": 8800,
+        "basis": "seasonal-model",
         "by_season": {
           "peak": {
             "weeks": 11,
@@ -1111,6 +1131,7 @@
       "str_revenue": {
         "gross_annual": 130796,
         "peak_weekly": 8800,
+        "basis": "seasonal-model",
         "by_season": {
           "peak": {
             "weeks": 11,

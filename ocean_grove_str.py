@@ -40,6 +40,18 @@ The financial engine is identical regardless of source, so wiring a real feed
 later changes nothing downstream.
 
 --------------------------------------------------------------------------------
+STR REVENUE (AirDNA-calibratable)
+--------------------------------------------------------------------------------
+Each listing's gross STR revenue is resolved most-specific-first:
+  1. listing `airdna_projected_revenue`  — address-level AirDNA Rentalizer.
+  2. AirDNA market data by bedroom count  — from data/ocean_grove/airdna_market.json
+     ($OG_AIRDNA_JSON), populated from an AirDNA MarketMinder subscription. See
+     airdna_market.example.json for the template.
+  3. Built-in seasonal model              — used when no AirDNA figure applies.
+The chosen basis is recorded per listing (`str_revenue.basis`) and summarized in
+`meta.revenue_source`.
+
+--------------------------------------------------------------------------------
 USAGE
 --------------------------------------------------------------------------------
   python ocean_grove_str.py                    # write JSON + MD into data/ocean_grove
@@ -232,29 +244,74 @@ def fetch_listings():
 # ==============================================================================
 # FINANCIAL MODEL
 # ==============================================================================
-def estimate_str_revenue(listing):
-    """Seasonal gross STR revenue buildup for a listing.
+def estimate_str_revenue(listing, airdna=None):
+    """Annual gross STR revenue for a listing, with basis.
 
-    Uses a per-listing `str_peak_weekly` override when present, else the
-    bedroom-count lookup. Returns (gross_annual, breakdown_by_season, peak_weekly).
+    Revenue is resolved in priority order (most specific first):
+      1. listing `airdna_projected_revenue`  — address-level AirDNA Rentalizer.
+      2. AirDNA market data for the listing's bedroom count — annual_revenue, or
+         adr x occupancy x 365 if annual_revenue is absent.
+      3. The seasonal model (per-listing `str_peak_weekly` override or the
+         bedroom-count peak-weekly lookup, scaled across peak/shoulder/off).
+
+    Returns (gross_annual, breakdown_by_season, peak_weekly, basis). When AirDNA
+    supplies the annual total, the seasonal breakdown is the model's shape scaled
+    to that total (illustrative distribution — AirDNA's own monthly seasonality
+    is not applied unless present in a future field).
     """
     beds = int(listing.get("beds", 2) or 0)
+    bkey = min(beds, 5)
     peak_weekly = listing.get("str_peak_weekly")
     if peak_weekly is None:
-        peak_weekly = PEAK_WEEKLY_BY_BED.get(min(beds, 5), PEAK_WEEKLY_BY_BED[2])
+        peak_weekly = PEAK_WEEKLY_BY_BED.get(bkey, PEAK_WEEKLY_BY_BED[2])
 
-    breakdown = {}
-    gross = 0.0
+    # Unscaled model seasonal shape — the pure estimate, and the distribution used
+    # to display an AirDNA annual total across seasons.
+    shape = {}
+    model_total = 0.0
     for name, s in SEASONS.items():
         rev = peak_weekly * s["rate_mult"] * s["occ"] * s["weeks"]
+        shape[name] = rev
+        model_total += rev
+
+    gross = None
+    basis = "seasonal-model"
+    by_bed = (airdna or {}).get("by_bedroom", {}) if airdna else {}
+    ad = by_bed.get(str(bkey)) or by_bed.get(bkey)  # tolerate str/int keys
+    if listing.get("airdna_projected_revenue"):
+        gross = float(listing["airdna_projected_revenue"]); basis = "airdna-rentalizer"
+    elif ad and ad.get("annual_revenue"):
+        gross = float(ad["annual_revenue"]); basis = "airdna-market-bedroom"
+    elif ad and ad.get("adr") and ad.get("occupancy"):
+        gross = float(ad["adr"]) * float(ad["occupancy"]) * 365; basis = "airdna-adr-occ"
+    if gross is None:
+        gross = model_total
+
+    scale = (gross / model_total) if model_total else 0
+    breakdown = {}
+    for name, s in SEASONS.items():
         breakdown[name] = {
             "weeks": s["weeks"],
-            "weekly_rate": round(peak_weekly * s["rate_mult"]),
+            "weekly_rate": round(peak_weekly * s["rate_mult"] * scale),
             "occupancy": s["occ"],
-            "revenue": round(rev),
+            "revenue": round(shape[name] * scale),
         }
-        gross += rev
-    return round(gross), breakdown, round(peak_weekly)
+    return round(gross), breakdown, round(peak_weekly * scale), basis
+
+
+def load_airdna():
+    """Load AirDNA market calibration if present. Returns (data, path) or (None, None).
+
+    Path resolves from $OG_AIRDNA_JSON (default data/ocean_grove/airdna_market.json).
+    Populate it from your AirDNA MarketMinder dashboard — see airdna_market.example.json.
+    """
+    path = os.environ.get("OG_AIRDNA_JSON", "data/ocean_grove/airdna_market.json")
+    if path and Path(path).exists():
+        try:
+            return json.loads(Path(path).read_text()), path
+        except (ValueError, OSError):
+            return None, None
+    return None, None
 
 
 def _stabilized_aftertax_financed(noi, price, down_pct):
@@ -331,11 +388,11 @@ def operating_expenses(listing, gross_revenue):
     return exp
 
 
-def analyze(listing):
+def analyze(listing, airdna=None):
     """Full STR economics for one listing."""
     price = listing["list_price"]
 
-    gross, season_breakdown, peak_weekly = estimate_str_revenue(listing)
+    gross, season_breakdown, peak_weekly, revenue_basis = estimate_str_revenue(listing, airdna)
     exp = operating_expenses(listing, gross)
     noi = gross - exp["total"]                       # Net Operating Income (pre-debt, pre-tax)
 
@@ -428,6 +485,7 @@ def analyze(listing):
         "str_revenue": {
             "gross_annual": gross,
             "peak_weekly": peak_weekly,
+            "basis": revenue_basis,
             "by_season": season_breakdown,
         },
         "operating_expenses": exp,
@@ -493,7 +551,14 @@ def _pct(x):
 
 def build_report(asof_date, archive=True):
     listings, source = fetch_listings()
-    analyzed = [analyze(l) for l in listings]
+    airdna, airdna_path = load_airdna()
+    analyzed = [analyze(l, airdna) for l in listings]
+
+    # Revenue provenance: how each listing's gross STR revenue was derived.
+    basis_counts = {}
+    for a in analyzed:
+        b = a["str_revenue"]["basis"]
+        basis_counts[b] = basis_counts.get(b, 0) + 1
 
     # Rank by sustainable after-tax cash flow (financed), best first.
     analyzed.sort(
@@ -530,6 +595,19 @@ def build_report(asof_date, archive=True):
                 if source == "representative-sample" else
                 "Listings resolved from a configured live/file source."
             ),
+            "revenue_source": {
+                "primary": ("airdna" if airdna_path and any(k.startswith("airdna") for k in basis_counts)
+                            else "seasonal-model"),
+                "by_basis": basis_counts,
+                "airdna_file": airdna_path,
+                "airdna_as_of": (airdna or {}).get("as_of") if airdna else None,
+                "note": (
+                    "STR revenue calibrated to AirDNA MarketMinder figures."
+                    if airdna_path and any(k.startswith("airdna") for k in basis_counts) else
+                    "STR revenue from the built-in seasonal model. Drop AirDNA MarketMinder "
+                    "figures into data/ocean_grove/airdna_market.json (see .example.json) to calibrate."
+                ),
+            },
             "listing_count": len(analyzed),
         },
         "assumptions": {
@@ -598,6 +676,15 @@ def render_markdown(report):
     lines.append("")
     if m["data_source"] == "representative-sample":
         lines.append(f"> ⚠️ **Data source: representative sample** — {m['data_source_note']}")
+        lines.append("")
+    rs = m.get("revenue_source", {})
+    if rs:
+        if rs.get("primary") == "airdna":
+            lines.append(f"> 📊 **STR revenue: AirDNA MarketMinder**"
+                         + (f" (as of {rs['airdna_as_of']})" if rs.get("airdna_as_of") else "")
+                         + f" — {rs['note']}")
+        else:
+            lines.append(f"> 📈 **STR revenue: built-in seasonal model** — {rs['note']}")
         lines.append("")
 
     # --- Executive summary ---
@@ -683,8 +770,14 @@ def render_markdown(report):
         lines.append(f"{x['property_type']} · {x['beds']} bd / {x['baths']} ba · {x['sqft']:,} sqft · list **{_money(x['list_price'])}**  ")
         lines.append(f"[listing]({x['url']})")
         lines.append("")
+        _basis_lbl = {
+            "seasonal-model": "seasonal model",
+            "airdna-rentalizer": "AirDNA Rentalizer (address-level)",
+            "airdna-market-bedroom": "AirDNA market (by bedroom)",
+            "airdna-adr-occ": "AirDNA ADR×occupancy",
+        }.get(x["str_revenue"].get("basis"), x["str_revenue"].get("basis"))
         lines.append(f"- **Gross STR revenue:** {_money(x['str_revenue']['gross_annual'])}/yr "
-                     f"(peak {_money(x['str_revenue']['peak_weekly'])}/wk)")
+                     f"(peak {_money(x['str_revenue']['peak_weekly'])}/wk · basis: {_basis_lbl})")
         lines.append(f"- **Operating expenses:** {_money(exp['total'])}/yr "
                      f"(mgmt {_money(exp['management'])}, tax {_money(exp['property_tax'])}, "
                      f"ins {_money(exp['insurance'])}, maint {_money(exp['maintenance'])}, "
@@ -806,6 +899,8 @@ def main():
 
     s = report["summary"]
     print(f"Ocean Grove STR Report — week of {report['meta']['week_of']} ({report['meta']['data_source']})")
+    rs = report["meta"].get("revenue_source", {})
+    print(f"  Revenue source: {rs.get('primary')} {dict(rs.get('by_basis', {}))}")
     print(f"  {s['listing_count']} listings · {s['breakeven_operating_allcash']} unlevered break-even · "
           f"{s['breakeven_sustained']} financed-sustained · {s['breakeven_purchase_year']} purchase-year")
     print(f"  Wrote {out/'latest.json'}, {out/'latest.md'}")

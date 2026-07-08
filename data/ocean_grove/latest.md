@@ -1,8 +1,10 @@
 # 🏖️ Ocean Grove STR Opportunity Report
 
-**Week of 2026-07-06**  ·  Ocean Grove, NJ (Neptune Township, Monmouth County)  ·  generated 2026-07-08 18:38 UTC
+**Week of 2026-07-06**  ·  Ocean Grove, NJ (Neptune Township, Monmouth County)  ·  generated 2026-07-08 19:02 UTC
 
 > ⚠️ **Data source: representative sample** — Representative sample listings — illustrative, not live MLS. Wire a live feed via $OG_LISTINGS_JSON or $RENTCAST_API_KEY.
+
+> 📈 **STR revenue: built-in seasonal model** — STR revenue from the built-in seasonal model. Drop AirDNA MarketMinder figures into data/ocean_grove/airdna_market.json (see .example.json) to calibrate.
 
 ## Summary
 
@@ -50,7 +52,7 @@ _No listing self-funds every year at the assumed financing (25% down / 6.5%)._ B
 Condo (studio) · 0 bd / 1.0 ba · 480 sqft · list **$329,000**  
 [listing](https://example.com/listing/OG-006)
 
-- **Gross STR revenue:** $35,672/yr (peak $2,400/wk)
+- **Gross STR revenue:** $35,672/yr (peak $2,400/wk · basis: seasonal model)
 - **Operating expenses:** $29,896/yr (mgmt $5,351, tax $4,300, ins $1,974, maint $3,290, utils $4,800, condo $4,080)
 - **NOI:** $5,776/yr · cap rate 1.8% · gross yield 10.8%
 - **Debt service:** $18,716/yr (loan $246,750 @ 6.5%, yr-1 interest $15,958)
@@ -65,7 +67,7 @@ Condo (studio) · 0 bd / 1.0 ba · 480 sqft · list **$329,000**
 Condo · 1 bd / 1.0 ba · 620 sqft · list **$415,000**  
 [listing](https://example.com/listing/OG-003)
 
-- **Gross STR revenue:** $41,617/yr (peak $2,800/wk)
+- **Gross STR revenue:** $41,617/yr (peak $2,800/wk · basis: seasonal model)
 - **Operating expenses:** $34,497/yr (mgmt $6,243, tax $5,200, ins $2,490, maint $4,150, utils $4,800, condo $4,620)
 - **NOI:** $7,120/yr · cap rate 1.7% · gross yield 10.0%
 - **Debt service:** $23,608/yr (loan $311,250 @ 6.5%, yr-1 interest $20,129)
@@ -80,7 +82,7 @@ Condo · 1 bd / 1.0 ba · 620 sqft · list **$415,000**
 Single-family · 3 bd / 1.5 ba · 1,400 sqft · list **$739,000**  
 [listing](https://example.com/listing/OG-009)
 
-- **Gross STR revenue:** $74,316/yr (peak $5,000/wk)
+- **Gross STR revenue:** $74,316/yr (peak $5,000/wk · basis: seasonal model)
 - **Operating expenses:** $51,218/yr (mgmt $11,147, tax $10,600, ins $4,434, maint $7,390, utils $4,800, ground lease $950)
 - **NOI:** $23,098/yr · cap rate 3.1% · gross yield 10.1%
 - **Debt service:** $42,039/yr (loan $554,250 @ 6.5%, yr-1 interest $35,844)
@@ -95,7 +97,7 @@ Single-family · 3 bd / 1.5 ba · 1,400 sqft · list **$739,000**
 Condo · 2 bd / 2.0 ba · 1,100 sqft · list **$560,000**  
 [listing](https://example.com/listing/OG-008)
 
-- **Gross STR revenue:** $56,480/yr (peak $3,800/wk)
+- **Gross STR revenue:** $56,480/yr (peak $3,800/wk · basis: seasonal model)
 - **Operating expenses:** $45,493/yr (mgmt $8,472, tax $7,800, ins $3,360, maint $5,600, utils $4,800, condo $6,240)
 - **NOI:** $10,987/yr · cap rate 2.0% · gross yield 10.1%
 - **Debt service:** $31,856/yr (loan $420,000 @ 6.5%, yr-1 interest $27,162)
@@ -110,7 +112,7 @@ Condo · 2 bd / 2.0 ba · 1,100 sqft · list **$560,000**
 Single-family (Victorian) · 3 bd / 2.0 ba · 1,500 sqft · list **$785,000**  
 [listing](https://example.com/listing/OG-001)
 
-- **Gross STR revenue:** $74,316/yr (peak $5,000/wk)
+- **Gross STR revenue:** $74,316/yr (peak $5,000/wk · basis: seasonal model)
 - **Operating expenses:** $52,554/yr (mgmt $11,147, tax $11,150, ins $4,710, maint $7,850, utils $4,800, ground lease $1,000)
 - **NOI:** $21,762/yr · cap rate 2.8% · gross yield 9.5%
 - **Debt service:** $44,656/yr (loan $588,750 @ 6.5%, yr-1 interest $38,075)
@@ -125,7 +127,7 @@ Single-family (Victorian) · 3 bd / 2.0 ba · 1,500 sqft · list **$785,000**
 Cottage · 2 bd / 1.0 ba · 980 sqft · list **$649,000**  
 [listing](https://example.com/listing/OG-002)
 
-- **Gross STR revenue:** $56,480/yr (peak $3,800/wk)
+- **Gross STR revenue:** $56,480/yr (peak $3,800/wk · basis: seasonal model)
 - **Operating expenses:** $43,177/yr (mgmt $8,472, tax $9,400, ins $3,894, maint $6,490, utils $4,800, ground lease $900)
 - **NOI:** $13,303/yr · cap rate 2.1% · gross yield 8.7%
 - **Debt service:** $36,919/yr (loan $486,750 @ 6.5%, yr-1 interest $31,479)
@@ -140,7 +142,7 @@ Cottage · 2 bd / 1.0 ba · 980 sqft · list **$649,000**
 Single-family · 3 bd / 2.0 ba · 1,600 sqft · list **$829,000**  
 [listing](https://example.com/listing/OG-011)
 
-- **Gross STR revenue:** $74,316/yr (peak $5,000/wk)
+- **Gross STR revenue:** $74,316/yr (peak $5,000/wk · basis: seasonal model)
 - **Operating expenses:** $54,108/yr (mgmt $11,147, tax $12,000, ins $4,974, maint $8,290, utils $4,800, ground lease $1,000)
 - **NOI:** $20,208/yr · cap rate 2.4% · gross yield 9.0%
 - **Debt service:** $47,159/yr (loan $621,750 @ 6.5%, yr-1 interest $40,209)
@@ -155,7 +157,7 @@ Single-family · 3 bd / 2.0 ba · 1,600 sqft · list **$829,000**
 Single-family (Victorian) · 3 bd / 2.0 ba · 1,650 sqft · list **$895,000**  
 [listing](https://example.com/listing/OG-012)
 
-- **Gross STR revenue:** $74,316/yr (peak $5,000/wk)
+- **Gross STR revenue:** $74,316/yr (peak $5,000/wk · basis: seasonal model)
 - **Operating expenses:** $56,414/yr (mgmt $11,147, tax $13,200, ins $5,370, maint $8,950, utils $4,800, ground lease $1,050)
 - **NOI:** $17,902/yr · cap rate 2.0% · gross yield 8.3%
 - **Debt service:** $50,913/yr (loan $671,250 @ 6.5%, yr-1 interest $43,410)
@@ -170,7 +172,7 @@ Single-family (Victorian) · 3 bd / 2.0 ba · 1,650 sqft · list **$895,000**
 Single-family · 4 bd / 2.5 ba · 2,200 sqft · list **$1,150,000**  
 [listing](https://example.com/listing/OG-005)
 
-- **Gross STR revenue:** $101,070/yr (peak $6,800/wk)
+- **Gross STR revenue:** $101,070/yr (peak $6,800/wk · basis: seasonal model)
 - **Operating expenses:** $72,171/yr (mgmt $15,160, tax $16,800, ins $6,900, maint $11,500, utils $4,800, ground lease $1,100)
 - **NOI:** $28,899/yr · cap rate 2.5% · gross yield 8.8%
 - **Debt service:** $65,419/yr (loan $862,500 @ 6.5%, yr-1 interest $55,779)
@@ -185,7 +187,7 @@ Single-family · 4 bd / 2.5 ba · 2,200 sqft · list **$1,150,000**
 Single-family (near beach) · 4 bd / 3.0 ba · 2,400 sqft · list **$1,495,000**  
 [listing](https://example.com/listing/OG-007)
 
-- **Gross STR revenue:** $101,070/yr (peak $6,800/wk)
+- **Gross STR revenue:** $101,070/yr (peak $6,800/wk · basis: seasonal model)
 - **Operating expenses:** $81,941/yr (mgmt $15,160, tax $21,000, ins $8,970, maint $14,950, utils $4,800, ground lease $1,150)
 - **NOI:** $19,129/yr · cap rate 1.3% · gross yield 6.8%
 - **Debt service:** $85,045/yr (loan $1,121,250 @ 6.5%, yr-1 interest $72,512)
@@ -200,7 +202,7 @@ Single-family (near beach) · 4 bd / 3.0 ba · 2,400 sqft · list **$1,495,000**
 Single-family (Grand Victorian) · 5 bd / 3.0 ba · 3,000 sqft · list **$1,795,000**  
 [listing](https://example.com/listing/OG-004)
 
-- **Gross STR revenue:** $130,796/yr (peak $8,800/wk)
+- **Gross STR revenue:** $130,796/yr (peak $8,800/wk · basis: seasonal model)
 - **Operating expenses:** $99,209/yr (mgmt $19,619, tax $24,500, ins $10,770, maint $17,950, utils $4,800, ground lease $1,200)
 - **NOI:** $31,587/yr · cap rate 1.8% · gross yield 7.3%
 - **Debt service:** $102,111/yr (loan $1,346,250 @ 6.5%, yr-1 interest $87,063)
@@ -215,7 +217,7 @@ Single-family (Grand Victorian) · 5 bd / 3.0 ba · 3,000 sqft · list **$1,795,
 Single-family (large) · 6 bd / 4.0 ba · 3,400 sqft · list **$2,150,000**  
 [listing](https://example.com/listing/OG-010)
 
-- **Gross STR revenue:** $130,796/yr (peak $8,800/wk)
+- **Gross STR revenue:** $130,796/yr (peak $8,800/wk · basis: seasonal model)
 - **Operating expenses:** $109,489/yr (mgmt $19,619, tax $29,000, ins $12,900, maint $21,500, utils $4,800, ground lease $1,300)
 - **NOI:** $21,307/yr · cap rate 1.0% · gross yield 6.1%
 - **Debt service:** $122,305/yr (loan $1,612,500 @ 6.5%, yr-1 interest $104,282)
