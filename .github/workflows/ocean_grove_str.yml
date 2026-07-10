@@ -38,8 +38,11 @@ jobs:
 
       - name: Generate report
         env:
-          # Optional live data source. Leave unset to use the representative sample.
-          RENTCAST_API_KEY: ${{ secrets.RENTCAST_API_KEY }}
+          # Optional live data. Leave unset to use the representative sample +
+          # seasonal model. Set both for a fully-automated real-data pipeline:
+          RENTCAST_API_KEY: ${{ secrets.RENTCAST_API_KEY }}   # for-sale listings
+          AIRROI_API_KEY: ${{ secrets.AIRROI_API_KEY }}       # STR revenue by bedroom
+          AIRROI_MARKET: ${{ vars.AIRROI_MARKET }}            # optional market id/slug
         run: |
           python3 ocean_grove_str.py
 

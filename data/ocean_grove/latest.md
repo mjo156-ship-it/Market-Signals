@@ -1,10 +1,10 @@
 # 🏖️ Ocean Grove STR Opportunity Report
 
-**Week of 2026-07-06**  ·  Ocean Grove, NJ (Neptune Township, Monmouth County)  ·  generated 2026-07-08 19:02 UTC
+**Week of 2026-07-06**  ·  Ocean Grove, NJ (Neptune Township, Monmouth County)  ·  generated 2026-07-10 17:57 UTC
 
 > ⚠️ **Data source: representative sample** — Representative sample listings — illustrative, not live MLS. Wire a live feed via $OG_LISTINGS_JSON or $RENTCAST_API_KEY.
 
-> 📈 **STR revenue: built-in seasonal model** — STR revenue from the built-in seasonal model. Drop AirDNA MarketMinder figures into data/ocean_grove/airdna_market.json (see .example.json) to calibrate.
+> 📈 **STR revenue: built-in seasonal model** — STR revenue from the built-in seasonal model. Set $AIRROI_API_KEY (live) or drop AirDNA MarketMinder figures into data/ocean_grove/airdna_market.json to calibrate to real market data.
 
 ## Summary
 

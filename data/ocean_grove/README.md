@@ -24,12 +24,26 @@ Monday by [`.github/workflows/ocean_grove_str.yml`](../../.github/workflows/ocea
 
 1. **`$OG_LISTINGS_JSON`** — path to a JSON file of real listings you drop in
    (same schema as `SAMPLE_LISTINGS`). Either a bare array or `{"listings": [...]}`.
-2. **`$RENTCAST_API_KEY`** — live pull from RentCast (wired as a stub in
-   `_fetch_rentcast`; enable by filling in the request + mapping).
+2. **`$RENTCAST_API_KEY`** — live for-sale listings from RentCast
+   (`GET /listings/sale` for zip 07756; self-serve key).
 3. **`SAMPLE_LISTINGS`** — a curated, clearly-labelled **representative** set used
    when no live source is configured, so the report runs out-of-the-box. These are
    illustrative, **not** live MLS rows. The report's `meta.data_source` says which
    source produced it.
+
+## Fully-automated real-data pipeline (no manual step)
+
+Set two repo secrets once and the weekly Action pulls everything itself — no
+paste, ever:
+
+| Secret | Provider | Feeds |
+| --- | --- | --- |
+| `RENTCAST_API_KEY` | [RentCast](https://www.rentcast.io/api) (free tier, self-serve) | For-sale listings |
+| `AIRROI_API_KEY` | [AirROI](https://www.airroi.com/api) (pay-as-you-go, ~$0.01/call) | STR revenue by bedroom |
+
+Optional: repo **variable** `AIRROI_MARKET` (a market id/slug) if you don't want
+to resolve by lat/lng. With both keys set, `meta.data_source` = the live listings
+source and `meta.revenue_source.primary` = `airroi`.
 
 The financial engine is identical regardless of source.
 
