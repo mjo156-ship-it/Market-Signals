@@ -241,12 +241,25 @@ def _http_json(url, headers=None, method="GET", body=None):
         return None
 
 
+def _norm_addr_key(it):
+    """Municipality-agnostic dedup key for a RentCast listing. Ocean Grove is part
+    of Neptune Township, so RentCast can return the same unit twice under both city
+    labels; keying on street + unit (ignoring city/state/zip) collapses them while
+    keeping distinct units (e.g. Apt 3I vs Apt 2F) separate."""
+    l1 = (it.get("addressLine1") or "").strip().lower()
+    l2 = (it.get("addressLine2") or "").strip().lower()
+    if l1:
+        return f"{l1}|{l2}"
+    parts = [p.strip().lower() for p in (it.get("formattedAddress") or "").split(",")]
+    return "|".join(parts[:-2]) if len(parts) > 2 else "|".join(parts)
+
+
 def _fetch_rentcast(api_key):
     """Live Ocean Grove for-sale listings from RentCast.
 
     GET {RENTCAST_BASE}/listings/sale?zipCode=07756&status=Active  (header X-Api-Key).
-    Maps the response into the SAMPLE_LISTINGS schema. Returns None on failure so
-    the caller falls back to the representative set.
+    Maps the response into the SAMPLE_LISTINGS schema, de-duplicating repeated units.
+    Returns None on failure so the caller falls back to the representative set.
     """
     qs = urllib.parse.urlencode({"zipCode": OG_ZIP, "status": "Active", "limit": 100})
     url = f"{RENTCAST_BASE}/listings/sale?{qs}"
@@ -254,10 +267,17 @@ def _fetch_rentcast(api_key):
     if not isinstance(rows, list) or not rows:
         return None
     out = []
+    seen = set()
+    dropped = 0
     for it in rows:
         price = it.get("price")
         if not price:
             continue
+        key = _norm_addr_key(it)
+        if key in seen:
+            dropped += 1
+            continue
+        seen.add(key)
         hoa = it.get("hoa") or {}
         out.append({
             "id": it.get("id") or it.get("formattedAddress"),
@@ -279,6 +299,8 @@ def _fetch_rentcast(api_key):
     for r in out:
         if r["annual_property_tax"] is None:
             del r["annual_property_tax"]
+    if dropped:
+        print(f"  RentCast: {len(out)} listings ({dropped} duplicate unit(s) dropped)")
     return out or None
 
 
