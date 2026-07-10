@@ -44,19 +44,17 @@ STR REVENUE (AirDNA-calibratable)
 --------------------------------------------------------------------------------
 Each listing's gross STR revenue is resolved most-specific-first:
   1. listing `airdna_projected_revenue`/`str_projected_revenue` — address-level
-     projection (AirDNA Rentalizer, AirROI listing analytics, ...).
-  2. Market data by bedroom count, from either:
-       * data/ocean_grove/airdna_market.json ($OG_AIRDNA_JSON) — an AirDNA
-         MarketMinder paste (see airdna_market.example.json), or
-       * $AIRROI_API_KEY — a live AirROI market pull (fully automated, self-serve,
-         pay-as-you-go). POST /markets/summary per bedroom bucket.
-  3. Built-in seasonal model              — used when no market figure applies.
+     projection, if supplied on the listing.
+  2. Market data by bedroom count from data/ocean_grove/airdna_market.json
+     ($OG_AIRDNA_JSON) — an optional AirDNA MarketMinder paste (see
+     airdna_market.example.json).
+  3. Built-in seasonal model              — the default.
 The chosen basis is recorded per listing (`str_revenue.basis`) and summarized in
 `meta.revenue_source`.
 
-Fully-automated setup (no manual step after keys are set once): add repo secrets
-$RENTCAST_API_KEY (listings) and $AIRROI_API_KEY (revenue); the weekly Action
-does the rest.
+Automated setup: add repo secret $RENTCAST_API_KEY and the weekly Action pulls
+live listings on its own. STR revenue uses the seasonal model (there is no free
+automated STR-revenue feed; AirDNA/AirROI both gate their APIs behind paid tiers).
 
 --------------------------------------------------------------------------------
 USAGE
@@ -132,14 +130,10 @@ LICENSE_ANNUAL       = _envf("OG_LICENSE_ANNUAL", 750)     # Neptune Twp STR lic
 # --- "Near break-even" band: how close (in $/yr) counts as almost-there ---
 NEAR_BREAKEVEN_BAND  = _envf("OG_NEAR_BREAKEVEN_BAND", 7500)
 
-# --- Live data endpoints (all overridable so the API shape can be tuned without
-# a code change once a real key is in hand). ---
+# --- Live data endpoints (overridable so the API shape can be tuned without a
+# code change once a real key is in hand). ---
 OG_ZIP           = os.environ.get("OG_ZIP", "07756")           # Ocean Grove, NJ
-OG_LAT           = _envf("OG_LAT", 40.2126)
-OG_LNG           = _envf("OG_LNG", -74.0043)
 RENTCAST_BASE    = os.environ.get("RENTCAST_BASE", "https://api.rentcast.io/v1")
-AIRROI_BASE      = os.environ.get("AIRROI_BASE", "https://api.airroi.com")
-AIRROI_MARKET    = os.environ.get("AIRROI_MARKET", "")         # market id/slug if known
 HTTP_TIMEOUT     = _envi("OG_HTTP_TIMEOUT", 20)
 
 # --- Seasonal STR revenue model (Ocean Grove is an intensely seasonal shore
@@ -314,10 +308,10 @@ def estimate_str_revenue(listing, market=None):
 
     Revenue is resolved in priority order (most specific first):
       1. listing `airdna_projected_revenue`/`str_projected_revenue` — address-level
-         projection (AirDNA Rentalizer, AirROI listing analytics, etc.).
+         projection, if supplied on the listing.
       2. `market` data for the listing's bedroom count — annual_revenue, or
          adr x occupancy x 365 if annual_revenue is absent. `market` comes from an
-         AirDNA MarketMinder paste or a live AirROI pull (same shape).
+         optional AirDNA MarketMinder paste (airdna_market.json).
       3. The seasonal model (per-listing `str_peak_weekly` override or the
          bedroom-count peak-weekly lookup, scaled across peak/shoulder/off).
 
@@ -368,66 +362,15 @@ def estimate_str_revenue(listing, market=None):
     return round(gross), breakdown, round(peak_weekly * scale), basis
 
 
-def _airroi_metric(obj, *names):
-    """Pull the first present numeric among candidate field names (tolerates the
-    minor naming differences across AirROI's summary responses)."""
-    for n in names:
-        v = obj.get(n)
-        if isinstance(v, (int, float)):
-            return float(v)
-    return None
-
-
-def _fetch_airroi(api_key):
-    """Live Ocean Grove STR market metrics from AirROI, by bedroom count.
-
-    POST {AIRROI_BASE}/markets/summary (header x-api-key) once per bedroom bucket,
-    returning the shared market-revenue shape: {by_bedroom: {n: {annual_revenue,
-    adr, occupancy}}}. Endpoint/field names are defensive + env-overridable so a
-    real key needs at most a one-line tweak. Returns None on failure.
-    """
-    url = f"{AIRROI_BASE}/markets/summary"
-    headers = {"x-api-key": api_key, "Accept": "application/json"}
-    by_bed = {}
-    for beds in range(0, 6):
-        # Market identified by explicit id/slug if provided, else by coordinates.
-        body = {"bedrooms": beds}
-        if AIRROI_MARKET:
-            body["market"] = AIRROI_MARKET
-        else:
-            body["latitude"] = OG_LAT
-            body["longitude"] = OG_LNG
-        resp = _http_json(url, headers=headers, method="POST", body=body)
-        if not isinstance(resp, dict):
-            continue
-        d = resp.get("data") or resp.get("summary") or resp
-        rev = _airroi_metric(d, "revenue", "annual_revenue", "revenue_ltm", "ltm_revenue")
-        adr = _airroi_metric(d, "adr", "average_daily_rate", "avg_daily_rate")
-        occ = _airroi_metric(d, "occupancy", "occupancy_rate", "occ")
-        if occ is not None and occ > 1:       # normalize a percentage to a fraction
-            occ = occ / 100.0
-        if rev or (adr and occ):
-            by_bed[str(beds)] = {"annual_revenue": rev, "adr": adr, "occupancy": occ}
-    if not by_bed:
-        return None
-    return {
-        "market": "Ocean Grove, NJ",
-        "source": "AirROI API",
-        "source_tag": "airroi",
-        "as_of": datetime.now(timezone.utc).strftime("%Y-%m"),
-        "by_bedroom": by_bed,
-    }
-
-
 def resolve_market_revenue():
-    """Resolve STR market revenue calibration, most-authoritative-first.
+    """Resolve STR market-revenue calibration. Returns (data, label), or
+    (None, None) to use the built-in seasonal model.
 
-    Returns (data, label) where data has the shape {by_bedroom, source_tag, ...}
-    consumed by estimate_str_revenue(), or (None, None) to use the seasonal model.
-
-      1. $OG_AIRDNA_JSON file (default data/ocean_grove/airdna_market.json) — a
-         paste from an AirDNA MarketMinder subscription.
-      2. $AIRROI_API_KEY — live AirROI market pull (fully automated).
+    Source: an optional $OG_AIRDNA_JSON file (default data/ocean_grove/
+    airdna_market.json) — a paste from an AirDNA MarketMinder subscription, shaped
+    like airdna_market.example.json. This is the only calibration hook; STR
+    revenue otherwise comes from the seasonal model (listings are automated via
+    RentCast, but no free automated STR-revenue feed is wired).
     """
     path = os.environ.get("OG_AIRDNA_JSON", "data/ocean_grove/airdna_market.json")
     if path and Path(path).exists():
@@ -437,13 +380,6 @@ def resolve_market_revenue():
             return d, path
         except (ValueError, OSError):
             pass
-
-    airroi_key = os.environ.get("AIRROI_API_KEY")
-    if airroi_key:
-        d = _fetch_airroi(airroi_key)
-        if d:
-            return d, "airroi-api"
-
     return None, None
 
 
@@ -688,7 +624,7 @@ def _revenue_basis_label(basis):
         return "seasonal model"
     if basis == "address-projection":
         return "address-level projection"
-    provider = {"airroi": "AirROI", "airdna": "AirDNA", "airdna-file": "AirDNA"}
+    provider = {"airdna": "AirDNA", "airdna-file": "AirDNA"}
     for tag, name in provider.items():
         if basis.startswith(tag + "-"):
             if basis.endswith("-market-bedroom"):
@@ -756,9 +692,9 @@ def build_report(asof_date, archive=True):
                 "note": (
                     f"STR revenue calibrated to {(market or {}).get('source', 'market data')}."
                     if market_used else
-                    "STR revenue from the built-in seasonal model. Set $AIRROI_API_KEY (live) "
-                    "or drop AirDNA MarketMinder figures into data/ocean_grove/airdna_market.json "
-                    "to calibrate to real market data."
+                    "STR revenue from the built-in seasonal model. Optionally drop AirDNA "
+                    "MarketMinder figures into data/ocean_grove/airdna_market.json to "
+                    "calibrate to real market data."
                 ),
             },
             "listing_count": len(analyzed),

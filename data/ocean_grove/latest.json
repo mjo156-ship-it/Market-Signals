@@ -2,7 +2,7 @@
   "meta": {
     "report": "Ocean Grove STR Opportunity Report",
     "version": "1.0",
-    "generated_utc": "2026-07-10T17:57:08.190323+00:00",
+    "generated_utc": "2026-07-10T18:12:59.111113+00:00",
     "week_of": "2026-07-06",
     "asof": "2026-07-08",
     "market": "Ocean Grove, NJ (Neptune Township, Monmouth County)",
@@ -16,7 +16,7 @@
       "provider": null,
       "market_ref": null,
       "as_of": null,
-      "note": "STR revenue from the built-in seasonal model. Set $AIRROI_API_KEY (live) or drop AirDNA MarketMinder figures into data/ocean_grove/airdna_market.json to calibrate to real market data."
+      "note": "STR revenue from the built-in seasonal model. Optionally drop AirDNA MarketMinder figures into data/ocean_grove/airdna_market.json to calibrate to real market data."
     },
     "listing_count": 12
   },

@@ -31,19 +31,19 @@ Monday by [`.github/workflows/ocean_grove_str.yml`](../../.github/workflows/ocea
    illustrative, **not** live MLS rows. The report's `meta.data_source` says which
    source produced it.
 
-## Fully-automated real-data pipeline (no manual step)
+## Automated listings (no manual step)
 
-Set two repo secrets once and the weekly Action pulls everything itself — no
-paste, ever:
+Set one repo secret once and the weekly Action pulls live for-sale listings
+itself:
 
 | Secret | Provider | Feeds |
 | --- | --- | --- |
 | `RENTCAST_API_KEY` | [RentCast](https://www.rentcast.io/api) (free tier, self-serve) | For-sale listings |
-| `AIRROI_API_KEY` | [AirROI](https://www.airroi.com/api) (pay-as-you-go, ~$0.01/call) | STR revenue by bedroom |
 
-Optional: repo **variable** `AIRROI_MARKET` (a market id/slug) if you don't want
-to resolve by lat/lng. With both keys set, `meta.data_source` = the live listings
-source and `meta.revenue_source.primary` = `airroi`.
+STR **revenue** uses the built-in seasonal model — there is no free automated
+STR-revenue feed (AirDNA and AirROI both gate their APIs behind paid tiers). To
+calibrate revenue to real numbers, optionally paste AirDNA MarketMinder figures
+into `airdna_market.json` (see below); otherwise the seasonal model is used.
 
 The financial engine is identical regardless of source.
 
