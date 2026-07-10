@@ -1,6 +1,6 @@
 # Signal Research — 2026-07-10
 
-_Generated 2026-07-10T16:53:04+00:00 · 89 tickers · 3 firing · 8 approaching_
+_Generated 2026-07-10T21:12:26+00:00 · 89 tickers · 3 firing · 7 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -14,11 +14,10 @@ _Generated 2026-07-10T16:53:04+00:00 · 89 tickers · 3 firing · 8 approaching_
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Rotation: entered top-8 3-mo momentum (long) | NAIL | NAIL | manual_swing | 21d | 62% | +4.8% | +1.1pp | 122 |
-| Bollinger %B overbought (>1) fade (short) | TMV | short TMV | composer_ready | 5d | 60% | +0.9% | +0.9pp | 133 |
 | Rotation: entered top-8 12-mo momentum (long) | XLU | XLU | manual_swing | 21d | 75% | +2.1% | +1.0pp | 80 |
 | Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 64% | +1.5% | +0.7pp | 28 |
 | Rotation: entered top-8 3-mo momentum (long) | IAK | IAK | manual_swing | 21d | 67% | +1.3% | +0.5pp | 45 |
 | Rotation: entered top-8 12-mo momentum (long) | PSI | PSI | manual_swing | 21d | 62% | +3.2% | +0.6pp | 26 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 72% | +0.3% | +0.1pp | 226 |
+| Rotation: entered top-8 3-mo momentum (long) | XLF | FAS | manual_swing | 21d | 64% | +0.9% | +0.1pp | 99 |
 | Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |
