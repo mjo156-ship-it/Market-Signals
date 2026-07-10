@@ -25,7 +25,7 @@ permissions:
 jobs:
   generate-report:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -51,10 +51,16 @@ jobs:
           git add data/ocean_grove/
           if git diff --staged --quiet; then
             echo "No changes"
-          else
-            WEEK=$(TZ=America/New_York date +%Y-%m-%d)
-            git commit -m "🏖️ Ocean Grove STR report — week of ${WEEK}"
-            git pull --rebase
-            git push
-            echo "Report pushed"
+            exit 0
           fi
+          WEEK=$(TZ=America/New_York date +%Y-%m-%d)
+          git commit -m "🏖️ Ocean Grove STR report — week of ${WEEK}"
+          # main receives frequent commits from the other scheduled workflows, so
+          # rebase-and-push can lose a race. Retry a few times before failing.
+          for attempt in 1 2 3 4 5; do
+            git pull --rebase origin main && git push origin HEAD:main && {
+              echo "Report pushed (attempt ${attempt})"; exit 0; }
+            echo "Push attempt ${attempt} failed; retrying…"
+            sleep 5
+          done
+          echo "Push failed after retries"; exit 1
