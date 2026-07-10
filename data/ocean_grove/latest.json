@@ -2,7 +2,7 @@
   "meta": {
     "report": "Ocean Grove STR Opportunity Report",
     "version": "1.0",
-    "generated_utc": "2026-07-10T18:36:43.556807+00:00",
+    "generated_utc": "2026-07-10T19:04:19.261910+00:00",
     "week_of": "2026-07-06",
     "asof": "2026-07-10",
     "market": "Ocean Grove, NJ (Neptune Township, Monmouth County)",
@@ -11,14 +11,14 @@
     "revenue_source": {
       "primary": "seasonal-model",
       "by_basis": {
-        "seasonal-model": 22
+        "seasonal-model": 21
       },
       "provider": null,
       "market_ref": null,
       "as_of": null,
       "note": "STR revenue from the built-in seasonal model. Optionally drop AirDNA MarketMinder figures into data/ocean_grove/airdna_market.json to calibrate to real market data."
     },
-    "listing_count": 22
+    "listing_count": 21
   },
   "assumptions": {
     "basis_split": {
@@ -76,14 +76,14 @@
     "breakeven_definition": "Three tests are reported. purchase_year = year-1 after-tax operating cash flow (financed) >= $0, i.e. break-even net of tax WITH the 100% bonus-depreciation benefit (nearly always true \u2014 the shield swamps the operating loss). sustained = stabilized (yr 2+, no depreciation) after-tax cash flow (financed) >= $0 (the strict self-funding test). operating_allcash = stabilized after-tax cash flow >= $0 unlevered. break_even_down_pct = equity fraction needed to self-fund annually; horizon_years = years the one-time yr-1 tax windfall keeps the cumulative position non-negative."
   },
   "summary": {
-    "listing_count": 22,
-    "breakeven_purchase_year": 22,
+    "listing_count": 21,
+    "breakeven_purchase_year": 21,
     "breakeven_sustained": 0,
-    "breakeven_operating_allcash": 14,
-    "median_list_price": 1039000.0,
-    "median_gross_str_revenue": 65398.0,
-    "median_noi": 8568.0,
-    "median_breakeven_down_pct": 0.756
+    "breakeven_operating_allcash": 13,
+    "median_list_price": 1179000,
+    "median_gross_str_revenue": 74316,
+    "median_noi": 8568,
+    "median_breakeven_down_pct": 0.7669
   },
   "listings": [
     {
@@ -95,100 +95,6 @@
       "sqft": 500,
       "list_price": 400000,
       "url": "https://www.rentcast.io/property/52-Pitman-Ave,-Apt-3I,-Ocean-Grove,-NJ-07756",
-      "str_revenue": {
-        "gross_annual": 41617,
-        "peak_weekly": 2800,
-        "basis": "seasonal-model",
-        "by_season": {
-          "peak": {
-            "weeks": 11,
-            "weekly_rate": 2800,
-            "occupancy": 0.9,
-            "revenue": 27720
-          },
-          "shoulder": {
-            "weeks": 8,
-            "weekly_rate": 1540,
-            "occupancy": 0.6,
-            "revenue": 7392
-          },
-          "off": {
-            "weeks": 33,
-            "weekly_rate": 896,
-            "occupancy": 0.22,
-            "revenue": 6505
-          }
-        }
-      },
-      "operating_expenses": {
-        "management": 6243,
-        "platform_fees": 1249,
-        "cleaning_net": 1665,
-        "supplies": 1249,
-        "capex_reserve": 2081,
-        "property_tax": 7160,
-        "insurance": 2400,
-        "maintenance": 4000,
-        "utilities": 4800,
-        "condo_fee": 1452,
-        "ground_lease": 0,
-        "str_license": 750,
-        "total": 33049
-      },
-      "noi": 8568,
-      "financing": {
-        "loan_amount": 300000,
-        "annual_debt_service": 22754,
-        "year1_interest": 19401,
-        "cash_invested": 112000,
-        "down_payment_pct": 0.25,
-        "rate": 0.065
-      },
-      "depreciation": {
-        "building_basis": 240000,
-        "land_basis": 160000,
-        "bonus_depreciation_year1": 240000
-      },
-      "operating_income": {
-        "financed": {
-          "pretax_cash_flow": -14186,
-          "year1_tax_benefit": 92808,
-          "aftertax_cash_flow_year1": 78622,
-          "aftertax_cash_flow_stabilized": -10178
-        },
-        "all_cash": {
-          "pretax_cash_flow": 8568,
-          "year1_tax_benefit": 85630,
-          "aftertax_cash_flow_year1": 94198,
-          "aftertax_cash_flow_stabilized": 5398
-        }
-      },
-      "yields": {
-        "cap_rate": 0.0214,
-        "gross_yield": 0.104,
-        "cash_on_cash": -0.1267
-      },
-      "breakeven": {
-        "down_payment_pct": 0.7401,
-        "horizon_years": 8
-      },
-      "flags": {
-        "breaks_even_purchase_year": true,
-        "breaks_even_sustained": false,
-        "breaks_even_operating_allcash": true
-      },
-      "rating": "DEPR_FUNDED_BREAKEVEN",
-      "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)"
-    },
-    {
-      "id": "52-Pitman-Ave,-Apt-3I,-Neptune-Township,-NJ-07756",
-      "address": "52 Pitman Ave, Apt 3I, Neptune Township, NJ 07756",
-      "property_type": "Condo",
-      "beds": 1,
-      "baths": 1,
-      "sqft": 0,
-      "list_price": 400000,
-      "url": "https://www.rentcast.io/property/52-Pitman-Ave,-Apt-3I,-Neptune-Township,-NJ-07756",
       "str_revenue": {
         "gross_annual": 41617,
         "peak_weekly": 2800,
