@@ -1,0 +1,1218 @@
+{
+  "meta": {
+    "report": "Ocean Grove STR Opportunity Report",
+    "version": "1.0",
+    "generated_utc": "2026-07-10T18:12:59.111113+00:00",
+    "week_of": "2026-07-06",
+    "asof": "2026-07-08",
+    "market": "Ocean Grove, NJ (Neptune Township, Monmouth County)",
+    "data_source": "representative-sample",
+    "data_source_note": "Representative sample listings \u2014 illustrative, not live MLS. Wire a live feed via $OG_LISTINGS_JSON or $RENTCAST_API_KEY.",
+    "revenue_source": {
+      "primary": "seasonal-model",
+      "by_basis": {
+        "seasonal-model": 12
+      },
+      "provider": null,
+      "market_ref": null,
+      "as_of": null,
+      "note": "STR revenue from the built-in seasonal model. Optionally drop AirDNA MarketMinder figures into data/ocean_grove/airdna_market.json to calibrate to real market data."
+    },
+    "listing_count": 12
+  },
+  "assumptions": {
+    "basis_split": {
+      "land": 0.4,
+      "building": 0.6
+    },
+    "bonus_depreciation_rate": 1.0,
+    "marginal_tax_rate": 0.37,
+    "tax_treatment": "STR losses assumed non-passive (avg stay <=7d + material participation)",
+    "financing": {
+      "down_payment_pct": 0.25,
+      "mortgage_rate": 0.065,
+      "term_years": 30,
+      "closing_cost_pct": 0.03
+    },
+    "operating_cost_pcts": {
+      "management": 0.15,
+      "platform_fees": 0.03,
+      "cleaning_net": 0.04,
+      "supplies": 0.03,
+      "capex_reserve": 0.05,
+      "insurance_of_price": 0.006,
+      "maintenance_of_price": 0.01
+    },
+    "operating_cost_fixed": {
+      "utilities_annual": 4800,
+      "str_license_annual": 750
+    },
+    "seasonal_model": {
+      "peak": {
+        "weeks": 11,
+        "rate_mult": 1.0,
+        "occ": 0.9
+      },
+      "shoulder": {
+        "weeks": 8,
+        "rate_mult": 0.55,
+        "occ": 0.6
+      },
+      "off": {
+        "weeks": 33,
+        "rate_mult": 0.32,
+        "occ": 0.22
+      }
+    },
+    "peak_weekly_by_bed": {
+      "0": 2400,
+      "1": 2800,
+      "2": 3800,
+      "3": 5000,
+      "4": 6800,
+      "5": 8800
+    },
+    "near_breakeven_band": 7500,
+    "breakeven_definition": "Three tests are reported. purchase_year = year-1 after-tax operating cash flow (financed) >= $0, i.e. break-even net of tax WITH the 100% bonus-depreciation benefit (nearly always true \u2014 the shield swamps the operating loss). sustained = stabilized (yr 2+, no depreciation) after-tax cash flow (financed) >= $0 (the strict self-funding test). operating_allcash = stabilized after-tax cash flow >= $0 unlevered. break_even_down_pct = equity fraction needed to self-fund annually; horizon_years = years the one-time yr-1 tax windfall keeps the cumulative position non-negative."
+  },
+  "summary": {
+    "listing_count": 12,
+    "breakeven_purchase_year": 12,
+    "breakeven_sustained": 0,
+    "breakeven_operating_allcash": 12,
+    "median_list_price": 807000.0,
+    "median_gross_str_revenue": 74316.0,
+    "median_noi": 19668.5,
+    "median_breakeven_down_pct": 0.7596
+  },
+  "listings": [
+    {
+      "id": "OG-006",
+      "address": "88 Main Ave, Unit 2",
+      "property_type": "Condo (studio)",
+      "beds": 0,
+      "baths": 1.0,
+      "sqft": 480,
+      "list_price": 329000,
+      "url": "https://example.com/listing/OG-006",
+      "str_revenue": {
+        "gross_annual": 35672,
+        "peak_weekly": 2400,
+        "basis": "seasonal-model",
+        "by_season": {
+          "peak": {
+            "weeks": 11,
+            "weekly_rate": 2400,
+            "occupancy": 0.9,
+            "revenue": 23760
+          },
+          "shoulder": {
+            "weeks": 8,
+            "weekly_rate": 1320,
+            "occupancy": 0.6,
+            "revenue": 6336
+          },
+          "off": {
+            "weeks": 33,
+            "weekly_rate": 768,
+            "occupancy": 0.22,
+            "revenue": 5576
+          }
+        }
+      },
+      "operating_expenses": {
+        "management": 5351,
+        "platform_fees": 1070,
+        "cleaning_net": 1427,
+        "supplies": 1070,
+        "capex_reserve": 1784,
+        "property_tax": 4300,
+        "insurance": 1974,
+        "maintenance": 3290,
+        "utilities": 4800,
+        "condo_fee": 4080,
+        "ground_lease": 0,
+        "str_license": 750,
+        "total": 29896
+      },
+      "noi": 5776,
+      "financing": {
+        "loan_amount": 246750,
+        "annual_debt_service": 18716,
+        "year1_interest": 15958,
+        "cash_invested": 92120,
+        "down_payment_pct": 0.25,
+        "rate": 0.065
+      },
+      "depreciation": {
+        "building_basis": 197400,
+        "land_basis": 131600,
+        "bonus_depreciation_year1": 197400
+      },
+      "operating_income": {
+        "financed": {
+          "pretax_cash_flow": -12940,
+          "year1_tax_benefit": 76805,
+          "aftertax_cash_flow_year1": 63866,
+          "aftertax_cash_flow_stabilized": -9172
+        },
+        "all_cash": {
+          "pretax_cash_flow": 5776,
+          "year1_tax_benefit": 70901,
+          "aftertax_cash_flow_year1": 76677,
+          "aftertax_cash_flow_stabilized": 3639
+        }
+      },
+      "yields": {
+        "cap_rate": 0.0176,
+        "gross_yield": 0.1084,
+        "cash_on_cash": -0.1405
+      },
+      "breakeven": {
+        "down_payment_pct": 0.787,
+        "horizon_years": 7
+      },
+      "flags": {
+        "breaks_even_purchase_year": true,
+        "breaks_even_sustained": false,
+        "breaks_even_operating_allcash": true
+      },
+      "rating": "DEPR_FUNDED_BREAKEVEN",
+      "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)"
+    },
+    {
+      "id": "OG-003",
+      "address": "71 Cookman Ave, Unit 3",
+      "property_type": "Condo",
+      "beds": 1,
+      "baths": 1.0,
+      "sqft": 620,
+      "list_price": 415000,
+      "url": "https://example.com/listing/OG-003",
+      "str_revenue": {
+        "gross_annual": 41617,
+        "peak_weekly": 2800,
+        "basis": "seasonal-model",
+        "by_season": {
+          "peak": {
+            "weeks": 11,
+            "weekly_rate": 2800,
+            "occupancy": 0.9,
+            "revenue": 27720
+          },
+          "shoulder": {
+            "weeks": 8,
+            "weekly_rate": 1540,
+            "occupancy": 0.6,
+            "revenue": 7392
+          },
+          "off": {
+            "weeks": 33,
+            "weekly_rate": 896,
+            "occupancy": 0.22,
+            "revenue": 6505
+          }
+        }
+      },
+      "operating_expenses": {
+        "management": 6243,
+        "platform_fees": 1249,
+        "cleaning_net": 1665,
+        "supplies": 1249,
+        "capex_reserve": 2081,
+        "property_tax": 5200,
+        "insurance": 2490,
+        "maintenance": 4150,
+        "utilities": 4800,
+        "condo_fee": 4620,
+        "ground_lease": 0,
+        "str_license": 750,
+        "total": 34497
+      },
+      "noi": 7120,
+      "financing": {
+        "loan_amount": 311250,
+        "annual_debt_service": 23608,
+        "year1_interest": 20129,
+        "cash_invested": 116200,
+        "down_payment_pct": 0.25,
+        "rate": 0.065
+      },
+      "depreciation": {
+        "building_basis": 249000,
+        "land_basis": 166000,
+        "bonus_depreciation_year1": 249000
+      },
+      "operating_income": {
+        "financed": {
+          "pretax_cash_flow": -16488,
+          "year1_tax_benefit": 96943,
+          "aftertax_cash_flow_year1": 80456,
+          "aftertax_cash_flow_stabilized": -11674
+        },
+        "all_cash": {
+          "pretax_cash_flow": 7120,
+          "year1_tax_benefit": 89496,
+          "aftertax_cash_flow_year1": 96616,
+          "aftertax_cash_flow_stabilized": 4486
+        }
+      },
+      "yields": {
+        "cap_rate": 0.0172,
+        "gross_yield": 0.1003,
+        "cash_on_cash": -0.1419
+      },
+      "breakeven": {
+        "down_payment_pct": 0.7918,
+        "horizon_years": 7
+      },
+      "flags": {
+        "breaks_even_purchase_year": true,
+        "breaks_even_sustained": false,
+        "breaks_even_operating_allcash": true
+      },
+      "rating": "DEPR_FUNDED_BREAKEVEN",
+      "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)"
+    },
+    {
+      "id": "OG-009",
+      "address": "53 Clark Ave",
+      "property_type": "Single-family",
+      "beds": 3,
+      "baths": 1.5,
+      "sqft": 1400,
+      "list_price": 739000,
+      "url": "https://example.com/listing/OG-009",
+      "str_revenue": {
+        "gross_annual": 74316,
+        "peak_weekly": 5000,
+        "basis": "seasonal-model",
+        "by_season": {
+          "peak": {
+            "weeks": 11,
+            "weekly_rate": 5000,
+            "occupancy": 0.9,
+            "revenue": 49500
+          },
+          "shoulder": {
+            "weeks": 8,
+            "weekly_rate": 2750,
+            "occupancy": 0.6,
+            "revenue": 13200
+          },
+          "off": {
+            "weeks": 33,
+            "weekly_rate": 1600,
+            "occupancy": 0.22,
+            "revenue": 11616
+          }
+        }
+      },
+      "operating_expenses": {
+        "management": 11147,
+        "platform_fees": 2229,
+        "cleaning_net": 2973,
+        "supplies": 2229,
+        "capex_reserve": 3716,
+        "property_tax": 10600,
+        "insurance": 4434,
+        "maintenance": 7390,
+        "utilities": 4800,
+        "condo_fee": 0,
+        "ground_lease": 950,
+        "str_license": 750,
+        "total": 51218
+      },
+      "noi": 23098,
+      "financing": {
+        "loan_amount": 554250,
+        "annual_debt_service": 42039,
+        "year1_interest": 35844,
+        "cash_invested": 206920,
+        "down_payment_pct": 0.25,
+        "rate": 0.065
+      },
+      "depreciation": {
+        "building_basis": 443400,
+        "land_basis": 295600,
+        "bonus_depreciation_year1": 443400
+      },
+      "operating_income": {
+        "financed": {
+          "pretax_cash_flow": -18941,
+          "year1_tax_benefit": 168774,
+          "aftertax_cash_flow_year1": 149833,
+          "aftertax_cash_flow_stabilized": -14225
+        },
+        "all_cash": {
+          "pretax_cash_flow": 23098,
+          "year1_tax_benefit": 155512,
+          "aftertax_cash_flow_year1": 178610,
+          "aftertax_cash_flow_stabilized": 14552
+        }
+      },
+      "yields": {
+        "cap_rate": 0.0313,
+        "gross_yield": 0.1006,
+        "cash_on_cash": -0.0915
+      },
+      "breakeven": {
+        "down_payment_pct": 0.6207,
+        "horizon_years": 11
+      },
+      "flags": {
+        "breaks_even_purchase_year": true,
+        "breaks_even_sustained": false,
+        "breaks_even_operating_allcash": true
+      },
+      "rating": "DEPR_FUNDED_BREAKEVEN",
+      "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)"
+    },
+    {
+      "id": "OG-008",
+      "address": "122 Central Ave",
+      "property_type": "Condo",
+      "beds": 2,
+      "baths": 2.0,
+      "sqft": 1100,
+      "list_price": 560000,
+      "url": "https://example.com/listing/OG-008",
+      "str_revenue": {
+        "gross_annual": 56480,
+        "peak_weekly": 3800,
+        "basis": "seasonal-model",
+        "by_season": {
+          "peak": {
+            "weeks": 11,
+            "weekly_rate": 3800,
+            "occupancy": 0.9,
+            "revenue": 37620
+          },
+          "shoulder": {
+            "weeks": 8,
+            "weekly_rate": 2090,
+            "occupancy": 0.6,
+            "revenue": 10032
+          },
+          "off": {
+            "weeks": 33,
+            "weekly_rate": 1216,
+            "occupancy": 0.22,
+            "revenue": 8828
+          }
+        }
+      },
+      "operating_expenses": {
+        "management": 8472,
+        "platform_fees": 1694,
+        "cleaning_net": 2259,
+        "supplies": 1694,
+        "capex_reserve": 2824,
+        "property_tax": 7800,
+        "insurance": 3360,
+        "maintenance": 5600,
+        "utilities": 4800,
+        "condo_fee": 6240,
+        "ground_lease": 0,
+        "str_license": 750,
+        "total": 45493
+      },
+      "noi": 10987,
+      "financing": {
+        "loan_amount": 420000,
+        "annual_debt_service": 31856,
+        "year1_interest": 27162,
+        "cash_invested": 156800,
+        "down_payment_pct": 0.25,
+        "rate": 0.065
+      },
+      "depreciation": {
+        "building_basis": 336000,
+        "land_basis": 224000,
+        "bonus_depreciation_year1": 336000
+      },
+      "operating_income": {
+        "financed": {
+          "pretax_cash_flow": -20869,
+          "year1_tax_benefit": 130305,
+          "aftertax_cash_flow_year1": 109435,
+          "aftertax_cash_flow_stabilized": -14885
+        },
+        "all_cash": {
+          "pretax_cash_flow": 10987,
+          "year1_tax_benefit": 120255,
+          "aftertax_cash_flow_year1": 131242,
+          "aftertax_cash_flow_stabilized": 6922
+        }
+      },
+      "yields": {
+        "cap_rate": 0.0196,
+        "gross_yield": 0.1009,
+        "cash_on_cash": -0.1331
+      },
+      "breakeven": {
+        "down_payment_pct": 0.7619,
+        "horizon_years": 8
+      },
+      "flags": {
+        "breaks_even_purchase_year": true,
+        "breaks_even_sustained": false,
+        "breaks_even_operating_allcash": true
+      },
+      "rating": "DEPR_FUNDED_BREAKEVEN",
+      "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)"
+    },
+    {
+      "id": "OG-001",
+      "address": "29 Embury Ave",
+      "property_type": "Single-family (Victorian)",
+      "beds": 3,
+      "baths": 2.0,
+      "sqft": 1500,
+      "list_price": 785000,
+      "url": "https://example.com/listing/OG-001",
+      "str_revenue": {
+        "gross_annual": 74316,
+        "peak_weekly": 5000,
+        "basis": "seasonal-model",
+        "by_season": {
+          "peak": {
+            "weeks": 11,
+            "weekly_rate": 5000,
+            "occupancy": 0.9,
+            "revenue": 49500
+          },
+          "shoulder": {
+            "weeks": 8,
+            "weekly_rate": 2750,
+            "occupancy": 0.6,
+            "revenue": 13200
+          },
+          "off": {
+            "weeks": 33,
+            "weekly_rate": 1600,
+            "occupancy": 0.22,
+            "revenue": 11616
+          }
+        }
+      },
+      "operating_expenses": {
+        "management": 11147,
+        "platform_fees": 2229,
+        "cleaning_net": 2973,
+        "supplies": 2229,
+        "capex_reserve": 3716,
+        "property_tax": 11150,
+        "insurance": 4710,
+        "maintenance": 7850,
+        "utilities": 4800,
+        "condo_fee": 0,
+        "ground_lease": 1000,
+        "str_license": 750,
+        "total": 52554
+      },
+      "noi": 21762,
+      "financing": {
+        "loan_amount": 588750,
+        "annual_debt_service": 44656,
+        "year1_interest": 38075,
+        "cash_invested": 219800,
+        "down_payment_pct": 0.25,
+        "rate": 0.065
+      },
+      "depreciation": {
+        "building_basis": 471000,
+        "land_basis": 314000,
+        "bonus_depreciation_year1": 471000
+      },
+      "operating_income": {
+        "financed": {
+          "pretax_cash_flow": -22894,
+          "year1_tax_benefit": 180306,
+          "aftertax_cash_flow_year1": 157412,
+          "aftertax_cash_flow_stabilized": -16858
+        },
+        "all_cash": {
+          "pretax_cash_flow": 21762,
+          "year1_tax_benefit": 166218,
+          "aftertax_cash_flow_year1": 187980,
+          "aftertax_cash_flow_stabilized": 13710
+        }
+      },
+      "yields": {
+        "cap_rate": 0.0277,
+        "gross_yield": 0.0947,
+        "cash_on_cash": -0.1042
+      },
+      "breakeven": {
+        "down_payment_pct": 0.6636,
+        "horizon_years": 10
+      },
+      "flags": {
+        "breaks_even_purchase_year": true,
+        "breaks_even_sustained": false,
+        "breaks_even_operating_allcash": true
+      },
+      "rating": "DEPR_FUNDED_BREAKEVEN",
+      "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)"
+    },
+    {
+      "id": "OG-002",
+      "address": "108 Heck Ave",
+      "property_type": "Cottage",
+      "beds": 2,
+      "baths": 1.0,
+      "sqft": 980,
+      "list_price": 649000,
+      "url": "https://example.com/listing/OG-002",
+      "str_revenue": {
+        "gross_annual": 56480,
+        "peak_weekly": 3800,
+        "basis": "seasonal-model",
+        "by_season": {
+          "peak": {
+            "weeks": 11,
+            "weekly_rate": 3800,
+            "occupancy": 0.9,
+            "revenue": 37620
+          },
+          "shoulder": {
+            "weeks": 8,
+            "weekly_rate": 2090,
+            "occupancy": 0.6,
+            "revenue": 10032
+          },
+          "off": {
+            "weeks": 33,
+            "weekly_rate": 1216,
+            "occupancy": 0.22,
+            "revenue": 8828
+          }
+        }
+      },
+      "operating_expenses": {
+        "management": 8472,
+        "platform_fees": 1694,
+        "cleaning_net": 2259,
+        "supplies": 1694,
+        "capex_reserve": 2824,
+        "property_tax": 9400,
+        "insurance": 3894,
+        "maintenance": 6490,
+        "utilities": 4800,
+        "condo_fee": 0,
+        "ground_lease": 900,
+        "str_license": 750,
+        "total": 43177
+      },
+      "noi": 13303,
+      "financing": {
+        "loan_amount": 486750,
+        "annual_debt_service": 36919,
+        "year1_interest": 31479,
+        "cash_invested": 181720,
+        "down_payment_pct": 0.25,
+        "rate": 0.065
+      },
+      "depreciation": {
+        "building_basis": 389400,
+        "land_basis": 259600,
+        "bonus_depreciation_year1": 389400
+      },
+      "operating_income": {
+        "financed": {
+          "pretax_cash_flow": -23616,
+          "year1_tax_benefit": 150803,
+          "aftertax_cash_flow_year1": 127187,
+          "aftertax_cash_flow_stabilized": -16891
+        },
+        "all_cash": {
+          "pretax_cash_flow": 13303,
+          "year1_tax_benefit": 139156,
+          "aftertax_cash_flow_year1": 152459,
+          "aftertax_cash_flow_stabilized": 8381
+        }
+      },
+      "yields": {
+        "cap_rate": 0.0205,
+        "gross_yield": 0.087,
+        "cash_on_cash": -0.13
+      },
+      "breakeven": {
+        "down_payment_pct": 0.7513,
+        "horizon_years": 8
+      },
+      "flags": {
+        "breaks_even_purchase_year": true,
+        "breaks_even_sustained": false,
+        "breaks_even_operating_allcash": true
+      },
+      "rating": "DEPR_FUNDED_BREAKEVEN",
+      "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)"
+    },
+    {
+      "id": "OG-011",
+      "address": "40 Abbott Ave",
+      "property_type": "Single-family",
+      "beds": 3,
+      "baths": 2.0,
+      "sqft": 1600,
+      "list_price": 829000,
+      "url": "https://example.com/listing/OG-011",
+      "str_revenue": {
+        "gross_annual": 74316,
+        "peak_weekly": 5000,
+        "basis": "seasonal-model",
+        "by_season": {
+          "peak": {
+            "weeks": 11,
+            "weekly_rate": 5000,
+            "occupancy": 0.9,
+            "revenue": 49500
+          },
+          "shoulder": {
+            "weeks": 8,
+            "weekly_rate": 2750,
+            "occupancy": 0.6,
+            "revenue": 13200
+          },
+          "off": {
+            "weeks": 33,
+            "weekly_rate": 1600,
+            "occupancy": 0.22,
+            "revenue": 11616
+          }
+        }
+      },
+      "operating_expenses": {
+        "management": 11147,
+        "platform_fees": 2229,
+        "cleaning_net": 2973,
+        "supplies": 2229,
+        "capex_reserve": 3716,
+        "property_tax": 12000,
+        "insurance": 4974,
+        "maintenance": 8290,
+        "utilities": 4800,
+        "condo_fee": 0,
+        "ground_lease": 1000,
+        "str_license": 750,
+        "total": 54108
+      },
+      "noi": 20208,
+      "financing": {
+        "loan_amount": 621750,
+        "annual_debt_service": 47159,
+        "year1_interest": 40209,
+        "cash_invested": 232120,
+        "down_payment_pct": 0.25,
+        "rate": 0.065
+      },
+      "depreciation": {
+        "building_basis": 497400,
+        "land_basis": 331600,
+        "bonus_depreciation_year1": 497400
+      },
+      "operating_income": {
+        "financed": {
+          "pretax_cash_flow": -26951,
+          "year1_tax_benefit": 191438,
+          "aftertax_cash_flow_year1": 164488,
+          "aftertax_cash_flow_stabilized": -19550
+        },
+        "all_cash": {
+          "pretax_cash_flow": 20208,
+          "year1_tax_benefit": 176561,
+          "aftertax_cash_flow_year1": 196769,
+          "aftertax_cash_flow_stabilized": 12731
+        }
+      },
+      "yields": {
+        "cap_rate": 0.0244,
+        "gross_yield": 0.0896,
+        "cash_on_cash": -0.1161
+      },
+      "breakeven": {
+        "down_payment_pct": 0.7042,
+        "horizon_years": 9
+      },
+      "flags": {
+        "breaks_even_purchase_year": true,
+        "breaks_even_sustained": false,
+        "breaks_even_operating_allcash": true
+      },
+      "rating": "DEPR_FUNDED_BREAKEVEN",
+      "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)"
+    },
+    {
+      "id": "OG-012",
+      "address": "62 Mt Hermon Way",
+      "property_type": "Single-family (Victorian)",
+      "beds": 3,
+      "baths": 2.0,
+      "sqft": 1650,
+      "list_price": 895000,
+      "url": "https://example.com/listing/OG-012",
+      "str_revenue": {
+        "gross_annual": 74316,
+        "peak_weekly": 5000,
+        "basis": "seasonal-model",
+        "by_season": {
+          "peak": {
+            "weeks": 11,
+            "weekly_rate": 5000,
+            "occupancy": 0.9,
+            "revenue": 49500
+          },
+          "shoulder": {
+            "weeks": 8,
+            "weekly_rate": 2750,
+            "occupancy": 0.6,
+            "revenue": 13200
+          },
+          "off": {
+            "weeks": 33,
+            "weekly_rate": 1600,
+            "occupancy": 0.22,
+            "revenue": 11616
+          }
+        }
+      },
+      "operating_expenses": {
+        "management": 11147,
+        "platform_fees": 2229,
+        "cleaning_net": 2973,
+        "supplies": 2229,
+        "capex_reserve": 3716,
+        "property_tax": 13200,
+        "insurance": 5370,
+        "maintenance": 8950,
+        "utilities": 4800,
+        "condo_fee": 0,
+        "ground_lease": 1050,
+        "str_license": 750,
+        "total": 56414
+      },
+      "noi": 17902,
+      "financing": {
+        "loan_amount": 671250,
+        "annual_debt_service": 50913,
+        "year1_interest": 43410,
+        "cash_invested": 250600,
+        "down_payment_pct": 0.25,
+        "rate": 0.065
+      },
+      "depreciation": {
+        "building_basis": 537000,
+        "land_basis": 358000,
+        "bonus_depreciation_year1": 537000
+      },
+      "operating_income": {
+        "financed": {
+          "pretax_cash_flow": -33011,
+          "year1_tax_benefit": 208128,
+          "aftertax_cash_flow_year1": 175117,
+          "aftertax_cash_flow_stabilized": -23573
+        },
+        "all_cash": {
+          "pretax_cash_flow": 17902,
+          "year1_tax_benefit": 192066,
+          "aftertax_cash_flow_year1": 209968,
+          "aftertax_cash_flow_stabilized": 11278
+        }
+      },
+      "yields": {
+        "cap_rate": 0.02,
+        "gross_yield": 0.083,
+        "cash_on_cash": -0.1317
+      },
+      "breakeven": {
+        "down_payment_pct": 0.7573,
+        "horizon_years": 8
+      },
+      "flags": {
+        "breaks_even_purchase_year": true,
+        "breaks_even_sustained": false,
+        "breaks_even_operating_allcash": true
+      },
+      "rating": "DEPR_FUNDED_BREAKEVEN",
+      "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)"
+    },
+    {
+      "id": "OG-005",
+      "address": "45 Webb Ave",
+      "property_type": "Single-family",
+      "beds": 4,
+      "baths": 2.5,
+      "sqft": 2200,
+      "list_price": 1150000,
+      "url": "https://example.com/listing/OG-005",
+      "str_revenue": {
+        "gross_annual": 101070,
+        "peak_weekly": 6800,
+        "basis": "seasonal-model",
+        "by_season": {
+          "peak": {
+            "weeks": 11,
+            "weekly_rate": 6800,
+            "occupancy": 0.9,
+            "revenue": 67320
+          },
+          "shoulder": {
+            "weeks": 8,
+            "weekly_rate": 3740,
+            "occupancy": 0.6,
+            "revenue": 17952
+          },
+          "off": {
+            "weeks": 33,
+            "weekly_rate": 2176,
+            "occupancy": 0.22,
+            "revenue": 15798
+          }
+        }
+      },
+      "operating_expenses": {
+        "management": 15160,
+        "platform_fees": 3032,
+        "cleaning_net": 4043,
+        "supplies": 3032,
+        "capex_reserve": 5054,
+        "property_tax": 16800,
+        "insurance": 6900,
+        "maintenance": 11500,
+        "utilities": 4800,
+        "condo_fee": 0,
+        "ground_lease": 1100,
+        "str_license": 750,
+        "total": 72171
+      },
+      "noi": 28899,
+      "financing": {
+        "loan_amount": 862500,
+        "annual_debt_service": 65419,
+        "year1_interest": 55779,
+        "cash_invested": 322000,
+        "down_payment_pct": 0.25,
+        "rate": 0.065
+      },
+      "depreciation": {
+        "building_basis": 690000,
+        "land_basis": 460000,
+        "bonus_depreciation_year1": 690000
+      },
+      "operating_income": {
+        "financed": {
+          "pretax_cash_flow": -36520,
+          "year1_tax_benefit": 265245,
+          "aftertax_cash_flow_year1": 228725,
+          "aftertax_cash_flow_stabilized": -26575
+        },
+        "all_cash": {
+          "pretax_cash_flow": 28899,
+          "year1_tax_benefit": 244607,
+          "aftertax_cash_flow_year1": 273506,
+          "aftertax_cash_flow_stabilized": 18206
+        }
+      },
+      "yields": {
+        "cap_rate": 0.0251,
+        "gross_yield": 0.0879,
+        "cash_on_cash": -0.1134
+      },
+      "breakeven": {
+        "down_payment_pct": 0.6951,
+        "horizon_years": 9
+      },
+      "flags": {
+        "breaks_even_purchase_year": true,
+        "breaks_even_sustained": false,
+        "breaks_even_operating_allcash": true
+      },
+      "rating": "DEPR_FUNDED_BREAKEVEN",
+      "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)"
+    },
+    {
+      "id": "OG-007",
+      "address": "6 Surf Ave",
+      "property_type": "Single-family (near beach)",
+      "beds": 4,
+      "baths": 3.0,
+      "sqft": 2400,
+      "list_price": 1495000,
+      "url": "https://example.com/listing/OG-007",
+      "str_revenue": {
+        "gross_annual": 101070,
+        "peak_weekly": 6800,
+        "basis": "seasonal-model",
+        "by_season": {
+          "peak": {
+            "weeks": 11,
+            "weekly_rate": 6800,
+            "occupancy": 0.9,
+            "revenue": 67320
+          },
+          "shoulder": {
+            "weeks": 8,
+            "weekly_rate": 3740,
+            "occupancy": 0.6,
+            "revenue": 17952
+          },
+          "off": {
+            "weeks": 33,
+            "weekly_rate": 2176,
+            "occupancy": 0.22,
+            "revenue": 15798
+          }
+        }
+      },
+      "operating_expenses": {
+        "management": 15160,
+        "platform_fees": 3032,
+        "cleaning_net": 4043,
+        "supplies": 3032,
+        "capex_reserve": 5054,
+        "property_tax": 21000,
+        "insurance": 8970,
+        "maintenance": 14950,
+        "utilities": 4800,
+        "condo_fee": 0,
+        "ground_lease": 1150,
+        "str_license": 750,
+        "total": 81941
+      },
+      "noi": 19129,
+      "financing": {
+        "loan_amount": 1121250,
+        "annual_debt_service": 85045,
+        "year1_interest": 72512,
+        "cash_invested": 418600,
+        "down_payment_pct": 0.25,
+        "rate": 0.065
+      },
+      "depreciation": {
+        "building_basis": 897000,
+        "land_basis": 598000,
+        "bonus_depreciation_year1": 897000
+      },
+      "operating_income": {
+        "financed": {
+          "pretax_cash_flow": -65916,
+          "year1_tax_benefit": 351642,
+          "aftertax_cash_flow_year1": 285726,
+          "aftertax_cash_flow_stabilized": -46164
+        },
+        "all_cash": {
+          "pretax_cash_flow": 19129,
+          "year1_tax_benefit": 324812,
+          "aftertax_cash_flow_year1": 343941,
+          "aftertax_cash_flow_stabilized": 12051
+        }
+      },
+      "yields": {
+        "cap_rate": 0.0128,
+        "gross_yield": 0.0676,
+        "cash_on_cash": -0.1575
+      },
+      "breakeven": {
+        "down_payment_pct": 0.8447,
+        "horizon_years": 7
+      },
+      "flags": {
+        "breaks_even_purchase_year": true,
+        "breaks_even_sustained": false,
+        "breaks_even_operating_allcash": true
+      },
+      "rating": "DEPR_FUNDED_BREAKEVEN",
+      "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)"
+    },
+    {
+      "id": "OG-004",
+      "address": "14 Ocean Pathway",
+      "property_type": "Single-family (Grand Victorian)",
+      "beds": 5,
+      "baths": 3.0,
+      "sqft": 3000,
+      "list_price": 1795000,
+      "url": "https://example.com/listing/OG-004",
+      "str_revenue": {
+        "gross_annual": 130796,
+        "peak_weekly": 8800,
+        "basis": "seasonal-model",
+        "by_season": {
+          "peak": {
+            "weeks": 11,
+            "weekly_rate": 8800,
+            "occupancy": 0.9,
+            "revenue": 87120
+          },
+          "shoulder": {
+            "weeks": 8,
+            "weekly_rate": 4840,
+            "occupancy": 0.6,
+            "revenue": 23232
+          },
+          "off": {
+            "weeks": 33,
+            "weekly_rate": 2816,
+            "occupancy": 0.22,
+            "revenue": 20444
+          }
+        }
+      },
+      "operating_expenses": {
+        "management": 19619,
+        "platform_fees": 3924,
+        "cleaning_net": 5232,
+        "supplies": 3924,
+        "capex_reserve": 6540,
+        "property_tax": 24500,
+        "insurance": 10770,
+        "maintenance": 17950,
+        "utilities": 4800,
+        "condo_fee": 0,
+        "ground_lease": 1200,
+        "str_license": 750,
+        "total": 99209
+      },
+      "noi": 31587,
+      "financing": {
+        "loan_amount": 1346250,
+        "annual_debt_service": 102111,
+        "year1_interest": 87063,
+        "cash_invested": 502600,
+        "down_payment_pct": 0.25,
+        "rate": 0.065
+      },
+      "depreciation": {
+        "building_basis": 1077000,
+        "land_basis": 718000,
+        "bonus_depreciation_year1": 1077000
+      },
+      "operating_income": {
+        "financed": {
+          "pretax_cash_flow": -70524,
+          "year1_tax_benefit": 419016,
+          "aftertax_cash_flow_year1": 348493,
+          "aftertax_cash_flow_stabilized": -49997
+        },
+        "all_cash": {
+          "pretax_cash_flow": 31587,
+          "year1_tax_benefit": 386803,
+          "aftertax_cash_flow_year1": 418390,
+          "aftertax_cash_flow_stabilized": 19900
+        }
+      },
+      "yields": {
+        "cap_rate": 0.0176,
+        "gross_yield": 0.0729,
+        "cash_on_cash": -0.1403
+      },
+      "breakeven": {
+        "down_payment_pct": 0.7865,
+        "horizon_years": 7
+      },
+      "flags": {
+        "breaks_even_purchase_year": true,
+        "breaks_even_sustained": false,
+        "breaks_even_operating_allcash": true
+      },
+      "rating": "DEPR_FUNDED_BREAKEVEN",
+      "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)"
+    },
+    {
+      "id": "OG-010",
+      "address": "17 Pilgrim Pathway",
+      "property_type": "Single-family (large)",
+      "beds": 6,
+      "baths": 4.0,
+      "sqft": 3400,
+      "list_price": 2150000,
+      "url": "https://example.com/listing/OG-010",
+      "str_revenue": {
+        "gross_annual": 130796,
+        "peak_weekly": 8800,
+        "basis": "seasonal-model",
+        "by_season": {
+          "peak": {
+            "weeks": 11,
+            "weekly_rate": 8800,
+            "occupancy": 0.9,
+            "revenue": 87120
+          },
+          "shoulder": {
+            "weeks": 8,
+            "weekly_rate": 4840,
+            "occupancy": 0.6,
+            "revenue": 23232
+          },
+          "off": {
+            "weeks": 33,
+            "weekly_rate": 2816,
+            "occupancy": 0.22,
+            "revenue": 20444
+          }
+        }
+      },
+      "operating_expenses": {
+        "management": 19619,
+        "platform_fees": 3924,
+        "cleaning_net": 5232,
+        "supplies": 3924,
+        "capex_reserve": 6540,
+        "property_tax": 29000,
+        "insurance": 12900,
+        "maintenance": 21500,
+        "utilities": 4800,
+        "condo_fee": 0,
+        "ground_lease": 1300,
+        "str_license": 750,
+        "total": 109489
+      },
+      "noi": 21307,
+      "financing": {
+        "loan_amount": 1612500,
+        "annual_debt_service": 122305,
+        "year1_interest": 104282,
+        "cash_invested": 602000,
+        "down_payment_pct": 0.25,
+        "rate": 0.065
+      },
+      "depreciation": {
+        "building_basis": 1290000,
+        "land_basis": 860000,
+        "bonus_depreciation_year1": 1290000
+      },
+      "operating_income": {
+        "financed": {
+          "pretax_cash_flow": -100998,
+          "year1_tax_benefit": 508001,
+          "aftertax_cash_flow_year1": 407003,
+          "aftertax_cash_flow_stabilized": -70297
+        },
+        "all_cash": {
+          "pretax_cash_flow": 21307,
+          "year1_tax_benefit": 469416,
+          "aftertax_cash_flow_year1": 490723,
+          "aftertax_cash_flow_stabilized": 13423
+        }
+      },
+      "yields": {
+        "cap_rate": 0.0099,
+        "gross_yield": 0.0608,
+        "cash_on_cash": -0.1678
+      },
+      "breakeven": {
+        "down_payment_pct": 0.8797,
+        "horizon_years": 6
+      },
+      "flags": {
+        "breaks_even_purchase_year": true,
+        "breaks_even_sustained": false,
+        "breaks_even_operating_allcash": true
+      },
+      "rating": "DEPR_FUNDED_BREAKEVEN",
+      "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)"
+    }
+  ]
+}
