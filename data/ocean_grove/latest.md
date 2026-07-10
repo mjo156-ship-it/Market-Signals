@@ -1,6 +1,6 @@
 # 🏖️ Ocean Grove STR Opportunity Report
 
-**Week of 2026-07-06**  ·  Ocean Grove, NJ (Neptune Township, Monmouth County)  ·  generated 2026-07-10 18:12 UTC
+**Week of 2026-07-06**  ·  Ocean Grove, NJ (Neptune Township, Monmouth County)  ·  generated 2026-07-10 18:22 UTC
 
 > ⚠️ **Data source: representative sample** — Representative sample listings — illustrative, not live MLS. Wire a live feed via $OG_LISTINGS_JSON or $RENTCAST_API_KEY.
 

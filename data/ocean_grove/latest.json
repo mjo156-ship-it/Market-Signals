@@ -2,9 +2,9 @@
   "meta": {
     "report": "Ocean Grove STR Opportunity Report",
     "version": "1.0",
-    "generated_utc": "2026-07-10T18:12:59.111113+00:00",
+    "generated_utc": "2026-07-10T18:22:25.657310+00:00",
     "week_of": "2026-07-06",
-    "asof": "2026-07-08",
+    "asof": "2026-07-10",
     "market": "Ocean Grove, NJ (Neptune Township, Monmouth County)",
     "data_source": "representative-sample",
     "data_source_note": "Representative sample listings \u2014 illustrative, not live MLS. Wire a live feed via $OG_LISTINGS_JSON or $RENTCAST_API_KEY.",
