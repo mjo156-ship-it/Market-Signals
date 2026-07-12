@@ -176,16 +176,32 @@ def backtest(entry: pd.Series, price: pd.Series, horizon: int,
     n = int(len(rets))
     if n < MIN_SAMPLE:
         return None
-    baseline = float(fwd.dropna().mean())
+    fwd_all = fwd.dropna()
+    baseline = float(fwd_all.mean())
     avg = float(rets.mean())
+
+    # Per-event records (date + integer bar position + forward return) so the
+    # downstream validation pipeline can dedup overlapping windows, bootstrap,
+    # and split by regime WITHOUT re-fetching the price store. `i` is the
+    # positional index into `price.index`; two events are non-overlapping iff
+    # their `i` differ by >= horizon.
+    pos = {ts: k for k, ts in enumerate(price.index)}
+    events = [{"date": str(ts.date()) if hasattr(ts, "date") else str(ts),
+               "i": int(pos[ts]), "ret": round(float(r), 5)}
+              for ts, r in rets.items()]
+
     return {
         "n": n,
         "win_rate": round(float((rets > 0).mean()), 3),
         "avg_return": round(avg, 4),
         "median_return": round(float(rets.median()), 4),
         "baseline_return": round(baseline, 4),
+        # Unconditional (all-days) forward-return hit-rate at this horizon: the
+        # correct base rate for the event win-rate test (never test vs 50%).
+        "baseline_win_rate": round(float((fwd_all > 0).mean()), 4),
         "edge": round(avg - baseline, 4),
         "fired_today": bool(edges.iloc[-1]),
+        "events": events,
     }
 
 
@@ -373,8 +389,15 @@ def run_signal_research(write: bool = True) -> dict:
         for ticker in close_panel.columns:
             if ticker not in by:
                 continue
-            m = mom[ticker].iloc[-1]
-            rk = rank[ticker].iloc[-1]
+            # Use the ticker's LAST VALID momentum/rank, not iloc[-1]: a ticker
+            # with no bar on the panel's final date (store lag / thin trading)
+            # has NaN at iloc[-1], which previously rendered as "momentum n/a".
+            # The signal itself fires on the ticker's own last bar, so describe
+            # that same bar. (Display-only; entry/backtest are unaffected.)
+            m_valid = mom[ticker].dropna()
+            rk_valid = rank[ticker].dropna()
+            m = m_valid.iloc[-1] if len(m_valid) else float("nan")
+            rk = rk_valid.iloc[-1] if len(rk_valid) else float("nan")
             val = (f"{label} momentum {m:+.1%}, rank #{int(rk)}"
                    if pd.notna(m) and pd.notna(rk) else f"{label} momentum n/a")
             _collect((f"Rotation: entered top-8 {label} momentum", "rotation",
@@ -399,10 +422,20 @@ def run_signal_research(write: bool = True) -> dict:
     results.sort(key=lambda r: r["score"], reverse=True)
     watchlist.sort(key=lambda r: r["score"], reverse=True)
 
+    # Multiple-testing denominator M: every signal x instrument combination the
+    # scan evaluates today (not just the surfaced ones). The downstream
+    # validation pipeline corrects surfaced p-values against this M.
+    _sample_df = next(iter(by.values()))
+    _n_per_ticker = sum(1 for _ in per_ticker_candidates(_sample_df))
+    _n_rotation = 3
+    _n_macro = 2 * sum(1 for num, den, _ in RATIO_PAIRS if num in by and den in by)
+    combinations_evaluated = (_n_per_ticker + _n_rotation) * len(by) + _n_macro
+
     payload = {
         "generated_at_utc": _now_iso(),
         "data_through": str(data_through.date()),
         "universe_size": len(by),
+        "combinations_evaluated": combinations_evaluated,
         "params": {"min_sample": MIN_SAMPLE, "win_rate_min": WIN_RATE_MIN},
         "summary": {
             "n_results": len(results),
