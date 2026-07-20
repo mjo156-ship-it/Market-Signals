@@ -1,6 +1,6 @@
 # Signal Research — 2026-07-20
 
-_Generated 2026-07-20T15:35:56+00:00 · 89 tickers · 0 firing · 7 approaching_
+_Generated 2026-07-20T16:23:09+00:00 · 89 tickers · 0 firing · 8 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -11,6 +11,7 @@ _No backtest-gated signals firing today._
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Rotation: entered top-8 3-mo momentum (long) | SVXY | SVXY | manual_swing | 21d | 76% | +8.6% | +4.2pp | 91 |
+| Donchian 52-week breakout (long) | SVXY | SVXY | composer_ready | 20d | 64% | +6.6% | +2.4pp | 124 |
 | Rotation: entered top-8 12-mo momentum (long) | XLU | XLU | manual_swing | 21d | 76% | +2.1% | +1.1pp | 78 |
 | CPER/GLD ratio z>2 (stretched) (short) | CPER | short CPER | manual_swing | 20d | 63% | +1.2% | +1.7pp | 30 |
 | Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 64% | +1.5% | +0.7pp | 28 |
