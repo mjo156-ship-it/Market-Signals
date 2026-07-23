@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-07-23T15:39:39+00:00",
+  "generated_at_utc": "2026-07-23T16:22:20+00:00",
   "data_through": "2026-07-23",
   "universe_size": 90,
   "combinations_evaluated": 1270,
@@ -9,7 +9,7 @@
   },
   "summary": {
     "n_results": 1,
-    "n_watchlist": 10,
+    "n_watchlist": 9,
     "by_family": {
       "volatility_breakout": 1
     },
@@ -26,7 +26,7 @@
       "direction": "long",
       "horizon_days": 10,
       "mode": "composer_ready",
-      "today_value": "bandwidth pctile 0.03, %B 1.08",
+      "today_value": "bandwidth pctile 0.03, %B 1.03",
       "backtest": {
         "n": 28,
         "win_rate": 0.607,
@@ -1379,7 +1379,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "3-mo momentum +9.0%, rank #10",
+      "today_value": "3-mo momentum +8.6%, rank #11",
       "backtest": {
         "n": 91,
         "win_rate": 0.615,
@@ -1857,7 +1857,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +113.0%, rank #9",
+      "today_value": "12-mo momentum +112.0%, rank #9",
       "backtest": {
         "n": 78,
         "win_rate": 0.756,
@@ -2270,7 +2270,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +101.1%, rank #11",
+      "today_value": "12-mo momentum +100.4%, rank #12",
       "backtest": {
         "n": 26,
         "win_rate": 0.615,
@@ -2416,254 +2416,6 @@
       "score": 0.0591
     },
     {
-      "family": "rotation",
-      "name": "Rotation: entered top-8 3-mo momentum",
-      "ticker": "IAK",
-      "suggested_instrument": "IAK",
-      "direction": "long",
-      "horizon_days": 21,
-      "mode": "manual_swing",
-      "today_value": "3-mo momentum +8.2%, rank #11",
-      "backtest": {
-        "n": 45,
-        "win_rate": 0.667,
-        "avg_return": 0.0132,
-        "median_return": 0.0228,
-        "baseline_return": 0.0083,
-        "baseline_win_rate": 0.6312,
-        "edge": 0.0049,
-        "fired_today": false,
-        "events": [
-          {
-            "date": "2006-09-28",
-            "i": 88,
-            "ret": 0.01116
-          },
-          {
-            "date": "2006-10-03",
-            "i": 91,
-            "ret": 0.00235
-          },
-          {
-            "date": "2006-11-01",
-            "i": 112,
-            "ret": 0.02284
-          },
-          {
-            "date": "2007-01-29",
-            "i": 170,
-            "ret": -0.00337
-          },
-          {
-            "date": "2007-02-02",
-            "i": 174,
-            "ret": -0.0182
-          },
-          {
-            "date": "2007-03-02",
-            "i": 193,
-            "ret": -0.00173
-          },
-          {
-            "date": "2009-01-09",
-            "i": 660,
-            "ret": -0.21475
-          },
-          {
-            "date": "2009-05-08",
-            "i": 742,
-            "ret": -0.02713
-          },
-          {
-            "date": "2009-05-28",
-            "i": 755,
-            "ret": -0.02347
-          },
-          {
-            "date": "2009-07-31",
-            "i": 800,
-            "ret": 0.13025
-          },
-          {
-            "date": "2009-08-12",
-            "i": 808,
-            "ret": 0.05163
-          },
-          {
-            "date": "2009-08-19",
-            "i": 813,
-            "ret": 0.09222
-          },
-          {
-            "date": "2009-08-21",
-            "i": 815,
-            "ret": 0.03953
-          },
-          {
-            "date": "2009-10-12",
-            "i": 850,
-            "ret": -0.03379
-          },
-          {
-            "date": "2010-03-08",
-            "i": 950,
-            "ret": 0.06119
-          },
-          {
-            "date": "2010-03-10",
-            "i": 952,
-            "ret": 0.06083
-          },
-          {
-            "date": "2010-03-18",
-            "i": 958,
-            "ret": 0.04942
-          },
-          {
-            "date": "2010-03-23",
-            "i": 961,
-            "ret": 0.0636
-          },
-          {
-            "date": "2010-04-20",
-            "i": 980,
-            "ret": -0.09668
-          },
-          {
-            "date": "2011-12-07",
-            "i": 1394,
-            "ret": 0.01244
-          },
-          {
-            "date": "2011-12-09",
-            "i": 1396,
-            "ret": 0.04854
-          },
-          {
-            "date": "2012-10-31",
-            "i": 1619,
-            "ret": -0.00724
-          },
-          {
-            "date": "2012-11-27",
-            "i": 1637,
-            "ret": 0.01544
-          },
-          {
-            "date": "2012-12-04",
-            "i": 1642,
-            "ret": 0.05462
-          },
-          {
-            "date": "2012-12-11",
-            "i": 1647,
-            "ret": 0.0406
-          },
-          {
-            "date": "2012-12-21",
-            "i": 1655,
-            "ret": 0.0726
-          },
-          {
-            "date": "2013-03-21",
-            "i": 1715,
-            "ret": -0.00367
-          },
-          {
-            "date": "2015-07-22",
-            "i": 2303,
-            "ret": -0.01816
-          },
-          {
-            "date": "2015-07-28",
-            "i": 2307,
-            "ret": -0.07254
-          },
-          {
-            "date": "2015-08-06",
-            "i": 2314,
-            "ret": -0.08106
-          },
-          {
-            "date": "2015-08-19",
-            "i": 2323,
-            "ret": -0.08539
-          },
-          {
-            "date": "2016-11-10",
-            "i": 2634,
-            "ret": 0.06488
-          },
-          {
-            "date": "2019-05-22",
-            "i": 3268,
-            "ret": 0.02309
-          },
-          {
-            "date": "2019-06-04",
-            "i": 3276,
-            "ret": 0.04553
-          },
-          {
-            "date": "2019-06-27",
-            "i": 3293,
-            "ret": 0.02984
-          },
-          {
-            "date": "2019-07-05",
-            "i": 3298,
-            "ret": -0.06041
-          },
-          {
-            "date": "2022-10-04",
-            "i": 4117,
-            "ret": 0.06705
-          },
-          {
-            "date": "2022-10-31",
-            "i": 4136,
-            "ret": 0.03749
-          },
-          {
-            "date": "2023-10-16",
-            "i": 4376,
-            "ret": 0.0072
-          },
-          {
-            "date": "2023-10-24",
-            "i": 4382,
-            "ret": 0.05983
-          },
-          {
-            "date": "2023-11-01",
-            "i": 4388,
-            "ret": 0.04495
-          },
-          {
-            "date": "2023-11-07",
-            "i": 4392,
-            "ret": 0.0385
-          },
-          {
-            "date": "2023-11-13",
-            "i": 4396,
-            "ret": 0.05192
-          },
-          {
-            "date": "2024-09-17",
-            "i": 4607,
-            "ret": 0.02131
-          },
-          {
-            "date": "2024-09-20",
-            "i": 4610,
-            "ret": 0.02085
-          }
-        ]
-      },
-      "score": 0.0329
-    },
-    {
       "family": "volatility_breakout",
       "name": "Donchian 52-week breakout",
       "ticker": "SHV",
@@ -2671,7 +2423,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 110.26 vs 52w high 110.27",
+      "today_value": "close 110.27 vs 52w high 110.27",
       "backtest": {
         "n": 370,
         "win_rate": 0.949,
@@ -4544,7 +4296,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 81.77 vs 52w high 82.09",
+      "today_value": "close 81.78 vs 52w high 82.09",
       "backtest": {
         "n": 226,
         "win_rate": 0.717,
@@ -6215,7 +5967,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B 0.01",
+      "today_value": "%B 0.03",
       "backtest": {
         "n": 139,
         "win_rate": 0.612,
@@ -6933,7 +6685,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 36.50 vs 52w high 37.19",
+      "today_value": "close 36.52 vs 52w high 37.19",
       "backtest": {
         "n": 47,
         "win_rate": 0.681,
