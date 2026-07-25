@@ -1,17 +1,27 @@
 {
-  "generated_at_local": "2026-07-24T21:08:29.964467",
-  "generated_at_utc": "2026-07-24T21:08:29.964475Z",
-  "mode": "close",
+  "generated_at_local": "2026-07-25T20:46:35.421071",
+  "generated_at_utc": "2026-07-25T20:46:35.421081Z",
+  "mode": "preclose",
   "summary": {
-    "total_alerts": 1,
+    "total_alerts": 3,
     "buy_count": 0,
     "exit_count": 0,
-    "warning_count": 1
+    "warning_count": 3
   },
   "alerts": [
     {
       "title": "\ud83d\udfe1 Z-SCORE QQQ_RSP APPROACHING",
       "message": "QQQ/RSP z = -1.45\u03c3 (threshold \u2264 -1.5\u03c3, gap +0.05\u03c3)",
+      "category": "watch"
+    },
+    {
+      "title": "\ud83d\udfe1 IBS WATCH (provisional)",
+      "message": "SPY 1.0x (SPY IBS 0.31, RSI 42, breadth 0) \u2014 provisional; IBS final at close",
+      "category": "watch"
+    },
+    {
+      "title": "\ud83d\udfe1 IBS WATCH (provisional)",
+      "message": "TQQQ 1.0x (QQQ IBS 0.28, RSI 35, breadth 0) \u2014 provisional; IBS final at close",
       "category": "watch"
     }
   ],
@@ -51,6 +61,15 @@
       "sma50": 290.89,
       "ema21": 294.1,
       "pct_above_sma200": 10.43
+    },
+    "XLK": {
+      "price": 175.88,
+      "rsi10": 40.5,
+      "rsi50": 52.2,
+      "sma200": 154.35,
+      "sma50": 183.2,
+      "ema21": 180.76,
+      "pct_above_sma200": 13.95
     },
     "XLP": {
       "price": 84.13,
@@ -206,13 +225,13 @@
       "pct_above_sma200": -15.03
     },
     "BTC-USD": {
-      "price": 64150.07,
-      "rsi10": 48.9,
-      "rsi50": 46.2,
-      "sma200": 72406.91,
-      "sma50": 63108.2,
-      "ema21": 64248.94,
-      "pct_above_sma200": -11.4
+      "price": 64249.74,
+      "rsi10": 49.6,
+      "rsi50": 46.3,
+      "sma200": 72259.26,
+      "sma50": 63173.71,
+      "ema21": 64244.75,
+      "pct_above_sma200": -11.08
     },
     "AMD": {
       "price": 521.95,
@@ -418,5 +437,35 @@
       "last_fire": "never",
       "days_since_fire": -1
     }
+  },
+  "ibs": {
+    "gate_state": {
+      "SPY": "IN",
+      "QQQ": "IN",
+      "SMH": "OUT",
+      "XLK": "OUT"
+    },
+    "current_multiplier": {
+      "SPY": 1.0,
+      "TQQQ": 1.0,
+      "SOXL": 0.0,
+      "TECL": 0.0
+    },
+    "breadth": 0,
+    "ibs_sma3": {
+      "SPY": 0.3147,
+      "QQQ": 0.281,
+      "SMH": 0.4817,
+      "XLK": 0.4159
+    },
+    "rsi10": {
+      "SPY": 42.1,
+      "QQQ": 35.4,
+      "SMH": 40.2,
+      "XLK": 40.5
+    },
+    "equity_budget": 0.8,
+    "faltering": {},
+    "as_of": "2026-07-25"
   }
 }
