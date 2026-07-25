@@ -1,0 +1,145 @@
+{
+  "updated_at": "2026-07-25T20:07:22.530167",
+  "gate_state": {
+    "SPY": "IN",
+    "QQQ": "IN",
+    "SMH": "OUT",
+    "XLK": "OUT"
+  },
+  "current_multiplier": {
+    "SPY": 1.0,
+    "TQQQ": 1.0,
+    "SOXL": 0.0,
+    "TECL": 0.0
+  },
+  "breadth_today": 0,
+  "baseline": {
+    "gate_entry_SPY": {
+      "n": 478,
+      "wr": 0.6234,
+      "wilson_lo": 0.5792,
+      "wilson_hi": 0.6657,
+      "avg_1d": 0.21,
+      "avg_5d": 0.478,
+      "brier": 0.2348
+    },
+    "gate_entry_TECL": {
+      "n": 472,
+      "wr": 0.5678,
+      "wilson_lo": 0.5227,
+      "wilson_hi": 0.6118,
+      "avg_1d": 0.721,
+      "avg_5d": 0.961,
+      "brier": 0.2454
+    },
+    "gate_entry_SOXL": {
+      "n": 493,
+      "wr": 0.5598,
+      "wilson_lo": 0.5157,
+      "wilson_hi": 0.603,
+      "avg_1d": 0.851,
+      "avg_5d": 1.347,
+      "brier": 0.2464
+    },
+    "gate_entry_TQQQ": {
+      "n": 448,
+      "wr": 0.5893,
+      "wilson_lo": 0.5432,
+      "wilson_hi": 0.6339,
+      "avg_1d": 0.692,
+      "avg_5d": 1.182,
+      "brier": 0.242
+    },
+    "conviction_2.0x_single_SOXL": {
+      "n": 69,
+      "wr": 0.5797,
+      "wilson_lo": 0.4621,
+      "wilson_hi": 0.6889,
+      "avg_1d": 1.172,
+      "avg_5d": 2.897,
+      "brier": 0.2436
+    },
+    "conviction_1.5x_TECL": {
+      "n": 70,
+      "wr": 0.4714,
+      "wilson_lo": 0.359,
+      "wilson_hi": 0.5868,
+      "avg_1d": 1.795,
+      "avg_5d": -0.714,
+      "brier": 0.2492
+    },
+    "conviction_2.0x_breadth": {
+      "n": 264,
+      "wr": 0.5947,
+      "wilson_lo": 0.5345,
+      "wilson_hi": 0.6522,
+      "avg_1d": 1.494,
+      "avg_5d": 2.647,
+      "brier": 0.241
+    },
+    "conviction_1.5x_TQQQ": {
+      "n": 67,
+      "wr": 0.5821,
+      "wilson_lo": 0.4627,
+      "wilson_hi": 0.6926,
+      "avg_1d": 1.539,
+      "avg_5d": 0.854,
+      "brier": 0.2433
+    }
+  },
+  "baseline_curves": {
+    "engine_only": {
+      "period_return": 509.08558435782777,
+      "cagr": 0.27001076235021304,
+      "sharpe": 0.7851572609925386,
+      "maxdd": -0.7284284476896306,
+      "n": 6573
+    },
+    "engine_plus_btal": {
+      "period_return": 596.4445062767378,
+      "cagr": 0.2777312702535155,
+      "sharpe": 0.8124928608067336,
+      "maxdd": -0.7015532543192848,
+      "n": 6573
+    },
+    "btal_weight": 0.2,
+    "note": "Full-cycle synth-extended baseline (~2000-present). Pre-inception vehicle returns are synthetic-3x (understate choppy-crash decay); pre-2011 BTAL is the anti-beta proxy (conservative floor). UNCAPPED backtest assumed margin on ~3% of high-bounce days, so the capped live version runs slightly below these numbers."
+  },
+  "firings": [
+    {
+      "date": "2026-07-24",
+      "sleeve": "SPY",
+      "underlying": "SPY",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.3147,
+      "own_rsi10": 41.9,
+      "breadth": 0,
+      "entry_price": 738.9299926757812,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    },
+    {
+      "date": "2026-07-24",
+      "sleeve": "TQQQ",
+      "underlying": "QQQ",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.281,
+      "own_rsi10": 35.4,
+      "breadth": 0,
+      "entry_price": null,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    }
+  ],
+  "rolling": {},
+  "equity": {
+    "engine_only": [],
+    "engine_plus_btal": []
+  }
+}
