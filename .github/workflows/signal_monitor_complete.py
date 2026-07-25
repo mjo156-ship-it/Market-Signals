@@ -17,6 +17,8 @@ Signals included:
 Setup instructions at bottom of file
 """
 
+import os
+import sys
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -60,6 +62,7 @@ def get_data():
     """Download all required data"""
     tickers = [
         'SMH', 'QQQ', 'SPY', 'IWM',           # Equity indexes
+        'XLK',                                 # Tech sector (IBS TIER 10 breadth + TECL sleeve)
         'XLP', 'XLU', 'XLV',                   # Defensive sectors
         'HYG', 'LQD', 'TLT',                   # Credit/Bonds
         'UCO', 'GLD',                          # Commodities
@@ -78,6 +81,128 @@ def get_data():
             pass
     
     return pd.DataFrame(data)
+
+def _ibs_fetch_ohlc(tickers, period="1y"):
+    """Fetch full OHLC frames (get_data() keeps Close only — IBS needs High/Low)."""
+    out = {}
+    for t in tickers:
+        d = yf.download(t, period=period, auto_adjust=False, progress=False)
+        if not d.empty:
+            if isinstance(d.columns, pd.MultiIndex):
+                d.columns = d.columns.get_level_values(0)
+            out[t] = d
+    return out
+
+
+def ibs_tier10():
+    """TIER 10: IBS Dip Gate + Conviction (mirrors dashboard compute_ibs_signals).
+
+    Fully self-contained: fetches its own OHLC, wrapped by the caller in
+    try/except so it can NEVER break the rest of the email. Emits plain
+    emoji-prefixed strings (the live alert format). Close-mode only acts on the
+    gate (buy/exit/resize) and persists ibs_tracker.json; open/preclose emit a
+    provisional watch only (IBS needs the final bar). Returns (alerts, status).
+    """
+    import os as _os
+    _os.sys.path.insert(0, _os.path.abspath(
+        _os.path.join(_os.path.dirname(__file__), "..", "..")))
+    import ibs_engine as eng
+    import ibs_tracker as itr
+
+    mode = sys.argv[1] if len(sys.argv) > 1 else "close"
+    und = eng.BREADTH_UNIVERSE                       # SPY, QQQ, SMH, XLK
+    ohlc = _ibs_fetch_ohlc(und)
+    if not all(u in ohlc for u in und):
+        return [], []
+
+    # Per-underlying IBS_sma3 (needs High/Low/Close) and RSI10 (reuse Wilder).
+    rsi_by, ibs3_by = {}, {}
+    for u in und:
+        rsi_by[u] = float(calculate_rsi_wilder(ohlc[u]["Close"], 10).iloc[-1])
+        ibs3_by[u] = float(eng.ibs_sma3(ohlc[u]).iloc[-1])
+    breadth = eng.breadth_count(rsi_by)
+
+    state = itr.load_state()
+    prior_state = state.get("gate_state", {})
+    prior_mult = state.get("current_multiplier", {})   # keyed by vehicle
+
+    alerts, status = [], []
+    new_state, new_mult = {}, {}
+    for u in und:
+        veh = eng.SLEEVE_MAP[u]
+        st = eng.gate_state(ibs3_by[u], prior_state.get(u, "OUT"))
+        mult = eng.conviction_multiplier(u, rsi_by[u], breadth) if st == "IN" else 0.0
+        new_state[u], new_mult[u] = st, mult
+        pv_st = prior_state.get(u, "OUT")
+        pv_m = prior_mult.get(veh, 0.0)
+        entry_price = float(ohlc[u]["Close"].iloc[-1]) if u == "SPY" else None
+        ctx = f"({u} IBS {ibs3_by[u]:.2f}, RSI {rsi_by[u]:.0f}, breadth {breadth})"
+
+        if mode != "close":
+            # provisional — IBS is only final at the close
+            if st == "IN":
+                alerts.append(f"🟡 IBS WATCH (provisional): {veh} {mult:.1f}× {ctx}")
+            continue
+
+        if st == "IN" and pv_st != "IN":
+            alerts.append(f"🟢 IBS BUY: {veh} {mult:.1f}× {ctx}")
+            itr.log_firing(state, ohlc[u].index[-1].strftime("%Y-%m-%d"), veh,
+                           "gate_entry", 1.0, u, round(ibs3_by[u], 4),
+                           round(rsi_by[u], 1), breadth, entry_price)
+            _ibs_log_conviction(itr, state, u, veh, mult, breadth, ohlc, ibs3_by, rsi_by, entry_price)
+        elif st == "IN" and pv_st == "IN" and mult != pv_m:
+            arrow = "↑" if mult > pv_m else "↓"
+            alerts.append(f"🟡 IBS RESIZE {arrow}: {veh} {pv_m:.1f}×→{mult:.1f}× {ctx}")
+            _ibs_log_conviction(itr, state, u, veh, mult, breadth, ohlc, ibs3_by, rsi_by, entry_price)
+        elif st == "OUT" and pv_st == "IN":
+            alerts.append(f"🔴 IBS EXIT: {veh} → FLAT {ctx}")
+
+    # ---- close-mode: mature forward returns, refresh rolling, persist ----
+    if mode == "close":
+        veh_set = sorted(set(eng.SLEEVE_MAP.values()))
+        vprices = _ibs_fetch_ohlc(veh_set, period="3mo")
+        itr.mature_results(state, lambda tk: vprices[tk]["Close"] if tk in vprices else None)
+        itr.snapshot(state, new_state, new_mult, breadth)
+        itr.save_state(state)
+
+    # ---- faltering: prefix any WATCH/FALTERING tiers onto the alerts + status ----
+    falt = itr.faltering_flags(state)
+    for key, stt in falt.items():
+        base = state.get("baseline", {}).get(key, {})
+        roll = state.get("rolling", {}).get(key, {})
+        if stt == "FALTERING":
+            alerts.insert(0, f"⚠️ FALTERING: {key} trailing WR "
+                          f"{roll.get('trailing_wr', 0)*100:.0f}% vs baseline "
+                          f"{base.get('wr', 0)*100:.0f}% [lo {base.get('wilson_lo', 0)*100:.0f}%], "
+                          f"n={roll.get('trailing_n', 0)} — investigate/suspend this tier by hand")
+
+    # ---- status block (always shown) ----
+    status.append("")
+    status.append("IBS DIP GATE + CONVICTION (TIER 10):")
+    for u in und:
+        veh = eng.SLEEVE_MAP[u]
+        mtxt = f"{new_mult[u]:.1f}×" if new_state[u] == "IN" else "—"
+        status.append(f"  {u}→{veh}: {new_state[u]} {mtxt}  (IBS {ibs3_by[u]:.2f}, RSI {rsi_by[u]:.0f})")
+    status.append(f"  Breadth (RSI10<30 of SPY/QQQ/SMH/XLK): {breadth}")
+    if falt:
+        status.append(f"  ⚠️ Faltering tiers: {', '.join(f'{k}={v}' for k, v in falt.items())}")
+    return alerts, status
+
+
+def _ibs_log_conviction(itr, state, u, veh, mult, breadth, ohlc, ibs3_by, rsi_by, entry_price):
+    """Log the conviction-tier firing when an elevated tier is entered."""
+    import ibs_engine as eng
+    if mult not in (eng.MULT_SINGLE, eng.MULT_BREADTH):
+        return
+    if breadth >= 3:
+        stype = "conviction_2.0x_breadth"
+    elif eng.SLEEVE_MAP[u] == "SOXL":
+        stype = "conviction_2.0x_single"
+    else:
+        stype = "conviction_1.5x"
+    itr.log_firing(state, ohlc[u].index[-1].strftime("%Y-%m-%d"), veh, stype, mult, u,
+                   round(ibs3_by[u], 4), round(rsi_by[u], 1), breadth, entry_price)
+
 
 def analyze_signals(df):
     """Analyze all signals and return alerts"""
@@ -305,9 +430,68 @@ def analyze_signals(df):
             alerts.append("   → Long TQQQ 10 days | CAGR: +19%, Win: 70%")
     
     # =========================================================================
+    # TIER 9: DIP-BUY REGIME CANARY (SPY 252d lag-1 autocorrelation)
+    # =========================================================================
+    # Protects the entire dip-buy sleeve (QQQ/SMH dip-buys above, plus the
+    # leveraged dip symphonies). The dip-buy edge exists only in the post-1990
+    # negative-autocorrelation regime: 2020s SPX decade AC -0.17 (edge strongest
+    # on record); pre-1990 +0.05..+0.25 (edge NEGATIVE). Calibration (S&P rolling
+    # 252d lag-1 AC, 2000-2026): median -0.046 | p95 +0.050 | modern max +0.135.
+    # AC>0 occurs ~26% of days with NO edge degradation, so zero-crossings are
+    # noise. Alerts fire only on structural drift:
+    #   WATCH: AC > +0.05 (95th pct of modern era)
+    #   BREAK: AC > +0.10 for 21 consecutive sessions (never occurred 2000-2026)
+    # NOT a tactical entry filter - do not gate individual dip-buys on it.
+    dip_regime_ac = None
+    if 'SPY' in df.columns and len(df['SPY'].dropna()) >= 300:
+        try:
+            spy_close = df['SPY'].dropna()
+            spy_ret = spy_close.pct_change().dropna()
+
+            # rolling 252d lag-1 autocorrelation
+            ac_series = spy_ret.rolling(252).apply(
+                lambda x: pd.Series(x).autocorr(1), raw=False).dropna()
+
+            if len(ac_series) >= 1:
+                ac_now = float(ac_series.iloc[-1])
+                dip_regime_ac = ac_now
+
+                # trailing 252d avg next-day return after a -1% day (the bounce we harvest)
+                w = spy_ret.tail(253)
+                bounces = w[w.shift(1) < -0.01]
+                n_b = len(bounces)
+                bounce_avg = float(bounces.mean()) * 100 if n_b >= 5 else float('nan')
+                bounce_txt = f"{bounce_avg:+.2f}%/day" if bounce_avg == bounce_avg else "n/a"
+
+                sustained_break = (len(ac_series) >= 21
+                                   and bool((ac_series.tail(21) > 0.10).all()))
+
+                if sustained_break:
+                    alerts.append(f"🔴 DIP-BUY REGIME BREAK: SPY 252d autocorr {ac_now:+.3f} > +0.10 for 21 sessions")
+                    alerts.append("   Structural drift toward pre-1990 momentum regime (never seen 2000-2026)")
+                    alerts.append(f"   Post-dip bounce (252d, n={n_b}): {bounce_txt}")
+                    alerts.append("   → PAUSE / de-risk ALL dip-buy symphonies pending review")
+                elif ac_now > 0.05:
+                    alerts.append(f"🟡 DIP-BUY REGIME WATCH: SPY 252d autocorr {ac_now:+.3f} > +0.05 (95th pct modern era)")
+                    alerts.append(f"   Post-dip bounce (252d, n={n_b}): {bounce_txt}")
+                    alerts.append("   No action - tripwire arms at +0.10 sustained 21 sessions (2020s avg -0.17)")
+        except Exception as e:
+            print(f"Dip-buy regime canary error: {e}")
+
+    # =========================================================================
+    # TIER 10: IBS DIP GATE + CONVICTION (self-contained; NEVER breaks the email)
+    # =========================================================================
+    _ibs_status = []
+    try:
+        _ibs_alerts, _ibs_status = ibs_tier10()
+        alerts.extend(_ibs_alerts)
+    except Exception as e:
+        print(f"[IBS] TIER 10 skipped (non-fatal): {e}")
+
+    # =========================================================================
     # BUILD STATUS SUMMARY
     # =========================================================================
-    
+
     status_lines.append("=" * 70)
     status_lines.append(f"DAILY SIGNAL STATUS - {datetime.now().strftime('%Y-%m-%d')}")
     status_lines.append("=" * 70)
@@ -336,8 +520,17 @@ def analyze_signals(df):
     
     status_lines.append("")
     status_lines.append("RSI > 79 = Overbought | RSI < 25 = Oversold")
+
+    # Dip-buy regime canary telemetry (always shown, even when no alert fires)
+    if dip_regime_ac is not None:
+        status_lines.append("")
+        status_lines.append(f"DIP-BUY REGIME CANARY (SPY 252d lag-1 AC): {dip_regime_ac:+.3f}")
+        status_lines.append("  Negative = dip-buy edge intact | watch > +0.05 | break > +0.10 x21 sessions")
+
+    status_lines.extend(_ibs_status)
+
     status_lines.append("=" * 70)
-    
+
     return alerts, status_lines
 
 def send_email(subject, body):
@@ -403,9 +596,23 @@ def main():
             # return
         
         send_email(subject, body)
-        
+
     except Exception as e:
         send_email("❌ Signal Monitor Error", f"Error: {e}")
+
+    # ---- Price store refresh (post-close run only) --------------------------
+    # Purely additive and fully isolated: a failure here can NEVER affect the
+    # signal email above. Only runs on the 4:05 PM "close" invocation (the open /
+    # preclose runs pass a mode arg), so the trailing window upserts a settled bar.
+    mode = sys.argv[1] if len(sys.argv) > 1 else "close"
+    if mode == "close":
+        try:
+            sys.path.insert(0, os.path.abspath(
+                os.path.join(os.path.dirname(__file__), "..", "..")))
+            from price_store import update_price_store
+            update_price_store()
+        except Exception as e:
+            print(f"[price_store] skipped (non-fatal): {e}", flush=True)
 
 if __name__ == "__main__":
     main()

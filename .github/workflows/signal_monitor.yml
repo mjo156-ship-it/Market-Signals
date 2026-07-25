@@ -34,6 +34,11 @@ on:
           - open
           - preclose
           - close
+      prime_ibs:
+        description: 'Prime the IBS baseline (run ONCE to seed ~2000-present history, then never again)'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   check-signals:
@@ -50,7 +55,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install yfinance pandas numpy requests
+          pip install yfinance pandas numpy requests pandas_market_calendars
 
       - name: Determine run mode
         id: mode
@@ -79,6 +84,11 @@ jobs:
           COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
           COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
         run: |
+          # One-time IBS baseline priming (workflow_dispatch prime_ibs=true).
+          if [ "${{ inputs.prime_ibs }}" == "true" ]; then
+            echo "Priming IBS baseline (one-time; seeds ~2000-present)..."
+            python ibs_tracker.py prime
+          fi
           MODE="${{ steps.mode.outputs.mode }}"
           if [ "$MODE" == "open" ]; then
             python .github/workflows/signal_monitor_complete.py open
@@ -113,4 +123,54 @@ jobs:
             git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
             git push origin "HEAD:${GITHUB_REF_NAME:-main}"
             echo "State committed"
+          fi
+
+      # Commit the refreshed price store (post-close run only). Isolated from the
+      # state commit above so a price-store hiccup never blocks the signal pipeline.
+      - name: Commit price store
+        if: success() && steps.mode.outputs.mode == 'close'
+        run: |
+          set -e
+          if [ ! -d data/price_store ]; then
+            echo "No price store produced -- skipping commit"
+            exit 0
+          fi
+
+          git config user.name "signal-monitor-bot"
+          git config user.email "signal-monitor-bot@users.noreply.github.com"
+          git add data/price_store
+
+          if git diff --cached --quiet; then
+            echo "No price-store change to commit"
+          else
+            MSG=$(cat price_store_commit_msg.txt 2>/dev/null || echo "price store update $(date -u +%F)")
+            git commit -m "$MSG"
+            git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+            git push origin "HEAD:${GITHUB_REF_NAME:-main}"
+            echo "Price store committed: $MSG"
+          fi
+
+      # Commit the IBS tracker (close run persists gate state + firings; the
+      # prime_ibs dispatch seeds the full-cycle baseline). Isolated so an IBS
+      # hiccup never blocks the signal pipeline.
+      - name: Commit IBS tracker
+        if: success() && (steps.mode.outputs.mode == 'close' || inputs.prime_ibs == true)
+        run: |
+          set -e
+          if [ ! -f ibs_tracker.json ]; then
+            echo "No ibs_tracker.json produced -- skipping commit"
+            exit 0
+          fi
+
+          git config user.name "signal-monitor-bot"
+          git config user.email "signal-monitor-bot@users.noreply.github.com"
+          git add ibs_tracker.json
+
+          if git diff --cached --quiet; then
+            echo "No IBS tracker change to commit"
+          else
+            git commit -m "ibs tracker update $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+            git push origin "HEAD:${GITHUB_REF_NAME:-main}"
+            echo "IBS tracker committed"
           fi
