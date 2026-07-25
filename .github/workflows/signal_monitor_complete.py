@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Comprehensive Market Signal Monitor v5.1
+Comprehensive Market Signal Monitor v5.2
 ========================================
 Monitors all backtested trading signals and sends alerts.
 + Robot James module (Ensemble 50/50 mom+below-SMA base + 4-way EO strict overlay)
++ SIGNAL GROUPS 1-14 + Group 34 (OVX Oil Vol Spike, added 2026-07-25)
 
 SCHEDULE: Three emails daily (weekdays)
 - 9:45 AM ET:  Post-open snapshot (open mode)
@@ -989,6 +990,19 @@ def check_signals(data):
     except Exception as e:
         print(f"[IBS] Group 14 skipped (non-fatal): {e}")
 
+    # =========================================================================
+    # SIGNAL GROUP 34: OVX OIL VOL SPIKE (monitor-only, manual execution)
+    # =========================================================================
+    # Wrapped so a ^OVX download/parse hiccup degrades gracefully (skip Group 34,
+    # keep every other group alive) rather than crashing the monitor.
+    try:
+        ovx_alerts, ovx_status = ovx_group34(data, indicators)
+        alerts.extend(ovx_alerts)
+        if ovx_status:
+            status['ovx'] = ovx_status
+    except Exception as e:
+        print(f"[OVX] Group 34 skipped (non-fatal): {e}")
+
     return alerts, status
 
 # =============================================================================
@@ -1104,6 +1118,242 @@ def _ibs_log_conviction(itr, eng, state, u, veh, mult, breadth, data, ibs3_by, r
         stype = 'conviction_1.5x'
     itr.log_firing(state, data[u].index[-1].strftime('%Y-%m-%d'), veh, stype, mult, u,
                    round(ibs3_by[u], 4), rsi_r, breadth, entry_price)
+
+
+# =============================================================================
+# SIGNAL GROUP 34: OVX OIL VOL SPIKE  (helper)
+# =============================================================================
+# Provenance record — DO NOT EDIT the backtest block below; it must survive
+# future edits. Renumbered from the spec's "Group 31" to Group 34: the dashboard
+# already uses Group 31 (BofA Bear Market Signposts), and the monitor's own
+# sequence had reached Group 14, so 34 is the first number free in both files.
+#
+# SIGNAL GROUP 34 (spec'd as 31) — OVX OIL VOL SPIKE
+# Tested 2026-07-24. Status: TIER 3 (monitor-only, manual execution).
+# NOT "validated" — that label requires explicit sign-off.
+#
+# Data:      Yahoo ^OVX vs ^VIX, 2007-05-10 to 2026-07-23, n=4831 trading days
+# Method:    T+1 aligned (signal at close t, return measured close t -> close t+1),
+#            Wilder RSI(10), 5-day episode deduplication, Wilson 95% CIs,
+#            10K-iteration permutation tests vs unconditional distribution.
+#
+# TRIGGER:   OVX RSI(10) > 79       [46 episodes, ~2.4/year]
+#
+# PRIMARY VEHICLE — ERX (2x Energy Bull), n=42 episodes
+#   Hold   WR      Wilson 95% CI     avg      median   edge vs base
+#   1d     66.7%   (51.6, 79.0)      +2.24%   +1.95%   +14.5pp   <- TRADE THIS
+#   5d     59.5%   (44.5, 73.0)      +3.23%   +4.50%   +5.8pp
+#   10d    59.5%   (44.5, 73.0)      +2.37%   +6.62%   +6.6pp
+#   20d    59.5%   (44.5, 73.0)      +4.26%   +3.36%   +5.8pp
+#   Permutation: 1d p_mean=0.0012, p_WR=0.0388
+#
+# LEVERAGE-ERA SPLIT (ERX went 3x -> 2x on 2020-03-24; pooled n mixes
+# two different instruments. Realized median |ERX|/|XLE| 1d = 2.87 in the
+# 3x era, 2.04 in the 2x era.)
+#   2x era (>=2020-03-24), n=20:  1d 75.0% CI(53,89) +1.79% | 5d 65.0% +4.04%
+#                                 10d 60.0% +4.75%          | 20d 65.0% +6.25%
+#   3x era (<2020-03-24),  n=22:  1d 59.1% CI(39,77) +2.64% | 5d 54.5% +2.50%
+#   The 2x era is what is tradeable today. n=20 -> Tier 3.
+#
+# SLIPPAGE STRESS (house standard 5 bps leveraged, then 2x at 10 bps)
+#   ERX 1d gross +2.24% -> net +2.19% -> 2x-stress +2.14%
+#   WR 66.7% -> 64.3% at 2x stress. Edge is ~40x transaction cost. Robust.
+#
+# TAIL RISK
+#   ERX 1d: worst -24.5%, best +40.3%  (both 3x era, March 2020)
+#   ERX 5d: worst -71.4%               (3x era)
+#   2x era only: worst 1d -7.44%, worst 5d -12.42%
+#   -> 1d hold caps damage in a way the 5d hold does not. Hold 1 day.
+#
+# WHY 1d AND NOT 5d/10d
+#   5d/10d show higher average returns in the 2x era (+4.60%, +6.31%) but
+#   permutation p_WR collapses to 0.17 and 0.28 — those averages are carried
+#   by a handful of outliers, not a repeatable edge. House rule: 1d WR first.
+#
+# SECONDARY LEGS ON THE SAME TRIGGER
+#   UCO  1d  64.3% n=42  +2.97%  +12.7pp  p_mean<0.0001  (post-2020: 71% n=24 +4.44%)
+#   XLE  1d  63.0% n=46  +0.71%  +10.7pp  p_mean=0.0089
+#   GUSH 1d  63.3% n=30  +2.08%           p_mean=0.0295
+#   DIG  1d  60.9% n=46  +1.17%
+#   OIH  1d  58.7% n=46  +1.20%
+#   UVXY 5d  67.0% n=24  +7.96%  post-2020 ONLY  p_WR=0.0013, p_mean=0.0066
+#            (pre-2020 was 38% WR n=13 and negative — post-2020 structural,
+#             same regime family as VIXM<25->HIBL. Monitor with Brier.)
+#
+# OIL-DIRECTION CONDITIONING — ERX does NOT need the filter, UCO DOES
+#   ERX 1d, USO > SMA50 (n=17): 64.7% +1.20%
+#   ERX 1d, USO < SMA50 (n=26): 61.5% +2.53%   <- works both ways
+#   UCO,    USO > SMA50 (n=17): 5d 64.7% +2.16% | 10d 70.6% +4.05%
+#   UCO,    USO < SMA50 (n=26): 5d 42.3% -5.08% | 20d 34.6% -8.78%  <- fails
+#   Mechanism: an oil-vol spike dislocates energy equities regardless of trend
+#   and they bounce; leveraged oil futures carry roll decay that only a
+#   trend overcomes. GATE THE UCO LEG ON USO > SMA50. Do not gate ERX.
+#
+# DO NOT TRADE — tested and rejected, do not re-test
+#   SPY short on OVX RSI>79: 5d 45.7% n=46, -14.3pp edge, p_mean=0.47. Noise.
+#   OVX > 1yr 90th percentile: no edge (SPY 5d 53.8% -6.1pp, USO 5d 42.9%).
+#   OVX +40% in 20d without the RSI gate: weaker (UVXY 5d 26.5%).
+#   OVX RSI < 25: VIX 5d 72% n=25 +6.19% but 84% of sample is pre-2020. Weak.
+#   Composer-native realized-vol proxy (USO stddev20 / SPY stddev20):
+#     corr to OVX is 0.882 in LEVELS but only 0.278 in DAILY CHANGES.
+#     Edges drop to ~1/3 (UCO 5d 58.0%, +6.2pp). Implied vol carries
+#     information realized vol does not. The proxy is not a substitute.
+#
+# CONTEXT SIGNAL — display only, NOT tradeable
+#   OVX >15% above SMA50 AND VIX < SMA50, n=62 episodes:
+#     SPY 1d 61.3% | 5d 69.4% (+9.5pp) | 10d 71.0% | 20d 67.7%
+#     UVXY 5d 33.3%    VIX level 10d 35.5%
+#     post-2020 n=27: SPY 5d 93%, UVXY 5d 15% (-7.50%)
+#     Permutation p_mean=0.22, p_WR=0.081 -> NOT significant.
+#   Interpretation: the "VIX plays catch-up to OVX" thesis is BACKWARDS.
+#   Slow-grind oil-vol divergence with a calm VIX is a short-vol / long-equity
+#   regime, not a catch-up trade. Render as regime color. Never as an alert.
+#
+# MULTIPLE TESTING
+#   19 signal specs tested this session. Bonferroni threshold p<0.0026.
+#   Surviving: ERX 1d p_mean=0.0012; UVXY 5d post-2020 p_WR=0.0013.
+#   Not surviving: ERX 1d p_WR=0.0388, XLE 1d p_mean=0.0089.
+#
+# COMPOSER
+#   ^OVX is a CBOE index, not a security. It CANNOT be referenced in a
+#   Composer symphony. This signal is monitor-alert + manual execution at
+#   Fidelity only. Do not build a symphony around it.
+#
+# PORTFOLIO CAVEAT
+#   The Hormuz manual basket is already ~$206K of energy-adjacent names
+#   (PSCE, SU, GLNG, STNG, DOW, LIN, APD, RTX). ERX on this trigger is a
+#   2x-leveraged ADD to an existing large energy sleeve, not a new
+#   uncorrelated Holy Grail stream. The alert text must say so.
+#
+# STATE AT TIME OF TESTING (2026-07-23 close)
+#   OVX 68.97 (95.1 pctile all-history) | VIX 18.70 | ratio 3.69 (98.2 pctile)
+#   OVX RSI(10) 72.4 -> NOT FIRING | OVX +19.7% vs SMA50 | VIX +7.7% vs SMA50
+#   OVX 20d change +44.9% vs VIX +0.4%
+#   Last trigger: 2026-03-16. 2026 OVX peak: 120.9 (Hormuz).
+# =============================================================================
+def ovx_group34(data, indicators):
+    """SIGNAL GROUP 34: OVX Oil Vol Spike. Returns (alerts, ovx_status).
+
+    Trigger: OVX RSI(10) > 79 -> ERX 1-day hold (66.7% WR n=42). Tier B adds the
+    UCO leg only when USO > SMA50. Tier C is a 70-79 approach watch. All readings
+    are stashed in ovx_status regardless of whether anything fires. See the
+    provenance block above. Monitor-only / manual execution (^OVX can't be built
+    in Composer)."""
+    def _num(x, n=2):
+        try:
+            f = float(x)
+            return round(f, n) if f == f else None
+        except (TypeError, ValueError):
+            return None
+
+    if '^OVX' not in data or 'Close' not in data['^OVX']:
+        return [], {}
+    ovx_close = data['^OVX']['Close']
+    if isinstance(ovx_close, pd.DataFrame):
+        ovx_close = ovx_close.iloc[:, 0]
+    ovx_close = ovx_close.dropna()
+    if len(ovx_close) < 60:   # need >=60 for RSI(10) + SMA(50) to be well-formed
+        return [], {}
+
+    ovx_level = safe_float(ovx_close.iloc[-1])
+    ovx_rsi_series = calculate_rsi_wilder(ovx_close, 10)
+    ovx_rsi10 = safe_float(ovx_rsi_series.iloc[-1])
+    ovx_sma50 = safe_float(ovx_close.rolling(50).mean().iloc[-1])
+    ovx_pct_vs_sma50 = (ovx_level / ovx_sma50 - 1) * 100 if (ovx_sma50 and ovx_sma50 > 0) else None
+
+    # VIX + OVX/VIX ratio and its 252d percentile rank
+    vix_level = vix_sma50 = vix_pct_vs_sma50 = ratio = ratio_pctile = None
+    vix_below_sma50 = None
+    if '^VIX' in data and 'Close' in data['^VIX']:
+        vix_close = data['^VIX']['Close']
+        if isinstance(vix_close, pd.DataFrame):
+            vix_close = vix_close.iloc[:, 0]
+        vix_close = vix_close.dropna()
+        if len(vix_close) >= 50:
+            vix_level = safe_float(vix_close.iloc[-1])
+            vix_sma50 = safe_float(vix_close.rolling(50).mean().iloc[-1])
+            vix_pct_vs_sma50 = (vix_level / vix_sma50 - 1) * 100 if (vix_sma50 and vix_sma50 > 0) else None
+            vix_below_sma50 = bool(vix_level < vix_sma50) if vix_sma50 else None
+            joined = pd.concat([ovx_close, vix_close], axis=1, keys=['o', 'v']).dropna()
+            if len(joined) >= 20:
+                ratio_series = joined['o'] / joined['v']
+                ratio = safe_float(ratio_series.iloc[-1])
+                window = ratio_series.tail(252)
+                if len(window) > 0 and ratio is not None:
+                    ratio_pctile = float((window < ratio).mean() * 100)
+
+    # USO trend gate for the UCO leg
+    uso = uso_sma50 = None
+    uso_above_sma50 = None
+    if 'USO' in data and 'Close' in data['USO']:
+        uso_close = data['USO']['Close']
+        if isinstance(uso_close, pd.DataFrame):
+            uso_close = uso_close.iloc[:, 0]
+        uso_close = uso_close.dropna()
+        if len(uso_close) >= 50:
+            uso = safe_float(uso_close.iloc[-1])
+            uso_sma50 = safe_float(uso_close.rolling(50).mean().iloc[-1])
+            uso_above_sma50 = bool(uso > uso_sma50) if uso_sma50 else None
+
+    # days since last trigger — derived from OVX RSI history (no persistence file)
+    days_since_last_trigger = None
+    try:
+        trig = ovx_rsi_series[ovx_rsi_series > 79].dropna()
+        if len(trig) > 0:
+            days_since_last_trigger = int((ovx_close.index[-1] - trig.index[-1]).days)
+    except Exception:
+        pass
+
+    firing = ovx_rsi10 is not None and ovx_rsi10 > 79
+    approaching = ovx_rsi10 is not None and 70 <= ovx_rsi10 <= 79
+    uco_leg_valid = bool(uso_above_sma50) if uso_above_sma50 is not None else False
+    context_div = bool(ovx_pct_vs_sma50 is not None and ovx_pct_vs_sma50 > 15
+                       and vix_below_sma50 is True)
+
+    ratio_txt = f"{ratio:.2f}" if ratio is not None else "n/a"
+
+    alerts = []
+    if firing:
+        # Tier A — primary ERX 1-day trade
+        alerts.append(('🟢 OVX OIL VOL SPIKE',
+            f"OVX RSI(10)={ovx_rsi10:.1f} > 79 (OVX={ovx_level:.1f}) → ERX 1-DAY hold: "
+            f"66.7% WR n=42, +2.24% avg, Wilson CI (51.6, 79.0). "
+            f"2x-era only: 75.0% WR n=20, +1.79%. "
+            f"HOLD 1 DAY ONLY — 5d edge is outlier-driven (p_WR=0.17). "
+            f"Manual execution at Fidelity — ^OVX cannot be built in Composer. "
+            f"CAUTION: 2x leveraged ADD to an already-large energy sleeve (Hormuz basket ~$206K).",
+            'buy'))
+        # Tier B — conditional UCO leg (only when USO > SMA50)
+        if uco_leg_valid and uso is not None and uso_sma50 is not None:
+            alerts.append(('🟢 OVX SPIKE + OIL UPTREND',
+                f"OVX RSI={ovx_rsi10:.1f} > 79 AND USO ${uso:.2f} > SMA50 ${uso_sma50:.2f} → "
+                f"UCO leg live: 1d 70.6% WR n=17, 10d 70.6% +4.05%. "
+                f"UCO leg is INVALID when USO < SMA50 (20d WR 34.6%, -8.78% avg).",
+                'buy'))
+    elif approaching:
+        # Tier C — approach warning (live today at ~72)
+        alerts.append(('🟡 OVX APPROACHING SPIKE',
+            f"OVX RSI(10)={ovx_rsi10:.1f} (trigger 79). OVX={ovx_level:.1f}, "
+            f"OVX/VIX ratio={ratio_txt}. Watch for ERX 1d setup.",
+            'watch'))
+
+    ovx_status = {
+        'level': _num(ovx_level, 2),
+        'rsi10': _num(ovx_rsi10, 1),
+        'pct_vs_sma50': _num(ovx_pct_vs_sma50, 1),
+        'vix_level': _num(vix_level, 2),
+        'vix_pct_vs_sma50': _num(vix_pct_vs_sma50, 1),
+        'ratio': _num(ratio, 2),
+        'ratio_pctile_252d': _num(ratio_pctile, 1),
+        'signal_active': bool(firing),
+        'approaching': bool(approaching),
+        'uco_leg_valid': uco_leg_valid,
+        'uso': _num(uso, 2),
+        'uso_sma50': _num(uso_sma50, 2),
+        'context_divergence_active': context_div,
+        'days_since_last_trigger': days_since_last_trigger,
+    }
+    return alerts, ovx_status
 
 
 # =============================================================================
@@ -1604,6 +1854,18 @@ IBS DIP GATE + CONVICTION (Group 14, manual/IRA)
         if falt:
             body += "  ⚠️ Faltering tiers: " + ", ".join(f"{k}={v}" for k, v in falt.items()) + "\n"
 
+    # OVX Oil Vol Spike reading (Group 34) — always shown, even when nothing fires
+    ovx = status.get('ovx') if isinstance(status, dict) else None
+    if ovx and ovx.get('level') is not None:
+        _r = ovx.get('rsi10'); _p = ovx.get('pct_vs_sma50')
+        _rt = ovx.get('ratio'); _pc = ovx.get('ratio_pctile_252d')
+        _r_t = f"{_r:.1f}" if _r is not None else "n/a"
+        _p_t = f"{_p:+.1f}%" if _p is not None else "n/a"
+        _rt_t = f"{_rt:.2f}" if _rt is not None else "n/a"
+        _pc_t = f"{_pc:.0f}th pctile 1yr" if _pc is not None else "n/a"
+        body += (f"\nOVX {ovx['level']:.2f} | RSI(10) {_r_t} | vs SMA50 {_p_t} | "
+                 f"OVX/VIX {_rt_t} ({_pc_t})\n")
+
     if 'SMH' in indicators:
         smh = indicators['SMH']
         sma200 = smh['sma200']
@@ -1757,6 +2019,13 @@ def write_state_json(alerts, status, mode, hormuz_data=None, rj_state=None,
         except Exception:
             pass
 
+    # Group 34 OVX Oil Vol Spike (readings + trigger/gate/context state)
+    if isinstance(status, dict) and status.get('ovx'):
+        try:
+            state['ovx'] = status['ovx']
+        except Exception:
+            pass
+
     try:
         with open(path, 'w') as f:
             json.dump(state, f, indent=2, default=str)
@@ -1836,6 +2105,10 @@ def main():
         'TMF',
         # Equal-weight S&P 500 (for SIGNAL GROUP 13 z-score ratios)
         'RSP',
+        # OVX Oil Vol Spike (SIGNAL GROUP 34): ^OVX index + ^VIX for the ratio,
+        # ERX (2x energy bull) primary vehicle, USO for the UCO-leg trend gate.
+        # (UCO, XLE, UVXY already present above.)
+        '^OVX', '^VIX', 'ERX', 'USO',
     ]
 
     print("Downloading market data...")
