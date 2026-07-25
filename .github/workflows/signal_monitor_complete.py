@@ -978,7 +978,133 @@ def check_signals(data):
 
     status['zscore_signals'] = zscore_status
 
+    # =========================================================================
+    # SIGNAL GROUP 14: IBS DIP GATE + CONVICTION (manual/IRA; shared ibs_engine)
+    # =========================================================================
+    try:
+        ibs_alerts, ibs_status = ibs_group14(data, indicators)
+        alerts.extend(ibs_alerts)
+        if ibs_status:
+            status['ibs'] = ibs_status
+    except Exception as e:
+        print(f"[IBS] Group 14 skipped (non-fatal): {e}")
+
     return alerts, status
+
+# =============================================================================
+# SIGNAL GROUP 14: IBS DIP GATE + CONVICTION  (helper)
+# =============================================================================
+# Manual/IRA swing dip-buy on SPY/QQQ/SMH/XLK -> SPY(1x)/TQQQ/SOXL/TECL.
+# Reuses the OHLC already in `data` (download_data keeps full frames) and
+# indicators[t]['rsi10']. Shares ibs_engine.py / ibs_tracker.py (repo root,
+# duplicated in chf-dashboard). Emits (title, message, category) 3-tuples so it
+# flows through the existing subject/section/state machinery unchanged.
+def ibs_group14(data, indicators):
+    """Returns (alerts, ibs_status). Close-mode only emits buy/exit/resize and
+    persists ibs_tracker.json; open/preclose emit a provisional watch (IBS is
+    only final at the close). The caller wraps this in try/except."""
+    _here = os.path.dirname(os.path.abspath(__file__))
+    _root = os.path.dirname(os.path.dirname(_here))   # repo root (ibs_engine.py lives here)
+    if _root not in sys.path:
+        sys.path.insert(0, _root)
+    import ibs_engine as eng
+    import ibs_tracker as itr
+
+    und = eng.BREADTH_UNIVERSE   # SPY, QQQ, SMH, XLK
+    if not all(u in data and u in indicators for u in und):
+        return [], {}
+
+    rsi_by, ibs3_by = {}, {}
+    for u in und:
+        rsi_by[u] = indicators[u].get('rsi10')
+        ibs3_by[u] = safe_float(eng.ibs_sma3(data[u]).iloc[-1])
+    breadth = eng.breadth_count(rsi_by)
+
+    state = itr.load_state()
+    prior_state = state.get('gate_state', {})
+    prior_mult = state.get('current_multiplier', {})
+
+    alerts = []
+    new_state, new_mult = {}, {}
+    for u in und:
+        veh = eng.SLEEVE_MAP[u]
+        s3 = ibs3_by[u] if ibs3_by[u] == ibs3_by[u] else float('nan')   # NaN-safe hold
+        st = eng.gate_state(s3, prior_state.get(u, 'OUT'))
+        mult = eng.conviction_multiplier(u, rsi_by[u], breadth) if st == 'IN' else 0.0
+        new_state[u], new_mult[u] = st, mult
+        pv_st = prior_state.get(u, 'OUT')
+        pv_m = prior_mult.get(veh, 0.0)
+        entry_price = safe_float(data[veh]['Close'].iloc[-1]) if veh in data else None
+        rsi_txt = f"{rsi_by[u]:.0f}" if rsi_by[u] is not None else "n/a"
+        ctx = f"{u} IBS {ibs3_by[u]:.2f}, RSI {rsi_txt}, breadth {breadth}"
+        rsi_r = round(rsi_by[u], 1) if rsi_by[u] is not None else None
+
+        if IS_PRECLOSE_LIKE:
+            if st == 'IN':
+                alerts.append(('🟡 IBS WATCH (provisional)',
+                               f"{veh} {mult:.1f}x ({ctx}) — provisional; IBS final at close", 'watch'))
+            continue
+
+        if st == 'IN' and pv_st != 'IN':
+            alerts.append((f'🟢 IBS BUY: {veh} {mult:.1f}x',
+                           f"Gate IN ({ctx}) → buy {veh} at {mult:.1f}x base", 'buy'))
+            itr.log_firing(state, data[u].index[-1].strftime('%Y-%m-%d'), veh,
+                           'gate_entry', 1.0, u, round(ibs3_by[u], 4), rsi_r, breadth, entry_price)
+            _ibs_log_conviction(itr, eng, state, u, veh, mult, breadth, data, ibs3_by, rsi_r, entry_price)
+        elif st == 'IN' and pv_st == 'IN' and mult != pv_m:
+            arrow = '↑' if mult > pv_m else '↓'
+            alerts.append((f'🟡 IBS RESIZE {arrow}: {veh}',
+                           f"{pv_m:.1f}x → {mult:.1f}x ({ctx})", 'watch'))
+            _ibs_log_conviction(itr, eng, state, u, veh, mult, breadth, data, ibs3_by, rsi_r, entry_price)
+        elif st == 'OUT' and pv_st == 'IN':
+            alerts.append((f'🔴 IBS EXIT: {veh}',
+                           f"Gate OUT ({ctx}) → sell {veh}, go flat", 'exit'))
+
+    # close-mode: mature forward returns, refresh rolling, persist tracker
+    if IS_CLOSE:
+        vprices = {v: data[v]['Close'] for v in set(eng.SLEEVE_MAP.values()) if v in data}
+        itr.mature_results(state, lambda tk: vprices.get(tk))
+        itr.snapshot(state, new_state, new_mult, breadth)
+        itr.save_state(state)
+
+    # faltering tiers -> prepend a warning alert (investigate/suspend by hand)
+    falt = itr.faltering_flags(state)
+    for key, stt in falt.items():
+        if stt == 'FALTERING':
+            base = state.get('baseline', {}).get(key, {})
+            roll = state.get('rolling', {}).get(key, {})
+            alerts.insert(0, ('⚠️ IBS FALTERING',
+                f"{key} trailing WR {roll.get('trailing_wr', 0)*100:.0f}% vs baseline "
+                f"{base.get('wr', 0)*100:.0f}% [lo {base.get('wilson_lo', 0)*100:.0f}%], "
+                f"n={roll.get('trailing_n', 0)} — investigate/suspend this tier by hand", 'warning'))
+
+    ibs_status = {
+        'gate_state': new_state,
+        'current_multiplier': {eng.SLEEVE_MAP[u]: (new_mult[u] if new_state[u] == 'IN' else 0.0)
+                               for u in und},
+        'breadth': breadth,
+        'ibs_sma3': {u: (round(ibs3_by[u], 4) if ibs3_by[u] == ibs3_by[u] else None) for u in und},
+        'rsi10': {u: (round(rsi_by[u], 1) if rsi_by[u] is not None else None) for u in und},
+        'equity_budget': eng.EQUITY_BUDGET,
+        'faltering': falt,
+        'as_of': datetime.now().strftime('%Y-%m-%d'),
+    }
+    return alerts, ibs_status
+
+
+def _ibs_log_conviction(itr, eng, state, u, veh, mult, breadth, data, ibs3_by, rsi_r, entry_price):
+    """Log the conviction-tier firing when an elevated tier is entered."""
+    if mult not in (eng.MULT_SINGLE, eng.MULT_BREADTH):
+        return
+    if breadth >= 3:
+        stype = 'conviction_2.0x_breadth'
+    elif eng.SLEEVE_MAP[u] == 'SOXL':
+        stype = 'conviction_2.0x_single'
+    else:
+        stype = 'conviction_1.5x'
+    itr.log_firing(state, data[u].index[-1].strftime('%Y-%m-%d'), veh, stype, mult, u,
+                   round(ibs3_by[u], 4), rsi_r, breadth, entry_price)
+
 
 # =============================================================================
 # HORMUZ INTELLIGENCE (Windward)
@@ -1450,6 +1576,34 @@ Z-SCORE RATIO SIGNALS (Tier 2, manual execution)
             )
         body += "\n"
 
+    # IBS Dip Gate + Conviction block (Group 14, manual/IRA)
+    ibs = status.get('ibs') if isinstance(status, dict) else None
+    if ibs:
+        sleeve_map = {'SPY': 'SPY', 'QQQ': 'TQQQ', 'SMH': 'SOXL', 'XLK': 'TECL'}
+        body += f"""
+{'='*70}
+IBS DIP GATE + CONVICTION (Group 14, manual/IRA)
+{'='*70}
+"""
+        gs = ibs.get('gate_state', {})
+        cm = ibs.get('current_multiplier', {})
+        i3 = ibs.get('ibs_sma3', {})
+        r10 = ibs.get('rsi10', {})
+        for u in ['SPY', 'QQQ', 'SMH', 'XLK']:
+            veh = sleeve_map[u]
+            st = gs.get(u, 'OUT')
+            m = cm.get(veh, 0.0)
+            mtxt = f"{m:.1f}x" if st == 'IN' else "--"
+            s3 = i3.get(u)
+            rr = r10.get(u)
+            s3txt = f"{s3:.2f}" if s3 is not None else "n/a"
+            rrtxt = f"{rr:.0f}" if rr is not None else "n/a"
+            body += f"  {u:<4}→{veh:<5} {st:<3} {mtxt:<5} (IBS {s3txt}, RSI {rrtxt})\n"
+        body += f"  Breadth (RSI10<30 of SPY/QQQ/SMH/XLK): {ibs.get('breadth', 0)}\n"
+        falt = ibs.get('faltering', {})
+        if falt:
+            body += "  ⚠️ Faltering tiers: " + ", ".join(f"{k}={v}" for k, v in falt.items()) + "\n"
+
     if 'SMH' in indicators:
         smh = indicators['SMH']
         sma200 = smh['sma200']
@@ -1596,6 +1750,13 @@ def write_state_json(alerts, status, mode, hormuz_data=None, rj_state=None,
         except Exception:
             pass
 
+    # Group 14 IBS Dip Gate + Conviction (current gate state + multipliers + flags)
+    if isinstance(status, dict) and status.get('ibs'):
+        try:
+            state['ibs'] = status['ibs']
+        except Exception:
+            pass
+
     try:
         with open(path, 'w') as f:
             json.dump(state, f, indent=2, default=str)
@@ -1649,6 +1810,8 @@ def main():
     tickers = [
         # Core Indices
         'SMH', 'SPY', 'QQQ', 'IWM',
+        # Tech sector (IBS Group 14 breadth + TECL sleeve)
+        'XLK',
         # Defensive Sectors
         'XLP', 'XLU', 'XLV',
         # Safe Havens & Macro

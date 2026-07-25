@@ -34,6 +34,11 @@ on:
           - open
           - preclose
           - close
+      prime_ibs:
+        description: 'Prime the IBS Group 14 baseline (run ONCE to seed ~2000-present, then never again)'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   check-signals:
@@ -81,6 +86,11 @@ jobs:
           COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
           COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
         run: |
+          # One-time IBS Group 14 baseline priming (workflow_dispatch prime_ibs=true).
+          if [ "${{ inputs.prime_ibs }}" == "true" ]; then
+            echo "Priming IBS baseline (one-time; seeds ~2000-present)..."
+            python ibs_tracker.py prime
+          fi
           MODE="${{ steps.mode.outputs.mode }}"
           if [ "$MODE" == "open" ]; then
             python .github/workflows/signal_monitor_complete.py open
@@ -108,7 +118,7 @@ jobs:
           # dashboard_state.json every run; price store + signal research are
           # refreshed on the post-close (close) run only -- git add is a no-op
           # when unchanged.
-          git add dashboard_state.json data/price_store/ data/signal_research/
+          git add dashboard_state.json data/price_store/ data/signal_research/ ibs_tracker.json
 
           if git diff --cached --quiet; then
             echo "No state change to commit"
