@@ -1,0 +1,95 @@
+# Composer OOS Capture
+# Pulls each symphony's matched live-vs-backtest curves from Composer once daily
+# and commits data/composer_oos.jsonl back to this repo.
+#
+# Read-only by construction: scripts/composer_oos.py whitelists GETs and permits
+# exactly one POST (the backtest simulation). Deploy / trading / dry-run paths raise.
+#
+# Uses the same COMPOSER_KEY_ID / COMPOSER_KEY_SECRET secrets already configured
+# for the signal monitor (the module also accepts COMPOSER_API_KEY_ID /
+# COMPOSER_API_SECRET). Nothing is hardcoded.
+
+name: Composer OOS Capture
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    # 4:30 PM Eastern = 20:30 UTC (DST) -- after market close, once per weekday
+    - cron: '30 20 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      start:
+        description: 'Force a common window start (YYYY-MM-DD), else per invested_since'
+        required: false
+        default: ''
+        type: string
+      dry_run:
+        description: 'Smoke test: fetch and print summaries but write/commit nothing'
+        required: false
+        default: false
+        type: boolean
+      limit:
+        description: 'Cap symphonies processed (e.g. 1 for a quick smoke test), else all'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  capture-oos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Capture OOS live-vs-backtest
+        env:
+          COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
+          COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
+        run: |
+          ARGS="sync"
+          START="${{ github.event.inputs.start }}"
+          LIMIT="${{ github.event.inputs.limit }}"
+          [ -n "$START" ] && ARGS="$ARGS --start $START"
+          [ -n "$LIMIT" ] && ARGS="$ARGS --limit $LIMIT"
+          [ "${{ github.event.inputs.dry_run }}" == "true" ] && ARGS="$ARGS --dry-run"
+          echo "Running: python scripts/composer_oos.py $ARGS"
+          python scripts/composer_oos.py $ARGS
+
+      - name: Print OOS report
+        # Ranked live-vs-backtest table straight into the Actions log. Skipped on
+        # dry-run, which already prints per-symphony summaries and writes no file.
+        if: success() && github.event.inputs.dry_run != 'true'
+        run: python scripts/composer_oos.py report
+
+      - name: Commit OOS ledger
+        # Skip on dry-run: it writes nothing, so there is nothing to commit.
+        if: success() && github.event.inputs.dry_run != 'true'
+        run: |
+          set -e
+          if [ ! -f data/composer_oos.jsonl ]; then
+            echo "No data/composer_oos.jsonl produced -- skipping commit"
+            exit 0
+          fi
+          git config user.name "composer-oos-bot"
+          git config user.email "composer-oos-bot@users.noreply.github.com"
+          git add data/composer_oos.jsonl
+          if git diff --cached --quiet; then
+            echo "No OOS change to commit"
+          else
+            git commit -m "📈 Composer OOS capture $(date -u +%Y-%m-%d)"
+            git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+            git push origin "HEAD:${GITHUB_REF_NAME:-main}"
+            echo "OOS ledger committed"
+          fi
