@@ -25,6 +25,16 @@ on:
         required: false
         default: ''
         type: string
+      dry_run:
+        description: 'Smoke test: fetch and print summaries but write/commit nothing'
+        required: false
+        default: false
+        type: boolean
+      limit:
+        description: 'Cap symphonies processed (e.g. 1 for a quick smoke test), else all'
+        required: false
+        default: ''
+        type: string
 
 jobs:
   capture-oos:
@@ -48,15 +58,18 @@ jobs:
           COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
           COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
         run: |
+          ARGS="sync"
           START="${{ github.event.inputs.start }}"
-          if [ -n "$START" ]; then
-            python scripts/composer_oos.py sync --start "$START"
-          else
-            python scripts/composer_oos.py sync
-          fi
+          LIMIT="${{ github.event.inputs.limit }}"
+          [ -n "$START" ] && ARGS="$ARGS --start $START"
+          [ -n "$LIMIT" ] && ARGS="$ARGS --limit $LIMIT"
+          [ "${{ github.event.inputs.dry_run }}" == "true" ] && ARGS="$ARGS --dry-run"
+          echo "Running: python scripts/composer_oos.py $ARGS"
+          python scripts/composer_oos.py $ARGS
 
       - name: Commit OOS ledger
-        if: success()
+        # Skip on dry-run: it writes nothing, so there is nothing to commit.
+        if: success() && github.event.inputs.dry_run != 'true'
         run: |
           set -e
           if [ ! -f data/composer_oos.jsonl ]; then
