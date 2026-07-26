@@ -1,0 +1,52 @@
+# Composer Watchlist OOS Split (manual, read-only capture)
+# Backtests each watchlist symphony frozen >= 6 months ago, splits the equity
+# curve at its freeze date into in-sample vs out-of-sample, and commits
+# data/composer_oos_watchlist.jsonl. Uses only the permitted backtest POST.
+
+name: Composer Watchlist OOS Split
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+
+jobs:
+  oos-split:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run OOS split
+        env:
+          COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
+          COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
+        run: python scripts/composer_oos_watchlist.py
+
+      - name: Commit results
+        if: success()
+        run: |
+          set -e
+          if [ ! -f data/composer_oos_watchlist.jsonl ]; then
+            echo "No output produced -- skipping commit"; exit 0
+          fi
+          git config user.name "composer-oos-bot"
+          git config user.email "composer-oos-bot@users.noreply.github.com"
+          git add data/composer_oos_watchlist.jsonl
+          if git diff --cached --quiet; then
+            echo "No change to commit"
+          else
+            git commit -m "📊 Composer watchlist OOS split $(date -u +%Y-%m-%d)"
+            git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+            git push origin "HEAD:${GITHUB_REF_NAME:-main}"
+          fi
