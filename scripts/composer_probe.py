@@ -23,6 +23,7 @@ USAGE
 """
 from __future__ import annotations
 import os, sys, re, json, time, argparse
+from urllib.parse import urlparse
 
 import requests
 
@@ -153,6 +154,78 @@ def raw_get(url: str) -> None:
         print(f"  [{url}] -> {type(e).__name__}: {str(e)[:120]}", flush=True)
 
 
+# Path segments that indicate a state change. A list-query POST to a bare
+# collection path (…/watchlist, …/public/symphonies) carries none of these.
+_MUTATE = ("deploy", "orders", "order", "rebalance", "dry-run", "add-watch",
+           "remove-watch", "delete", "create", "update", "invest", "liquidate",
+           "cancel", "execute", "trade-preview")
+
+
+def raw_post_readonly(url: str, body: dict) -> None:
+    """POST a *list-query* body to a collection endpoint to READ it. Refuses any
+    path whose segments imply mutation, and never sends an item id in the body."""
+    path = urlparse(url).path.lower()
+    if any(seg in path for seg in _MUTATE):
+        print(f"  [POST {url}] -> REFUSED (mutating path segment)", flush=True)
+        return
+    # a read-query body must not carry a symphony id (which could add/target one)
+    lowkeys = {k.lower() for k in body}
+    if any("symph" in k or k in ("id", "symphony_id") for k in lowkeys):
+        print(f"  [POST {url}] -> REFUSED (body carries an id)", flush=True)
+        return
+    try:
+        r = requests.post(url, headers=oos._headers(), json=body, timeout=30)
+        ct = r.headers.get("content-type", "")
+        body_note = ""
+        if "json" in ct:
+            try:
+                d = r.json()
+                if isinstance(d, dict):
+                    body_note = f"dict keys={list(d.keys())[:15]}"
+                    for k, v in d.items():
+                        if isinstance(v, list) and v and isinstance(v[0], dict):
+                            body_note += f" | {k}[0] keys={list(v[0].keys())[:16]}"
+                            break
+                elif isinstance(d, list):
+                    body_note = f"list len={len(d)}"
+                    if d and isinstance(d[0], dict):
+                        body_note += f" [0] keys={list(d[0].keys())[:16]}"
+                if not body_note:
+                    body_note = json.dumps(d)[:300]
+            except Exception:
+                body_note = r.text[:300]
+        else:
+            body_note = (r.text or "")[:300].replace("\n", " ")
+        print(f"  [POST {url}] body={json.dumps(body)} -> {r.status_code} {body_note}",
+              flush=True)
+    except Exception as e:
+        print(f"  [POST {url}] -> {type(e).__name__}: {str(e)[:140]}", flush=True)
+
+
+def probe_post() -> None:
+    print("\n=== READ-ONLY POST PROBES (confirmed host: trading-api) ===", flush=True)
+    base = "https://trading-api.composer.trade/"
+    # Discover the current account uuids to try as optional query context.
+    uuids = []
+    try:
+        uuids = [a.get("account_uuid") for a in oos.list_accounts()
+                 if a.get("account_uuid")]
+    except Exception as e:
+        print(f"  (accounts/list failed: {type(e).__name__}) — trying anonymous body",
+              flush=True)
+    wl_bodies = [{}]
+    if uuids:
+        wl_bodies += [{"account_uuids": uuids}, {"account_uuid": uuids[0]}]
+    for b in wl_bodies:
+        time.sleep(0.5)
+        raw_post_readonly(base + "api/v1/watchlist", b)
+    # Discover leaderboard source — list query with sort/limit filters.
+    for b in [{}, {"sort": "oos_annualized_return", "limit": 25},
+              {"category": "best_of_community", "limit": 25}]:
+        time.sleep(0.5)
+        raw_post_readonly(base + "api/v1/public/symphonies", b)
+
+
 def probe_v1(bases: list[str]) -> None:
     print("\n=== V1 ENDPOINT PROBES (bases discovered in bundle) ===", flush=True)
     # Fall back to a couple of hand guesses if the bundle yielded nothing.
@@ -206,7 +279,6 @@ if __name__ == "__main__":
     ap.add_argument("--bundle", default=DEFAULT_BUNDLE)
     ap.add_argument("--no-bundle", action="store_true")
     a = ap.parse_args()
-    bases = []
     if not a.no_bundle:
-        bases = scan_bundle(a.bundle)
-    probe_v1(bases)
+        scan_bundle(a.bundle)
+    probe_post()
