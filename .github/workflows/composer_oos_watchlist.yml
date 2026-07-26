@@ -10,6 +10,11 @@ permissions:
 
 on:
   workflow_dispatch:
+  schedule:
+    # Weekly, Sundays 22:00 UTC — OOS windows extend slowly, so weekly keeps
+    # data/composer_oos_watchlist.jsonl (and the dashboard tab) current without
+    # backtesting 121 symphonies daily.
+    - cron: '0 22 * * 0'
 
 jobs:
   oos-split:
