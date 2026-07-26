@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<!--
+  Watchlist OOS dashboard tab (self-contained, dependency-free).
+
+  Renders the in-sample vs out-of-sample split published by
+  scripts/composer_oos_watchlist.py: for each watchlist symphony frozen >= 6
+  months ago, the equity curve is backtested and split at its freeze date
+  (last_semantic_update_at = OOS inception) into in-sample (before) vs
+  out-of-sample (after). Shows the aggregate overfit picture, the strategies
+  that held up OOS, the worst decayers, and a full sortable table.
+
+  Data source: data/composer_oos_watchlist.jsonl in this repo. By default it
+  fetches from raw.githubusercontent.com on `main` (works opened locally, on
+  GitHub Pages, or embedded in another app). Override with query params:
+     ?branch=<branch>     e.g. ?branch=claude/new-session-3tnlmm
+     ?base=<url-or-path>  e.g. ?base=.   (relative, when served beside the data)
+  or use the "Source" control in the header.
+
+  EMBEDDING IN chf-dashboard (Flask): everything is namespaced under
+  #composer-oos-tab and a single IIFE — paste the <style> + the
+  <div id="composer-oos-tab"> + the <script> into a Jinja template (or a tab
+  pane) and it runs as-is. No globals leak; no external dependencies.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watchlist OOS</title>
+<style>
+  #composer-oos-tab {
+    --bg:#0f1419; --panel:#171d26; --panel2:#1d2530; --line:#2a3340;
+    --txt:#e6edf3; --muted:#8b98a8; --green:#3fb950; --red:#f85149;
+    --blue:#58a6ff; --amber:#d29922; --chip:#243042;
+    background:var(--bg); color:var(--txt); min-height:100vh;
+    font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:24px; box-sizing:border-box;
+  }
+  #composer-oos-tab * { box-sizing:border-box; }
+  #composer-oos-tab h1 { font-size:22px; margin:0; letter-spacing:.2px; }
+  #composer-oos-tab h2 { font-size:15px; margin:22px 0 10px; color:var(--txt);
+    border-left:3px solid var(--blue); padding-left:9px; }
+  #composer-oos-tab .sub { color:var(--muted); font-size:13px; margin-top:4px; }
+  #composer-oos-tab .head { display:flex; flex-wrap:wrap; gap:14px;
+    align-items:flex-end; justify-content:space-between; }
+  #composer-oos-tab .controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  #composer-oos-tab label { color:var(--muted); font-size:12px; margin-right:5px; }
+  #composer-oos-tab select, #composer-oos-tab input {
+    background:var(--panel2); color:var(--txt); border:1px solid var(--line);
+    border-radius:6px; padding:6px 9px; font-size:13px; }
+  #composer-oos-tab input { width:80px; }
+  #composer-oos-tab .panel { background:var(--panel); border:1px solid var(--line);
+    border-radius:10px; padding:16px 18px; margin-top:16px; }
+  #composer-oos-tab .cards { display:flex; flex-wrap:wrap; gap:12px; }
+  #composer-oos-tab .card { background:var(--panel2); border:1px solid var(--line);
+    border-radius:9px; padding:11px 14px; min-width:150px; flex:1; }
+  #composer-oos-tab .card .k { color:var(--muted); font-size:11px; text-transform:uppercase;
+    letter-spacing:.5px; }
+  #composer-oos-tab .card .v { font-size:20px; font-weight:600; margin-top:3px; }
+  #composer-oos-tab .card .v small { font-size:12px; color:var(--muted); font-weight:400; }
+  #composer-oos-tab table { width:100%; border-collapse:collapse; font-size:13px; }
+  #composer-oos-tab th, #composer-oos-tab td {
+    text-align:right; padding:7px 9px; border-bottom:1px solid var(--line); white-space:nowrap; }
+  #composer-oos-tab th:first-child, #composer-oos-tab td:first-child { text-align:left; }
+  #composer-oos-tab th { color:var(--muted); font-weight:600; font-size:11px;
+    text-transform:uppercase; letter-spacing:.5px; cursor:pointer; }
+  #composer-oos-tab th.sorted::after { content:" \25BE"; color:var(--blue); }
+  #composer-oos-tab tbody tr:hover { background:var(--panel2); }
+  #composer-oos-tab .pos { color:var(--green); } #composer-oos-tab .neg { color:var(--red); }
+  #composer-oos-tab .muted { color:var(--muted); }
+  #composer-oos-tab .chip { display:inline-block; padding:1px 7px; border-radius:999px;
+    background:var(--chip); color:var(--muted); font-size:11px; }
+  #composer-oos-tab .chip.robust { color:var(--green); }
+  #composer-oos-tab .chip.decay { color:var(--red); }
+  #composer-oos-tab .empty { color:var(--muted); font-style:italic; padding:10px 2px; }
+  #composer-oos-tab .err { color:var(--red); }
+  #composer-oos-tab .foot { color:var(--muted); font-size:11px; margin-top:22px;
+    border-top:1px solid var(--line); padding-top:12px; }
+  #composer-oos-tab a { color:var(--blue); text-decoration:none; }
+</style>
+</head>
+<body>
+<div id="composer-oos-tab">
+  <div class="head">
+    <div>
+      <h1>🔬 Watchlist OOS</h1>
+      <div class="sub" id="oos-sub">Loading…</div>
+    </div>
+    <div class="controls">
+      <span><label for="oos-sort">Sort</label><select id="oos-sort">
+        <option value="oos_sharpe">OOS Sharpe</option>
+        <option value="oos_cagr_pct">OOS CAGR</option>
+        <option value="cagr_gap_pct">CAGR gap</option>
+        <option value="oos_days">OOS days</option>
+        <option value="name">Name</option>
+      </select></span>
+      <span><label for="oos-min">Min OOS d</label><input id="oos-min" type="number" value="100"></span>
+      <span><label for="oos-branch">Source</label><input id="oos-branch" placeholder="branch" style="width:120px"></span>
+    </div>
+  </div>
+
+  <div class="panel" id="oos-summary"><div class="empty">Loading latest…</div></div>
+
+  <h2>✅ Held up out-of-sample</h2>
+  <div class="sub">OOS Sharpe ≥ 1.3 · CAGR gap ≥ −60 · OOS max-DD ≥ −30% · ≥ 150 OOS days</div>
+  <div class="panel" id="oos-robust"><div class="empty">…</div></div>
+
+  <h2>⚠️ Worst overfit / decay</h2>
+  <div class="sub">Biggest in-sample→OOS CAGR drop (≥ 250 OOS days)</div>
+  <div class="panel" id="oos-decay"><div class="empty">…</div></div>
+
+  <h2>All symphonies</h2>
+  <div class="panel" id="oos-all"><div class="empty">…</div></div>
+
+  <div class="foot" id="oos-foot"></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var qs = new URLSearchParams(location.search);
+  var OWNER = "mjo156-ship-it", REPO = "Market-Signals";
+  var branch = qs.get("branch") || "main";
+  function baseFor(b) {
+    var explicit = qs.get("base");
+    if (explicit) return explicit.replace(/\/$/, "");
+    return "https://raw.githubusercontent.com/" + OWNER + "/" + REPO + "/" + b;
+  }
+  var BASE = baseFor(branch);
+  var PATH = "/data/composer_oos_watchlist.jsonl";
+  var ROWS = [];
+
+  function el(tag, cls, html) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html != null) e.innerHTML = html;
+    return e;
+  }
+  function esc(s) { return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function num(x, dp) { return (x == null || isNaN(x)) ? "—" : (+x).toFixed(dp == null ? 0 : dp); }
+  function sgn(x, dp) { if (x == null || isNaN(x)) return "—"; return (x >= 0 ? "+" : "") + (+x).toFixed(dp == null ? 0 : dp); }
+  function cls(x) { return (x == null || isNaN(x)) ? "" : (x >= 0 ? "pos" : "neg"); }
+  function median(a) { if (!a.length) return NaN; var s = a.slice().sort(function (x, y) { return x - y; });
+    var m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+  function corr(xs, ys) {
+    var n = xs.length; if (n < 2) return NaN;
+    var mx = xs.reduce(function (a, b) { return a + b; }, 0) / n;
+    var my = ys.reduce(function (a, b) { return a + b; }, 0) / n;
+    var sx = 0, sy = 0, sxy = 0;
+    for (var i = 0; i < n; i++) { var dx = xs[i] - mx, dy = ys[i] - my; sx += dx * dx; sy += dy * dy; sxy += dx * dy; }
+    return (sx && sy) ? sxy / Math.sqrt(sx * sy) : NaN;
+  }
+
+  function fetchRows() {
+    return fetch(BASE + PATH + "?t=" + Date.now()).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.text();
+    }).then(function (txt) {
+      return txt.split("\n").map(function (l) { l = l.trim(); if (!l) return null;
+        try { return JSON.parse(l); } catch (e) { return null; } })
+        .filter(function (r) { return r && r.scope === "oos_split"; });
+    });
+  }
+
+  function table(rows, opts) {
+    opts = opts || {};
+    if (!rows || !rows.length) return el("div", "empty", "Nothing here.");
+    var t = el("table");
+    var flagCol = opts.flag ? "<th>Flag</th>" : "";
+    t.innerHTML =
+      "<thead><tr><th data-k='name'>Symphony</th><th data-k='oos_date'>Frozen</th>" +
+      "<th data-k='oos_days'>OOS d</th><th data-k='is_cagr_pct'>IS CAGR</th>" +
+      "<th data-k='oos_cagr_pct'>OOS CAGR</th><th data-k='cagr_gap_pct'>Gap</th>" +
+      "<th data-k='is_sharpe'>IS Sh</th><th data-k='oos_sharpe'>OOS Sh</th>" +
+      "<th data-k='oos_maxdd_pct'>OOS DD</th>" + flagCol + "</tr></thead>";
+    var tb = el("tbody");
+    rows.forEach(function (r) {
+      var tr = el("tr");
+      var flag = "";
+      if (opts.flag) {
+        var robust = r.oos_sharpe >= 1.3 && (r.cagr_gap_pct == null || r.cagr_gap_pct >= -60)
+          && r.oos_maxdd_pct >= -30 && r.oos_days >= 150;
+        var decay = r.cagr_gap_pct != null && r.cagr_gap_pct <= -200;
+        flag = "<td>" + (robust ? "<span class='chip robust'>held</span>"
+          : decay ? "<span class='chip decay'>decay</span>" : "") + "</td>";
+      }
+      tr.innerHTML =
+        "<td>" + esc(r.name) + "</td>" +
+        "<td class='muted'>" + esc(r.oos_date) + "</td>" +
+        "<td>" + num(r.oos_days) + "</td>" +
+        "<td class='muted'>" + num(r.is_cagr_pct) + "%</td>" +
+        "<td class='" + cls(r.oos_cagr_pct) + "'>" + num(r.oos_cagr_pct) + "%</td>" +
+        "<td class='" + cls(r.cagr_gap_pct) + "'>" + sgn(r.cagr_gap_pct) + "</td>" +
+        "<td class='muted'>" + num(r.is_sharpe, 2) + "</td>" +
+        "<td class='" + (r.oos_sharpe >= 1 ? "pos" : r.oos_sharpe < 0 ? "neg" : "") + "'>" + num(r.oos_sharpe, 2) + "</td>" +
+        "<td class='neg'>" + num(r.oos_maxdd_pct) + "%</td>" + flag;
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);
+    return t;
+  }
+
+  function renderSummary() {
+    var minD = +document.getElementById("oos-min").value || 0;
+    var big = ROWS.filter(function (r) { return (r.oos_days || 0) >= minD
+      && r.oos_cagr_pct != null && r.is_cagr_pct != null; });
+    var gaps = big.map(function (r) { return r.cagr_gap_pct; }).filter(function (x) { return x != null; });
+    var pairs = big.filter(function (r) { return r.is_sharpe != null && r.oos_sharpe != null; });
+    var neg = gaps.filter(function (g) { return g < 0; }).length;
+    var shDrop = pairs.filter(function (r) { return r.oos_sharpe < r.is_sharpe; }).length;
+    var posOOS = big.filter(function (r) { return r.oos_cagr_pct > 0; }).length;
+    var c = corr(pairs.map(function (r) { return r.is_sharpe; }), pairs.map(function (r) { return r.oos_sharpe; }));
+    var box = document.getElementById("oos-summary");
+    box.innerHTML = "";
+    box.appendChild(el("div", "sub",
+      "<b>" + big.length + "</b> symphonies frozen ≥ 6 months, ≥ " + minD +
+      " OOS days · in-sample = backtest before freeze, out-of-sample = after"));
+    var cards = el("div", "cards");
+    function card(k, v, sub) { var d = el("div", "card");
+      d.innerHTML = "<div class='k'>" + k + "</div><div class='v'>" + v +
+        (sub ? " <small>" + sub + "</small>" : "") + "</div>"; return d; }
+    cards.appendChild(card("Median CAGR", num(median(big.map(function (r) { return r.is_cagr_pct; }))) +
+      "% <small>→</small> <span class='" + cls(median(big.map(function (r) { return r.oos_cagr_pct; }))) + "'>" +
+      num(median(big.map(function (r) { return r.oos_cagr_pct; }))) + "%</span>", "IS → OOS"));
+    cards.appendChild(card("Median Sharpe", num(median(pairs.map(function (r) { return r.is_sharpe; })), 2) +
+      " <small>→</small> " + num(median(pairs.map(function (r) { return r.oos_sharpe; })), 2), "IS → OOS"));
+    cards.appendChild(card("IS↔OOS Sharpe corr", "<span class='" + cls(c) + "'>" + num(c, 2) + "</span>",
+      "backtest predicts OOS?"));
+    cards.appendChild(card("Decayed", neg + "/" + gaps.length, "negative CAGR gap"));
+    cards.appendChild(card("Sharpe fell", shDrop + "/" + pairs.length, "OOS < IS"));
+    cards.appendChild(card("Still positive OOS", posOOS + "/" + big.length, "CAGR > 0"));
+    box.appendChild(cards);
+  }
+
+  function renderRobust() {
+    var rows = ROWS.filter(function (r) {
+      return r.oos_sharpe != null && r.oos_sharpe >= 1.3
+        && (r.cagr_gap_pct == null || r.cagr_gap_pct >= -60)
+        && r.oos_maxdd_pct != null && r.oos_maxdd_pct >= -30
+        && (r.oos_days || 0) >= 150;
+    }).sort(function (a, b) { return (b.oos_sharpe || 0) - (a.oos_sharpe || 0); });
+    var box = document.getElementById("oos-robust"); box.innerHTML = "";
+    box.appendChild(table(rows));
+  }
+
+  function renderDecay() {
+    var rows = ROWS.filter(function (r) { return (r.oos_days || 0) >= 250
+      && r.cagr_gap_pct != null; })
+      .sort(function (a, b) { return a.cagr_gap_pct - b.cagr_gap_pct; }).slice(0, 15);
+    var box = document.getElementById("oos-decay"); box.innerHTML = "";
+    box.appendChild(table(rows));
+  }
+
+  function renderAll() {
+    var minD = +document.getElementById("oos-min").value || 0;
+    var key = document.getElementById("oos-sort").value;
+    var rows = ROWS.filter(function (r) { return (r.oos_days || 0) >= minD; });
+    rows.sort(function (a, b) {
+      if (key === "name") return String(a.name).localeCompare(String(b.name));
+      return (b[key] == null ? -1e9 : b[key]) - (a[key] == null ? -1e9 : a[key]);
+    });
+    var box = document.getElementById("oos-all"); box.innerHTML = "";
+    box.appendChild(el("div", "sub", rows.length + " shown"));
+    box.appendChild(table(rows, { flag: true }));
+  }
+
+  function renderAllSorted() { renderSummary(); renderAll(); }
+
+  function boot() {
+    document.getElementById("oos-sub").textContent = "Loading from " + branch + "…";
+    document.getElementById("oos-foot").innerHTML =
+      "Source: <a href='" + BASE + PATH + "' target='_blank'>composer_oos_watchlist.jsonl</a>" +
+      " · built by scripts/composer_oos_watchlist.py · OOS inception = each symphony's last_semantic_update_at";
+    fetchRows().then(function (rows) {
+      ROWS = rows;
+      var asof = rows.length ? rows[0].date : "?";
+      document.getElementById("oos-sub").innerHTML =
+        "<b>" + rows.length + "</b> symphonies · captured " + esc(asof) + " · branch " + branch;
+      renderSummary(); renderRobust(); renderDecay(); renderAll();
+    }).catch(function (e) {
+      document.getElementById("oos-sub").innerHTML =
+        "<span class='err'>Could not load data from " + esc(branch) + " (" + esc(e.message) +
+        "). Try a different branch in Source.</span>";
+    });
+  }
+
+  document.getElementById("oos-sort").onchange = renderAll;
+  document.getElementById("oos-min").onchange = renderAllSorted;
+  var bi = document.getElementById("oos-branch");
+  bi.value = branch;
+  bi.addEventListener("change", function () {
+    branch = bi.value.trim() || "main"; BASE = baseFor(branch); boot();
+  });
+  boot();
+})();
+</script>
+</body>
+</html>
