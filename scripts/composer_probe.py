@@ -22,7 +22,7 @@ USAGE
     python composer_probe.py --no-bundle           # skip the bundle download
 """
 from __future__ import annotations
-import os, sys, re, json, argparse
+import os, sys, re, json, time, argparse
 
 import requests
 
@@ -38,9 +38,14 @@ UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/126.0 Safari/537.36")
 
 # Regexes over the minified bundle.
-_PATH_RE = re.compile(r"""["'`](/api/[a-zA-Z0-9_./{}$:-]+)["'`]""")
+# Catch every api/vN[...] path token, with OR without a leading slash/quote —
+# the watchlist path appears as the bare literal "api/v1/watchlist".
+_PATH_RE = re.compile(r"""(/?api/v\d[a-zA-Z0-9_./{}$:-]*)""")
 _KW_RE = re.compile(r"""["'`]([^"'`]*(?:watchlist|watch|discover|popular|community|"""
                     r"""out-of-sample|out_of_sample|oos)[^"'`]*)["'`]""", re.I)
+# Show how a path is assembled (host/base) by printing context around it.
+_CTX_TERMS = ("api/v1/watchlist", "api/v1/discover", "best_of_community",
+              "stable_performers", "recent_performers", "/discover")
 
 
 def scan_bundle(url: str) -> None:
@@ -54,9 +59,16 @@ def scan_bundle(url: str) -> None:
         return
     js = r.text
     paths = sorted(set(_PATH_RE.findall(js)))
-    print(f"\n  -- {len(paths)} distinct /api/ paths --", flush=True)
+    print(f"\n  -- {len(paths)} distinct api/vN paths --", flush=True)
     for p in paths:
         print(f"    {p}", flush=True)
+    print("\n  -- context around key terms (reveals host/base) --", flush=True)
+    for term in _CTX_TERMS:
+        i = js.find(term)
+        if i >= 0:
+            print(f"    [{term}] ...{js[max(0,i-70):i+len(term)+30]}...", flush=True)
+        else:
+            print(f"    [{term}] (not found)", flush=True)
     kws = sorted({s for s in _KW_RE.findall(js) if len(s) < 120})
     # keep the ones that look like paths/keys, drop prose
     kws = [s for s in kws if ("/" in s or "-" in s or "_" in s) and " " not in s.strip()]
@@ -87,6 +99,52 @@ def probe(path: str) -> None:
             print(f"      [0]={json.dumps(d[0])[:400]}", flush=True)
     else:
         print(f"  [{path}] -> 200 {type(d).__name__}", flush=True)
+
+
+_FORBIDDEN = ("/deploy/", "/trading/", "/dry-run", "/rebalance")
+
+
+def raw_get(url: str) -> None:
+    """GET an absolute URL with the API key. Read-only: refuses state-changing
+    paths and only ever issues GET."""
+    if any(f in url for f in _FORBIDDEN):
+        print(f"  [{url}] -> refused (forbidden path)", flush=True)
+        return
+    try:
+        r = requests.get(url, headers=oos._headers(), timeout=30)
+        ct = r.headers.get("content-type", "")
+        note = ""
+        if r.ok and "json" in ct:
+            d = r.json()
+            if isinstance(d, dict):
+                note = f"dict keys={list(d.keys())[:12]}"
+                for k, v in d.items():
+                    if isinstance(v, list) and v and isinstance(v[0], dict):
+                        note += f" | {k}[0] keys={list(v[0].keys())[:14]}"
+                        break
+            elif isinstance(d, list):
+                note = f"list len={len(d)}"
+                if d and isinstance(d[0], dict):
+                    note += f" [0] keys={list(d[0].keys())[:14]}"
+        else:
+            note = (r.text or "")[:100].replace("\n", " ")
+        print(f"  [{url}] -> {r.status_code} {note}", flush=True)
+    except Exception as e:
+        print(f"  [{url}] -> {type(e).__name__}: {str(e)[:120]}", flush=True)
+
+
+def probe_v1() -> None:
+    print("\n=== V1 ENDPOINT PROBES (both likely hosts) ===", flush=True)
+    hosts = ["https://api.composer.trade", "https://stagehand.composer.trade"]
+    paths = ["/api/v1/watchlist", "/api/v1/watchlist/",
+             "/api/v1/discover", "/api/v1/discover/community",
+             "/api/v1/discover/best_of_community",
+             "/api/v1/discover/stable_performers",
+             "/api/v1/discover/recent_performers"]
+    for h in hosts:
+        for p in paths:
+            time.sleep(0.5)
+            raw_get(h + p)
 
 
 def probe_candidates() -> None:
@@ -129,4 +187,5 @@ if __name__ == "__main__":
     a = ap.parse_args()
     if not a.no_bundle:
         scan_bundle(a.bundle)
+    probe_v1()
     probe_candidates()
