@@ -46,9 +46,13 @@ _KW_RE = re.compile(r"""["'`]([^"'`]*(?:watchlist|watch|discover|popular|communi
 # Show how a path is assembled (host/base) by printing context around it.
 _CTX_TERMS = ("api/v1/watchlist", "api/v1/discover", "best_of_community",
               "stable_performers", "recent_performers", "/discover")
+# The watchlist URL is BACKTEST_BASE_URL + "api/v1/watchlist"; find the base.
+_BASEURL_RE = re.compile(r"""([A-Za-z_]*BASE_URL|[A-Za-z_]*ApiUrl|[A-Za-z_]*_URL)"""
+                         r"""\s*[:=]\s*["'`](https?://[^"'`]+)["'`]""")
+_HOST_RE = re.compile(r"""https?://[a-zA-Z0-9.-]+\.composer\.trade[a-zA-Z0-9._/-]*""")
 
 
-def scan_bundle(url: str) -> None:
+def scan_bundle(url: str) -> list[str]:
     print(f"\n=== JS BUNDLE SCAN: {url}", flush=True)
     try:
         r = requests.get(url, headers={"user-agent": UA}, timeout=60)
@@ -56,8 +60,20 @@ def scan_bundle(url: str) -> None:
         r.raise_for_status()
     except Exception as e:
         print(f"  bundle fetch failed: {type(e).__name__}: {e}", flush=True)
-        return
+        return []
     js = r.text
+    # Base-URL constants and every composer.trade host — this pins the host.
+    bases = _BASEURL_RE.findall(js)
+    print(f"\n  -- {len(bases)} *_URL base constants --", flush=True)
+    for name, val in sorted(set(bases)):
+        print(f"    {name} = {val}", flush=True)
+    hosts = sorted({h for h in _HOST_RE.findall(js)})
+    # collapse to distinct scheme://host[/first-seg]
+    roots = sorted({re.match(r'https?://[a-zA-Z0-9.-]+\.composer\.trade', h).group(0)
+                    for h in hosts})
+    print(f"\n  -- {len(roots)} distinct composer.trade hosts --", flush=True)
+    for h in roots:
+        print(f"    {h}", flush=True)
     paths = sorted(set(_PATH_RE.findall(js)))
     print(f"\n  -- {len(paths)} distinct api/vN paths --", flush=True)
     for p in paths:
@@ -75,6 +91,10 @@ def scan_bundle(url: str) -> None:
     print(f"\n  -- {len(kws)} watch/discover/oos-ish string literals --", flush=True)
     for s in kws[:120]:
         print(f"    {s}", flush=True)
+    # Candidate bases to probe: every discovered base-URL value + host root,
+    # normalized to a trailing slash (the app concatenates base + "api/v1/...").
+    cand = {v for _, v in bases} | set(roots)
+    return sorted({(b if b.endswith("/") else b + "/") for b in cand})
 
 
 def probe(path: str) -> None:
@@ -133,18 +153,19 @@ def raw_get(url: str) -> None:
         print(f"  [{url}] -> {type(e).__name__}: {str(e)[:120]}", flush=True)
 
 
-def probe_v1() -> None:
-    print("\n=== V1 ENDPOINT PROBES (both likely hosts) ===", flush=True)
-    hosts = ["https://api.composer.trade", "https://stagehand.composer.trade"]
-    paths = ["/api/v1/watchlist", "/api/v1/watchlist/",
-             "/api/v1/discover", "/api/v1/discover/community",
-             "/api/v1/discover/best_of_community",
-             "/api/v1/discover/stable_performers",
-             "/api/v1/discover/recent_performers"]
-    for h in hosts:
+def probe_v1(bases: list[str]) -> None:
+    print("\n=== V1 ENDPOINT PROBES (bases discovered in bundle) ===", flush=True)
+    # Fall back to a couple of hand guesses if the bundle yielded nothing.
+    if not bases:
+        bases = ["https://api.composer.trade/", "https://stagehand.composer.trade/"]
+    print(f"  probing {len(bases)} base(s): {bases}", flush=True)
+    paths = ["api/v1/watchlist",
+             "api/v1/public/symphonies",
+             "api/v1/public/meta/symphonies"]
+    for b in bases:
         for p in paths:
             time.sleep(0.5)
-            raw_get(h + p)
+            raw_get(b + p)
 
 
 def probe_candidates() -> None:
@@ -185,7 +206,7 @@ if __name__ == "__main__":
     ap.add_argument("--bundle", default=DEFAULT_BUNDLE)
     ap.add_argument("--no-bundle", action="store_true")
     a = ap.parse_args()
+    bases = []
     if not a.no_bundle:
-        scan_bundle(a.bundle)
-    probe_v1()
-    probe_candidates()
+        bases = scan_bundle(a.bundle)
+    probe_v1(bases)
