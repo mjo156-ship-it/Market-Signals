@@ -15,7 +15,7 @@ uses composer_oos.backtest (the one permitted POST) + _curve_stats. Commits
 data/composer_oos_watchlist.jsonl and prints a ranked report.
 """
 from __future__ import annotations
-import os, sys, json
+import os, sys, json, time
 from datetime import date
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -155,12 +155,28 @@ def _cs(c):
     return oos._curve_stats(c)
 
 
+def _backtest_resilient(sid, start, end, tries=5):
+    """oos.backtest with extra backoff on the backtest endpoint's burst rate
+    limit. oos._request already retries 429 four times (<=8s total); running
+    121 backtests back-to-back still tripped a burst cap in groups of ~3. On a
+    'rate limited after retries' RuntimeError, wait longer and retry."""
+    for k in range(tries):
+        try:
+            return oos.backtest(sid, start, end)
+        except RuntimeError as e:
+            if 'rate limited' in str(e).lower() and k < tries - 1:
+                time.sleep(6 * (k + 1))   # 6, 12, 18, 24s
+                continue
+            raise
+
+
 def main():
     asof = date.today().isoformat()
     rows = []
     for i, (sid, oosdate, name) in enumerate(WATCH, 1):
+        time.sleep(0.5)                       # gentle pacing to avoid burst 429s
         try:
-            curve, _ = oos.backtest(sid, EARLY_START, asof)
+            curve, _ = _backtest_resilient(sid, EARLY_START, asof)
         except Exception as e:
             print(f"[{i}/{len(WATCH)}] {name}: FAIL {type(e).__name__}: {str(e)[:80]}",
                   file=sys.stderr)
