@@ -1,0 +1,182 @@
+[
+ {
+  "id": "2cuimtTihBBpJgf7FSis",
+  "name": "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+  "oos_date": "2022-11-09",
+  "cons": 0.999,
+  "oos_sharpe": 1.46,
+  "oos_cagr": 29.34,
+  "oos_maxdd": -14.81
+ },
+ {
+  "id": "KZI0pblLIgmdvsABRyhT",
+  "name": "V 1.0 | \ud83d\udcc8 Actively Managed S&P 10 | Deez",
+  "oos_date": "2022-10-27",
+  "cons": 0.992,
+  "oos_sharpe": 1.45,
+  "oos_cagr": 29.66,
+  "oos_maxdd": -18.64
+ },
+ {
+  "id": "FPWcQQFIs22zsnYxvgSQ",
+  "name": "Monthly JNK canary",
+  "oos_date": "2023-01-06",
+  "cons": 0.989,
+  "oos_sharpe": 1.24,
+  "oos_cagr": 25.41,
+  "oos_maxdd": -12.58
+ },
+ {
+  "id": "wx89z5cyImxAamUuNyxX",
+  "name": "[monthly] ?? NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+  "oos_date": "2023-06-14",
+  "cons": 0.984,
+  "oos_sharpe": 1.37,
+  "oos_cagr": 49.12,
+  "oos_maxdd": -22.3
+ },
+ {
+  "id": "5PYqxj3J0RvIizhGslIB",
+  "name": "V1a Dereck Nielsen All Weather Portfolio",
+  "oos_date": "2023-03-26",
+  "cons": 0.982,
+  "oos_sharpe": 1.46,
+  "oos_cagr": 23.59,
+  "oos_maxdd": -18.83
+ },
+ {
+  "id": "t59m5iKeyGQiH0c36p6R",
+  "name": "V1 WEAT\ud83c\udf3e",
+  "oos_date": "2022-11-22",
+  "cons": 0.982,
+  "oos_sharpe": 1.2,
+  "oos_cagr": 17.24,
+  "oos_maxdd": -16.36
+ },
+ {
+  "id": "UcEdbLxz7BUGsBy0YRbf",
+  "name": "\u2622\ufe0f NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+  "oos_date": "2022-11-18",
+  "cons": 0.974,
+  "oos_sharpe": 1.62,
+  "oos_cagr": 68.06,
+  "oos_maxdd": -21.46
+ },
+ {
+  "id": "IYdL0rZxSD8ZXa7PN6Ur",
+  "name": "SPY minimum drawdown",
+  "oos_date": "2022-02-13",
+  "cons": 0.971,
+  "oos_sharpe": 1.15,
+  "oos_cagr": 14.09,
+  "oos_maxdd": -15.98
+ },
+ {
+  "id": "y03pNNw8lsvwsuSSL9KK",
+  "name": "OG V1.1 QQQ 1DMR - 2X LETF edition",
+  "oos_date": "2022-11-11",
+  "cons": 0.97,
+  "oos_sharpe": 1.58,
+  "oos_cagr": 43.41,
+  "oos_maxdd": -24.93
+ },
+ {
+  "id": "UlYXnJnU1GsBs1QDt422",
+  "name": "Ease Up on the Gas V2a - K-1 Free",
+  "oos_date": "2023-06-13",
+  "cons": 0.967,
+  "oos_sharpe": 1.22,
+  "oos_cagr": 26.09,
+  "oos_maxdd": -23.14
+ },
+ {
+  "id": "A3VawMkCM18n2Kl8zfA4",
+  "name": "Monthly Nasdaq Top 10 Trading",
+  "oos_date": "2023-03-22",
+  "cons": 0.966,
+  "oos_sharpe": 1.42,
+  "oos_cagr": 24.87,
+  "oos_maxdd": -15.14
+ },
+ {
+  "id": "A2ioLOOs13YguciW4Jhs",
+  "name": "Sector Selector Ninja Mode",
+  "oos_date": "2022-09-30",
+  "cons": 0.962,
+  "oos_sharpe": 1.24,
+  "oos_cagr": 33.5,
+  "oos_maxdd": -23.36
+ },
+ {
+  "id": "z3YepUFuvrpdV6QA2g2P",
+  "name": "Tech vs Utilities | Managed Risk",
+  "oos_date": "2023-01-04",
+  "cons": 0.961,
+  "oos_sharpe": 1.43,
+  "oos_cagr": 34.05,
+  "oos_maxdd": -21.02
+ },
+ {
+  "id": "F8cR1emy2BFsjiwVVwRI",
+  "name": "SPY S&P500 Avoid All Market Crashes",
+  "oos_date": "2023-05-03",
+  "cons": 0.956,
+  "oos_sharpe": 1.65,
+  "oos_cagr": 26.24,
+  "oos_maxdd": -10.26
+ },
+ {
+  "id": "4QTIzMenmP6NF9V3jk21",
+  "name": "V 1.1 | \ud83d\udcc8 Levered S&P 10 Actively Traded | Deez | PROD",
+  "oos_date": "2022-10-31",
+  "cons": 0.955,
+  "oos_sharpe": 1.4,
+  "oos_cagr": 27.65,
+  "oos_maxdd": -17.84
+ },
+ {
+  "id": "N6FTbZmjMjo98wzeVBsA",
+  "name": "Stock Market Basic Strategy",
+  "oos_date": "2022-09-30",
+  "cons": 0.955,
+  "oos_sharpe": 1.26,
+  "oos_cagr": 23.92,
+  "oos_maxdd": -20.35
+ },
+ {
+  "id": "yhhUROwdOFifzCH5f4SS",
+  "name": "Cocktail Rev 1.0 _ Updated May 8 (Shared)",
+  "oos_date": "2023-05-08",
+  "cons": 0.951,
+  "oos_sharpe": 1.55,
+  "oos_cagr": 23.58,
+  "oos_maxdd": -12.53
+ },
+ {
+  "id": "h73lAH4mh3LEcu4XLFgy",
+  "name": "Apple Long Term Investing",
+  "oos_date": "2022-09-12",
+  "cons": 0.945,
+  "oos_sharpe": 1.15,
+  "oos_cagr": 29.27,
+  "oos_maxdd": -21.96
+ },
+ {
+  "id": "s7wRwWRKMeYg3UKmt1K0",
+  "name": "*WIP* Beat Market rules + Actively Managed S&P 10",
+  "oos_date": "2022-10-27",
+  "cons": 0.927,
+  "oos_sharpe": 1.55,
+  "oos_cagr": 31.33,
+  "oos_maxdd": -18.58
+ },
+ {
+  "id": "Dt37l1ceAggm8ggzBpRS",
+  "name": "Simple Regime Switching and Dip Buying with Leveraged Nasdaq (2x)",
+  "oos_date": "2022-09-25",
+  "cons": 0.927,
+  "oos_sharpe": 1.35,
+  "oos_cagr": 33.0,
+  "oos_maxdd": -22.94
+ }
+]
