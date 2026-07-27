@@ -155,6 +155,40 @@ def _cs(c):
     return oos._curve_stats(c)
 
 
+def _ext(curve):
+    """Extra risk metrics from an equity curve, to complement _curve_stats:
+        calmar  = CAGR / |MaxDD|
+        sortino = annualized mean / downside deviation (rf=0, target 0, sqrt(252))
+        ulcer   = Ulcer Index = RMS of the percentage drawdown path
+        martin  = Martin ratio = annualized return % / Ulcer Index
+    Returns {} for curves too short to be meaningful."""
+    if len(curve) < 3:
+        return {}
+    ds = sorted(curve)
+    vals = [curve[d] for d in ds]
+    rets = [vals[i] / vals[i - 1] - 1 for i in range(1, len(vals)) if vals[i - 1]]
+    if len(rets) < 2:
+        return {}
+    n = len(rets)
+    mean = sum(rets) / n
+    cum = vals[-1] / vals[0] - 1
+    yrs = n / 252
+    cagr = ((1 + cum) ** (1 / yrs) - 1) if (yrs > 0.08 and (1 + cum) > 0) else None
+    dd_dev = (sum(min(r, 0.0) ** 2 for r in rets) / n) ** 0.5
+    sortino = round((mean * 252) / (dd_dev * 252 ** 0.5), 2) if dd_dev > 0 else None
+    peak, mdd, sq = vals[0], 0.0, 0.0
+    for v in vals:
+        peak = max(peak, v)
+        d = v / peak - 1
+        mdd = min(mdd, d)
+        sq += (d * 100.0) ** 2
+    ulcer = (sq / len(vals)) ** 0.5
+    calmar = round(cagr / abs(mdd), 2) if (cagr is not None and mdd < 0) else None
+    martin = round((cagr * 100) / ulcer, 2) if (cagr is not None and ulcer > 0) else None
+    return {"calmar": calmar, "sortino": sortino,
+            "ulcer": round(ulcer, 2), "martin": martin}
+
+
 def _backtest_resilient(sid, start, end, tries=5):
     """oos.backtest with extra backoff on the backtest endpoint's burst rate
     limit. oos._request already retries 429 four times (<=8s total); running
@@ -184,8 +218,10 @@ def main():
         if not curve:
             print(f"[{i}/{len(WATCH)}] {name}: empty curve", file=sys.stderr)
             continue
+        oos_curve = {d: v for d, v in curve.items() if d >= oosdate}
         ins = _cs({d: v for d, v in curve.items() if d < oosdate})
-        out = _cs({d: v for d, v in curve.items() if d >= oosdate})
+        out = _cs(oos_curve)
+        oute = _ext(oos_curve)          # Calmar / Sortino / Ulcer / Martin (OOS side)
         row = {
             "date": asof, "scope": "oos_split", "sym_id": sid, "name": name,
             "oos_date": oosdate,
@@ -195,6 +231,8 @@ def main():
             "is_sharpe": ins.get("sharpe"), "oos_sharpe": out.get("sharpe"),
             "is_maxdd_pct": ins.get("maxdd_pct"), "oos_maxdd_pct": out.get("maxdd_pct"),
             "oos_cum_pct": out.get("cum_pct"),
+            "oos_calmar": oute.get("calmar"), "oos_sortino": oute.get("sortino"),
+            "oos_ulcer": oute.get("ulcer"), "oos_martin": oute.get("martin"),
         }
         if ins.get("cagr_pct") is not None and out.get("cagr_pct") is not None:
             row["cagr_gap_pct"] = round(out["cagr_pct"] - ins["cagr_pct"], 2)
