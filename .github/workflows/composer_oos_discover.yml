@@ -14,6 +14,12 @@ permissions:
 
 on:
   workflow_dispatch:
+  schedule:
+    # Weekly, Sundays 23:00 UTC — one hour after the watchlist OOS run (22:00)
+    # so the two don't hit the Composer backtest API at the same time. OOS
+    # windows extend slowly, so weekly keeps data/composer_oos_discover.jsonl
+    # (and the Discover OOS tab) current without daily backtests.
+    - cron: '0 23 * * 0'
 
 jobs:
   discover-oos:
