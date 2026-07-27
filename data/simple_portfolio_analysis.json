@@ -1,0 +1,790 @@
+{
+  "as_of": "2026-07-27",
+  "common_start": "2023-06-14",
+  "common_days": 781,
+  "weighting": "equal",
+  "simple_pool": [
+    {
+      "id": "tEq3s5F3AzjqcxwwvVVJ",
+      "name": "Joseph Story Fund",
+      "nodes": 11,
+      "decisions": 0,
+      "turnover": 0.176,
+      "oos_sharpe": 1.12,
+      "oos_cagr_pct": 24.62,
+      "oos_maxdd_pct": -22.32,
+      "consistency": 0.97
+    },
+    {
+      "id": "6lLWbBtodpMpQjZlP1Od",
+      "name": "The Anti-ESG Portfolio",
+      "nodes": 12,
+      "decisions": 2,
+      "turnover": 0.687,
+      "oos_sharpe": 1.09,
+      "oos_cagr_pct": 19.69,
+      "oos_maxdd_pct": -23.8,
+      "consistency": 0.987
+    },
+    {
+      "id": "Dt37l1ceAggm8ggzBpRS",
+      "name": "Simple Regime Switching and Dip Buying with Leveraged Nasdaq (2x)",
+      "nodes": 12,
+      "decisions": 2,
+      "turnover": null,
+      "oos_sharpe": 1.35,
+      "oos_cagr_pct": 33.0,
+      "oos_maxdd_pct": -22.94,
+      "consistency": 0.927
+    },
+    {
+      "id": "0NukZC005nYIg0PZ7wET",
+      "name": "Simple Dividends",
+      "nodes": 20,
+      "decisions": 2,
+      "turnover": 0.365,
+      "oos_sharpe": 1.01,
+      "oos_cagr_pct": 26.88,
+      "oos_maxdd_pct": -10.94,
+      "consistency": 0.944
+    },
+    {
+      "id": "h73lAH4mh3LEcu4XLFgy",
+      "name": "Apple Long Term Investing",
+      "nodes": 21,
+      "decisions": 4,
+      "turnover": 0.875,
+      "oos_sharpe": 1.15,
+      "oos_cagr_pct": 29.27,
+      "oos_maxdd_pct": -21.96,
+      "consistency": 0.945
+    },
+    {
+      "id": "2cuimtTihBBpJgf7FSis",
+      "name": "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+      "nodes": 29,
+      "decisions": 4,
+      "turnover": null,
+      "oos_sharpe": 1.46,
+      "oos_cagr_pct": 29.34,
+      "oos_maxdd_pct": -14.81,
+      "consistency": 0.999
+    },
+    {
+      "id": "A2ioLOOs13YguciW4Jhs",
+      "name": "Sector Selector Ninja Mode",
+      "nodes": 30,
+      "decisions": 3,
+      "turnover": 0.794,
+      "oos_sharpe": 1.24,
+      "oos_cagr_pct": 33.5,
+      "oos_maxdd_pct": -23.36,
+      "consistency": 0.962
+    },
+    {
+      "id": "N6FTbZmjMjo98wzeVBsA",
+      "name": "Stock Market Basic Strategy",
+      "nodes": 31,
+      "decisions": 6,
+      "turnover": 0.875,
+      "oos_sharpe": 1.26,
+      "oos_cagr_pct": 23.92,
+      "oos_maxdd_pct": -20.35,
+      "consistency": 0.955
+    },
+    {
+      "id": "FPWcQQFIs22zsnYxvgSQ",
+      "name": "Monthly JNK canary",
+      "nodes": 36,
+      "decisions": 4,
+      "turnover": 0.674,
+      "oos_sharpe": 1.24,
+      "oos_cagr_pct": 25.41,
+      "oos_maxdd_pct": -12.58,
+      "consistency": 0.989
+    },
+    {
+      "id": "wx89z5cyImxAamUuNyxX",
+      "name": "[monthly] ?? NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+      "nodes": 40,
+      "decisions": 4,
+      "turnover": 0.638,
+      "oos_sharpe": 1.37,
+      "oos_cagr_pct": 49.12,
+      "oos_maxdd_pct": -22.3,
+      "consistency": 0.984
+    },
+    {
+      "id": "UcEdbLxz7BUGsBy0YRbf",
+      "name": "☢️ NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+      "nodes": 40,
+      "decisions": 4,
+      "turnover": 0.932,
+      "oos_sharpe": 1.62,
+      "oos_cagr_pct": 68.06,
+      "oos_maxdd_pct": -21.46,
+      "consistency": 0.974
+    },
+    {
+      "id": "iJkNY85OcmLhVyT89FuO",
+      "name": "Broke as a Joke (Recession Plays)",
+      "nodes": 41,
+      "decisions": 3,
+      "turnover": 0.719,
+      "oos_sharpe": 1.08,
+      "oos_cagr_pct": 22.24,
+      "oos_maxdd_pct": -19.56,
+      "consistency": 0.967
+    },
+    {
+      "id": "l4glDbmbbDFd3p1Mcjkx",
+      "name": "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod",
+      "nodes": 44,
+      "decisions": 9,
+      "turnover": 0.412,
+      "oos_sharpe": 1.12,
+      "oos_cagr_pct": 32.77,
+      "oos_maxdd_pct": -18.56,
+      "consistency": 0.991
+    },
+    {
+      "id": "IYdL0rZxSD8ZXa7PN6Ur",
+      "name": "SPY minimum drawdown",
+      "nodes": 51,
+      "decisions": 4,
+      "turnover": 0.625,
+      "oos_sharpe": 1.15,
+      "oos_cagr_pct": 14.09,
+      "oos_maxdd_pct": -15.98,
+      "consistency": 0.971
+    }
+  ],
+  "corr_labels": [
+    "Joseph Story Fund",
+    "The Anti-ESG Portfolio",
+    "Simple Regime Switching and Dip Buying with Leveraged Nasdaq (2x)",
+    "Simple Dividends",
+    "Apple Long Term Investing",
+    "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+    "Sector Selector Ninja Mode",
+    "Stock Market Basic Strategy",
+    "Monthly JNK canary",
+    "[monthly] ?? NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+    "☢️ NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+    "Broke as a Joke (Recession Plays)",
+    "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod",
+    "SPY minimum drawdown"
+  ],
+  "corr": [
+    [
+      1.0,
+      0.68,
+      0.69,
+      0.41,
+      0.49,
+      0.29,
+      0.38,
+      0.7,
+      0.41,
+      0.27,
+      0.4,
+      0.6,
+      0.27,
+      0.6
+    ],
+    [
+      0.68,
+      1.0,
+      0.79,
+      0.48,
+      0.47,
+      0.36,
+      0.48,
+      0.82,
+      0.49,
+      0.43,
+      0.52,
+      0.74,
+      0.32,
+      0.79
+    ],
+    [
+      0.69,
+      0.79,
+      1.0,
+      0.69,
+      0.53,
+      0.36,
+      0.68,
+      0.91,
+      0.56,
+      0.47,
+      0.69,
+      0.93,
+      0.52,
+      0.77
+    ],
+    [
+      0.41,
+      0.48,
+      0.69,
+      1.0,
+      0.39,
+      0.07,
+      0.81,
+      0.54,
+      0.43,
+      0.13,
+      0.55,
+      0.81,
+      0.73,
+      0.53
+    ],
+    [
+      0.49,
+      0.47,
+      0.53,
+      0.39,
+      1.0,
+      0.21,
+      0.35,
+      0.53,
+      0.32,
+      0.15,
+      0.3,
+      0.51,
+      0.28,
+      0.45
+    ],
+    [
+      0.29,
+      0.36,
+      0.36,
+      0.07,
+      0.21,
+      1.0,
+      0.1,
+      0.42,
+      0.35,
+      0.2,
+      0.13,
+      0.28,
+      0.05,
+      0.35
+    ],
+    [
+      0.38,
+      0.48,
+      0.68,
+      0.81,
+      0.35,
+      0.1,
+      1.0,
+      0.51,
+      0.44,
+      0.17,
+      0.55,
+      0.8,
+      0.77,
+      0.54
+    ],
+    [
+      0.7,
+      0.82,
+      0.91,
+      0.54,
+      0.53,
+      0.42,
+      0.51,
+      1.0,
+      0.56,
+      0.49,
+      0.62,
+      0.82,
+      0.38,
+      0.78
+    ],
+    [
+      0.41,
+      0.49,
+      0.56,
+      0.43,
+      0.32,
+      0.35,
+      0.44,
+      0.56,
+      1.0,
+      0.21,
+      0.43,
+      0.56,
+      0.29,
+      0.54
+    ],
+    [
+      0.27,
+      0.43,
+      0.47,
+      0.13,
+      0.15,
+      0.2,
+      0.17,
+      0.49,
+      0.21,
+      1.0,
+      0.7,
+      0.35,
+      0.05,
+      0.4
+    ],
+    [
+      0.4,
+      0.52,
+      0.69,
+      0.55,
+      0.3,
+      0.13,
+      0.55,
+      0.62,
+      0.43,
+      0.7,
+      1.0,
+      0.65,
+      0.44,
+      0.55
+    ],
+    [
+      0.6,
+      0.74,
+      0.93,
+      0.81,
+      0.51,
+      0.28,
+      0.8,
+      0.82,
+      0.56,
+      0.35,
+      0.65,
+      1.0,
+      0.61,
+      0.75
+    ],
+    [
+      0.27,
+      0.32,
+      0.52,
+      0.73,
+      0.28,
+      0.05,
+      0.77,
+      0.38,
+      0.29,
+      0.05,
+      0.44,
+      0.61,
+      1.0,
+      0.4
+    ],
+    [
+      0.6,
+      0.79,
+      0.77,
+      0.53,
+      0.45,
+      0.35,
+      0.54,
+      0.78,
+      0.54,
+      0.4,
+      0.55,
+      0.75,
+      0.4,
+      1.0
+    ]
+  ],
+  "top_portfolios": [
+    {
+      "names": [
+        "Simple Dividends",
+        "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+        "[monthly] ?? NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "☢️ NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod"
+      ],
+      "nodes": [
+        20,
+        29,
+        40,
+        40,
+        44
+      ],
+      "turnover": [
+        0.365,
+        null,
+        0.638,
+        0.932,
+        0.412
+      ],
+      "avg_nodes": 34.6,
+      "avg_corr": 0.31,
+      "calmar": 4.81,
+      "cagr_pct": 43.3,
+      "sharpe": 1.89,
+      "sortino": 4.08,
+      "maxdd_pct": -9.0,
+      "vol_pct": 20.1
+    },
+    {
+      "names": [
+        "Simple Dividends",
+        "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+        "Monthly JNK canary",
+        "[monthly] ?? NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod"
+      ],
+      "nodes": [
+        20,
+        29,
+        36,
+        40,
+        44
+      ],
+      "turnover": [
+        0.365,
+        null,
+        0.674,
+        0.638,
+        0.412
+      ],
+      "avg_nodes": 33.8,
+      "avg_corr": 0.25,
+      "calmar": 4.32,
+      "cagr_pct": 35.0,
+      "sharpe": 1.95,
+      "sortino": 4.35,
+      "maxdd_pct": -8.1,
+      "vol_pct": 16.0
+    },
+    {
+      "names": [
+        "Simple Dividends",
+        "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+        "Monthly JNK canary",
+        "[monthly] ?? NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "☢️ NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod"
+      ],
+      "nodes": [
+        20,
+        29,
+        36,
+        40,
+        40,
+        44
+      ],
+      "turnover": [
+        0.365,
+        null,
+        0.674,
+        0.638,
+        0.932,
+        0.412
+      ],
+      "avg_nodes": 34.8,
+      "avg_corr": 0.32,
+      "calmar": 4.3,
+      "cagr_pct": 40.0,
+      "sharpe": 1.91,
+      "sortino": 4.15,
+      "maxdd_pct": -9.3,
+      "vol_pct": 18.5
+    },
+    {
+      "names": [
+        "Simple Dividends",
+        "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+        "[monthly] ?? NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "☢️ NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod",
+        "SPY minimum drawdown"
+      ],
+      "nodes": [
+        20,
+        29,
+        40,
+        40,
+        44,
+        51
+      ],
+      "turnover": [
+        0.365,
+        null,
+        0.638,
+        0.932,
+        0.412,
+        0.625
+      ],
+      "avg_nodes": 37.3,
+      "avg_corr": 0.35,
+      "calmar": 4.15,
+      "cagr_pct": 39.0,
+      "sharpe": 1.92,
+      "sortino": 4.1,
+      "maxdd_pct": -9.4,
+      "vol_pct": 18.0
+    },
+    {
+      "names": [
+        "Simple Dividends",
+        "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+        "Stock Market Basic Strategy",
+        "☢️ NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod"
+      ],
+      "nodes": [
+        20,
+        29,
+        31,
+        40,
+        44
+      ],
+      "turnover": [
+        0.365,
+        null,
+        0.875,
+        0.932,
+        0.412
+      ],
+      "avg_nodes": 32.8,
+      "avg_corr": 0.39,
+      "calmar": 4.14,
+      "cagr_pct": 38.1,
+      "sharpe": 1.8,
+      "sortino": 4.31,
+      "maxdd_pct": -9.2,
+      "vol_pct": 18.9
+    },
+    {
+      "names": [
+        "Simple Dividends",
+        "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+        "[monthly] ?? NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod",
+        "SPY minimum drawdown"
+      ],
+      "nodes": [
+        20,
+        29,
+        40,
+        44,
+        51
+      ],
+      "turnover": [
+        0.365,
+        null,
+        0.638,
+        0.412,
+        0.625
+      ],
+      "avg_nodes": 36.8,
+      "avg_corr": 0.29,
+      "calmar": 4.12,
+      "cagr_pct": 33.8,
+      "sharpe": 1.96,
+      "sortino": 4.3,
+      "maxdd_pct": -8.2,
+      "vol_pct": 15.4
+    },
+    {
+      "names": [
+        "Simple Dividends",
+        "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+        "Monthly JNK canary",
+        "☢️ NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod"
+      ],
+      "nodes": [
+        20,
+        29,
+        36,
+        40,
+        44
+      ],
+      "turnover": [
+        0.365,
+        null,
+        0.674,
+        0.932,
+        0.412
+      ],
+      "avg_nodes": 33.8,
+      "avg_corr": 0.35,
+      "calmar": 4.07,
+      "cagr_pct": 37.4,
+      "sharpe": 1.79,
+      "sortino": 4.51,
+      "maxdd_pct": -9.2,
+      "vol_pct": 18.6
+    },
+    {
+      "names": [
+        "Simple Dividends",
+        "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+        "Stock Market Basic Strategy",
+        "[monthly] ?? NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "☢️ NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod"
+      ],
+      "nodes": [
+        20,
+        29,
+        31,
+        40,
+        40,
+        44
+      ],
+      "turnover": [
+        0.365,
+        null,
+        0.875,
+        0.638,
+        0.932,
+        0.412
+      ],
+      "avg_nodes": 34.0,
+      "avg_corr": 0.37,
+      "calmar": 4.06,
+      "cagr_pct": 40.6,
+      "sharpe": 1.9,
+      "sortino": 3.96,
+      "maxdd_pct": -10.0,
+      "vol_pct": 18.8
+    },
+    {
+      "names": [
+        "Simple Dividends",
+        "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+        "Stock Market Basic Strategy",
+        "[monthly] ?? NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod"
+      ],
+      "nodes": [
+        20,
+        29,
+        31,
+        40,
+        44
+      ],
+      "turnover": [
+        0.365,
+        null,
+        0.875,
+        0.638,
+        0.412
+      ],
+      "avg_nodes": 32.8,
+      "avg_corr": 0.31,
+      "calmar": 4.01,
+      "cagr_pct": 35.7,
+      "sharpe": 1.93,
+      "sortino": 4.09,
+      "maxdd_pct": -8.9,
+      "vol_pct": 16.5
+    },
+    {
+      "names": [
+        "Simple Dividends",
+        "Stock Market Basic Strategy",
+        "[monthly] ?? NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "☢️ NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod"
+      ],
+      "nodes": [
+        20,
+        31,
+        40,
+        40,
+        44
+      ],
+      "turnover": [
+        0.365,
+        0.875,
+        0.638,
+        0.932,
+        0.412
+      ],
+      "avg_nodes": 35.0,
+      "avg_corr": 0.46,
+      "calmar": 4.01,
+      "cagr_pct": 42.1,
+      "sharpe": 1.72,
+      "sortino": 3.63,
+      "maxdd_pct": -10.5,
+      "vol_pct": 21.7
+    },
+    {
+      "names": [
+        "Simple Dividends",
+        "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+        "Stock Market Basic Strategy",
+        "Monthly JNK canary",
+        "☢️ NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod"
+      ],
+      "nodes": [
+        20,
+        29,
+        31,
+        36,
+        40,
+        44
+      ],
+      "turnover": [
+        0.365,
+        null,
+        0.875,
+        0.674,
+        0.932,
+        0.412
+      ],
+      "avg_nodes": 33.3,
+      "avg_corr": 0.4,
+      "calmar": 3.97,
+      "cagr_pct": 35.7,
+      "sharpe": 1.81,
+      "sortino": 4.25,
+      "maxdd_pct": -9.0,
+      "vol_pct": 17.6
+    },
+    {
+      "names": [
+        "Simple Dividends",
+        "Monthly JNK canary",
+        "[monthly] ?? NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "☢️ NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+        "OG V 1bb | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015 | no bb okhi2u mod"
+      ],
+      "nodes": [
+        20,
+        36,
+        40,
+        40,
+        44
+      ],
+      "turnover": [
+        0.365,
+        0.674,
+        0.638,
+        0.932,
+        0.412
+      ],
+      "avg_nodes": 36.0,
+      "avg_corr": 0.4,
+      "calmar": 3.95,
+      "cagr_pct": 41.5,
+      "sharpe": 1.74,
+      "sortino": 3.82,
+      "maxdd_pct": -10.5,
+      "vol_pct": 21.2
+    }
+  ]
+}
