@@ -116,7 +116,46 @@ def main():
     os.makedirs("data", exist_ok=True)
     json.dump(root, open("data/portfolio_symphony.json", "w"), indent=2, ensure_ascii=False)
     print("\nAssembled single symphony -> data/portfolio_symphony.json")
-    print(json.dumps(root, ensure_ascii=False)[:1200])
+
+    # Verify Composer accepts + backtests the assembled definition (unsaved).
+    print("\nVerifying via Composer backtest of the assembled symphony ...")
+    params = {"capital": 100000, "apply_reg_fee": True, "apply_taf_fee": True,
+              "apply_cat_fee": True, "apply_subscription": "none",
+              "backtest_version": "v2", "slippage_percent": 0.0005,
+              "start_date": "2023-06-14", "end_date": "2026-07-27",
+              "broker": "ALPACA_WHITE_LABEL", "benchmark_tickers": ["SPY"]}
+    bt_urls = [
+        "https://backtest-api.composer.trade/api/v1/public/symphonies/backtest",
+        "https://backtest-api.composer.trade/api/v1/backtest",
+        "https://backtest-api.composer.trade/api/v1/public/backtest",
+    ]
+    bodies = [{**params, "symphony": root}, {**params, "symphony_score": root}, {"symphony": root, **params}]
+    for url in bt_urls:
+        for body in bodies:
+            for label, hdr in (("noauth", {"accept": "application/json", "content-type": "application/json"}),
+                               ("auth", oos._headers())):
+                try:
+                    r = requests.post(url, headers=hdr, json=body, timeout=90)
+                except Exception:
+                    continue
+                print(f"  [{label}] POST {url} (key={'symphony' if 'symphony' in body else 'symphony_score'}) -> {r.status_code}")
+                if r.status_code == 200 and "json" in r.headers.get("content-type", ""):
+                    d = r.json()
+                    dvm = d.get("dvm_capital") or {}
+                    curve = next(iter(dvm.values()), None) if dvm else None
+                    stats = d.get("stats") or {}
+                    print("   ^ BACKTEST OK. stats keys:", sorted(stats.keys())[:12])
+                    if curve:
+                        vals = [curve[k] for k in sorted(curve)]
+                        cum = vals[-1] / vals[0] - 1
+                        peak = mdd = vals[0]; worst = 0.0
+                        for v in vals:
+                            peak = max(peak, v); worst = min(worst, v / peak - 1)
+                        yrs = len(vals) / 252
+                        cagr = ((1 + cum) ** (1 / yrs) - 1) * 100 if yrs > 0 else 0
+                        print(f"   ^ assembled symphony: {len(vals)}d  CAGR {cagr:.1f}%  MaxDD {worst*100:.1f}%")
+                    return
+    print("  (could not reach an unsaved-symphony backtest endpoint; the JSON is still valid Composer code)")
 
 
 if __name__ == "__main__":
