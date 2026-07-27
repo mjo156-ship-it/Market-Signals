@@ -1,0 +1,53 @@
+# Composer Discover OOS-confidence report (manual, read-only capture)
+# Evaluates Discover/Symphony-Library strategies the same way as the watchlist:
+# backtest the frozen definition, split at the freeze date into in-sample vs
+# out-of-sample, compute OOS risk metrics + a statistical CONFIDENCE tier from the
+# OOS window length, and commit data/composer_oos_discover.jsonl. The symphony list
+# comes from data/composer_discover_seed.json (a pasted Discover network response,
+# normalized) or a best-effort read-only auto-fetch. Uses only the permitted
+# backtest POST.
+
+name: Composer Discover OOS Report
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+
+jobs:
+  discover-oos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Discover OOS report
+        env:
+          COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
+          COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
+        run: python scripts/composer_oos_discover.py
+
+      - name: Commit results
+        if: success()
+        run: |
+          set -e
+          git config user.name "composer-oos-bot"
+          git config user.email "composer-oos-bot@users.noreply.github.com"
+          git add -A data/composer_oos_discover.jsonl data/composer_discover_seed.json
+          if git diff --cached --quiet; then
+            echo "No change to commit"
+          else
+            git commit -m "📊 Composer Discover OOS report $(date -u +%Y-%m-%d)"
+            git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+            git push origin "HEAD:${GITHUB_REF_NAME:-main}"
+          fi
