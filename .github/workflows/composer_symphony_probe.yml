@@ -1,0 +1,41 @@
+# Composer symphony-definition probe (manual, read-only, throwaway)
+# Checks whether a symphony's full node-tree definition is retrievable with the
+# API keys, so we can assemble a single backtestable symphony inlining the 5
+# portfolio sleeves. Commits data/symphony_defs.json if definitions are found.
+
+name: Composer Symphony Probe
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Probe
+        env:
+          COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
+          COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
+        run: python scripts/composer_symphony_probe.py
+      - name: Commit results
+        if: success()
+        run: |
+          set -e
+          if [ ! -f data/symphony_defs.json ]; then echo "no defs found"; exit 0; fi
+          git config user.name "composer-oos-bot"
+          git config user.email "composer-oos-bot@users.noreply.github.com"
+          git add data/symphony_defs.json
+          if git diff --cached --quiet; then echo "no change"; else
+            git commit -m "🔎 Symphony definitions probe $(date -u +%Y-%m-%d)"
+            git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+            git push origin "HEAD:${GITHUB_REF_NAME:-main}"
+          fi
