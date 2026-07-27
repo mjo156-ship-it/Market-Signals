@@ -1,0 +1,42 @@
+# Composer Simple Portfolio Builder (manual, read-only)
+# Screens High-confidence/consistent Discover candidates, enriches each with node
+# count (from its definition) and daily turnover (from backtest target weights),
+# keeps the simplest/lowest-churn names, and searches equal-weight 5-7 combos with
+# MaxDD < 20%. Commits data/simple_portfolio_analysis.json.
+
+name: Composer Simple Portfolio
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+
+jobs:
+  simple:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests numpy
+      - name: Build simple portfolio
+        env:
+          COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
+          COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
+        run: python scripts/composer_simple_portfolio.py
+      - name: Commit results
+        if: success()
+        run: |
+          set -e
+          if [ ! -f data/simple_portfolio_analysis.json ]; then echo "nothing"; exit 0; fi
+          git config user.name "composer-oos-bot"
+          git config user.email "composer-oos-bot@users.noreply.github.com"
+          git add data/simple_portfolio_analysis.json
+          if git diff --cached --quiet; then echo "no change"; else
+            git commit -m "📊 Composer simple portfolio analysis $(date -u +%Y-%m-%d)"
+            git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+            git push origin "HEAD:${GITHUB_REF_NAME:-main}"
+          fi
