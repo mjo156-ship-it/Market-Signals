@@ -1,6 +1,6 @@
 # Composer Watchlist OOS Split (manual, read-only capture)
-# Backtests each watchlist symphony frozen >= 6 months ago, splits the equity
-# curve at its freeze date into in-sample vs out-of-sample, and commits
+# Backtests every watchlisted symphony (all followed strategies), splits the
+# equity curve at its freeze date into in-sample vs out-of-sample, and commits
 # data/composer_oos_watchlist.jsonl. Uses only the permitted backtest POST.
 
 name: Composer Watchlist OOS Split
@@ -13,13 +13,13 @@ on:
   schedule:
     # Weekly, Sundays 22:00 UTC — OOS windows extend slowly, so weekly keeps
     # data/composer_oos_watchlist.jsonl (and the dashboard tab) current without
-    # backtesting 121 symphonies daily.
+    # backtesting all watchlisted symphonies daily.
     - cron: '0 22 * * 0'
 
 jobs:
   oos-split:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
