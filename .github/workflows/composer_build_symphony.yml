@@ -1,0 +1,41 @@
+# Composer single-symphony builder (manual, read-only)
+# Tries to fetch the 5 sub-symphony definitions from Composer's public score
+# endpoints and assemble them into one weighted symphony. Commits
+# data/portfolio_symphony.json if all 5 are retrieved.
+
+name: Composer Build Symphony
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests
+      - name: Build symphony
+        env:
+          COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
+          COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
+        run: python scripts/composer_build_symphony.py
+      - name: Commit results
+        if: success()
+        run: |
+          set -e
+          if [ ! -f data/portfolio_symphony.json ]; then echo "no symphony assembled"; exit 0; fi
+          git config user.name "composer-oos-bot"
+          git config user.email "composer-oos-bot@users.noreply.github.com"
+          git add data/portfolio_symphony.json
+          if git diff --cached --quiet; then echo "no change"; else
+            git commit -m "🎼 Assemble portfolio symphony $(date -u +%Y-%m-%d)"
+            git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+            git push origin "HEAD:${GITHUB_REF_NAME:-main}"
+          fi
