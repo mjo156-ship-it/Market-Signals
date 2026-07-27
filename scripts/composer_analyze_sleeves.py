@@ -87,17 +87,33 @@ def backtest_tdvm(sid, start, end):
     return d.get("tdvm_weights")
 
 
+def _dkey(k):
+    s = str(k).replace("-", "").replace(".", "")
+    return float(s) if s.isdigit() else str(k)
+
+
 def change_days(tdvm):
-    """Return (n_days, list of change-day indices set, per-day change flags keyed by day)."""
-    if not isinstance(tdvm, dict) or len(tdvm) < 5: return None
-    days = sorted(tdvm.keys(), key=lambda k: float(k) if str(k).replace(".", "").isdigit() else 0)
-    keys = sorted({k for dd in days for k in (tdvm[dd] if isinstance(tdvm[dd], dict) else {})})
+    """Count days the target weights actually change.
+
+    Composer returns tdvm_weights as {ticker: {date: weight}}; transpose to
+    {date: {ticker: weight}} before diffing consecutive days.
+    """
+    if not isinstance(tdvm, dict) or not tdvm: return None
+    sample = next(iter(tdvm.values()))
+    if not isinstance(sample, dict): return None          # unexpected shape
+    tickers = sorted(tdvm.keys())
+    byday = {}
+    for tk, series in tdvm.items():
+        if not isinstance(series, dict): continue
+        for d, w in series.items():
+            byday.setdefault(d, {})[tk] = w
+    days = sorted(byday.keys(), key=_dkey)
+    if len(days) < 5: return None
     flags = {}
     prev = None
     for dd in days:
-        w = tdvm[dd]
-        if not isinstance(w, dict): return None
-        vec = np.array([float(w.get(k, 0) or 0) for k in keys]); s = vec.sum()
+        w = byday[dd]
+        vec = np.array([float(w.get(k, 0) or 0) for k in tickers]); s = vec.sum()
         if s > 0: vec = vec / s
         if prev is not None:
             flags[dd] = 0.5 * np.abs(vec - prev).sum() > TRADE_THRESH
