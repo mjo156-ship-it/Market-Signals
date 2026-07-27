@@ -179,9 +179,19 @@ def main():
               f"oosSh={r['oos_sharpe']} cons={r['consistency']}  {r['name'][:34]}")
 
     print(f"\n[simple] enriched {len(enr)} candidates")
-    # pick the simplest / lowest-churn that clear quality (already gated), rank by nodes then turnover
-    enr.sort(key=lambda r: (r["nodes"], r["turnover"] if r["turnover"] is not None else 1.0))
-    simple = enr[:SIMPLE_KEEP]
+    # dedupe near-identical variants (same name prefix) — keep the simplest of each
+    import re as _re
+    enr.sort(key=lambda r: (r["nodes"], r["turnover"] if r["turnover"] is not None else 0.5))
+    seen_pref, dedup = set(), []
+    for r in enr:
+        p = _re.sub(r"[^a-z0-9]", "", (r["name"] or "").lower())[:12]
+        if p in seen_pref:
+            continue
+        seen_pref.add(p); dedup.append(r)
+    # low-churn preference: drop the churniest (turnover > TURN_MAX) unless we'd fall short
+    TURN_MAX = float(os.environ.get("TURN_MAX", "0.55"))
+    low = [r for r in dedup if (r["turnover"] is None or r["turnover"] <= TURN_MAX)]
+    simple = (low if len(low) >= 8 else dedup)[:SIMPLE_KEEP]
     print(f"[simple] SIMPLE pool (fewest nodes, lowest churn) -> {len(simple)}:")
     for r in simple:
         print(f"    nodes={r['nodes']:>3} turn={r['turnover']} oosSh={r['oos_sharpe']} "
@@ -205,13 +215,20 @@ def main():
             m = _metrics(port)
             if m["maxdd_pct"] < -MAXDD_LIMIT: continue
             calmar = m["cagr_pct"] / abs(m["maxdd_pct"]) if m["maxdd_pct"] < 0 else 0
+            tv = [simple[j]["turnover"] for j in c]
+            avg_turn = round(float(np.mean([t if t is not None else 0.3 for t in tv])), 3)
+            avg_nodes = round(float(np.mean([simple[j]["nodes"] for j in c])), 1)
             feas.append({"idx": c, "names": [names[j] for j in c],
-                         "nodes": [simple[j]["nodes"] for j in c],
-                         "turnover": [simple[j]["turnover"] for j in c],
-                         "avg_nodes": round(float(np.mean([simple[j]["nodes"] for j in c])), 1),
+                         "nodes": [simple[j]["nodes"] for j in c], "turnover": tv,
+                         "avg_nodes": avg_nodes, "avg_turnover": avg_turn,
+                         # simplicity score: low nodes + low churn (lower = simpler)
+                         "simplicity": round(avg_nodes + 60 * avg_turn, 1),
                          "avg_corr": round(float(off.mean()), 2), "calmar": round(calmar, 2), **m})
+    # rank for SIMPLICITY among combos that still deliver (Sharpe>=1.4, CAGR>=18)
+    good = [p for p in feas if p["sharpe"] >= 1.4 and p["cagr_pct"] >= 18]
+    good.sort(key=lambda p: p["simplicity"])
     feas.sort(key=lambda p: (p["calmar"], p["sharpe"]), reverse=True)
-    print(f"[simple] {len(feas)} feasible equal-weight portfolios (maxDD<-{MAXDD_LIMIT:.0f}%)")
+    print(f"[simple] {len(feas)} feasible; {len(good)} deliver (Sharpe>=1.4, CAGR>=18)")
 
     result = {"as_of": asof, "common_start": COMMON_START, "common_days": len(common),
               "weighting": "equal", "simple_pool": [{"id": r["sym_id"], "name": r["name"],
@@ -219,14 +236,15 @@ def main():
                 "oos_sharpe": r["oos_sharpe"], "oos_cagr_pct": r["oos_cagr_pct"],
                 "oos_maxdd_pct": r["oos_maxdd_pct"], "consistency": r["consistency"]} for r in simple],
               "corr_labels": names, "corr": [[round(float(corr[a][b]), 2) for b in range(N)] for a in range(N)],
-              "top_portfolios": [{kk: vv for kk, vv in p.items() if kk != "idx"} for p in feas[:12]]}
+              "simplest_portfolios": [{kk: vv for kk, vv in p.items() if kk != "idx"} for p in good[:12]],
+              "top_by_calmar": [{kk: vv for kk, vv in p.items() if kk != "idx"} for p in feas[:8]]}
     os.makedirs("data", exist_ok=True)
     json.dump(result, open(OUT, "w"), indent=2, ensure_ascii=False)
 
-    print("\n=== TOP 6 SIMPLE PORTFOLIOS (equal weight, maxDD < {:.0f}%) ===".format(MAXDD_LIMIT))
-    for p in feas[:6]:
-        print(f"\nCAGR {p['cagr_pct']}%  MaxDD {p['maxdd_pct']}%  Sharpe {p['sharpe']}  "
-              f"Sortino {p['sortino']}  Calmar {p['calmar']}  avgNodes {p['avg_nodes']}  (n={len(p['names'])})")
+    print("\n=== SIMPLEST PORTFOLIOS THAT STILL DELIVER (equal weight, maxDD<{:.0f}%, Sharpe>=1.4) ===".format(MAXDD_LIMIT))
+    for p in good[:6]:
+        print(f"\nsimplicity {p['simplicity']} (avgNodes {p['avg_nodes']}, avgTurn {p['avg_turnover']})  |  "
+              f"CAGR {p['cagr_pct']}%  MaxDD {p['maxdd_pct']}%  Sharpe {p['sharpe']}  Calmar {p['calmar']}  (n={len(p['names'])})")
         for nm, nd, tu in zip(p["names"], p["nodes"], p["turnover"]):
             print(f"    {nd:>3} nodes  turn {tu}  {nm[:46]}")
     print(f"\n[simple] wrote {OUT}")
