@@ -117,6 +117,19 @@ def _backtest_resilient(sid, start, end, tries=5):
 
 
 # ── Discover list sourcing ───────────────────────────────────────────────────
+def _freeze_iso(frz):
+    """Freeze date -> 'YYYY-MM-DD'. Accepts ISO strings or epoch (ms/s/days),
+    the way Composer's Algolia index returns last_semantic_update_at (epoch ms)."""
+    if isinstance(frz, (int, float)):
+        return oos._to_date(frz)
+    s = str(frz)
+    if s[:4].isdigit() and "-" in s:      # already ISO-ish
+        return s[:10]
+    if s.isdigit():                        # epoch as string
+        return oos._to_date(int(s))
+    return s[:10]
+
+
 def _norm(items):
     """Normalize a list of symphony dicts to (id, freeze_date, name) tuples.
     Accepts the field spellings Composer uses across endpoints."""
@@ -128,9 +141,9 @@ def _norm(items):
         frz = (s.get("last_semantic_update_at") or s.get("lastSemanticUpdateAt")
                or s.get("last_semantic_update") or s.get("frozen_at"))
         name = s.get("name") or s.get("title") or sid
-        if not sid or not frz:
+        if not sid or frz is None:
             continue
-        out.append((sid, str(frz)[:10], name))
+        out.append((sid, _freeze_iso(frz), name))
     return out
 
 
