@@ -1,6 +1,6 @@
 # Signal Research — 2026-07-27
 
-_Generated 2026-07-27T16:56:22+00:00 · 90 tickers · 5 firing · 7 approaching_
+_Generated 2026-07-27T21:16:56+00:00 · 90 tickers · 5 firing · 4 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -16,10 +16,7 @@ _Generated 2026-07-27T16:56:22+00:00 · 90 tickers · 5 firing · 7 approaching_
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Distance-from-50DMA z < -2 (long) | TQQQ | TQQQ | composer_ready | 5d | 67% | +9.1% | +7.0pp | 57 |
 | Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 64% | +1.5% | +0.7pp | 28 |
-| Bollinger %B oversold (<0) (long) | VOO | VOO | composer_ready | 5d | 60% | +0.5% | +0.3pp | 116 |
-| Bollinger %B oversold (<0) (long) | SPMO | SPMO | composer_ready | 5d | 62% | +0.7% | +0.3pp | 71 |
+| Donchian 52-week breakout (long) | SHV | SHV | composer_ready | 20d | 95% | +0.2% | +0.1pp | 370 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 72% | +0.3% | +0.1pp | 226 |
-| 4+ down-day streak (long) | AVGO | AVGO | composer_ready | 5d | 64% | +1.8% | +0.0pp | 95 |
 | Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |
