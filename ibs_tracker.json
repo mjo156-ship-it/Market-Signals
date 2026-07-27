@@ -1,16 +1,16 @@
 {
-  "updated_at": "2026-07-25T20:07:22.530167",
+  "updated_at": "2026-07-27T16:04:09.040025",
   "gate_state": {
     "SPY": "IN",
     "QQQ": "IN",
-    "SMH": "OUT",
-    "XLK": "OUT"
+    "SMH": "IN",
+    "XLK": "IN"
   },
   "current_multiplier": {
     "SPY": 1.0,
     "TQQQ": 1.0,
-    "SOXL": 0.0,
-    "TECL": 0.0
+    "SOXL": 1.0,
+    "TECL": 1.0
   },
   "breadth_today": 0,
   "baseline": {
@@ -131,6 +131,36 @@
       "own_rsi10": 35.4,
       "breadth": 0,
       "entry_price": null,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    },
+    {
+      "date": "2026-07-27",
+      "sleeve": "SOXL",
+      "underlying": "SMH",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.2967,
+      "own_rsi10": 35.1,
+      "breadth": 0,
+      "entry_price": 121.06999969482422,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    },
+    {
+      "date": "2026-07-27",
+      "sleeve": "TECL",
+      "underlying": "XLK",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.2765,
+      "own_rsi10": 36.5,
+      "breadth": 0,
+      "entry_price": 169.05999755859375,
       "fwd_1d": null,
       "fwd_5d": null,
       "fwd_10d": null,
