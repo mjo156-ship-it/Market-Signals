@@ -24,7 +24,7 @@ on:
 jobs:
   discover-oos:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 100
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,6 +41,11 @@ jobs:
         env:
           COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
           COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
+          # Backtest only strategies with a real OOS window (>= 1y frozen). The
+          # confidence tier comes from the freeze date alone, so the recently-
+          # tweaked "Thin" tail is skipped without a backtest — keeps the run
+          # tractable now the seed spans the full library.
+          COMPOSER_DISCOVER_MIN_OOS_DAYS: '365'
         run: python scripts/composer_oos_discover.py
 
       - name: Commit results

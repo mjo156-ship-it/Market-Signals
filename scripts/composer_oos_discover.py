@@ -40,6 +40,11 @@ import composer_oos as oos
 EARLY_START = "2015-01-01"
 OUT = os.environ.get("COMPOSER_OOS_DISC_PATH", "data/composer_oos_discover.jsonl")
 SEED = os.environ.get("COMPOSER_DISCOVER_SEED", "data/composer_discover_seed.json")
+# Only backtest strategies whose OOS window is at least this many days — the
+# confidence tier is a function of the freeze date alone, so recently-tweaked
+# "Thin" strategies (no meaningful OOS) can be skipped without a backtest. This
+# keeps the run tractable when the seed is the full library. 0 = evaluate all.
+MIN_OOS_DAYS = int(os.environ.get("COMPOSER_DISCOVER_MIN_OOS_DAYS", "0"))
 
 # Candidate read-only Discover endpoints, tried in order if no seed file exists.
 # Siblings of the known watchlist endpoint (trading-api.composer.trade/api/v1/
@@ -233,6 +238,25 @@ def main():
         os.makedirs(os.path.dirname(OUT) or ".", exist_ok=True)
         open(OUT, "w").close()
         return
+
+    # Freeze-date prefilter: skip strategies whose OOS window is shorter than
+    # MIN_OOS_DAYS *before* backtesting. Confidence is a function of the freeze
+    # date alone, so this drops the Thin (recently-tweaked) tail for free and
+    # keeps the run tractable when the seed is the full library.
+    if MIN_OOS_DAYS > 0:
+        today = date.today()
+        kept = []
+        for sid, oosdate, name in watch:
+            try:
+                y, m, d = (int(x) for x in oosdate[:10].split("-"))
+                age = (today - date(y, m, d)).days
+            except Exception:
+                age = 0
+            if age >= MIN_OOS_DAYS:
+                kept.append((sid, oosdate, name))
+        print(f"[discover] freeze-date prefilter: {len(kept)}/{len(watch)} have "
+              f">= {MIN_OOS_DAYS}d OOS; skipping {len(watch) - len(kept)} thin ones")
+        watch = kept
 
     rows = []
     for i, (sid, oosdate, name) in enumerate(watch, 1):

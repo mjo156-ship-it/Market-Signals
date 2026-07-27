@@ -1500,9 +1500,2909 @@
     "last_semantic_update_at": "2022-12-08"
   },
   {
+    "id": "AhtCRqvbpcRmNu4NkHoD",
+    "name": "V1.1a | Elon's Walk of Shame | HinnomTX | 190% AR | 39% DD | Dec2012-Dec2022",
+    "last_semantic_update_at": "2022-12-09"
+  },
+  {
+    "id": "AXee7YIjZMivbNqY6UBp",
+    "name": "3x Beefier V4.1.1xxx | A Better \"LETF minimum drawdown\" | DJKeyhole \ud83e\uddd9\u200d\u2642\ufe0f | No UGE UUP QLD DBC",
+    "last_semantic_update_at": "2022-12-10"
+  },
+  {
+    "id": "mkU426qHpQhWIDYXuCjQ",
+    "name": "Protective \ud83e\uddba Asset Allocation",
+    "last_semantic_update_at": "2022-12-12"
+  },
+  {
+    "id": "hrw5pt0pIszAt4QfcsCz",
+    "name": "V 1.0.0 | \ud83e\udda0Amoeba | BT JAN 14 2014 | 311.8% AR, 40.5% DD (Dec 12th 2022)",
+    "last_semantic_update_at": "2022-12-13"
+  },
+  {
+    "id": "uJgFsuuqcHpHourQNozu",
+    "name": "ULTRA BALANCER",
+    "last_semantic_update_at": "2022-12-13"
+  },
+  {
+    "id": "Ry8PMaVZbOO9jodRtxS5",
+    "name": "Volatility Index Black Swan Catcher",
+    "last_semantic_update_at": "2022-12-14"
+  },
+  {
+    "id": "qyN2jJAHJnUe2ml1N9ug",
+    "name": "V3 | Fund Surfing | Michael B | Milder",
+    "last_semantic_update_at": "2022-12-14"
+  },
+  {
+    "id": "1ZC01R4Ju2vOKwhHCYxQ",
+    "name": "V 1.0.0 | \ud83e\udda0 Dividend Slime | \ud83e\uddea Proteus \ud83e\uddec | Daily | BT March 30 2022 | 2934% AR, 9.7% MD, 48.5 std. dev, 7.36 Sharpe (Dec13-2022)",
+    "last_semantic_update_at": "2022-12-14"
+  },
+  {
+    "id": "acpEwhCTWLORcwuoBSUu",
+    "name": "V 1.1.0| \ud83e\udda0 Dividend Slime -- high AR mutant | \ud83e\uddea Proteus \ud83e\uddec | Daily | BT June 27 2022 | 1829.9% AR, 3% MD, 34.0% std. dev, 9.01 Sharpe (Dec13-2022)",
+    "last_semantic_update_at": "2022-12-14"
+  },
+  {
+    "id": "bfm3RL7iIZy0GRqXsWzy",
+    "name": "HEDGED & LEVERAGED - BONDS & STOCKS - V2.1.1 - BT 12-6-2012 Replace UPRO with TECL, TQQQ, and SOXL",
+    "last_semantic_update_at": "2022-12-17"
+  },
+  {
+    "id": "iJkNY85OcmLhVyT89FuO",
+    "name": "Broke as a Joke (Recession Plays)",
+    "last_semantic_update_at": "2022-12-17"
+  },
+  {
+    "id": "OTwSyij1wp8AlrLDNrs9",
+    "name": "V2 Beat the Market | Michael B Mod Replace QQQ and QLD with SOXX and SOXL",
+    "last_semantic_update_at": "2022-12-18"
+  },
+  {
+    "id": "J0eYs9s6ErXX2CdId1FZ",
+    "name": "V3 Beat the Market | Michael B Mod Replace QLD with TQQQ",
+    "last_semantic_update_at": "2022-12-18"
+  },
+  {
+    "id": "SZZdSd8PkPrfOeGb3dWh",
+    "name": "Translating Average Length of DD on QQQ from Tradingview to Composer",
+    "last_semantic_update_at": "2022-12-18"
+  },
+  {
+    "id": "wPXL0F2O6UKWTbfAjdGZ",
+    "name": "HEDGED & LEVERAGED - BONDS & STOCKS - V4.1.1 Replace UPRO with TECL, TQQQ, and SOXL",
+    "last_semantic_update_at": "2022-12-19"
+  },
+  {
+    "id": "dV4o25VsKVCfj8pDZcI9",
+    "name": "HEDGED & LEVERAGED - BONDS & STOCKS - V4.2 Replace UPRO with TECL, TQQQ, and SOXL",
+    "last_semantic_update_at": "2022-12-19"
+  },
+  {
+    "id": "4GmYMVTBhbZ0kqnz2sqG",
+    "name": "S&P Growth vs Value",
+    "last_semantic_update_at": "2022-12-20"
+  },
+  {
+    "id": "THovCLrB2Nrzr5IUgZgi",
+    "name": "Pop Bot W/ Active Trading Symphony",
+    "last_semantic_update_at": "2022-12-20"
+  },
+  {
+    "id": "Jz4pndF9A7Ytw28L6N5M",
+    "name": "Beat The Market V2",
+    "last_semantic_update_at": "2022-12-20"
+  },
+  {
+    "id": "H3TpHbkLkVVngnBZGWHk",
+    "name": "V1a | Fund Surfing | Michael B",
+    "last_semantic_update_at": "2022-12-20"
+  },
+  {
+    "id": "CLwKF6fvc7JQnqWDfEma",
+    "name": "V2a | Fund Surfing | Michael B | Commodities",
+    "last_semantic_update_at": "2022-12-20"
+  },
+  {
+    "id": "Z5H9iVjsJSyRjYoEcOrY",
+    "name": "Long Backtest Slime l 10Dec2014 - (USDU-PDBC) ",
+    "last_semantic_update_at": "2022-12-20"
+  },
+  {
+    "id": "1dVzvYYOuNbe6fGip5k6",
+    "name": "TQQQ V4.2a.2 | \ud83d\ude80 w/ Sideways",
+    "last_semantic_update_at": "2022-12-24"
+  },
+  {
+    "id": "vJVCdBOi0DCYGxhdrAR3",
+    "name": "Blend: Total Market Hedged (V 1.0) & Fund Surfing v2.0a",
+    "last_semantic_update_at": "2022-12-25"
+  },
+  {
+    "id": "IY8SJekZMFThHkoUbpme",
+    "name": "Simple LQQQ",
+    "last_semantic_update_at": "2022-12-26"
+  },
+  {
+    "id": "MAiAtUOBGUsI3m9IZR9Q",
+    "name": "V1.1.1a| Elon's Walk of Shame | HinnomTX | 237.9% AR | 39% DD | Dec2012-Dec2022 Replace TQQQ, QID, and SQQQ with SOXL and SOXS",
+    "last_semantic_update_at": "2022-12-27"
+  },
+  {
+    "id": "2NikM8NJOSadxphzzV6g",
+    "name": "Dividends (TECL-UVIX)",
+    "last_semantic_update_at": "2022-12-27"
+  },
+  {
+    "id": "h0J7spTmVL6VzX6FIein",
+    "name": "V1.1.1 | Elon's Walk of Shame | HinnomTX | 253.6% AR | 43.1% DD | Dec2012-Dec2022 Replace TQQQ,QID, and SQQQ with SOXL and SOXS",
+    "last_semantic_update_at": "2022-12-27"
+  },
+  {
+    "id": "8mDMP1QOfJoYRefKNYAn",
+    "name": "XLK vs XLU l May 30 2007",
+    "last_semantic_update_at": "2022-12-29"
+  },
+  {
+    "id": "fxw5uiUXN4cyAiMeHiMt",
+    "name": "XLK vs XLP/U l 30May2007",
+    "last_semantic_update_at": "2022-12-30"
+  },
+  {
+    "id": "QCvPrlwnYhtuUbvl8MK7",
+    "name": "v2.1.0 Double Pop Bots l Oct 28th 2011",
+    "last_semantic_update_at": "2023-01-02"
+  },
+  {
+    "id": "K3aboMdZ5p0cQLVfw17T",
+    "name": "V1a Monthly JNK canary Replace UPRO with TQQQ",
+    "last_semantic_update_at": "2023-01-03"
+  },
+  {
+    "id": "z3YepUFuvrpdV6QA2g2P",
+    "name": "Tech vs Utilities | Managed Risk",
+    "last_semantic_update_at": "2023-01-04"
+  },
+  {
+    "id": "FPWcQQFIs22zsnYxvgSQ",
+    "name": "Monthly JNK canary",
+    "last_semantic_update_at": "2023-01-06"
+  },
+  {
+    "id": "GZFdsruJ1hF0MyABVyJT",
+    "name": "Blend: Agressive Battleship III & Fund Surfing v2.0a",
+    "last_semantic_update_at": "2023-01-08"
+  },
+  {
+    "id": "ik1rWNuLpOyrmafnqZzQ",
+    "name": "60/40 TQQQ, UVXY/BSV and Shorts",
+    "last_semantic_update_at": "2023-01-09"
+  },
+  {
+    "id": "T5vA49MmOOLXrgg7CjRK",
+    "name": "Neo Pops SCHD",
+    "last_semantic_update_at": "2023-01-09"
+  },
+  {
+    "id": "g0J87gnk7SausotpUoCt",
+    "name": "TQQQ or not/Pop",
+    "last_semantic_update_at": "2023-01-09"
+  },
+  {
+    "id": "dGEWkZ1W1uZ58akdE03U",
+    "name": "V1 | Bear BUYDIPS, Bull HFEAR | Michael B+Fund Surfing v2.0a",
+    "last_semantic_update_at": "2023-01-09"
+  },
+  {
+    "id": "nCsdPOLAyszgc45s0i25",
+    "name": "V1 | Bear BUYDIPS, Bull HFEAR | Michael B+Fund Surfing v2.0a+Agressive Battleship III",
+    "last_semantic_update_at": "2023-01-09"
+  },
+  {
+    "id": "4gIHbmDgUzjeIUdfXt9s",
+    "name": "Beat the Market (since 2002) SAVE",
+    "last_semantic_update_at": "2023-01-11"
+  },
+  {
+    "id": "R5UqpkTqw4DpEDHissw7",
+    "name": "Simple S&P 500 & Nasdaq SAVE",
+    "last_semantic_update_at": "2023-01-11"
+  },
+  {
+    "id": "ai8R0slYRLFkfaJPU4fV",
+    "name": "The Triple Dip | Remixed by Cashen SAVE",
+    "last_semantic_update_at": "2023-01-12"
+  },
+  {
+    "id": "tm1b4BTZIX5e322dppAL",
+    "name": "V1.1 | Bear BUYDIPS, Bull HFEAR | Michael B | Safety Mix Update",
+    "last_semantic_update_at": "2023-01-12"
+  },
+  {
+    "id": "6tZrN6aWaqy5zrfZkUs7",
+    "name": "Neo Pops - SCHD",
+    "last_semantic_update_at": "2023-01-14"
+  },
+  {
+    "id": "6speflDlF9QKJdr6xhtq",
+    "name": "Neo Pops - SPHD",
+    "last_semantic_update_at": "2023-01-14"
+  },
+  {
+    "id": "OK2kPAdrnFL6fEWZVQeN",
+    "name": "Neo Trinity (Dippy - AAA - HnL)",
+    "last_semantic_update_at": "2023-01-14"
+  },
+  {
+    "id": "lNFC8wihRPd57dQqWJ8e",
+    "name": "Cautious Fund Surfing | 3x",
+    "last_semantic_update_at": "2023-01-15"
+  },
+  {
+    "id": "Oy8B9oJpgzMMA8yGsN9B",
+    "name": "Cautious Fund Surfing | SPY vs. SHY | 3x",
+    "last_semantic_update_at": "2023-01-15"
+  },
+  {
+    "id": "w7JaPH12NLuCzOKdqeVp",
+    "name": "Cautious Fund Surfing | 2x",
+    "last_semantic_update_at": "2023-01-15"
+  },
+  {
+    "id": "HexyLrTmTDtaiwuqfZHJ",
+    "name": "Chowmeini's Simple TECL with Safety",
+    "last_semantic_update_at": "2023-01-15"
+  },
+  {
+    "id": "eWaezIFdbm9D8033IpAR",
+    "name": "Cautious Fund Surfing | SPY vs. SHY | 2x",
+    "last_semantic_update_at": "2023-01-15"
+  },
+  {
+    "id": "DEOUnnFHHUvVnELOiLcU",
+    "name": "Blend: Cautious Fund Surfing | 3x & V1.1 | Bear BUYDIPS, Bull HFEAR",
+    "last_semantic_update_at": "2023-01-20"
+  },
+  {
+    "id": "gwwdpdwmU2P6Z4YJ3Y7T",
+    "name": "The Sandy Dragon",
+    "last_semantic_update_at": "2023-01-21"
+  },
+  {
+    "id": "QqzJgXkJ5BkvvwUyn9YV",
+    "name": "V1a Deez the mad lad (Golden Ark Ballers)",
+    "last_semantic_update_at": "2023-01-23"
+  },
+  {
+    "id": "nmGGd7doJYJfZ6N5LHwn",
+    "name": "Magic Internet Money (+ TQQQ FTLT)",
+    "last_semantic_update_at": "2023-01-23"
+  },
+  {
+    "id": "HukRwDJLlYPLMbrQbua5",
+    "name": "TQQQ For The Long Term (Reddit Post Link)",
+    "last_semantic_update_at": "2023-01-24"
+  },
+  {
+    "id": "5kRr11VRZt4CumcidQnV",
+    "name": "The Dave Ramsey",
+    "last_semantic_update_at": "2023-01-24"
+  },
+  {
+    "id": "CcwuP8eByXklWwlXmkwW",
+    "name": "3x Leveraged | Dereck's Secular Market Framework",
+    "last_semantic_update_at": "2023-01-25"
+  },
+  {
+    "id": "QzLDGjjZKlztt8Ozelhj",
+    "name": "2x Leveraged | Dereck's Secular Market Framework",
+    "last_semantic_update_at": "2023-01-25"
+  },
+  {
+    "id": "XNem1BPMvo3aQENhKPbI",
+    "name": "\u2622 V3a The Manhattan Project |  BB V3.0.4.2a merged with TQQQ FTLT V4.2 | V2 Sideways Market Mod Below the SPY 200d SMA | FINAL | DereckN Replace TQQQ and SQQQ with SOXL and SOXS | Replace 'A Better QQQ' Pietros Maneos |+V1 New SOXL Baller",
+    "last_semantic_update_at": "2023-01-26"
+  },
+  {
+    "id": "Y8XNBsxxlHHfYhB4G0wz",
+    "name": "V1 BOTZ bot | QLD AI\ud83e\udd16 FTLT",
+    "last_semantic_update_at": "2023-01-28"
+  },
+  {
+    "id": "1kpCKMUZwgnCyyJcv6sl",
+    "name": "Trade Unweighted Test",
+    "last_semantic_update_at": "2023-01-28"
+  },
+  {
+    "id": "U7Hx8nZsSGsdCBAteM9T",
+    "name": "\u2622 V1 The Manhattan Project | TQ-FTLT 4.2 & Deez Theory 3.2 Rotator | 2705% AR | 20% DD",
+    "last_semantic_update_at": "2023-01-31"
+  },
+  {
+    "id": "jAXNv7r92OXJNCdUdWWv",
+    "name": "RSI Test",
+    "last_semantic_update_at": "2023-02-02"
+  },
+  {
+    "id": "Bc9AZyrxsi12MCxPkQts",
+    "name": "SPY, Energy, Chips, Commodities \ud83e\udda2+V1 New SOXL Baller",
+    "last_semantic_update_at": "2023-02-04"
+  },
+  {
+    "id": "Ql4StWO8IT42foKiC56A",
+    "name": "Rising Rates with Vol Switch | KYLE MOD + Jefe",
+    "last_semantic_update_at": "2023-02-05"
+  },
+  {
+    "id": "d01yaiLCCBI7CCwAnrJU",
+    "name": "TQQQ FTLT OVERFIT (255.2% RR/46.4% Max DD)",
+    "last_semantic_update_at": "2023-02-07"
+  },
+  {
+    "id": "zEDEOmPbRBD4UTqhTAn8",
+    "name": "Fund Surfing",
+    "last_semantic_update_at": "2023-02-07"
+  },
+  {
+    "id": "QlSZZ6cPu8wlxiQftbmx",
+    "name": "Momentum V0.1",
+    "last_semantic_update_at": "2023-02-08"
+  },
+  {
+    "id": "P5fMSaRxNaeHf1nllnNk",
+    "name": "[in review] V1.0.0RR |Cathie's One Night Stand|Hawk",
+    "last_semantic_update_at": "2023-02-09"
+  },
+  {
+    "id": "P0Ni04bqkxi2COV04hZQ",
+    "name": "[in review revB] CONS v1.0.0 RR | ARK Baller + Plaid Inner Baller [\u2623 Experimental strategy - limited backtest]",
+    "last_semantic_update_at": "2023-02-09"
+  },
+  {
+    "id": "x9QlNtMksifNAQ11gr6v",
+    "name": "V1 ARKQ bot | QLD AI\ud83e\udd16 FTLT",
+    "last_semantic_update_at": "2023-02-10"
+  },
+  {
+    "id": "tEq3s5F3AzjqcxwwvVVJ",
+    "name": "Joseph Story Fund",
+    "last_semantic_update_at": "2023-02-10"
+  },
+  {
+    "id": "2KTxqZ1MAb6zuwXxsfTS",
+    "name": "Super Simple Symphony - Leverage -",
+    "last_semantic_update_at": "2023-02-11"
+  },
+  {
+    "id": "qZBaa0yX96afMkQ8wLAV",
+    "name": "Super Simple Symphony - Less Derivatives -",
+    "last_semantic_update_at": "2023-02-11"
+  },
+  {
+    "id": "rff0TjUxjHTbGgb8oHkv",
+    "name": "V1a Super Simple Symphony - Less Derivatives -",
+    "last_semantic_update_at": "2023-02-11"
+  },
+  {
+    "id": "dPfnPcfe4koAFcfkt9Ez",
+    "name": "C-DTMS (Longer Backtest Mod) - 24May2019",
+    "last_semantic_update_at": "2023-02-13"
+  },
+  {
+    "id": "fE70vNYakkHr0jpfPzGt",
+    "name": "V2.0.0 | Cathie's One Night Stand|Hawk, HinnomTX",
+    "last_semantic_update_at": "2023-02-13"
+  },
+  {
+    "id": "4AcTAmoXPACWIDlX9Rrk",
+    "name": "Volatility and Kelly Symphony - Replace SHY w/ TLT & SSO w/ TECL",
+    "last_semantic_update_at": "2023-02-14"
+  },
+  {
+    "id": "xdndiXHvtThMGhrgWpdN",
+    "name": "Volatility and Kelly Symphony - Replace SSO w/TQQQ - ",
+    "last_semantic_update_at": "2023-02-14"
+  },
+  {
+    "id": "h7uySGanVb1pHRbUPIhR",
+    "name": "TQQQ FTLT w/Sideways Market Mods (FINAL)",
+    "last_semantic_update_at": "2023-02-18"
+  },
+  {
+    "id": "JB3Ih8UAyNDMCESsAz3f",
+    "name": "V2 | Cautious Fund Surfing | 3x with V1.1 | Bear BUYDIPS, Bull HFEAR ",
+    "last_semantic_update_at": "2023-02-20"
+  },
+  {
+    "id": "S7jg7sGP9nru3nKhCiRf",
+    "name": "Fund Surfing + V1.1 Bear BUYDIPS, Bull HFEAR",
+    "last_semantic_update_at": "2023-02-20"
+  },
+  {
+    "id": "MYnC6lm7vtujxd0dsfqQ",
+    "name": "Volatility and Kelly Symphony - Replace SHY w/ TLT, SSO w/ TECL, & UPRO w/ CURE",
+    "last_semantic_update_at": "2023-02-21"
+  },
+  {
+    "id": "VmMTI2FUrG1gnIq5xsOo",
+    "name": "Buy the Dips Else Not Boring v1.2",
+    "last_semantic_update_at": "2023-02-21"
+  },
+  {
+    "id": "QxH1jFST2xVDWcPnKXIt",
+    "name": "(B) Michael B Meets Dalio w/ Pop Bots 2.1.0 (85/14%MDD) Since 2019 (SPY parity, with pops to upside)",
+    "last_semantic_update_at": "2023-02-22"
+  },
+  {
+    "id": "9PuMw0m5LeHa7ZqfpXsM",
+    "name": "Safety Town v1.4 w/ Pop Bots v1.0",
+    "last_semantic_update_at": "2023-02-22"
+  },
+  {
+    "id": "y7bVcSM8kXUNh4wXKsbU",
+    "name": "Michael B Meets Dalio w/ Pop Bots 2.1.0",
+    "last_semantic_update_at": "2023-02-23"
+  },
+  {
+    "id": "jDhMduu2qD9Ri0uhuRr1",
+    "name": "SSO, Energy, Chips, Commodities \ud83e\udda2",
+    "last_semantic_update_at": "2023-02-24"
+  },
+  {
+    "id": "Guu3b2azYdDvFLlMF4fE",
+    "name": "SSO, Energy, Chips, Commodities \ud83e\udda2+V1 New SOXL Baller",
+    "last_semantic_update_at": "2023-02-24"
+  },
+  {
+    "id": "q4ejBcmVg4BG1mgzC6tq",
+    "name": "SSO, Energy, Chips, Commodities+Agressive Battleship III - 3YrBT: | USMC/JEB - Replace URE w/ XLRE",
+    "last_semantic_update_at": "2023-02-24"
+  },
+  {
+    "id": "7CwWAvbHGmWjwXI1Imzj",
+    "name": "Volatility and Kelly Symphony - Replace SHY w/ TLT, SSO w/TECL, & UPRO w/ CURE + Fund Surfing - Replace TQQQ w/ TECL",
+    "last_semantic_update_at": "2023-02-25"
+  },
+  {
+    "id": "rbZ0fqA1Gzziii9Th5yO",
+    "name": "Fund Surfing - Replace TQQQ w/ TECL + V1.1 Bear BUYDIPS, Bull HFEAR",
+    "last_semantic_update_at": "2023-02-25"
+  },
+  {
+    "id": "KfutAjdJxeW7u6BNXJN1",
+    "name": "V1 QLD bot | QLD FTLT",
+    "last_semantic_update_at": "2023-03-02"
+  },
+  {
+    "id": "SPbmZwm9xGLGqlzXi7yJ",
+    "name": "Bag of Wide Moats Frank'n",
+    "last_semantic_update_at": "2023-03-02"
+  },
+  {
+    "id": "s5IXDx68rUB0oDzHTr8t",
+    "name": "V1a Commander BND | 4 Trade Days / Year | Replace PST w/ TBT, VIXM w/ VIXY, USDU w/ TLT, & UGL w/ GLD",
+    "last_semantic_update_at": "2023-03-04"
+  },
+  {
+    "id": "9RqkOOItL9X0NNGqeyN0",
+    "name": "V1a Deez the mad lad (Golden Ark Ballers)+V1a 15/15 MIM CONS",
+    "last_semantic_update_at": "2023-03-04"
+  },
+  {
+    "id": "Pq0GwJK8x20O9Wu4ShCN",
+    "name": "TQQQ for Long Term (V3)",
+    "last_semantic_update_at": "2023-03-05"
+  },
+  {
+    "id": "s0K72g80tLMT6CiiujSs",
+    "name": "\u2622\ufe0f: JCB: TQQQ for the LT - Charged QQQ 12d Exp MA Rtn | 3Yr BT | AR 492.7% | SR 2.86 | MDD 43.4% | CR 11.4",
+    "last_semantic_update_at": "2023-03-08"
+  },
+  {
+    "id": "AfqHEioqAOatOKpSmRgR",
+    "name": "\u2622\ufe0f: JCB: TQQQ for the LT - Charged QQQ 12d Cum Rtn | 3Yr BT | AR 488.0% | SR 2.85 | MDD 43.4% | CR 11.3",
+    "last_semantic_update_at": "2023-03-08"
+  },
+  {
+    "id": "q5gbkqXZhNoO9Vhqis70",
+    "name": "\u2622\ufe0f: JCB: TQQQ for the LT - Charged QQQ 30d RSI | 3Yr BT | AR 433.3% | SR 2.76 | MDD 47.1% | CR 9.2",
+    "last_semantic_update_at": "2023-03-08"
+  },
+  {
+    "id": "ADmWNa8WqwVGUwTyadBC",
+    "name": "V 1.4.4a | Proteus Slime + Dividends l 100-0+BB V3.0.4.2A Merged with Magic Internet Money (CONS) and V1 New SOXL Baller",
+    "last_semantic_update_at": "2023-03-08"
+  },
+  {
+    "id": "U4MDrI1Gf5YZWOmcDWB2",
+    "name": "Anti-chop QLD For The Long Term",
+    "last_semantic_update_at": "2023-03-11"
+  },
+  {
+    "id": "TRHlJ57sclc9hlv7hWJP",
+    "name": "Anti-chop QLD For The Long Term",
+    "last_semantic_update_at": "2023-03-11"
+  },
+  {
+    "id": "HeMuzrLpXnNTJRXuunBl",
+    "name": "S&P Symphony w/ Leverage - Replace TECL w/ SOXL & XLP w/ XLE",
+    "last_semantic_update_at": "2023-03-12"
+  },
+  {
+    "id": "KpCZaTavfhU2OoaSc3pG",
+    "name": "v2 JEPI-DBMF-TQQQ | Simple Monthly | Jefe",
+    "last_semantic_update_at": "2023-03-12"
+  },
+  {
+    "id": "lBczZQh57jj7RlSf3sjb",
+    "name": "gunny-symphony-mix-TD",
+    "last_semantic_update_at": "2023-03-13"
+  },
+  {
+    "id": "CW8oWU12S6vEvn2Hh7jD",
+    "name": "SOXL Growth v2.4.5 RL",
+    "last_semantic_update_at": "2023-03-14"
+  },
+  {
+    "id": "PQLrpIOAonybkb57RGYJ",
+    "name": "Wooden ARKK Machine 2.2 + BB V3.0.4.2a Merged with MIM CONS and V1 New SOXL Baller ",
+    "last_semantic_update_at": "2023-03-14"
+  },
+  {
+    "id": "WitIOPpeGI7d0exdkrEN",
+    "name": "Stonk Tortoise",
+    "last_semantic_update_at": "2023-03-15"
+  },
+  {
+    "id": "W7OcHXvPmUes7DFgwfp5",
+    "name": "\u2622 V3a The Manhattan Project |  BB V3.0.4.2a merged with TQQQ FTLT V4.2 | V2 Sideways Market Mod Below the SPY 200d SMA | FINAL | DereckN Replace TQQQ and SQQQ with SOXL and SOXS | Replace 'A Better QQQ' Pietros Maneos |",
+    "last_semantic_update_at": "2023-03-16"
+  },
+  {
+    "id": "xboJSbExggp28YW5GYKF",
+    "name": "Wooden ARKK Machine 2.2 + BB V3.0.4.2A Merged with CONS v1.0.0 RR and V1 New SOXL Baller",
+    "last_semantic_update_at": "2023-03-16"
+  },
+  {
+    "id": "SSZ4g8ZhFfIIBJpOnUIK",
+    "name": "(C) Wooden ARKK Machine 2.2 + BB V3.0.4.2A Merged with CONS v1.0.0 RR and V1 New SOXL Baller (609/32%) 2022)",
+    "last_semantic_update_at": "2023-03-16"
+  },
+  {
+    "id": "hLTVtswfGh9jmduNp0qQ",
+    "name": "BB V3.0.4.2a Merged with CONS v1.0.0 RR and V1 New SOXL Baller",
+    "last_semantic_update_at": "2023-03-16"
+  },
+  {
+    "id": "Z3VKhtas5jyMpeK3EkiC",
+    "name": "v4 Pops l 18 April 2012",
+    "last_semantic_update_at": "2023-03-19"
+  },
+  {
+    "id": "Mooehkq7RlVyvODmyS2C",
+    "name": "V1.1 ChatGPT Beats SPY",
+    "last_semantic_update_at": "2023-03-19"
+  },
+  {
+    "id": "6cOUXqVpnc69TuBCah3O",
+    "name": "V1.2 ChatGPT Beats SPY",
+    "last_semantic_update_at": "2023-03-19"
+  },
+  {
+    "id": "bqWFwWg6r6nxspveDETH",
+    "name": "V1.0 Bento ADW | Narwhal Ronniem90 BrianE",
+    "last_semantic_update_at": "2023-03-21"
+  },
+  {
+    "id": "KzDgqMCccavziQxxlxMH",
+    "name": "Sideways Market Mod Below the SPY 200d SMA | FINAL | DereckN",
+    "last_semantic_update_at": "2023-03-21"
+  },
+  {
+    "id": "i35fhNTTAm0FYkATYDIY",
+    "name": "V1.0.1 Bento ADW | Narwhal Ronniem90 BrianE HinnomTX",
+    "last_semantic_update_at": "2023-03-21"
+  },
+  {
+    "id": "A3VawMkCM18n2Kl8zfA4",
+    "name": "Monthly Nasdaq Top 10 Trading",
+    "last_semantic_update_at": "2023-03-22"
+  },
+  {
+    "id": "hpzRR4ZjAgqCRONRYkua",
+    "name": "200d MA 3x Leverage",
+    "last_semantic_update_at": "2023-03-24"
+  },
+  {
+    "id": "0MUEAEBef0QDey40sGzH",
+    "name": "200d MA 3x Leverage | Live",
+    "last_semantic_update_at": "2023-03-24"
+  },
+  {
+    "id": "KgYYWH8NDudw0LoZb7QI",
+    "name": "Top Patent Approvals 2010-2017",
+    "last_semantic_update_at": "2023-03-24"
+  },
+  {
+    "id": "KkSw6l3T0MQV5IxMnInM",
+    "name": "Big Tech Momentum",
+    "last_semantic_update_at": "2023-03-26"
+  },
+  {
+    "id": "5PYqxj3J0RvIizhGslIB",
+    "name": "V1a Dereck Nielsen All Weather Portfolio",
+    "last_semantic_update_at": "2023-03-26"
+  },
+  {
+    "id": "UCdPGf2Ym4FeTq52nHQZ",
+    "name": "V1 | JEPI Jedi | HinnomTX",
+    "last_semantic_update_at": "2023-03-27"
+  },
+  {
+    "id": "OTWXAXqbIaecmIiS3eIn",
+    "name": "V1a | JEPI Jedi | HinnomTX",
+    "last_semantic_update_at": "2023-03-28"
+  },
+  {
+    "id": "aW7QbHdesPuPQYeMM8RU",
+    "name": "Order 66 (Beta Baller Activation Signal) + 60d RSI of TLT Breakdown",
+    "last_semantic_update_at": "2023-03-28"
+  },
+  {
+    "id": "W6c8SCWF6HMeq1VSYTfD",
+    "name": "Refined HFEA - 8% | https://www.investorcollab.com",
+    "last_semantic_update_at": "2023-03-28"
+  },
+  {
+    "id": "AbN9WTFjGAZP2lq12ppq",
+    "name": "V1.1 | JEPI Jedi | HinnomTX, Unit Holder, Ronniem90, DogWaterTamale",
+    "last_semantic_update_at": "2023-03-29"
+  },
+  {
+    "id": "qqg5Oy27uLBnbU03zh7v",
+    "name": "V2 All Weather Alpha 3x Leverage",
+    "last_semantic_update_at": "2023-03-30"
+  },
+  {
+    "id": "kGaoD6SPkLS2qXMaouZf",
+    "name": "Boring TQQQ Trendz",
+    "last_semantic_update_at": "2023-04-01"
+  },
+  {
+    "id": "j0QdrWjrvZbjkYsKrEZC",
+    "name": "V1.0.1a Bento ADW | Narwhal Ronniem90 BrianE HinnomTX",
+    "last_semantic_update_at": "2023-04-01"
+  },
+  {
+    "id": "88LlmMQxUl4qlGZKZUQd",
+    "name": "V1b Fund Surfing",
+    "last_semantic_update_at": "2023-04-02"
+  },
+  {
+    "id": "T5g943ifjvMrmql71Kin",
+    "name": "V1e Fund Surfing",
+    "last_semantic_update_at": "2023-04-02"
+  },
+  {
+    "id": "CmoYM1nObHpgaVLfn0rA",
+    "name": "V1d Fund Surfing",
+    "last_semantic_update_at": "2023-04-02"
+  },
+  {
+    "id": "aYhR2tDzRokPfwmlQPKD",
+    "name": "V1c Fund Surfing",
+    "last_semantic_update_at": "2023-04-02"
+  },
+  {
+    "id": "G5S5vJI9fJIHJIh1aYGy",
+    "name": "V1e Fund Surfing + V2 | Bear BUYDIPS, Bull HFEAR | Michael B | No K-1",
+    "last_semantic_update_at": "2023-04-02"
+  },
+  {
+    "id": "PYuZQTYarXPOLrZwoNM0",
+    "name": "V1d Fund Surfing + V2 | Bear BUYDIPS, Bull HFEAR | Michael B | No K-1",
+    "last_semantic_update_at": "2023-04-02"
+  },
+  {
+    "id": "2jxT0v2flegMUrYQGgwx",
+    "name": "V1a Fund Surfing",
+    "last_semantic_update_at": "2023-04-02"
+  },
+  {
+    "id": "nBICe7aGa7f2g7bePZyr",
+    "name": "\ud83e\uddea BlackSwan Portfolio | Cashen Mod",
+    "last_semantic_update_at": "2023-04-03"
+  },
+  {
+    "id": "hxDxsfy9a5eL3C4mBJPU",
+    "name": "BIORECKED | Premium Newsletter",
+    "last_semantic_update_at": "2023-04-03"
+  },
+  {
+    "id": "FoQrUYquL40wnSJrfax5",
+    "name": "Old Tech - Backtest to 1990",
+    "last_semantic_update_at": "2023-04-03"
+  },
+  {
+    "id": "dTDezQrPwndGUraaCOxO",
+    "name": "Cautious Fund Surfing | SPY vs. SHY & TLT | 3x",
+    "last_semantic_update_at": "2023-04-03"
+  },
+  {
+    "id": "MPzLRONiUYoIAPxcuHLg",
+    "name": "V1 BOTZ bot | QLD AI\ud83e\udd16 FTLT",
+    "last_semantic_update_at": "2023-04-03"
+  },
+  {
+    "id": "tT0ZhgZjb7ZAeJ21cCyA",
+    "name": "Cautious Fund Surfing | SPY vs. TLT | 3x",
+    "last_semantic_update_at": "2023-04-03"
+  },
+  {
+    "id": "2gX2Ch9EsG5MmJ9yjAvN",
+    "name": "OG Boring TQQQ Trendz",
+    "last_semantic_update_at": "2023-04-03"
+  },
+  {
+    "id": "LHFILKEYpR9s1AOvFvk3",
+    "name": "SPY For The Long Term",
+    "last_semantic_update_at": "2023-04-03"
+  },
+  {
+    "id": "Y1g7n9BO3dsGknQlefo9",
+    "name": "QLD FTLT + Bonds = 30% APY 17% DD",
+    "last_semantic_update_at": "2023-04-03"
+  },
+  {
+    "id": "P1eYxE3kwHFiC3LmtLXX",
+    "name": "\ud83e\uddeaRefined HFEA - 8%",
+    "last_semantic_update_at": "2023-04-03"
+  },
+  {
+    "id": "Y03AdEAOhSteeeDigHXm",
+    "name": "(C) QLD For The Long Term (62% APY 38.7% DD) 2007",
+    "last_semantic_update_at": "2023-04-06"
+  },
+  {
+    "id": "PWtnXSPveeNf4VDh2A9x",
+    "name": "V2 | Holy Grail Simplified w/ RSI Divination + VIXen | DereckN, HinnomTX",
+    "last_semantic_update_at": "2023-04-06"
+  },
+  {
+    "id": "lkYqdmUUFl0ys5UTn0Ib",
+    "name": "V2a | Holy Grail Simplified w/ RSI Divination + VIXen | DereckN, HinnomTX",
+    "last_semantic_update_at": "2023-04-06"
+  },
+  {
+    "id": "6rd56Kxj85IUAqKl2gDb",
+    "name": "Gold and Silver 1D Mean Reversion",
+    "last_semantic_update_at": "2023-04-06"
+  },
+  {
+    "id": "aqvvWGWOvmTJ6o5KtHxS",
+    "name": "Pure BS Catcher + V1d Fund Surfing",
+    "last_semantic_update_at": "2023-04-06"
+  },
+  {
+    "id": "vhCYar77Bl6JdPdbAnhm",
+    "name": "Vol Hedge ? 2.0",
+    "last_semantic_update_at": "2023-04-07"
+  },
+  {
+    "id": "GWqaAjHXeXnzCoXlm8Ew",
+    "name": "Vol Hedge ?",
+    "last_semantic_update_at": "2023-04-07"
+  },
+  {
+    "id": "clbo5Cq1YosMzwFzmwfm",
+    "name": "GLD Macro Momentum",
+    "last_semantic_update_at": "2023-04-07"
+  },
+  {
+    "id": "EziYIiWyUrHgSbgNACKW",
+    "name": "Sandy's Golden Dragon V4.3a (vol hedge?)",
+    "last_semantic_update_at": "2023-04-08"
+  },
+  {
+    "id": "utve73kWTnkXQu3zocGW",
+    "name": "Beta Hedge 3.0",
+    "last_semantic_update_at": "2023-04-09"
+  },
+  {
+    "id": "o3Gjzvmp0bJIMiUBb44c",
+    "name": "Vol Hedge ? 2.0 - Replace TQQQ w/ TECL",
+    "last_semantic_update_at": "2023-04-09"
+  },
+  {
+    "id": "BBjFrVKLQ0v1C1LSDs8C",
+    "name": "Sandy's Golden Dragon V4.4a (vol hedge?)",
+    "last_semantic_update_at": "2023-04-09"
+  },
+  {
+    "id": "Pfe4QDxrbEehr2s1ATJ5",
+    "name": "Sandy's Golden Dragon V4.5a (vol hedge? + beta hedge)",
+    "last_semantic_update_at": "2023-04-09"
+  },
+  {
+    "id": "r6GvWpanFtK0dzcij45C",
+    "name": "Sandy's Golden Dragon V4.6a (vol hedge? + beta hedge 2.0)",
+    "last_semantic_update_at": "2023-04-10"
+  },
+  {
+    "id": "xxFhi7WXusETROpYpFwY",
+    "name": "Sandy's Golden Dragon V4.7a (vol hedge? + beta hedge 2.0 + BAB 2)",
+    "last_semantic_update_at": "2023-04-10"
+  },
+  {
+    "id": "kjenF9IU2MR63qfi9r56",
+    "name": "V4 | Cautious Fund Surfing | 3x with V2 | Bear BUYDIPS, Bull HFEAR | No K-1 | SGOV",
+    "last_semantic_update_at": "2023-04-11"
+  },
+  {
+    "id": "5WAg9v0XoL0zY4lFIJYV",
+    "name": "JJ's Canary Leverage v2.2a Replace UPRO and TQQQ with SOXL",
+    "last_semantic_update_at": "2023-04-13"
+  },
+  {
+    "id": "cX9rAj8S4ngyDALZxaIP",
+    "name": "JJ's Canary Leverage v2.2b Replace UPRO with TQQQ",
+    "last_semantic_update_at": "2023-04-13"
+  },
+  {
+    "id": "0NukZC005nYIg0PZ7wET",
+    "name": "Simple Dividends",
+    "last_semantic_update_at": "2023-04-17"
+  },
+  {
+    "id": "i6xMQAqmefelIhXgtwcM",
+    "name": "[INV] | Megafolio | \ud83e\udde6\ud83d\udee5\ufe0f\ud83d\ude82\u20bf\u02b3\u1da6\u1d43\u207f \u1d31",
+    "last_semantic_update_at": "2023-04-17"
+  },
+  {
+    "id": "xyeWJHpJ7AP7vk9u6si8",
+    "name": "Base 2 Bull or Bonds",
+    "last_semantic_update_at": "2023-04-18"
+  },
+  {
+    "id": "2cOjwwHXQzJN7vHfMoUT",
+    "name": "Bull or Bonds Safety town",
+    "last_semantic_update_at": "2023-04-19"
+  },
+  {
+    "id": "6idb9D5kCMKf7R3hJsp9",
+    "name": "Simple Portfolio (UVXY)",
+    "last_semantic_update_at": "2023-04-21"
+  },
+  {
+    "id": "MzhTJqzPLSeiGxy4ODYi",
+    "name": "V1a Simple Portfolio (UVXY)",
+    "last_semantic_update_at": "2023-04-22"
+  },
+  {
+    "id": "8LNlmTgqsYnOOQ2RXMOo",
+    "name": "V1a Simple Portfolio (UVXY) + v4 Pops",
+    "last_semantic_update_at": "2023-04-22"
+  },
+  {
+    "id": "dOOauhey3mavaTPPVZ0q",
+    "name": "Simple Portfolio (UVXY) + v4 Pops",
+    "last_semantic_update_at": "2023-04-22"
+  },
+  {
+    "id": "s9VAT891fHNuJm1ZdFZJ",
+    "name": "v4.01 Pops l 18 April 2012 | No K-1 | BIL",
+    "last_semantic_update_at": "2023-04-22"
+  },
+  {
+    "id": "HNVnFrRtfKZEQ68FsupT",
+    "name": "HEFA 8% Risk on Risk off 5/100 SPY #1",
+    "last_semantic_update_at": "2023-04-22"
+  },
+  {
+    "id": "JUly3gwBeFwVLt1Dm3su",
+    "name": "Single Pops (Medium Leverage - No Black Swan Catcher) l 2 Nov 2011",
+    "last_semantic_update_at": "2023-04-22"
+  },
+  {
+    "id": "kl2dR0Rlp4RgZUHAJY2k",
+    "name": "Wooden ARKK Machine 2.2",
+    "last_semantic_update_at": "2023-04-23"
+  },
+  {
+    "id": "Kak9fBeaxnTfhM7oBSZn",
+    "name": "Rage",
+    "last_semantic_update_at": "2023-04-23"
+  },
+  {
+    "id": "5LyrJXtkTrV1xzxjfqjd",
+    "name": "V1a Simple Portfolio (UVXY) + v4 Pops + BB V3.0.4.2a merged with v2 TEC/SOX/HIB Baller - UVXY and V1 New SOXL Baller",
+    "last_semantic_update_at": "2023-04-23"
+  },
+  {
+    "id": "MJe3lvlFcU3MR1BVq7uM",
+    "name": "Simple Portfolio (UVXY) + v4 Pops + BB V3.0.4.2a merged with v2 TEC/SOX/HIB Baller - UVXY and V1 New SOXL Baller",
+    "last_semantic_update_at": "2023-04-23"
+  },
+  {
+    "id": "sKcIx7tsU2nd3EeHcQ6B",
+    "name": "V1a Simple Portfolio (UVXY) + v4 Pops + BB V3.0.4.2a",
+    "last_semantic_update_at": "2023-04-23"
+  },
+  {
+    "id": "yqNhaX4yktJXAivjfI7e",
+    "name": "Simple Portfolio (UVXY) + v4 Pops + BB V3.0.4.2a",
+    "last_semantic_update_at": "2023-04-23"
+  },
+  {
+    "id": "vLfcx19DP0jTKjVSt4da",
+    "name": "V1a Simple Portfolio (UVXY) + BB V3.0.4.2A merged with v4 Pops and V1 New SOXL + BB V3.0.4.2a merged with v2 TEC/SOX/HIB Baller - UVXY and V1 New SOXL Baller",
+    "last_semantic_update_at": "2023-04-24"
+  },
+  {
+    "id": "oMx2o5HqFfQSa9n1Se8i",
+    "name": "V1a Simple Portfolio (UVXY) + BB V3.0.4.2A merged with v4 Pops and V1 New SOXL + BB V3.0.4.2a merged with v2 TEC/SOX/HIB Baller - UVXY and V1 New SOXL Baller",
+    "last_semantic_update_at": "2023-04-24"
+  },
+  {
+    "id": "wTw6ou41cm2PhXfMz42P",
+    "name": "Simple Portfolio (UVXY) + BB V3.0.4.2A merged with v4 Pops and V1 New SOXL + BB V3.0.4.2a merged with v2 TEC/SOX/HIB Baller - UVXY and V1 New SOXL Baller",
+    "last_semantic_update_at": "2023-04-24"
+  },
+  {
+    "id": "gT725FXXjIbf7ptK2ioo",
+    "name": "5/6/24 Simple Portfolio (UVXY) + BB V3.0.4.2A merged with v4 Pops and V1 New SOXL + BB V3.0.4.2a merged with v2 TEC/SOX/HIB Baller - UVXY and V1 New SOXL Baller ",
+    "last_semantic_update_at": "2023-04-24"
+  },
+  {
+    "id": "e9zEJItPqZB94v8FobRh",
+    "name": "Sloth Tortoise",
+    "last_semantic_update_at": "2023-04-24"
+  },
+  {
+    "id": "oxSI7hYhS4P8uoH7y6Ck",
+    "name": "BB V3.0.4.2a merged with v4 Pops and V1 New SOXL Baller",
+    "last_semantic_update_at": "2023-04-25"
+  },
+  {
+    "id": "ycx1lh1fV5kqPox2CcMy",
+    "name": "JBB --- TQQQ FTLT?",
+    "last_semantic_update_at": "2023-04-26"
+  },
+  {
+    "id": "6Z61q2uMXMnrGvNJJYPw",
+    "name": "UPRO FTLT (No K-1)",
+    "last_semantic_update_at": "2023-04-26"
+  },
+  {
+    "id": "QPWTnnb3LxZN0bG9Mfzs",
+    "name": "TQQQ or not | Pop | SVXY 4TLT (AR 178.0% DD 27.2% from 2012)",
+    "last_semantic_update_at": "2023-04-27"
+  },
+  {
+    "id": "45kmFi5QV92IRZ5HqD3o",
+    "name": "[ETF Only] 80/20 | V2 | Cautious Fund Surfing | 3x with V1.1 | Bear BUYDIPS, Bull HFEAR & TQQQ v0.4",
+    "last_semantic_update_at": "2023-04-27"
+  },
+  {
+    "id": "sRj9ZOKjz4QyYnq6fmW7",
+    "name": "\ud83d\ude82 V3.0 | [ETF Only] Gain Train DGAF | Deez | 3Yr AR: 154.9% DD: 17.2%",
+    "last_semantic_update_at": "2023-04-27"
+  },
+  {
+    "id": "kjtgxVuSibW7XZm9OI6D",
+    "name": "[O.G.] \ud83d\ude82 V3.0 | Gain Train DGAF | Deez | 3Yr AR: 154.9% DD: 17.2%",
+    "last_semantic_update_at": "2023-04-27"
+  },
+  {
+    "id": "MVMuLrTJltXZ70HRbDuu",
+    "name": "SOXXroids Trend Following",
+    "last_semantic_update_at": "2023-04-28"
+  },
+  {
+    "id": "EuYlSCqgDqiAeYWP2SQC",
+    "name": "SOXX Trend Following",
+    "last_semantic_update_at": "2023-04-28"
+  },
+  {
+    "id": "VJB3T4rpOycCFc25K7tc",
+    "name": "Blend: V4 & V5 CFS + BBD, BHFEAR | BIL",
+    "last_semantic_update_at": "2023-04-28"
+  },
+  {
+    "id": "OgbfhkMcJgusYNi6aLpI",
+    "name": "[DEPRECATED] V1.1 | Fund Surfing | Michael B | 2x",
+    "last_semantic_update_at": "2023-04-28"
+  },
+  {
+    "id": "1ryqeCd3RuNdXy3qlI2r",
+    "name": "Base 2 - FTLT or Bull or Bonds (UVXY)",
+    "last_semantic_update_at": "2023-04-29"
+  },
+  {
+    "id": "8MZtfv9Lyk6UybAa3gOs",
+    "name": "Blend: V4 & V5 CFS + BBD, BHFEAR | BIL + TQQQ or not",
+    "last_semantic_update_at": "2023-04-29"
+  },
+  {
+    "id": "5VBHvzOzE2rPHu6MJl9S",
+    "name": "Blend: V4 & V5 CFS + BBD, BHFEAR | BIL + TQQQ or not - Replace UVXY w/ SOXS",
+    "last_semantic_update_at": "2023-04-29"
+  },
+  {
+    "id": "MXi52zfGKHnH7Uq9AII8",
+    "name": "TQQQ or not",
+    "last_semantic_update_at": "2023-04-29"
+  },
+  {
+    "id": "lKBRqXbuMF3tNxFlGj7y",
+    "name": "SFV by SBF - Stop Financial Violence - Insolvency Edition | Deez | 29APR2023",
+    "last_semantic_update_at": "2023-04-29"
+  },
+  {
+    "id": "omIdh5CH3rYlP0gwks3Z",
+    "name": "Blend: V4 & V5 CFS + BBD, BHFEAR | BIL + Pure BS Catcher (Garen Phillips)",
+    "last_semantic_update_at": "2023-04-29"
+  },
+  {
+    "id": "CwyYFM11qIMugKqdqYti",
+    "name": "TQQQ or not - Replace UVXY w/ SOXS",
+    "last_semantic_update_at": "2023-04-29"
+  },
+  {
+    "id": "9dvJmtqyz8BmKf1syqLd",
+    "name": "V1a TQQQ or not",
+    "last_semantic_update_at": "2023-04-30"
+  },
+  {
+    "id": "YVqpvgFviyxCuIPB0gyW",
+    "name": "V1a TQQQ or not - Replace UVXY w/ SOXS",
+    "last_semantic_update_at": "2023-04-30"
+  },
+  {
+    "id": "zFa9GlLjbK1xDk8bDDwr",
+    "name": "Blend: V4 & V5 CFS + BBD, BHFEAR | BIL + V1a TQQQ or not",
+    "last_semantic_update_at": "2023-04-30"
+  },
+  {
+    "id": "LHw9K0bLEtaSr1FxxzFC",
+    "name": "Blend: V4 & V5 CFS + BBD, BHFEAR | BIL + V1a TQQQ or not - Replace UVXY w/ SOXS",
+    "last_semantic_update_at": "2023-04-30"
+  },
+  {
+    "id": "ZxX7t24BonBkddVndn9m",
+    "name": "The vol-y wolly",
+    "last_semantic_update_at": "2023-04-30"
+  },
+  {
+    "id": "AtYbbCQEQNTNL8qU0eG4",
+    "name": "Blend: V4 & V5 CFS + BBD, BHFEAR | BIL + V1a TQQQ or not - Replace UVXY w/ VXX",
+    "last_semantic_update_at": "2023-05-03"
+  },
+  {
+    "id": "F8cR1emy2BFsjiwVVwRI",
+    "name": "SPY S&P500 Avoid All Market Crashes",
+    "last_semantic_update_at": "2023-05-03"
+  },
+  {
+    "id": "5o9sNxjW2TWSC3CjWK7V",
+    "name": "SPY Avoid All Market Crashes",
+    "last_semantic_update_at": "2023-05-03"
+  },
+  {
+    "id": "vRCMq6F2JVe6PmTrjlIU",
+    "name": "V1a TQQQ or not - Replace UVXY w/ VXX",
+    "last_semantic_update_at": "2023-05-04"
+  },
+  {
+    "id": "HUqPlsCfLVpE25qACKwn",
+    "name": "V1a TQQQ/QQQ or  Safety Town All Shared Versions | BlackSwan MeanRev BondSignal",
+    "last_semantic_update_at": "2023-05-04"
+  },
+  {
+    "id": "aFqMH2vdkuYOwcMQtnyY",
+    "name": "V1a Simple Portfolio (UVXY) + v4 Pops + V1a TQQQ or not",
+    "last_semantic_update_at": "2023-05-06"
+  },
+  {
+    "id": "S18E9zBOtod2iSlltX1V",
+    "name": "Simple Portfolio (UVXY) + v4 Pops + V1a TQQQ or not",
+    "last_semantic_update_at": "2023-05-06"
+  },
+  {
+    "id": "frr6MKYDf44DSPy2a0zv",
+    "name": "NOVA | V1a TQQQ or not | + Dash of SQQQ w/ V1a Simple Portfolio (UVXY)",
+    "last_semantic_update_at": "2023-05-06"
+  },
+  {
+    "id": "Q4edUvaEB7lYA038OgNn",
+    "name": "TQQQ or not | + Dash of SQQQ w/Simple Portfolio (UVXY) share",
+    "last_semantic_update_at": "2023-05-06"
+  },
+  {
+    "id": "z6t2ejH646nDTAjTxWOY",
+    "name": "TQQQ or not -  Replace UVXY w/ VXX",
+    "last_semantic_update_at": "2023-05-06"
+  },
+  {
+    "id": "Jd6WBXpMq57xMv1SpQr0",
+    "name": "\ud83c\udf2d Operation: Meat Shield + V1a TQQQ or not",
+    "last_semantic_update_at": "2023-05-06"
+  },
+  {
+    "id": "NOiHFTzmlLANxUiSYAFQ",
+    "name": "V1a TQQQ or not | + Dash of SQQQ w/ V1a Simple Portfolio (UVXY)",
+    "last_semantic_update_at": "2023-05-07"
+  },
+  {
+    "id": "4BNv9DA2Qd7JpFGAIadW",
+    "name": "Blend: V4 & V5 CFS + BBD, BHFEAR | BIL + V1a TQQQ or not | + Dash of SQQQ - Deez - Replace UVXY w/ SOXS",
+    "last_semantic_update_at": "2023-05-07"
+  },
+  {
+    "id": "phJ2vpTlpTOuL5AFptEY",
+    "name": "Blend: V4 & V5 CFS + BBD, BHFEAR | BIL + V1a TQQQ or not | + Dash of SQQQ - Deez - Replace UVXY w/ VXX",
+    "last_semantic_update_at": "2023-05-07"
+  },
+  {
+    "id": "yhhUROwdOFifzCH5f4SS",
+    "name": "Cocktail Rev 1.0 _ Updated May 8 (Shared)",
+    "last_semantic_update_at": "2023-05-08"
+  },
+  {
+    "id": "HMj10FZs0Tq6mmb8SBEs",
+    "name": "TQQQ + Crash Commods",
+    "last_semantic_update_at": "2023-05-09"
+  },
+  {
+    "id": "eg4vyhLnUMU0F21Lkf6h",
+    "name": "TG 8 - 40-62.5% SVOL",
+    "last_semantic_update_at": "2023-05-09"
+  },
+  {
+    "id": "pi3zfS5mPX9P1MUT5RZT",
+    "name": "Cocktail Rev 1.0a + V1a TQQQ or not | + Dash of SQQQ - Deez + Base 2 - FTLT or Bull or Bonds (UVXY)",
+    "last_semantic_update_at": "2023-05-09"
+  },
+  {
+    "id": "0rwlDNQOqP5CpUsQfsFR",
+    "name": "Total Market Trend",
+    "last_semantic_update_at": "2023-05-11"
+  },
+  {
+    "id": "ktqIzgxtE7fN9fMH8HcQ",
+    "name": "Wooden ARKK Machine 2.2a",
+    "last_semantic_update_at": "2023-05-16"
+  },
+  {
+    "id": "28m5GEDrcKoHGe6nfuHX",
+    "name": "Commodities/Bonds - Weekly",
+    "last_semantic_update_at": "2023-05-16"
+  },
+  {
+    "id": "VtcJ5UBQaGdmYLAeuq70",
+    "name": "Wooden ARKK Machine 2.2 w/ 2.2a 5percent",
+    "last_semantic_update_at": "2023-05-17"
+  },
+  {
+    "id": "u3SMVi4WmiBo2ztnk8TD",
+    "name": "Sandy's Modified AAW (logic changeup) v2 + v4 Pops + Pure BS Catcher + V1a TQQQ or not | + Dash of SQQQ - Deez",
+    "last_semantic_update_at": "2023-05-18"
+  },
+  {
+    "id": "1WH61ZDCPdgerrYL10EZ",
+    "name": "Blend: V4 & V5 CFS + BBD, BHFEAR | BIL + v4 Pops - K-1 Free",
+    "last_semantic_update_at": "2023-05-20"
+  },
+  {
+    "id": "vF55CZH2HMLERsntGF5z",
+    "name": "Blend: V4 & V5 CFS + BBD, BHFEAR | BIL + v4 Pops - K-1 Free - Longer Backtest",
+    "last_semantic_update_at": "2023-05-21"
+  },
+  {
+    "id": "0SjAgmmnxa71I3Q3Ow0g",
+    "name": "(C) Blend: V4 & V5 CFS + BBD, BHFEAR | BIL + v4 Pops - K-1 Free (130/32% MDD) Since 2012",
+    "last_semantic_update_at": "2023-05-21"
+  },
+  {
+    "id": "ffkyOlu92JcxmcFCcUHB",
+    "name": "V 1.0 | \u2622\ufe0f\u2622\ufe0f\u2622\ufe0f WTF-a-Tron | Deez | UTEN by SolarianKnight | AR: 208251.4%, 17.2% DD",
+    "last_semantic_update_at": "2023-05-23"
+  },
+  {
+    "id": "NeYJdd4eePW6onCAtgwp",
+    "name": "SR -001",
+    "last_semantic_update_at": "2023-05-23"
+  },
+  {
+    "id": "8FZ82Ej3h2SI82d6l1WP",
+    "name": "Total Market Trend 4 - 3 W/Shorter Trends",
+    "last_semantic_update_at": "2023-05-23"
+  },
+  {
+    "id": "X9u3p3KycYx5kCXjebgD",
+    "name": "P 10-1-24 // \ud83c\udff4\u200d\u2620\ufe0f Expired Warranty V10,  EricS with pirated content from  BrianE, Ronniem90, narwhal44, DereckN, HinnomTX. ",
+    "last_semantic_update_at": "2023-05-25"
+  },
+  {
+    "id": "YKnqz48WSe6LVqW8Ljzx",
+    "name": "[STRATGPT] Growth-Oriented Semiconductor Strategy | Deez",
+    "last_semantic_update_at": "2023-05-26"
+  },
+  {
+    "id": "w23LDhD3E8uZBFA0iKTW",
+    "name": "\ud83c\udff4\u200d\u2620\ufe0f Expired Warranty V10,  EricS with pirated content from  BrianE, Ronniem90, narwhal44, DereckN, HinnomTX. ",
+    "last_semantic_update_at": "2023-05-26"
+  },
+  {
+    "id": "qrxHBmtpJtVcCpejnn0r",
+    "name": "v4 Pops - K-1 Free | BIL",
+    "last_semantic_update_at": "2023-05-26"
+  },
+  {
+    "id": "kMpXOGPIEMSmLRJrxDW9",
+    "name": "Safe Dips/Rips l 10 Jan 2011",
+    "last_semantic_update_at": "2023-05-30"
+  },
+  {
+    "id": "ZSUm1304US0axE6qPWFP",
+    "name": "V1.0 Bento ADW | Narwhal Ronniem90 BrianE (share)",
+    "last_semantic_update_at": "2023-05-30"
+  },
+  {
+    "id": "UfPztq4UbP6fdmnRcdsB",
+    "name": "Base 2 FTLT or Bull or Bonds (UVXY)",
+    "last_semantic_update_at": "2023-05-31"
+  },
+  {
+    "id": "dnWOnrHheeVnhOgZWJbO",
+    "name": "Five stars in the American sky 1x",
+    "last_semantic_update_at": "2023-06-02"
+  },
+  {
+    "id": "ESwtPNlCWcb9OaCvVwaN",
+    "name": "TQQQ RSI Strategy with 3x Leveraged Defensive ETFs and QYLD for Sideways Markets",
+    "last_semantic_update_at": "2023-06-02"
+  },
+  {
+    "id": "Cyyvn9dUDVky7jza36WP",
+    "name": "Six stars in the American sky",
+    "last_semantic_update_at": "2023-06-03"
+  },
+  {
+    "id": "9LrKrTHsDHngmqabCtIq",
+    "name": "Wooden ARKK Machine 2.2b",
+    "last_semantic_update_at": "2023-06-04"
+  },
+  {
+    "id": "3ReRxcBriOtZa7yIx1Za",
+    "name": "[STRATGPT] Bond Triggered ETF Strategy with Inverse bond and index ETFs + Bull LEFTs",
+    "last_semantic_update_at": "2023-06-04"
+  },
+  {
+    "id": "tvHhcfBqBaAMGaOHY1Qz",
+    "name": "Opus-69",
+    "last_semantic_update_at": "2023-06-04"
+  },
+  {
+    "id": "JIDuDv2WJrEArYm2JOAp",
+    "name": "Ease Up on the Gas V2",
+    "last_semantic_update_at": "2023-06-05"
+  },
+  {
+    "id": "bfDWmOdCVXh1xHw92AdJ",
+    "name": "Ease Up on the Gas V2a (add a little nitro)",
+    "last_semantic_update_at": "2023-06-06"
+  },
+  {
+    "id": "rSC9pyZ7dlRde8oXqXpU",
+    "name": "Chadfundies mildly uncomfortable adventure | Deez |  8JUN2023 | 3YR BT: AR 23.4% DD 23.5%",
+    "last_semantic_update_at": "2023-06-08"
+  },
+  {
+    "id": "dWXG9acW33P9J3uLQXtH",
+    "name": "V1a Magic Internet Money (Base 2 - FTLT)",
+    "last_semantic_update_at": "2023-06-09"
+  },
+  {
+    "id": "In9SPETm1zZFmKdzj7pr",
+    "name": "Hedgefundie explores the suppository isle | Deez | 9JUN2023",
+    "last_semantic_update_at": "2023-06-09"
+  },
+  {
+    "id": "za6A7XY5FNyq07wO9Xqg",
+    "name": "[STRATGPT] Rank #1 | Bond Triggered ETF Strategy with Inverse bond and index ETFs",
+    "last_semantic_update_at": "2023-06-09"
+  },
+  {
+    "id": "2dVYXvm5P5Kafl6LSwB9",
+    "name": "TQXL | Deez | 11JUN2023",
+    "last_semantic_update_at": "2023-06-11"
+  },
+  {
+    "id": "kn1LiRDb2betKA6jkArg",
+    "name": "WAM 28 Oct 2011",
+    "last_semantic_update_at": "2023-06-13"
+  },
+  {
+    "id": "LHf1bGRdyxPr9B9B5HLf",
+    "name": "o4Fish's RSI-based asset allocation",
+    "last_semantic_update_at": "2023-06-13"
+  },
+  {
+    "id": "99jbVeLvU1SF1FEbOK4F",
+    "name": "Slowloss1",
+    "last_semantic_update_at": "2023-06-13"
+  },
+  {
+    "id": "UlYXnJnU1GsBs1QDt422",
+    "name": "Ease Up on the Gas V2a - K-1 Free",
+    "last_semantic_update_at": "2023-06-13"
+  },
+  {
+    "id": "wx89z5cyImxAamUuNyxX",
+    "name": "[monthly] ?? NASDAQ-X DeETF | $Deez | BT - 14NOV2019 - AR: 346.1% DD: 38.8% - Live",
+    "last_semantic_update_at": "2023-06-14"
+  },
+  {
+    "id": "DxG2Ofe98QI04uBSXxAd",
+    "name": "BB-X || Deez || 14JUN2023",
+    "last_semantic_update_at": "2023-06-14"
+  },
+  {
+    "id": "ap6jH6GG8JWYBgoxX9dV",
+    "name": "? SOXX RSI Machine | 1st RSI from 63 to 73 | Deez | 3YR-BT: AR 391.9% DD: 52.0% | 15NOV2022",
+    "last_semantic_update_at": "2023-06-16"
+  },
+  {
+    "id": "C8QUEQBKayzmaSBz7MAZ",
+    "name": "Overbought or Oversold SPY else UVXY",
+    "last_semantic_update_at": "2023-06-16"
+  },
+  {
+    "id": "IwTEpK4XTl4VdjDDKkRo",
+    "name": "Overbought or Oversold SPY else UVXY | Now let's make it weird. ",
+    "last_semantic_update_at": "2023-06-17"
+  },
+  {
+    "id": "JDohhsmIsGsuVQFGhQbz",
+    "name": "TUSI Custom",
+    "last_semantic_update_at": "2023-06-18"
+  },
+  {
+    "id": "Jca6XuaIiwMnnjAW2xgS",
+    "name": "Protected Leverage v2.4c 3x S&P 500 / NASDAQ v1.1 + Blend: V4 & V5 CFS + BBD, BHFEAR | BIL - K-1 Free",
+    "last_semantic_update_at": "2023-06-20"
+  },
+  {
+    "id": "GcaIWWvk3qvc1XNFerP2",
+    "name": "Protected Leverage v2.4c 3x S&P 500 / NASDAQ v1.1 + V1e Fund Surfing - K-1 Free",
+    "last_semantic_update_at": "2023-06-20"
+  },
+  {
+    "id": "HHRFE8F2ZUtiP6n9QMJK",
+    "name": "SLAAAM (SLUNT-WAM-FTLT)",
+    "last_semantic_update_at": "2023-06-21"
+  },
+  {
+    "id": "dctWu5ZHtOirWmidkWow",
+    "name": "Protected Leverage v2.5a + V1e Fund Surfing - K-1 Free",
+    "last_semantic_update_at": "2023-06-21"
+  },
+  {
+    "id": "0XU7ADpyuW8ZQIN6YFJw",
+    "name": "Statis Fund - AI Basket unmanaged",
+    "last_semantic_update_at": "2023-06-23"
+  },
+  {
+    "id": "QjhdVyFak1DSDoVW5Rsv",
+    "name": "ZeR0 B3Ta Mod by Cashen INVEST",
+    "last_semantic_update_at": "2023-06-23"
+  },
+  {
+    "id": "uXpJTnFfgsrZ78wtPfAi",
+    "name": "Sandy's Golden Dragon V4.4 (vol hedge?)",
+    "last_semantic_update_at": "2023-06-23"
+  },
+  {
+    "id": "fw13jBWYdOmuz80NilHY",
+    "name": "BB Signals (share)",
+    "last_semantic_update_at": "2023-06-25"
+  },
+  {
+    "id": "WYt0agcVhQXz03k8eN2L",
+    "name": "BB-XM 1.z ||| SLUNT ||| Deez ||| 14JUN2023",
+    "last_semantic_update_at": "2023-06-28"
+  },
+  {
+    "id": "1hoPN3tFE0aDY3aiZtxT",
+    "name": "BB-XM NASDAQ-X ||| Deez ||| 29JUN2023",
+    "last_semantic_update_at": "2023-06-29"
+  },
+  {
+    "id": "tsyLMLKb0blBSC33Jyax",
+    "name": "V2 Holy Grail Simplified w/RSI Divination - without VIXen, no bonds",
+    "last_semantic_update_at": "2023-07-02"
+  },
+  {
+    "id": "wa8tKp8RYRAAv1MhlwSp",
+    "name": "V2 Holy Grail Simplified w/RSI Divination - without VIXen",
+    "last_semantic_update_at": "2023-07-02"
+  },
+  {
+    "id": "NnNr4qyFg046zyVbk08w",
+    "name": "[PUB] WAM + Colonel Sanders [RSI 20d SPY TFLO]",
+    "last_semantic_update_at": "2023-07-03"
+  },
+  {
+    "id": "7nJ8FatAdG4rcTnfvnL3",
+    "name": "[PUB] WAM + Colonel Sanders [RSI 20d SPY TFLO]",
+    "last_semantic_update_at": "2023-07-03"
+  },
+  {
+    "id": "tuDq0KiVG9f6rXqUHmME",
+    "name": "CQ | Bank Blender V1.0 | 8.2.23 ",
+    "last_semantic_update_at": "2023-07-04"
+  },
+  {
+    "id": "bR4bo3s3xtfv4RJR2DFV",
+    "name": "CQ | Bank Blender V1.0 | 8.2.23 ",
+    "last_semantic_update_at": "2023-07-04"
+  },
+  {
+    "id": "VoBzCUKzKz6mr2yQecwc",
+    "name": "Nasdy Soxx Machine V1.0 | Deez | 7JUL2023",
+    "last_semantic_update_at": "2023-07-07"
+  },
+  {
+    "id": "WHSy87BDZuw8wfW6zp47",
+    "name": "V 1.2 | ? DE?ES?NU?TS | Deez | Honestly, it's kinda good. | V 1.2 Added DRV when SPY overbought.",
+    "last_semantic_update_at": "2023-07-07"
+  },
+  {
+    "id": "8wWT7nBC8pKM5zBin9uG",
+    "name": "?? BB-XM 1.z ||| Deez ||| 14JUN2023",
+    "last_semantic_update_at": "2023-07-07"
+  },
+  {
+    "id": "rl9qVhFinS9jAuQIrdhc",
+    "name": "Leveraged Golden Butterfly (17% APY 44% DD) Since 1992",
+    "last_semantic_update_at": "2023-07-08"
+  },
+  {
+    "id": "mNO8lope5JMCJYE2SAiN",
+    "name": "Portfolio: UPRO FTLT (No K-1)",
+    "last_semantic_update_at": "2023-07-10"
+  },
+  {
+    "id": "aC7Vtij4qJpc60pBi3cL",
+    "name": "RSI Scale In | No UVXY | No K-1",
+    "last_semantic_update_at": "2023-07-10"
+  },
+  {
+    "id": "atXeN97zhf84GbdaaOUE",
+    "name": "Fibonacci AF | Deez | 11JUL2023",
+    "last_semantic_update_at": "2023-07-11"
+  },
+  {
+    "id": "w5h8G8EsbAkKXwQWqaaM",
+    "name": "WAM Collection",
+    "last_semantic_update_at": "2023-07-12"
+  },
+  {
+    "id": "VLfODSGKGGSxVyl66dTc",
+    "name": "WAM Collection Live",
+    "last_semantic_update_at": "2023-07-12"
+  },
+  {
+    "id": "wBJBYCPZDoVJ1iR5NqDW",
+    "name": "Slowloss1",
+    "last_semantic_update_at": "2023-07-12"
+  },
+  {
+    "id": "ML1drAOBXpTcKJDc2xwn",
+    "name": "Slowloss1",
+    "last_semantic_update_at": "2023-07-12"
+  },
+  {
+    "id": "0xfD9vpl6QdaoJKylVOO",
+    "name": "100 Club | Deez | 27JUN2023",
+    "last_semantic_update_at": "2023-07-14"
+  },
+  {
+    "id": "BNHl9Wkj9VS1OVX9JPID",
+    "name": "V1.1 Dereck's Secular Market Framework | STDDev Mod | Garen",
+    "last_semantic_update_at": "2023-07-17"
+  },
+  {
+    "id": "EBwIN9y2OQmHI7ciJp2p",
+    "name": "HODLFundies Crypto strat | Deez | 17JUL2023",
+    "last_semantic_update_at": "2023-07-18"
+  },
+  {
+    "id": "7CQSvqELSubp5fw4OL1T",
+    "name": "Inverse Volatility with TECL",
+    "last_semantic_update_at": "2023-07-19"
+  },
+  {
+    "id": "YXZVbQNeNITXEwICTULP",
+    "name": "V1a WAM 28 Oct 2011 - K-1 Free",
+    "last_semantic_update_at": "2023-07-20"
+  },
+  {
+    "id": "Zt96r6DsP7cRnSZ0uLpK",
+    "name": "HFEA Diverse | Deez | 12JUN2023",
+    "last_semantic_update_at": "2023-07-20"
+  },
+  {
+    "id": "t0TlPiDDDxXFtYPlgKf8",
+    "name": "[STRATGPT-PROD] Safety Range | Deez | 3YR AR:74.8% DD:29.1% {prompt : ***}",
+    "last_semantic_update_at": "2023-07-21"
+  },
+  {
+    "id": "HyBbUCIN8vrAAJqU0C5x",
+    "name": "200d TQQQ",
+    "last_semantic_update_at": "2023-07-21"
+  },
+  {
+    "id": "80UHyT8JfNOC42Zylkj0",
+    "name": "200d UPRO",
+    "last_semantic_update_at": "2023-07-21"
+  },
+  {
+    "id": "VdcukAa6DZjqqzSQxh25",
+    "name": "SPY_2_Day_RSI - Ganesh",
+    "last_semantic_update_at": "2023-07-23"
+  },
+  {
+    "id": "0BfsbDtcVcDNFVEsQgra",
+    "name": "TQQQ/SQQQ",
+    "last_semantic_update_at": "2023-07-23"
+  },
+  {
+    "id": "FYBISYMcAYEDPPGESs9e",
+    "name": "HFEA 94% Deleveraged | Deez | 23JUL2023",
+    "last_semantic_update_at": "2023-07-23"
+  },
+  {
+    "id": "PCyhufcWZRYf86ecsVNB",
+    "name": "-watch- [STRATGPT] Rank #1 | Bond Triggered ETF Strategy with Inverse bond and index ETFs V2 | Deez | 23JUL2023",
+    "last_semantic_update_at": "2023-07-23"
+  },
+  {
+    "id": "UCAjSkN88nLyepvJGps5",
+    "name": "Bond Baller | Fly that Flag",
+    "last_semantic_update_at": "2023-07-23"
+  },
+  {
+    "id": "Oa2BICP2fXlOcIc4HYQ8",
+    "name": "Buy The Dips 150d MA Basket",
+    "last_semantic_update_at": "2023-07-24"
+  },
+  {
+    "id": "gv99mKXm2PaRO3CSoUPB",
+    "name": "SPY Overbought Test (Publication)",
+    "last_semantic_update_at": "2023-07-24"
+  },
+  {
+    "id": "6d6wB7uGW6g4daDzPoR2",
+    "name": "Nasdy Soxx Machine V1.0 | Deez | 7JUL2023",
+    "last_semantic_update_at": "2023-07-25"
+  },
+  {
+    "id": "zTV33nu3o0h5fKpT6IqL",
+    "name": "Super Semiconductors | Dereck Nielsen",
+    "last_semantic_update_at": "2023-07-27"
+  },
+  {
+    "id": "jVDx2haDl252zIzPmI7x",
+    "name": "V1a 15/15 BB + V1a WAM - K-1 Free",
+    "last_semantic_update_at": "2023-07-30"
+  },
+  {
+    "id": "fdWAUmhBzUPo2sZkRqXN",
+    "name": "V1a 15/15 BB + v4 Pops - K-1 Free ",
+    "last_semantic_update_at": "2023-07-30"
+  },
+  {
+    "id": "uOG8uEJzZdfZLKc4RJCe",
+    "name": "[DEV] ?? Beta Baller v0.21 - $Deez | OCT22",
+    "last_semantic_update_at": "2023-08-02"
+  },
+  {
+    "id": "N7nxAmvVwxT7kLkaoTLs",
+    "name": "V 1.0 | ?? Beta Baller | Deez | 6MO: AR 13740.4%, DD 27.4%",
+    "last_semantic_update_at": "2023-08-02"
+  },
+  {
+    "id": "HrFWQBxoS14Hp2WZRTyB",
+    "name": "V1b 15/15 BB + v4 Pops - K-1  Free ",
+    "last_semantic_update_at": "2023-08-02"
+  },
+  {
+    "id": "iIFfFUa1FoFbHvYi1AME",
+    "name": "V1b 15/15 BB + v4 Pops - K-1  Free ",
+    "last_semantic_update_at": "2023-08-02"
+  },
+  {
+    "id": "I9EA73CHsWH1JKMJvPiK",
+    "name": "CQ | Big Bank Blender w 200d | 8.2.23 ",
+    "last_semantic_update_at": "2023-08-02"
+  },
+  {
+    "id": "PsNqJRnxqDLuEI2Nu1zh",
+    "name": "V1a 15/15 BB + V1a TQQQ or not | + Dash of SQQQ - K-1 Free",
+    "last_semantic_update_at": "2023-08-02"
+  },
+  {
+    "id": "DyFaadurev5JNQXKpIKJ",
+    "name": "V1a BWC Market Assassin",
+    "last_semantic_update_at": "2023-08-03"
+  },
+  {
+    "id": "A5jF0cWII0Xi7ADOarg4",
+    "name": "V1a 15/15 BB + V1a BWC Market Assassin - K-1 Free",
+    "last_semantic_update_at": "2023-08-03"
+  },
+  {
+    "id": "XTmR9ZrrJ5E5lMCc0vsB",
+    "name": "Ease Up on the Gas V2a",
+    "last_semantic_update_at": "2023-08-03"
+  },
+  {
+    "id": "v0TEqrXxZGNOJP7kwUns",
+    "name": "V1b 15/15 BB + V1a BWC Market Assassin - K-1 Free",
+    "last_semantic_update_at": "2023-08-03"
+  },
+  {
+    "id": "Rr8zgfpA6PRnTY1phPzA",
+    "name": "V #1 - Golden Standard QLD with MOverH, No Vol. Trade, No Delev (401K)",
+    "last_semantic_update_at": "2023-08-04"
+  },
+  {
+    "id": "BG3LsLhaqogu8A1zxElH",
+    "name": "V2.1a Holy Grail Simplified",
+    "last_semantic_update_at": "2023-08-05"
+  },
+  {
+    "id": "TLQpnumgfyanI9GEEVeJ",
+    "name": "V1 BWC Mashed and Modified: CQ Big Bank Blender w/ RSI and drawdown hedge w/ BlackSwanCatcher ",
+    "last_semantic_update_at": "2023-08-06"
+  },
+  {
+    "id": "C2EpXtHm699MwuvIl9NE",
+    "name": "V 1.0 | Actively Managed S&P 10 | Deez",
+    "last_semantic_update_at": "2023-08-07"
+  },
+  {
+    "id": "erW1TnsrflqhJrrqfPcN",
+    "name": "DOT COM Bust (Apr 26 1999)",
+    "last_semantic_update_at": "2023-08-09"
+  },
+  {
+    "id": "HutgOnT7dxjb1uarUtzi",
+    "name": "V1a 15/15 BB + V1a TQQQ or not | + Dash of SQQQ - Deez - Replace UVXY w/ SOXS + Base 2 - FTLT or Bull or Bonds (SOXS) - K-1 Free",
+    "last_semantic_update_at": "2023-08-11"
+  },
+  {
+    "id": "pCvX9NmK0Q4tm951Znso",
+    "name": "V1a TQQQ or not | + Dash of SQQQ - Deez - Replace UVXY w/ SOXS + Base 2 - FTLT or Bull or Bonds (SOXS)",
+    "last_semantic_update_at": "2023-08-11"
+  },
+  {
+    "id": "RxzDNEcrTY2Hr5xrQbjN",
+    "name": "IFF Fund: Holy Amoeba",
+    "last_semantic_update_at": "2023-08-13"
+  },
+  {
+    "id": "CklMKxP88yXM9Lid0iAa",
+    "name": "Vixation",
+    "last_semantic_update_at": "2023-08-13"
+  },
+  {
+    "id": "JDe7JhHFboi6kqOr0VnX",
+    "name": "LBT New WAM Collection",
+    "last_semantic_update_at": "2023-08-15"
+  },
+  {
+    "id": "15NCwoCPGcsRuQBFWrtJ",
+    "name": "Rube Goldberg's Money Shredder",
+    "last_semantic_update_at": "2023-08-20"
+  },
+  {
+    "id": "ekV6oMO89ITbF6hYExAg",
+    "name": "Magic 7 | Deez | 23AUG2023 ",
+    "last_semantic_update_at": "2023-08-24"
+  },
+  {
+    "id": "eLe4i6d3JZpXDGpawGeF",
+    "name": "TQQQ FTLT with Volatility BSC - long backtesting",
+    "last_semantic_update_at": "2023-08-26"
+  },
+  {
+    "id": "umpFivCYDkYWf1KaqSXf",
+    "name": "2Combined TSLA + NVDA approaches | BT 23Aug22 - 13Dec23| AR 1455.8% | DD 12.8% | TH 9% ",
+    "last_semantic_update_at": "2023-08-26"
+  },
+  {
+    "id": "otVtDQHjLXDzUqWbvsmB",
+    "name": "V2 Holy Grail Simplified w/RSI Divination - without VIXen",
+    "last_semantic_update_at": "2023-08-31"
+  },
+  {
+    "id": "JQ2Qk1b9CR56ZuRFKeJl",
+    "name": "Jason's Combo of TQQQ FTLT Original with V2.1a Holy Grail ? | Results as of BT 01Jan12 - 04Aug23",
+    "last_semantic_update_at": "2023-08-31"
+  },
+  {
+    "id": "Lh0fYfA5RJQmpyfGEORb",
+    "name": "TQQQ RSI Strategy",
+    "last_semantic_update_at": "2023-09-08"
+  },
+  {
+    "id": "uHzPpkmCaQBZ3HZf2LW4",
+    "name": "(Archive) Holy Grail Simplified",
+    "last_semantic_update_at": "2023-09-11"
+  },
+  {
+    "id": "7JZ3CK7p5NlkzyKmdcav",
+    "name": "-bk-I 8/13 200d LETF MA Risk On/Off | 09/13/23 mod",
+    "last_semantic_update_at": "2023-09-13"
+  },
+  {
+    "id": "XwHVpB37makJzUzQppmm",
+    "name": "v1.1 | SVXY FTLT frontrunner UVXY mod",
+    "last_semantic_update_at": "2023-09-14"
+  },
+  {
+    "id": "hv1PmEacujW8MvpOnLcT",
+    "name": "New Symphony",
+    "last_semantic_update_at": "2023-09-17"
+  },
+  {
+    "id": "q5Xda3L8Bj2CccgjkkdO",
+    "name": "<W> ( Apr 12 2011\t) Word is Bond Combo 2x-3x [26.5 / 34.0] Kunnakudi-JM",
+    "last_semantic_update_at": "2023-09-17"
+  },
+  {
+    "id": "FZLYUdWJ0zKiNJ1mnmmB",
+    "name": "ChatGPT Beats SPY",
+    "last_semantic_update_at": "2023-09-18"
+  },
+  {
+    "id": "ADFv7ORJWd1ZlAUp3HX1",
+    "name": "TQQQ FTLTO (Longer Backtest)",
+    "last_semantic_update_at": "2023-09-20"
+  },
+  {
+    "id": "O2UXXRKukohO9EyUDv7J",
+    "name": "Tim and Elon's Excellent Adventure (No K-1) | Multi-range | or QQQ mod",
+    "last_semantic_update_at": "2023-09-21"
+  },
+  {
+    "id": "q4bmyjbVIT0eCKACg8YG",
+    "name": "v6 Symphony Sorter",
+    "last_semantic_update_at": "2023-09-22"
+  },
+  {
+    "id": "BZYwFhKSsqZSlt6aj3gL",
+    "name": "V1.0.1 | Pareto's Portfolio (Weekly Edition)",
+    "last_semantic_update_at": "2023-09-27"
+  },
+  {
+    "id": "Ge41zyJPhv3jjfcKLO5C",
+    "name": "QLD FTLT With Commodities & Forex",
+    "last_semantic_update_at": "2023-09-27"
+  },
+  {
+    "id": "RWWGWQ3fRcyv3C9hrdSz",
+    "name": "V1a QLD FTLT With Commodities & Forex - K-1 Free",
+    "last_semantic_update_at": "2023-09-27"
+  },
+  {
+    "id": "2FSQn8tbtmLF4b4yVfJL",
+    "name": "All Mean Reversions",
+    "last_semantic_update_at": "2023-09-28"
+  },
+  {
+    "id": "rJ52kMzA2I45IuZdmOjE",
+    "name": "V1a 15/15 BB + V1.1 Cash USDU & Stocks | BTAL - K-1 Free",
+    "last_semantic_update_at": "2023-09-28"
+  },
+  {
+    "id": "vkJ5YCvzJLBu2KKF6Oy0",
+    "name": "The Four Horsemen of the Apocalypse",
+    "last_semantic_update_at": "2023-09-29"
+  },
+  {
+    "id": "dEBso6J9uRqv6atSGgLt",
+    "name": "V1a Hello Algo World! + Gold/Cash USDU",
+    "last_semantic_update_at": "2023-09-30"
+  },
+  {
+    "id": "HvI87SvjxFRFEzk4D8UF",
+    "name": "V1.0.1a | Pareto's Portfolio (Weekly Edition) - K-1 Free",
+    "last_semantic_update_at": "2023-10-01"
+  },
+  {
+    "id": "dUld7XJSwzyocKKZq1t4",
+    "name": "Better Ballers - RSI Sort 10.1.23",
+    "last_semantic_update_at": "2023-10-02"
+  },
+  {
+    "id": "jg0ijfmLEIbZfAuMZ59Z",
+    "name": "Safer Baller - Max DD 10.1.23",
+    "last_semantic_update_at": "2023-10-03"
+  },
+  {
+    "id": "65ZhlFzfwgcsqsgAG6Vt",
+    "name": "V1a 15/15 BB + TQQQ FTLT - K-1 Free",
+    "last_semantic_update_at": "2023-10-03"
+  },
+  {
+    "id": "ueDlYv8M4X4Xh4Mn9Dtw",
+    "name": "Loops 2 DD/Dev Ret 10.4.23",
+    "last_semantic_update_at": "2023-10-04"
+  },
+  {
+    "id": "nRWI0xcit6OwNDupJOx4",
+    "name": "V7a BWC: Income and Opportunity",
+    "last_semantic_update_at": "2023-10-07"
+  },
+  {
+    "id": "qTLigMKu6tPeQXAe9i9s",
+    "name": "New WAM Collection - 10/07/23",
+    "last_semantic_update_at": "2023-10-09"
+  },
+  {
+    "id": "XcqkOgXtgLUVKnCtzmMi",
+    "name": "QLD For The Long Term",
+    "last_semantic_update_at": "2023-10-09"
+  },
+  {
+    "id": "12EmiQX5caeEF1jX1ivU",
+    "name": "Hello Algo World! + Gold/Cash USDU",
+    "last_semantic_update_at": "2023-10-09"
+  },
+  {
+    "id": "PWZaSMCpB9TW3uCtvt65",
+    "name": "SOXX OG",
+    "last_semantic_update_at": "2023-10-09"
+  },
+  {
+    "id": "W563P21Nr9tXnI7cCDWA",
+    "name": "mod TQQQ FTLT (104.22%/54.9% DD since 10-28-11 in composer), 110%, 51% max DD s2012, 112% cagr, 50% maxDD s90, 77% cagr, 71% maxDD s70 in sheets",
+    "last_semantic_update_at": "2023-10-11"
+  },
+  {
+    "id": "Iu01jh3yr2Rtqg2ltXAb",
+    "name": "Wooden ARKK Machine 2.2b no IEF no TYO [RSI 11d/16d IEF IWM]",
+    "last_semantic_update_at": "2023-10-14"
+  },
+  {
+    "id": "TzPiN6LCqFV3mvvE38gk",
+    "name": "TQQQ/LSM/BIL Mashup [CMP] (K-1 Free)",
+    "last_semantic_update_at": "2023-10-15"
+  },
+  {
+    "id": "aFw9BktijrzXVhzB4exe",
+    "name": "v2 TEC/SOX/HIB Baller + V3.0.1 BB + TCCC - K-1 Free",
+    "last_semantic_update_at": "2023-10-16"
+  },
+  {
+    "id": "aYhyGQktC5S4QU9MTd56",
+    "name": "[NO K-1] V 3.0.1 | \u2622\ufe0f Beta Baller + TCCC \ud83d\udc8a",
+    "last_semantic_update_at": "2023-10-16"
+  },
+  {
+    "id": "beJkD8zajgpih0linnPZ",
+    "name": "V1b BWC: Which WAM Wins ",
+    "last_semantic_update_at": "2023-10-16"
+  },
+  {
+    "id": "JQeMvk3YGC4W7ZGjMgPp",
+    "name": "TQQQ vs PSQ",
+    "last_semantic_update_at": "2023-10-17"
+  },
+  {
+    "id": "HGkXFTyiA1aCnWHnlgzE",
+    "name": "TQQQ On Or Off",
+    "last_semantic_update_at": "2023-10-17"
+  },
+  {
+    "id": "7y7sdnzXrFhyNCDEy2zK",
+    "name": "V1.1a BWC: Symphony McQQQ Face - K-1 Free",
+    "last_semantic_update_at": "2023-10-17"
+  },
+  {
+    "id": "j7qt5gOvUFYfyukN9rwC",
+    "name": "V1a TQQQ/LSM/BIL Mashup [CMP] (K-1 Free)",
+    "last_semantic_update_at": "2023-10-17"
+  },
+  {
+    "id": "PPyhbIghz297daUnU68I",
+    "name": "V1a BWC: Dark Symph",
+    "last_semantic_update_at": "2023-10-18"
+  },
+  {
+    "id": "N4fPNXMYTWYTJzyjiOEr",
+    "name": "SOXX COMPS MAR",
+    "last_semantic_update_at": "2023-10-21"
+  },
+  {
+    "id": "CBHMPwhttEZZ0mDy8Djm",
+    "name": "RSI TQQQ < AGG",
+    "last_semantic_update_at": "2023-10-23"
+  },
+  {
+    "id": "0LZXSBMXA1qgmje9Hzhe",
+    "name": "RSI SPY < AGG",
+    "last_semantic_update_at": "2023-10-23"
+  },
+  {
+    "id": "tsoidwv078ywZ3BFcDiZ",
+    "name": "RSI TECL < AGG",
+    "last_semantic_update_at": "2023-10-24"
+  },
+  {
+    "id": "pLeWX0HlO6YVeYZ1SVMS",
+    "name": "Common Trend Indicator Sorter",
+    "last_semantic_update_at": "2023-10-25"
+  },
+  {
+    "id": "axYRQiDDjbos1ThhmlX9",
+    "name": "New User Switchboard",
+    "last_semantic_update_at": "2023-10-25"
+  },
+  {
+    "id": "P2kcMa7jIz8T5cmi098O",
+    "name": "BIL vs BND",
+    "last_semantic_update_at": "2023-10-25"
+  },
+  {
+    "id": "Wx2l5hWYrLOOB2w6jIyw",
+    "name": "? V3.0 | [ETF Only] Gain Train DGAF | Deez | 3Yr AR: 154.9% DD: 17.2%",
+    "last_semantic_update_at": "2023-10-26"
+  },
+  {
+    "id": "KoHA3RobcRFhNatNmJ3q",
+    "name": "-bk-I 8/13 200d LETF MA Risk On/Off inv",
+    "last_semantic_update_at": "2023-10-31"
+  },
+  {
+    "id": "nMpcL9e6j8HmZNFe6b56",
+    "name": "COMBINED (K-1 Free)",
+    "last_semantic_update_at": "2023-10-31"
+  },
+  {
+    "id": "8eLvxBSLnQG5oD5yUsJp",
+    "name": "LBT | Monotonic Microblob-\u03b4 w/ BSC (Aug2015-Current)",
+    "last_semantic_update_at": "2023-11-03"
+  },
+  {
+    "id": "YAtX4UqxB8jzH70GKOPA",
+    "name": "EMA VWO vs MA VWO",
+    "last_semantic_update_at": "2023-11-04"
+  },
+  {
+    "id": "g5nqVYJhtt3yW56bkY32",
+    "name": "S&P Symphony w/ Leverage (101% RR/28.3% DD)",
+    "last_semantic_update_at": "2023-11-04"
+  },
+  {
+    "id": "mornRv7yxgp8DPFtnF4T",
+    "name": "Vox's Trend Switchboard",
+    "last_semantic_update_at": "2023-11-04"
+  },
+  {
+    "id": "CnF5i3yJcJVZwJucMFUm",
+    "name": "V1a WAM FTLT",
+    "last_semantic_update_at": "2023-11-05"
+  },
+  {
+    "id": "q7CvuV5kvBjArJs3FjFc",
+    "name": "V 1.1b | Leveraged S&P 10 Actively Traded | Deez | PROD | Michael B Version | Sorter",
+    "last_semantic_update_at": "2023-11-08"
+  },
+  {
+    "id": "YW7cvPP2J1h0VGyhUo59",
+    "name": "V 1.1 | \ud83d\udcc8 Leveraged S&P 10 Actively Traded | Deez | PROD | Michael B Version | Sorter",
+    "last_semantic_update_at": "2023-11-08"
+  },
+  {
+    "id": "uLqTZ8kPTSlL2XyJNYuS",
+    "name": "Main: Blend: Good Mix (No K-1)",
+    "last_semantic_update_at": "2023-11-15"
+  },
+  {
+    "id": "UKHGdDUhuhvHcgCKYo8M",
+    "name": "Safer WAM?",
+    "last_semantic_update_at": "2023-11-17"
+  },
+  {
+    "id": "cSvq7Kl5dx4BBK2EHbF1",
+    "name": "Safer WAM, voxed windows",
+    "last_semantic_update_at": "2023-11-17"
+  },
+  {
+    "id": "VUj76uxQAvoQb6kFLW2I",
+    "name": "V1a A Better \"Buy the Dips Nasdaq\" by Garen Phillips",
+    "last_semantic_update_at": "2023-11-17"
+  },
+  {
+    "id": "SjDVMmFG8UG9fexIIfb4",
+    "name": "Double Whammy",
+    "last_semantic_update_at": "2023-11-18"
+  },
+  {
+    "id": "UhxPRjDNHmEh9cQ2sUWR",
+    "name": "V1a Hello Algo World! + Cash USDU & XLE",
+    "last_semantic_update_at": "2023-11-18"
+  },
+  {
+    "id": "WfnYcNqOZBAPGscpNuAU",
+    "name": "V1a Wash it - K-1 Free",
+    "last_semantic_update_at": "2023-11-25"
+  },
+  {
+    "id": "mPEwXoPyph4KDiTqIY97",
+    "name": "V1b A Better \"Buy the Dips Nasdaq\" by Garen Phillips",
+    "last_semantic_update_at": "2023-11-29"
+  },
+  {
+    "id": "JeTBzyVllsqMoCPgDcTq",
+    "name": "V1b Simple Sort",
+    "last_semantic_update_at": "2023-11-30"
+  },
+  {
+    "id": "v7SWq67COaI1UGWzCCNp",
+    "name": "FreedomGoat Example",
+    "last_semantic_update_at": "2023-11-30"
+  },
+  {
+    "id": "w3ibE6W0RIr6RaqMnecG",
+    "name": "V1b Simple Sort w/ Dividends",
+    "last_semantic_update_at": "2023-11-30"
+  },
+  {
+    "id": "K8DHpdPBn9ajt4aGXRvb",
+    "name": "V10.5 BWC: Income and Opportunity (2024 Edition)",
+    "last_semantic_update_at": "2023-11-30"
+  },
+  {
+    "id": "iZK4qlgWDzKmSwiFYF5V",
+    "name": "V1b Simple Sort w/ Leverage",
+    "last_semantic_update_at": "2023-12-01"
+  },
+  {
+    "id": "aQPCcl0PlIIp55ZjzN6I",
+    "name": "Simple Sort w/ Leverage",
+    "last_semantic_update_at": "2023-12-01"
+  },
+  {
+    "id": "prpB0SEY7pLh0jTYG3FA",
+    "name": "V1a Simple Sort w/ Leverage",
+    "last_semantic_update_at": "2023-12-01"
+  },
+  {
+    "id": "aFxIkgzESlAxzDXNKHXI",
+    "name": "(T)QQQ/PSQ + V1b A Better \"Buy the Dips Nasdaq\"",
+    "last_semantic_update_at": "2023-12-02"
+  },
+  {
+    "id": "KZz4frIC7lUxeS1Rsyi1",
+    "name": "[Work] [Baller] Long Backtest Switchboard - 602% AR 28.9% DD 4/20/2013",
+    "last_semantic_update_at": "2023-12-03"
+  },
+  {
+    "id": "E9FF8HEgj7O4LmRepaIU",
+    "name": "slowloss5",
+    "last_semantic_update_at": "2023-12-04"
+  },
+  {
+    "id": "2mrBJuLeQBzyrP673efl",
+    "name": "\ud83e\udde6 SOXX RSI Machin, updated from Mr D",
+    "last_semantic_update_at": "2023-12-04"
+  },
+  {
+    "id": "V8hZ1sbdDGRT9Vmofby1",
+    "name": "SS RSI",
+    "last_semantic_update_at": "2023-12-06"
+  },
+  {
+    "id": "ctyGFsvYYsfQgKXVAcBL",
+    "name": "(C) E$[NO K-1 50/50] \u2622\ufe0f V1.11 The Manhattan Project | 50% TQQQ Minimal | 50% Beta Baller + TCCC (856%/30%MDD)",
+    "last_semantic_update_at": "2023-12-07"
+  },
+  {
+    "id": "SjuCvnhHqsj9tOrBg8n0",
+    "name": "TQQQ Moving Averages",
+    "last_semantic_update_at": "2023-12-07"
+  },
+  {
+    "id": "XQSL9Y7ecYxzcz525Tvo",
+    "name": "Just a Goof",
+    "last_semantic_update_at": "2023-12-08"
+  },
+  {
+    "id": "3WVeBPuAlUv2qFzxWJAw",
+    "name": "TQQQ or trends and BIL",
+    "last_semantic_update_at": "2023-12-08"
+  },
+  {
+    "id": "KY6RrR36Z7PsGVb8d0Tc",
+    "name": "Class Warfare",
+    "last_semantic_update_at": "2023-12-08"
+  },
+  {
+    "id": "KIzxfWQ1vH06KVUeEOfa",
+    "name": "Equal Weight NVDA & LLY - No SPXU & SQQQ",
+    "last_semantic_update_at": "2023-12-09"
+  },
+  {
+    "id": "OechVMk4LHnCvLoByFFv",
+    "name": "Equal Weight NVDA & LLY",
+    "last_semantic_update_at": "2023-12-09"
+  },
+  {
+    "id": "Xc7QRMe6sawhO6pKkp7S",
+    "name": "NVDA or V1a Simple Sort",
+    "last_semantic_update_at": "2023-12-09"
+  },
+  {
+    "id": "4nRRutmlzZpacQYQCrXs",
+    "name": "NVDA or SS 40d RSI",
+    "last_semantic_update_at": "2023-12-09"
+  },
+  {
+    "id": "xs2tMR83iZKleF8aaPYO",
+    "name": "NVDA or LLY",
+    "last_semantic_update_at": "2023-12-09"
+  },
+  {
+    "id": "TTxKAhYqRS8kBGBGRgXh",
+    "name": "What More Do You Need? (Even Longer Backtest)",
+    "last_semantic_update_at": "2023-12-11"
+  },
+  {
+    "id": "W4agjJM4tEYLefrDpHeR",
+    "name": "40d RSI Sort Top 2",
+    "last_semantic_update_at": "2023-12-13"
+  },
+  {
+    "id": "6YuuMVqE4bVmWwVfZlpp",
+    "name": "NVDA or 40d RSI Top 2",
+    "last_semantic_update_at": "2023-12-14"
+  },
+  {
+    "id": "Lq31hW0fOU8WuHq5NW9K",
+    "name": "NVDY or Yieldmax 40d RSI Sort Top 2",
+    "last_semantic_update_at": "2023-12-14"
+  },
+  {
+    "id": "nkcmS1MPaZK6XXS5S4Tf",
+    "name": "Way Too Long Backtest Switchboard",
+    "last_semantic_update_at": "2023-12-17"
+  },
+  {
+    "id": "RDt8zoMcGOofevzWqilX",
+    "name": "Extra Levered Way Too Long Backtest Switchboard",
+    "last_semantic_update_at": "2023-12-17"
+  },
+  {
+    "id": "YmZQAOV5aJGFiqRn6het",
+    "name": "Wash Sale Edition: BULZ or BERZ or BIL (from TQQQ or Not)",
+    "last_semantic_update_at": "2023-12-17"
+  },
+  {
+    "id": "J8jwfm7wKZ6FiNS2Sgww",
+    "name": "Simplified Extra Levered Way Too Long Backtest Switchboard - K-1 Free",
+    "last_semantic_update_at": "2023-12-17"
+  },
+  {
+    "id": "10gAZFrWUyt0yKglAD6O",
+    "name": "Monthly MAR SS",
+    "last_semantic_update_at": "2023-12-18"
+  },
+  {
+    "id": "o2CEBZVH85jH58xOVwVS",
+    "name": "3x Melting Pot",
+    "last_semantic_update_at": "2023-12-19"
+  },
+  {
+    "id": "whVtfj0t89cXG5crb3zp",
+    "name": "Weekly Simplified Holiday Competition",
+    "last_semantic_update_at": "2023-12-20"
+  },
+  {
+    "id": "0AdUm3Y6eHrvEKYuvbKF",
+    "name": "Short Volatility",
+    "last_semantic_update_at": "2023-12-20"
+  },
+  {
+    "id": "PecT9QlpQRKOdTj4C0OD",
+    "name": "V4.1 | SPY 3X Leveraged or Whatever",
+    "last_semantic_update_at": "2023-12-21"
+  },
+  {
+    "id": "YVh1Ful7RSKpbtSzGPRq",
+    "name": "Holiday Competition by Perfekt",
+    "last_semantic_update_at": "2023-12-21"
+  },
+  {
+    "id": "uI3vFU6cLYnVjjo7Gc44",
+    "name": "Excellent Adventures (no NVDA)",
+    "last_semantic_update_at": "2023-12-22"
+  },
+  {
+    "id": "0Aj9HRgodIFOZpIPEql0",
+    "name": "Excellent Adventures (with NVDA)",
+    "last_semantic_update_at": "2023-12-22"
+  },
+  {
+    "id": "2C04GAbK6XeIgZQBdnwx",
+    "name": "V1a Weekly Simplified Holiday Competition",
+    "last_semantic_update_at": "2023-12-23"
+  },
+  {
+    "id": "Axn4Hpn53ge83vn52zZo",
+    "name": "V1a Yieldmax Weekly Simplified Holiday Competition",
+    "last_semantic_update_at": "2023-12-23"
+  },
+  {
+    "id": "BofaejciRKULvDWpHqVo",
+    "name": "V1b Weekly Simplified Holiday Competition",
+    "last_semantic_update_at": "2023-12-23"
+  },
+  {
+    "id": "Q7hAQDhQVOicfnjHYvrj",
+    "name": "V1b Direxion Weekly Simplified Holiday Competition",
+    "last_semantic_update_at": "2023-12-23"
+  },
+  {
+    "id": "GRMnhsIixOaBCR1H2dS9",
+    "name": "TQQQ Dynamic",
+    "last_semantic_update_at": "2023-12-24"
+  },
+  {
+    "id": "s8QhlyRG3FXPxynri5Lk",
+    "name": "V1c Weekly Simplified Holiday Competition",
+    "last_semantic_update_at": "2023-12-24"
+  },
+  {
+    "id": "NcVRc1AlKgwcJAvFZXaq",
+    "name": "Excellent Adventures - Wash Sale Edition",
+    "last_semantic_update_at": "2023-12-24"
+  },
+  {
+    "id": "4VnnKhqFYKZwKmqoWTHx",
+    "name": "v20111013 V1 | Love SOXL, SVXY Jedi | Trades Weekly | HTX",
+    "last_semantic_update_at": "2023-12-26"
+  },
+  {
+    "id": "LKpwvyC5AMt7VQKH5FX0",
+    "name": "The Four Horsemen of the Apocalypse | Lex Luger Remix",
+    "last_semantic_update_at": "2023-12-27"
+  },
+  {
+    "id": "roCf4X5ipg8FmO6X1oNz",
+    "name": "V4 Balanced Alpha 3x Leverage",
+    "last_semantic_update_at": "2023-12-27"
+  },
+  {
+    "id": "Q2EJAIBghCzvF94TnjKZ",
+    "name": "[COMPLEX] Blend: V4 & V5 CFS + BBD, BHFEAR | BIL + v4 Pops - K-1 Free - Longer Backtest",
+    "last_semantic_update_at": "2024-01-02"
+  },
+  {
+    "id": "cYfOT0QRiDcseduq8kP2",
+    "name": "WAMmer Time | Strychnine",
+    "last_semantic_update_at": "2024-01-03"
+  },
+  {
+    "id": "mbZA3iA7GA0BwqPKboNd",
+    "name": "WAM | Dynamic Sort | Public",
+    "last_semantic_update_at": "2024-01-03"
+  },
+  {
+    "id": "qGfnh2FvzcPBfQD40MxA",
+    "name": "Funny",
+    "last_semantic_update_at": "2024-01-04"
+  },
+  {
+    "id": "ZYORUTlG2EixOR4qHHXA",
+    "name": "Funnier",
+    "last_semantic_update_at": "2024-01-04"
+  },
+  {
+    "id": "KUJlmGGYjg9WquPWh1k7",
+    "name": "V2 BWC: Emerging Markets (EEM)",
+    "last_semantic_update_at": "2024-01-04"
+  },
+  {
+    "id": "jKE01T3GqLpXduJ4ZKKN",
+    "name": "14D RSI SPY QQQ BITO leveraged short and long",
+    "last_semantic_update_at": "2024-01-07"
+  },
+  {
     "id": "o29Qg1pv9naYVT5CIaRF",
     "name": "Growth Blend v2.2 RL",
     "last_semantic_update_at": "2024-01-08"
+  },
+  {
+    "id": "y5O9atLdolI0LnYlE1PQ",
+    "name": "Modified Foreign Rat",
+    "last_semantic_update_at": "2024-01-09"
+  },
+  {
+    "id": "0HCtnEKGw1PRt8Om77a3",
+    "name": "10d BND vs. 10d SPHB",
+    "last_semantic_update_at": "2024-01-11"
+  },
+  {
+    "id": "Wh9Es8xGVZN4GnshkRnM",
+    "name": "CounterBalancer - LowMed R/R LBT",
+    "last_semantic_update_at": "2024-01-13"
+  },
+  {
+    "id": "yftwrXeO8CeJnSZlyXIO",
+    "name": "TQQQ or not |  Xtreme Degen",
+    "last_semantic_update_at": "2024-01-14"
+  },
+  {
+    "id": "zQ717QPRHWv8oGu9k2UG",
+    "name": "SOXL Scale-In Test",
+    "last_semantic_update_at": "2024-01-15"
+  },
+  {
+    "id": "vQPSeixLmx3MJswIdLdC",
+    "name": "(C) BTC Ribbon & BIOWRECKED| Bitcoin | Garen (257%/30MDD) 2021)",
+    "last_semantic_update_at": "2024-01-16"
+  },
+  {
+    "id": "JlrgUhbrK0DUptAdO1v1",
+    "name": "5/20 BTC Ribbon & BIOWRECKED| Bitcoin | Garen",
+    "last_semantic_update_at": "2024-01-16"
+  },
+  {
+    "id": "AU4yi3yPtuTUuN1AYPOH",
+    "name": "Foreign Rat FTLT Dynamic Sort",
+    "last_semantic_update_at": "2024-01-16"
+  },
+  {
+    "id": "9kId9b3B7E11SshADPMS",
+    "name": "WAMmer Time",
+    "last_semantic_update_at": "2024-01-17"
+  },
+  {
+    "id": "GernzxPYAetDaIfPPUi0",
+    "name": "10d RSI < 31",
+    "last_semantic_update_at": "2024-01-17"
+  },
+  {
+    "id": "t7LXXFIcLftD7WBYUqjB",
+    "name": "10d IEF vs 20d PSQ",
+    "last_semantic_update_at": "2024-01-17"
+  },
+  {
+    "id": "PRacWNofG726EsH6svUw",
+    "name": "Safe D/R",
+    "last_semantic_update_at": "2024-01-17"
+  },
+  {
+    "id": "5KjLnxT5Rwy75OsMW1IA",
+    "name": "Serious Business LBT",
+    "last_semantic_update_at": "2024-01-18"
+  },
+  {
+    "id": "DTd4KdYlHpXdQtG1KDQV",
+    "name": "Rate Momentum LABless",
+    "last_semantic_update_at": "2024-01-19"
+  },
+  {
+    "id": "LZOzW78YtjssJUmxLwR9",
+    "name": "Walt's Anti-YOLO Fornication Drill",
+    "last_semantic_update_at": "2024-01-20"
+  },
+  {
+    "id": "bmKKnEFG4s7oczb8bMEW",
+    "name": "Serious Business",
+    "last_semantic_update_at": "2024-01-21"
+  },
+  {
+    "id": "yJw5iixqyLyzQ4LOkFkW",
+    "name": "V1 BWC: 60D RSI <> 50",
+    "last_semantic_update_at": "2024-01-24"
+  },
+  {
+    "id": "u7XYAQXpQ8Jo47igM8KX",
+    "name": "V2  BWC: Medium Time Frame Switches ",
+    "last_semantic_update_at": "2024-01-24"
+  },
+  {
+    "id": "dR3Wv8pYkuCFKMeoBLw2",
+    "name": "The Classics",
+    "last_semantic_update_at": "2024-01-28"
+  },
+  {
+    "id": "bhVbODXRiuiGf4lpOIjy",
+    "name": "V1.1 | What More Do You Need? (Even Longer Backtest) | HTX mod",
+    "last_semantic_update_at": "2024-01-28"
+  },
+  {
+    "id": "3kH0u4lQpKOfHEM0QcHc",
+    "name": "Daily ETF Rebalancer",
+    "last_semantic_update_at": "2024-01-28"
+  },
+  {
+    "id": "C4WMkPInz49UuVnKL0rE",
+    "name": "RINF Test",
+    "last_semantic_update_at": "2024-01-29"
+  },
+  {
+    "id": "6nPoe5b6KND1zdM19vtc",
+    "name": "RINF Test 2",
+    "last_semantic_update_at": "2024-01-30"
+  },
+  {
+    "id": "bUFi3Kx6pXwQMkOO8CXk",
+    "name": "Steph combo 1",
+    "last_semantic_update_at": "2024-01-30"
+  },
+  {
+    "id": "uOoE7RjVQza2vohCBvZw",
+    "name": "SM Switchboard v1.2 (2012 Backtest)",
+    "last_semantic_update_at": "2024-02-03"
+  },
+  {
+    "id": "hE3gOH6KLe5eO4JfKsET",
+    "name": "The Five Horsemen of the Apocalypse | Switchboard Remix (DerekN/JKoz/Whsmacon/Anansi) | PWN",
+    "last_semantic_update_at": "2024-02-08"
+  },
+  {
+    "id": "6Gnr8nnjDUlwb8ml7r58",
+    "name": "Interstellar | Crypto | ETH",
+    "last_semantic_update_at": "2024-02-15"
+  },
+  {
+    "id": "wsCOGKXEckd1OO8utNs6",
+    "name": "TMF Momentum",
+    "last_semantic_update_at": "2024-02-15"
+  },
+  {
+    "id": "tSMxup5wf7j2YWsZT8VA",
+    "name": "Interstellar | Crypto | BTC (3.86)",
+    "last_semantic_update_at": "2024-02-15"
+  },
+  {
+    "id": "TiJJ3pxluMovF6xWE7PH",
+    "name": "AaronC - Digital Gold Rush",
+    "last_semantic_update_at": "2024-02-16"
+  },
+  {
+    "id": "ZGw9QBumJu68DkjzEx9B",
+    "name": "Gang Bang",
+    "last_semantic_update_at": "2024-02-17"
+  },
+  {
+    "id": "O4BEWvMj7Zzbedwoq0ci",
+    "name": "BottleRocket V1",
+    "last_semantic_update_at": "2024-02-22"
+  },
+  {
+    "id": "lpcU31i12EhDiwFKwnP5",
+    "name": "WAM with less shit tickers",
+    "last_semantic_update_at": "2024-02-27"
+  },
+  {
+    "id": "pD0yMALVhlVfRcIcMkkq",
+    "name": "AI & Digital Currency Revolution",
+    "last_semantic_update_at": "2024-03-01"
+  },
+  {
+    "id": "xFvLzc9pvGReRQzQWDTi",
+    "name": "BEs Popped Monthly Dividends",
+    "last_semantic_update_at": "2024-03-04"
+  },
+  {
+    "id": "WFPRjVxtJTr4TIe5oDZQ",
+    "name": "TQQQ For The Long Term (Reddit Post Link) | Replaced UVXY with BIL | Pietros Maneos |",
+    "last_semantic_update_at": "2024-03-04"
+  },
+  {
+    "id": "OGZlqyju4WyVngWinLSS",
+    "name": "i3 - VIXn' SHY DDBs",
+    "last_semantic_update_at": "2024-03-04"
+  },
+  {
+    "id": "hrOhrq5vnOGoCnJsDNJ4",
+    "name": "Cactus 3.6 [CMP] (K-1 Free)",
+    "last_semantic_update_at": "2024-03-09"
+  },
+  {
+    "id": "AhG0bnegllkgqTifAPIe",
+    "name": "20d BND vs 20d SPHB",
+    "last_semantic_update_at": "2024-03-12"
+  },
+  {
+    "id": "oYl8FsMr6BjFgzbUjKoN",
+    "name": "TQQQ FTLT | Full Package | Diceroll Group | Shorter Backtest v2 [FTL]",
+    "last_semantic_update_at": "2024-03-13"
+  },
+  {
+    "id": "z6vBrywI0VBKAXgwJT81",
+    "name": "Which Way Is Up? Trading 1.3",
+    "last_semantic_update_at": "2024-03-13"
+  },
+  {
+    "id": "U2Vemqz7PJqzA39uX9Lo",
+    "name": "BIORECKED | Anansi Mods | 2015-05-28",
+    "last_semantic_update_at": "2024-03-15"
+  },
+  {
+    "id": "Pn1oIoTVuiT42YQ4RCIg",
+    "name": "KMLM Switcher in Not Today Satan Framework (w/ Pops)| BT 4/13/22 = AR 323% / StdDev 46.3 /DD 15.3% ",
+    "last_semantic_update_at": "2024-03-18"
+  },
+  {
+    "id": "maPrBFWMCfL65ntQZ21E",
+    "name": "V2 TQQQ or not | + Dash of SQQQ w/ V1a Simple Portfolio Remixed w/ Top Cap by MA (571% AR - BT 2017-05-05)",
+    "last_semantic_update_at": "2024-03-18"
+  },
+  {
+    "id": "sx7gRrNjJxpLaZxKs2yb",
+    "name": "A Better \"Buy the Dips Nasdaq\" by Garen Phillips",
+    "last_semantic_update_at": "2024-03-18"
+  },
+  {
+    "id": "dxwhPEPi7x3lqLSTOMIk",
+    "name": "V2.1 Holy Grail w/RSI Divination - without VIXen [CMP mod 2] (backtest version)",
+    "last_semantic_update_at": "2024-03-21"
+  },
+  {
+    "id": "ktIPSqri34kqfvDWkxvu",
+    "name": "TQQQ FTLT V2 | Anansi Bull Mods",
+    "last_semantic_update_at": "2024-03-25"
+  },
+  {
+    "id": "2LOWjgz3Iy4v2XGo6Z1u",
+    "name": "UPRO FTLT",
+    "last_semantic_update_at": "2024-03-27"
+  },
+  {
+    "id": "qwi5aIhyK7mR08Ulu0el",
+    "name": "-Battle Drill 1A- (W/ WMT)",
+    "last_semantic_update_at": "2024-04-02"
+  },
+  {
+    "id": "cID5Z5GRxwtOaZa7ylV9",
+    "name": "v 0.0.2 |\ud83e\uddeaCombo Breaker",
+    "last_semantic_update_at": "2024-04-02"
+  },
+  {
+    "id": "VXzzDUsVe32flE92IlMv",
+    "name": "Backtest: Four Corners | OverSimplified 3x | SHARED",
+    "last_semantic_update_at": "2024-04-08"
+  },
+  {
+    "id": "WDQzBV4Mse7Zypxk4LtC",
+    "name": "TQQQ For The Long Term Original",
+    "last_semantic_update_at": "2024-04-12"
+  },
+  {
+    "id": "xKW00GvKkbrCvAySH6Wv",
+    "name": "IFF Fund: Squeeze the TQQQ out",
+    "last_semantic_update_at": "2024-04-18"
+  },
+  {
+    "id": "OUawoAlxZcI8EInmVYYZ",
+    "name": "JJ's Canary Leverage, Lit | HTX mod | No K-1",
+    "last_semantic_update_at": "2024-04-19"
+  },
+  {
+    "id": "8bDlJq96Agbh4JxeGD3c",
+    "name": "Pick Your Poison",
+    "last_semantic_update_at": "2024-04-24"
+  },
+  {
+    "id": "0Eo6uUwHt0PBVzHs1cbA",
+    "name": "Blue Chip or Not (9/1/2017)",
+    "last_semantic_update_at": "2024-04-29"
+  },
+  {
+    "id": "Ld9M9C8Ny1ZqJ53XdptL",
+    "name": "COST + UNH or Not",
+    "last_semantic_update_at": "2024-04-29"
+  },
+  {
+    "id": "ObXR8dVzzO92UGmNmO4F",
+    "name": "DeETF FTLT | 2013-01-09",
+    "last_semantic_update_at": "2024-04-30"
+  },
+  {
+    "id": "lqceelxzw0jOtpV6pL9A",
+    "name": "Just Run This FTLT DIA",
+    "last_semantic_update_at": "2024-04-30"
+  },
+  {
+    "id": "GECO7k1mMCnhCbNsXuQo",
+    "name": "$RB V1.3 | Fund Surfing | Michael B | double pop bots | 01-29-11 | VXX edition | SHARED",
+    "last_semantic_update_at": "2024-05-02"
+  },
+  {
+    "id": "U2LQ9TWCGYZGwxt1quFz",
+    "name": "BEAST MODE v3 - v1.3 Fund Surfing plus TQQQ or Not - Non-Degen Gambler Variant | SHARED",
+    "last_semantic_update_at": "2024-05-02"
+  },
+  {
+    "id": "T7Sq8f7LzAmyQYUpB6GV",
+    "name": "Elon's Excellent Adventure",
+    "last_semantic_update_at": "2024-05-06"
+  },
+  {
+    "id": "QWAQYt2XuC9xL6DFbilS",
+    "name": "TQQQ 20d SMA",
+    "last_semantic_update_at": "2024-05-07"
+  },
+  {
+    "id": "LnWvq7ezc8lmqsxYXQIg",
+    "name": "Tim Cook's Excellent Adventure",
+    "last_semantic_update_at": "2024-05-09"
+  },
+  {
+    "id": "MUp6JcQG4fRpXpoH4vmF",
+    "name": "2007 FTLT",
+    "last_semantic_update_at": "2024-05-10"
+  },
+  {
+    "id": "p6z1lHAXr8rTOim4oOfO",
+    "name": "QLD FTLT + Ballast | 2007-01-11",
+    "last_semantic_update_at": "2024-05-10"
+  },
+  {
+    "id": "itao2p3LBx15TQt5FTAy",
+    "name": "GME rally rider",
+    "last_semantic_update_at": "2024-05-14"
+  },
+  {
+    "id": "GGPk3968hx0J85zL1NJv",
+    "name": "TQQQ or Not & TQQQ FTLT Loops [FTL Share]",
+    "last_semantic_update_at": "2024-05-16"
+  },
+  {
+    "id": "jZuND8yVmYAWacdn4vBR",
+    "name": "Holy Grail Revamped | Anansi",
+    "last_semantic_update_at": "2024-05-16"
+  },
+  {
+    "id": "9fF2WR5z4OlljLfAEHwA",
+    "name": "Inverse volatilty",
+    "last_semantic_update_at": "2024-05-25"
+  },
+  {
+    "id": "D9oE44Y87boHDOYQ9rPm",
+    "name": "SVIX/XXXX KMLM switcher (single pops)| BT 12/19/23 = 786/10.5",
+    "last_semantic_update_at": "2024-05-29"
+  },
+  {
+    "id": "VZF7Tquv9qDVDe1LxqPU",
+    "name": "Sometimes I like XXXX",
+    "last_semantic_update_at": "2024-05-29"
+  },
+  {
+    "id": "0MEtMOUZJHlt2wk9qTQ0",
+    "name": " Holy Grail simplified with X",
+    "last_semantic_update_at": "2024-05-29"
+  },
+  {
+    "id": "Z8yB2V4UI8g60rSKXagt",
+    "name": "Pizza - TQQQ For The Long Term (Reddit Post Link), replace TQQQ/UPRO w/ XXXX",
+    "last_semantic_update_at": "2024-05-29"
+  },
+  {
+    "id": "rF70KeRzvRPBXBdmdCC6",
+    "name": "Modified Foreign Rat (why does this work?!)",
+    "last_semantic_update_at": "2024-06-03"
+  },
+  {
+    "id": "GuYbyiO3NmmJbOkIJ4fy",
+    "name": "Jeff's Excellent Adventure",
+    "last_semantic_update_at": "2024-06-05"
+  },
+  {
+    "id": "Pvl0fM0VdRQCRUflXMPf",
+    "name": "Sometimes TQQQ v2, Sometimes Managed Futures",
+    "last_semantic_update_at": "2024-06-06"
+  },
+  {
+    "id": "X899sjzfCIGugL5r1f6n",
+    "name": "Sometimes NVDU V3",
+    "last_semantic_update_at": "2024-06-08"
+  },
+  {
+    "id": "DLkcFcZS8jLOy1MXoeMh",
+    "name": "Simple Tech Heavy Beta Baller V1a",
+    "last_semantic_update_at": "2024-06-09"
+  },
+  {
+    "id": "ArMJczSeFb5scRMhVa93",
+    "name": "LAB Rat FTLT",
+    "last_semantic_update_at": "2024-06-10"
+  },
+  {
+    "id": "lDvstqbsOvYwB0vB53xg",
+    "name": "Keynes' Algo (TQQQ FTLT v4)",
+    "last_semantic_update_at": "2024-06-11"
+  },
+  {
+    "id": "53m9ieFT6WfrACKJjRdI",
+    "name": "Squid Games s2.1 prerelease",
+    "last_semantic_update_at": "2024-06-15"
+  },
+  {
+    "id": "6ZTNzEUcm5Ekn53NjFqo",
+    "name": "Simple Logic \u03b1 Collection",
+    "last_semantic_update_at": "2024-06-16"
+  },
+  {
+    "id": "8rvYjVqNQe9oZJc4zwKS",
+    "name": "UVXY & TQQQ",
+    "last_semantic_update_at": "2024-06-17"
+  },
+  {
+    "id": "CaWAEpio51gHJc55vJmc",
+    "name": "Infinite RSI! - QQQ",
+    "last_semantic_update_at": "2024-06-18"
+  },
+  {
+    "id": "e7q0lspF716Sx0F9kFTo",
+    "name": "DIAmond Hands",
+    "last_semantic_update_at": "2024-06-18"
+  },
+  {
+    "id": "hhDRJKVX45Lf7Y29XsiB",
+    "name": "Infinite RSI | QQQ",
+    "last_semantic_update_at": "2024-06-18"
+  },
+  {
+    "id": "vRRgNxcHbCd9vrEJ0JtR",
+    "name": "Market Games",
+    "last_semantic_update_at": "2024-06-18"
+  },
+  {
+    "id": "34wOyJ03lKGsgmTpFmpO",
+    "name": "Infinite RSI! 1.1",
+    "last_semantic_update_at": "2024-06-18"
+  },
+  {
+    "id": "euFWBGXyAaAb5Eh2EC3d",
+    "name": "Infinite RSI! - QQQ | Slim(mer) | WAM Bear",
+    "last_semantic_update_at": "2024-06-18"
+  },
+  {
+    "id": "inU6mkxn6iLCgMDx4OQQ",
+    "name": "uvxy frontrunner experiment",
+    "last_semantic_update_at": "2024-06-23"
+  },
+  {
+    "id": "5KP5Hwb83aV9dvef4bqn",
+    "name": "Catch them all 1.0.0",
+    "last_semantic_update_at": "2024-06-24"
+  },
+  {
+    "id": "MyRyWhvbdxTsRfzHmE1U",
+    "name": "Sometimes TQQQ v2",
+    "last_semantic_update_at": "2024-06-26"
+  },
+  {
+    "id": "cObgRstY5CqM4DiWRlik",
+    "name": "[Do not sell; let it grow] [Volatile Strategy] [Well Trusted]  V9a -- Alpha build -- Thinh Nguyen",
+    "last_semantic_update_at": "2024-07-01"
+  },
+  {
+    "id": "siH6WUixEl6EmVqdT2tB",
+    "name": "SAF 0.0.0.1",
+    "last_semantic_update_at": "2024-07-01"
+  },
+  {
+    "id": "fVG9nidZVDe2FsjuygaB",
+    "name": "Pressure 0.0.0.1",
+    "last_semantic_update_at": "2024-07-03"
+  },
+  {
+    "id": "QXi6BCP3C0FoaH2hbYRK",
+    "name": "TQQQ For The Long Term V2 (226.7% RR/46.1% Max DD) + The Holy Grail",
+    "last_semantic_update_at": "2024-07-04"
+  },
+  {
+    "id": "B6HNcZ62uNejjedhFoGq",
+    "name": "[Simple but Good] [use SPYU 4x]",
+    "last_semantic_update_at": "2024-07-07"
+  },
+  {
+    "id": "kpP7aCtpnEk2v4l29ppI",
+    "name": "Step by step 0.0.0.8",
+    "last_semantic_update_at": "2024-07-07"
+  },
+  {
+    "id": "DSz6iSkqtM4WwlNDvG5y",
+    "name": "Step by step 0.0.0.7 (SOXL)",
+    "last_semantic_update_at": "2024-07-07"
+  },
+  {
+    "id": "Eltgzw61ok13MXL3HOpw",
+    "name": "It is what it is 0.0.0.3",
+    "last_semantic_update_at": "2024-07-08"
+  },
+  {
+    "id": "8wLyn8hlFC9u1tJMDmDS",
+    "name": "What is overfit? 0.0.0.1",
+    "last_semantic_update_at": "2024-07-08"
+  },
+  {
+    "id": "pdLBvJpEBpLwxuJz4y0K",
+    "name": "It is what it is 0.0.0.2 - Including UVXY",
+    "last_semantic_update_at": "2024-07-08"
+  },
+  {
+    "id": "A0fqDF8HX7laSwq5KXFW",
+    "name": "(*) 0.0.0.2 - Including UVXY",
+    "last_semantic_update_at": "2024-07-08"
+  },
+  {
+    "id": "2bS6yKqZMlNqzxW7ekLx",
+    "name": "(SPECULATIVE:MARKET) Fun n Games til Someone Gets TQQQ'd  | 12.13.2022 - Simplified",
+    "last_semantic_update_at": "2024-07-08"
+  },
+  {
+    "id": "nN2m5HY2SCsL5PBCupcp",
+    "name": "TQQQ or not/Pop + Volatility checks",
+    "last_semantic_update_at": "2024-07-08"
+  },
+  {
+    "id": "R15SrJRxN8BVtWnCbDky",
+    "name": "Word is Bond + Pure Black Swan Catcher WM 74 (TQQQ FTLT instead of SOXL, TQQQ, TECL, SVXY)",
+    "last_semantic_update_at": "2024-07-08"
+  },
+  {
+    "id": "P6l4bgfYrBgYBM1mbL0m",
+    "name": "Longer Backtest Version of  [\u26a1\ufe0f\ud83c\udf36] \ud835\udcd5\ud835\udcf2\ud835\udcfb\ud835\udcee\ud835\udcec\ud835\udcfb\ud835\udcea\ud835\udcec\ud835\udcf4\ud835\udcee\ud835\udcfb by \ud835\udca2\ud835\udc5c\ud835\udcb7\ud835\udcbe",
+    "last_semantic_update_at": "2024-07-14"
+  },
+  {
+    "id": "AuEGRWc9VMH05l0q4Ysq",
+    "name": "NOVA | Long John Bond ETFifier | Anansi Mods v1.5",
+    "last_semantic_update_at": "2024-07-16"
+  },
+  {
+    "id": "CXF0en0Sp3YKmSke0lc1",
+    "name": "OG Simple 20d BND vs 60d SH | SPXL & VXX edition (no k1) | shared",
+    "last_semantic_update_at": "2024-07-16"
+  },
+  {
+    "id": "nw8zXgbHUDKIt8aZqC5w",
+    "name": "$DS TQQQ for the long run combo pack + VIXn' + BrianE's 4TLT l 3+1 group | VXX edition | SHARED",
+    "last_semantic_update_at": "2024-07-17"
+  },
+  {
+    "id": "bVxdloWpUp9cDHuKgKKl",
+    "name": "$RB Simple 20d BND vs 60d SH | VXX edition (no k1)",
+    "last_semantic_update_at": "2024-07-17"
+  },
+  {
+    "id": "wf7cb0OcftUsSJ9hqVwW",
+    "name": "Simons KMLM switcher (single pops)| BT 4/13/22 = A.R. 466% / D.D. 22%",
+    "last_semantic_update_at": "2024-07-18"
+  },
+  {
+    "id": "b3zovGUxvH1yWK06ufOz",
+    "name": "Simons Holy Grail Revamped | Anansi V2 - Simplified",
+    "last_semantic_update_at": "2024-07-20"
+  },
+  {
+    "id": "unOGZuW874ObWbqJrGI4",
+    "name": "Simons Holy Grail Revamped | Anansi V5 - Simplified",
+    "last_semantic_update_at": "2024-07-21"
   },
   {
     "id": "u5iBJE751BM5FKPRJvKf",
@@ -1510,9 +4410,894 @@
     "last_semantic_update_at": "2024-07-22"
   },
   {
+    "id": "syMn9OgFREE0wo8LtYsG",
+    "name": "KMLM Switcher of Simon97 - Original",
+    "last_semantic_update_at": "2024-07-22"
+  },
+  {
+    "id": "7Y0T7Qb3Pue58d2tPodi",
+    "name": "KMLM sorter V3 - (Longer BT, STD instead of CR)",
+    "last_semantic_update_at": "2024-07-22"
+  },
+  {
+    "id": "UhBqk1eYFgp9gdg8hLFk",
+    "name": "KMLM sorter V4 - Added back nerfed Nova version",
+    "last_semantic_update_at": "2024-07-22"
+  },
+  {
+    "id": "560tUXpS7I83yTX4Zwua",
+    "name": "Sometimes TQQQ v2 (zoop's No K-1 Edit)",
+    "last_semantic_update_at": "2024-07-22"
+  },
+  {
+    "id": "Y3mkk9vkrvPb1FaMdv3f",
+    "name": "Simons KMLM sorter",
+    "last_semantic_update_at": "2024-07-22"
+  },
+  {
+    "id": "DnxKTmGNORXbzXF3uJD4",
+    "name": "[5%] V.1.4|Dippy Qutie \ud83c\udf52|Garen,Pietros,EricS|06-01-2022",
+    "last_semantic_update_at": "2024-07-27"
+  },
+  {
+    "id": "3BpHJiEYkwXZyZzuMSn5",
+    "name": "Diversified Grail",
+    "last_semantic_update_at": "2024-07-28"
+  },
+  {
+    "id": "0xTJHJpCbG6xVpCuYiOU",
+    "name": "Just Run This FTLT (All Markets) | WHS Scale-In",
+    "last_semantic_update_at": "2024-07-30"
+  },
+  {
+    "id": "e4xsvBSfRkg5GReVVAdK",
+    "name": "Simons TQQQ FTLT (Reddit) (+ Mean reversions mods)",
+    "last_semantic_update_at": "2024-07-30"
+  },
+  {
+    "id": "lSeRcENgfDaexjIq77rZ",
+    "name": "Self-Replicating Bootstraps",
+    "last_semantic_update_at": "2024-07-31"
+  },
+  {
+    "id": "swImGXqo3m4gm2QsxH6D",
+    "name": "S10 Hedged Sector Rotator ",
+    "last_semantic_update_at": "2024-08-03"
+  },
+  {
+    "id": "chkrQ6BnXCw31n7OIEaK",
+    "name": "Hedged Sector Rotator ",
+    "last_semantic_update_at": "2024-08-03"
+  },
+  {
+    "id": "XUIVUB6On4klEjJOpE8h",
+    "name": "Vox'es TQQQ For The Long Term",
+    "last_semantic_update_at": "2024-08-03"
+  },
+  {
+    "id": "UpRaSC2n3zC5CRrlNER9",
+    "name": "(C - F) TECL KMLM switcher (single pops) MonkeyBusiness  WM74| (976/29%MDD) 72%STDev",
+    "last_semantic_update_at": "2024-08-04"
+  },
+  {
+    "id": "KWKTMMoeR5Wkn4t9wTLw",
+    "name": "Degen Version VIXM vs. SVXY | AaronC",
+    "last_semantic_update_at": "2024-08-04"
+  },
+  {
+    "id": "9BFSveMMeHb6iVr5Vk8f",
+    "name": "Jason's Overcompensating Safety Checks for TQQQs | Happier Wife Version (public)",
+    "last_semantic_update_at": "2024-08-07"
+  },
+  {
+    "id": "eHzBEBsSZKth5nbXL14Q",
+    "name": "Simons Jason's Overcompensating Safety Checks for TQQQs | Happier Wife Version (public)",
+    "last_semantic_update_at": "2024-08-08"
+  },
+  {
+    "id": "lwfDbc5z6rhchVaSd6oc",
+    "name": "Simons QQQ Dump Catcher + TQQQ FTLT Reddit",
+    "last_semantic_update_at": "2024-08-08"
+  },
+  {
+    "id": "DBjSH3cAA9KHfZv25JjU",
+    "name": "FTL Starburst | Interstellar Mods",
+    "last_semantic_update_at": "2024-08-10"
+  },
+  {
+    "id": "aYV0d5tEVcwT8lrdJknr",
+    "name": "C25.1 APM Version of Hedged Sector using BIL                 Rotator ",
+    "last_semantic_update_at": "2024-08-11"
+  },
+  {
+    "id": "V8PMHSkT4yH87TLz2B7K",
+    "name": "TQQQ FTLT with a bit of SOXL and \ud83e\udde6",
+    "last_semantic_update_at": "2024-08-13"
+  },
+  {
+    "id": "0F7wg93H1ifm72eezTLd",
+    "name": "Simons KMLM Switcher | SimplyGreen | RSI Buy/Sell V2",
+    "last_semantic_update_at": "2024-08-15"
+  },
+  {
+    "id": "fcNH2fzN9ZhlJ5ydYXpG",
+    "name": "TQQQ FTLT using KMLM before going full leverage V2",
+    "last_semantic_update_at": "2024-08-15"
+  },
+  {
+    "id": "R1anFlGFpNXTl4bNX1Vn",
+    "name": "TQQQ FTLT using KMLM for confirmation before going full leverage",
+    "last_semantic_update_at": "2024-08-15"
+  },
+  {
+    "id": "chRlxr0jnXnFDo91fQIU",
+    "name": "SMH, XLK, 5D Max DD > 15",
+    "last_semantic_update_at": "2024-08-15"
+  },
+  {
+    "id": "ARLmy68NLpKVsyIrBoaQ",
+    "name": "Long term (tested to end 2008) risk on risk off algo - basic etfs",
+    "last_semantic_update_at": "2024-08-15"
+  },
+  {
+    "id": "pHlW3OOSiWz67uw4fjeM",
+    "name": "XLK > KLML",
+    "last_semantic_update_at": "2024-08-15"
+  },
+  {
+    "id": "wX8ib04CpNQPtqHnT1AG",
+    "name": "KMLM | Technology",
+    "last_semantic_update_at": "2024-08-16"
+  },
+  {
+    "id": "6pCyUpIW4HYjOvTRajvo",
+    "name": "Simon's KMLM Full Build (zoop's No K-1 Edit)",
+    "last_semantic_update_at": "2024-08-17"
+  },
+  {
+    "id": "dsX6UM7P2YDMbccLoCDY",
+    "name": "Simons KMLM FULL BUILD",
+    "last_semantic_update_at": "2024-08-17"
+  },
+  {
+    "id": "8jzVyBoxa2J7J0cmYoDk",
+    "name": "Simons KMLM FULL BUILD",
+    "last_semantic_update_at": "2024-08-17"
+  },
+  {
+    "id": "eaS1yCP0pG7Myb3W9pqe",
+    "name": "Sometimes TQQQ v2 (Public)",
+    "last_semantic_update_at": "2024-08-17"
+  },
+  {
+    "id": "T00ZsVNXiBeOYNt8z1oA",
+    "name": "Sometimes TQQQ (Public)",
+    "last_semantic_update_at": "2024-08-17"
+  },
+  {
+    "id": "7HIosMN446sOtfEIPsjZ",
+    "name": "YYPT | TQQQ FTLT (Reddit Post Link) (Simplified)",
+    "last_semantic_update_at": "2024-08-17"
+  },
+  {
+    "id": "Ydf86sP1m80vbq3Q7ZEW",
+    "name": "Simple 20d BND vs 60d SH (Public)",
+    "last_semantic_update_at": "2024-08-17"
+  },
+  {
+    "id": "WK1ec0T1PjEe8Ohz785B",
+    "name": "KMLM with LETFs in the condition",
+    "last_semantic_update_at": "2024-08-17"
+  },
+  {
+    "id": "V8R67DproyRlr28j9cgQ",
+    "name": "EM",
+    "last_semantic_update_at": "2024-08-18"
+  },
+  {
+    "id": "mVaKtvqkEICyZv3eaW9d",
+    "name": "KMLM Test",
+    "last_semantic_update_at": "2024-08-19"
+  },
+  {
+    "id": "V17A7zzi51Kk064JKsId",
+    "name": "911-KMLM switcher-HR (P 4-10-26)",
+    "last_semantic_update_at": "2024-08-19"
+  },
+  {
+    "id": "3jreR4EaYOFLV0pOlFC0",
+    "name": "TDOG-LEVERED IDX/VIX",
+    "last_semantic_update_at": "2024-08-22"
+  },
+  {
+    "id": "PjS01JxYtbNzN4nVME2b",
+    "name": "JM255 - TQQQ For The Long Term (Reddit Post Link) modified by JM 8-25-24",
+    "last_semantic_update_at": "2024-08-25"
+  },
+  {
+    "id": "IrZucvdZcoRsiizN8p98",
+    "name": "$DS TQQQ FTLT V2 | Anansi Bull Mods | less leverage and VXX edition | shared",
+    "last_semantic_update_at": "2024-08-27"
+  },
+  {
+    "id": "aVY6mKiDrmHEQ2ITstWf",
+    "name": "v2.2 Double Pop Bots l BrianE l Oct 28th 2011 | okhi2u less BIL mod | VXX edition",
+    "last_semantic_update_at": "2024-08-28"
+  },
+  {
+    "id": "Cvv3OHnaaCIMt42nj5sf",
+    "name": "Top Performing S&P 500 Stock",
+    "last_semantic_update_at": "2024-08-30"
+  },
+  {
+    "id": "nWP8uLmaVHGfBS7vh4fx",
+    "name": "Reddit TQQQ For The Long Term  (60+ RSI mod)",
+    "last_semantic_update_at": "2024-08-30"
+  },
+  {
+    "id": "oT9dyDsvBpCUkJWCwoom",
+    "name": "TQQQ For The Long Term (Reddit Post Link) - BIL instead of UVXY and TQQQ intsead of TCEL for longterm backtest compare",
+    "last_semantic_update_at": "2024-09-01"
+  },
+  {
+    "id": "oplcyPjkxIqV4awzT77Y",
+    "name": "Feaver's Insane Money Printer FTLT V1.0",
+    "last_semantic_update_at": "2024-09-01"
+  },
+  {
+    "id": "Dw6qjjt4YHQpMbXlUimt",
+    "name": "UPRO For The Long Term (Reddit Post Link) - BIL instead of UVXY and UPRO intead of TCEL",
+    "last_semantic_update_at": "2024-09-01"
+  },
+  {
+    "id": "ftZyPVflMc0fNwhgPWcm",
+    "name": "Feaver's Insane Money Printer FTLT V2",
+    "last_semantic_update_at": "2024-09-03"
+  },
+  {
+    "id": "iwupvlRkpvtbxTtI0rj7",
+    "name": "Beat The Market V2",
+    "last_semantic_update_at": "2024-09-03"
+  },
+  {
+    "id": "41GgC0VePVT4nNqv8xbF",
+    "name": "V2 | YINN-YANG Roller Coaster | DereckN",
+    "last_semantic_update_at": "2024-09-04"
+  },
+  {
+    "id": "cy81zaZb98D4QaJqhvRg",
+    "name": "NOVA | Feaver's Insane Money Printer FTLT V2.1",
+    "last_semantic_update_at": "2024-09-04"
+  },
+  {
+    "id": "XoOMSGGlWmNnpyRve5tV",
+    "name": "BTAL HIBL KMLM",
+    "last_semantic_update_at": "2024-09-05"
+  },
+  {
+    "id": "NKIxNhFlf2blj3NraUWA",
+    "name": "Feaver Frontrunner V3 BIL only>KMLM | 2.1 XLK RSI KMLM 20d SMA Switcher  WM 74",
+    "last_semantic_update_at": "2024-09-06"
+  },
+  {
+    "id": "ElAJizGQDg90JSgsxYBk",
+    "name": "Feaver Frontrunner V3 simplified bil only>KMLM | 2.1 XLK RSI KMLM 20d SMA Switcher WM 74",
+    "last_semantic_update_at": "2024-09-06"
+  },
+  {
+    "id": "NNdoQBU9KgNAPyfbCVQo",
+    "name": "Feaver Frontrunner V3>KMLM | 2.1 XLK RSI KMLM 20d SMA Switcher  WM 74",
+    "last_semantic_update_at": "2024-09-06"
+  },
+  {
+    "id": "w9bAlRLJLgYiCbGMAVWg",
+    "name": "Aggressive Battleship III/ Sort  WM 74",
+    "last_semantic_update_at": "2024-09-06"
+  },
+  {
+    "id": "mxIHCXDlpnAVIxoLKli9",
+    "name": "2020's Sort",
+    "last_semantic_update_at": "2024-09-06"
+  },
+  {
+    "id": "sBTDkpa5E6KhYLY0a5tS",
+    "name": "Agressive Battleship III / Heavily Modded by WM 74 BT to Nov 2018",
+    "last_semantic_update_at": "2024-09-06"
+  },
+  {
+    "id": "fJA1bzdp7D2hzs9YxgA9",
+    "name": "Simons KMLM switcher V3",
+    "last_semantic_update_at": "2024-09-06"
+  },
+  {
+    "id": "ikJ5pBYge9HTRHCtQRaO",
+    "name": "TQQQ FTLT Signal Differentiation Example",
+    "last_semantic_update_at": "2024-09-07"
+  },
+  {
+    "id": "wX1peS2PYcI4kzIQavoC",
+    "name": "TQQQ For The Long Term (Reddit Post Link) - tqqq/200d tqqq, BIL instead of UVXY and TQQQ intsead of TCEL for longterm backtest compare",
+    "last_semantic_update_at": "2024-09-07"
+  },
+  {
+    "id": "ziRhQASn0OdLZEdHtFxZ",
+    "name": "UPRO FTLT (Azqato's Longer Backtest)",
+    "last_semantic_update_at": "2024-09-07"
+  },
+  {
+    "id": "V2E1UVLnTtuzCKvQL4EN",
+    "name": "Feaver's Insane Money Printer FTLT V4 08/15/2012",
+    "last_semantic_update_at": "2024-09-07"
+  },
+  {
+    "id": "pv6Th7aGXqlEPCwUrnkF",
+    "name": "Feaver's Insane Money Printer FTLT V4 08/15/2012",
+    "last_semantic_update_at": "2024-09-07"
+  },
+  {
+    "id": "6AIVmbv3o61jWJd3PuJl",
+    "name": "Feaver Frontrunner V3  SGOV only KMLM Switch Wash Sale ALgo 1 WM 74",
+    "last_semantic_update_at": "2024-09-09"
+  },
+  {
+    "id": "Y60vRkltf0XYg6v2UHMx",
+    "name": "KMLM switcher WASH Sale 2  WM 74",
+    "last_semantic_update_at": "2024-09-09"
+  },
+  {
+    "id": "5b9wfJ1n4gOD5oYYkJVK",
+    "name": "[SIMPLE] KMLM switcher (single pops)| BT 4/13/22",
+    "last_semantic_update_at": "2024-09-09"
+  },
+  {
+    "id": "hKurFMCwjbH9f5EofQAK",
+    "name": "Strat That Shall Not Be Named",
+    "last_semantic_update_at": "2024-09-10"
+  },
+  {
+    "id": "8hibDDSJfTFFB1ckYo1d",
+    "name": "Popped Total Market Trent 1",
+    "last_semantic_update_at": "2024-09-10"
+  },
+  {
+    "id": "sVohVxE3oFPmX9L9mcD9",
+    "name": "GBTC RSI TMV WGMI checks",
+    "last_semantic_update_at": "2024-09-10"
+  },
+  {
+    "id": "hMx4pb60cfpwZ0mm7Yl1",
+    "name": "(see bottom block) TECL For The Long Term (v7) | Less VIX | KMLM signal boost",
+    "last_semantic_update_at": "2024-09-13"
+  },
+  {
+    "id": "mAcSMKbojGG7khnppHFb",
+    "name": "FTLT V5 W/ Frontrunner V4 + Aggressive Battleship V2 WM74",
+    "last_semantic_update_at": "2024-09-13"
+  },
+  {
+    "id": "cFaGoCvxqL2fgLxuyM4S",
+    "name": "UPRO For The Long Term Feaver Edition",
+    "last_semantic_update_at": "2024-09-13"
+  },
+  {
+    "id": "IeLM89IjS7soy1Vhnb30",
+    "name": "Investors Collaborative: TQQQ For The Long Term (Reddit Post Link)",
+    "last_semantic_update_at": "2024-09-18"
+  },
+  {
+    "id": "4OebHR14XUEJjEpdtiZS",
+    "name": "Moving Average Block",
+    "last_semantic_update_at": "2024-09-19"
+  },
+  {
+    "id": "8inrf1TyhSrfPCY4Zrdw",
+    "name": "TQQQ FTLT Reddit with KMLM filter",
+    "last_semantic_update_at": "2024-09-20"
+  },
+  {
+    "id": "pXeo31myymV0c3Ej4y6A",
+    "name": "TQQQ FTLT + Additional filters based on conditions working OOS for more than 3 months",
+    "last_semantic_update_at": "2024-09-20"
+  },
+  {
+    "id": "CjV1zCFruzmr2mFgPjKB",
+    "name": "The Holy Grail with 20D KMLM V2 (Added Feavers stuff)",
+    "last_semantic_update_at": "2024-09-23"
+  },
+  {
+    "id": "Qh56yBYjxa2nTEiVpbG4",
+    "name": "TQQQ For The Long Term (Reddit Post Link)",
+    "last_semantic_update_at": "2024-09-23"
+  },
+  {
+    "id": "SyAZfLVdYayAYIgogj8u",
+    "name": "What More Do You Need?",
+    "last_semantic_update_at": "2024-09-23"
+  },
+  {
+    "id": "vSpAuA2893JcKmXrvdhK",
+    "name": "The Holy Grail with 20D KMLM",
+    "last_semantic_update_at": "2024-09-23"
+  },
+  {
+    "id": "meIl7Y8aw2BWipIFoDw4",
+    "name": "Proven conditions + Confirmation with KMLM",
+    "last_semantic_update_at": "2024-09-24"
+  },
+  {
+    "id": "hYmupKmLJxh7c4dnpru9",
+    "name": "Feaver's FTLT V7 08/15/2012",
+    "last_semantic_update_at": "2024-09-24"
+  },
+  {
+    "id": "KW5LzmCIRKoidNiVsGnN",
+    "name": "80/20 -> 100/0 Markov Chain Equities x Markov Volatility x Sector Rotator 218% RR, 23.6% Max DD, 43.5% SD 2019 BT)",
+    "last_semantic_update_at": "2024-09-29"
+  },
+  {
+    "id": "YoAXHOw10i7ng92W7M8T",
+    "name": "Dollar  Billz  WM 74",
+    "last_semantic_update_at": "2024-09-30"
+  },
+  {
+    "id": "d0WCj9OFMI3xILuOyRVV",
+    "name": "Yinn/Yang ftlt using eem from 2007 @ 2 Sharpe | Version 2",
+    "last_semantic_update_at": "2024-10-03"
+  },
+  {
+    "id": "U7n6vQUgVKXTE4wzGC5h",
+    "name": "Yinn/Yang ftlt using fxi from 2007 @ 2 Sharpe | Version 2",
+    "last_semantic_update_at": "2024-10-03"
+  },
+  {
+    "id": "otubF5ZTdkqi0WfFHnOd",
+    "name": "Feaver Frontruns Sometimes TQQQ & Beta Ballers (zoop's No K-1 Mashup)",
+    "last_semantic_update_at": "2024-10-03"
+  },
+  {
+    "id": "bCMKTig8btukXC9OZ3SC",
+    "name": "Googl Max",
+    "last_semantic_update_at": "2024-10-03"
+  },
+  {
+    "id": "fC2oAGLRzDRkO9aKayjG",
+    "name": "Axiom Growth - (AD:126.8%, DD:17.7%) Bonds Bull/Bear & Blackswan & 20% VIX Frontrunner",
+    "last_semantic_update_at": "2024-10-03"
+  },
+  {
+    "id": "vQnFyWhtJCb24XbVwW6E",
+    "name": "Just Memes",
+    "last_semantic_update_at": "2024-10-05"
+  },
+  {
+    "id": "l6bB2WJZTjB3rFPF4gwl",
+    "name": "Feaver Frontrunner V5 WM 74 mod no  VIX added VOX > Dividends",
+    "last_semantic_update_at": "2024-10-07"
+  },
+  {
+    "id": "8jZS4070KccE1onFVU5q",
+    "name": "Feaver Frontrunner V5 WM 74 mod no  VIX added VOX > Dividends",
+    "last_semantic_update_at": "2024-10-07"
+  },
+  {
+    "id": "m7Ayf2Q6kaXyRA40ohke",
+    "name": "NVDA Max",
+    "last_semantic_update_at": "2024-10-07"
+  },
+  {
+    "id": "RPV8PU7Rbve7H6LMEyUA",
+    "name": "Feaver Frontrunner V5  added VOX OB WM 74 > Dividends  WM 74",
+    "last_semantic_update_at": "2024-10-07"
+  },
+  {
+    "id": "8pznkFWwXFrCs96zZnIz",
+    "name": "EM ftlt from 2007 @ 2 Sharpe | Version 2",
+    "last_semantic_update_at": "2024-10-12"
+  },
+  {
+    "id": "9YutTpz3sQir3z2pHuDF",
+    "name": "KMLM switcher (single pops)| BT 4/13/22 ",
+    "last_semantic_update_at": "2024-10-13"
+  },
+  {
+    "id": "rJwkCH61aJBBnYPooxhx",
+    "name": "Nuclear Energy with Feaver Frontrunner V5 | BT 2022-03-24",
+    "last_semantic_update_at": "2024-10-14"
+  },
+  {
+    "id": "vi2oz2DmhHD7BZOa5t79",
+    "name": " ISPY ECML+ Sector Rotator",
+    "last_semantic_update_at": "2024-10-14"
+  },
+  {
+    "id": "uwrGKceh25tMcArEEfES",
+    "name": "Frontrunner.BDRY > Battleship WM74",
+    "last_semantic_update_at": "2024-10-16"
+  },
+  {
+    "id": "EUPx8gxv5ABlXLdO9gZ6",
+    "name": "BDJ chill FR with UPRO FTLT (TQQQ FTLT reddit link skeleton)",
+    "last_semantic_update_at": "2024-10-21"
+  },
+  {
+    "id": "7G4Ce2BGKlKkAoDZceob",
+    "name": "Wash Sale 3 Sorted by 5 day Max DD WM 74",
+    "last_semantic_update_at": "2024-10-25"
+  },
+  {
+    "id": "3W6bD1n1k9ih8ndA5bUy",
+    "name": "Wash Sale 2 WM 74 Calmer weighted",
+    "last_semantic_update_at": "2024-10-25"
+  },
+  {
+    "id": "fjFuXqRg1SEsaKVYqxZf",
+    "name": "Wash Sale 1 Inv Vol",
+    "last_semantic_update_at": "2024-10-25"
+  },
+  {
+    "id": "jZZwAJHnQuTITUsyeVtT",
+    "name": "Frontrunner: XLI",
+    "last_semantic_update_at": "2024-10-28"
+  },
+  {
+    "id": "JQpqCMEotaEXE8blE3xn",
+    "name": "[Reduced V4] ManuMB BlackSwan Catcher",
+    "last_semantic_update_at": "2024-10-30"
+  },
+  {
+    "id": "rwTJIDfYHlrY89Dh9HmN",
+    "name": "SOXL.SOXS SeeSaw",
+    "last_semantic_update_at": "2024-10-31"
+  },
+  {
+    "id": "8HYKZ3mVWuT0hMLkfy8B",
+    "name": "SOXL - BnH",
+    "last_semantic_update_at": "2024-11-12"
+  },
+  {
+    "id": "wTwEvJFnBorxsRLKL7AE",
+    "name": "Frontrunner: KMLM",
+    "last_semantic_update_at": "2024-11-23"
+  },
+  {
+    "id": "oZHiz3hAIWFdudqVYcZC",
+    "name": "Custom Exposures",
+    "last_semantic_update_at": "2024-11-25"
+  },
+  {
+    "id": "CAh0ajzvIm0nKwq8cjoe",
+    "name": "Custom Exposures",
+    "last_semantic_update_at": "2024-11-25"
+  },
+  {
+    "id": "7XNa485r9841zrmLhZnP",
+    "name": "1. \ud83d\ude82 V2a | Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015",
+    "last_semantic_update_at": "2024-11-25"
+  },
+  {
+    "id": "K9ZxH2P5HyZvy8Qv0yZE",
+    "name": "Just Memes III 11-29-24",
+    "last_semantic_update_at": "2024-11-30"
+  },
+  {
+    "id": "r6QLyNfzkkE2ldlCefYM",
+    "name": "UVXY Fun Holy Grail",
+    "last_semantic_update_at": "2024-12-08"
+  },
+  {
+    "id": "v3C3nYgR75lAJuTDQHrS",
+    "name": "Optimized Small Nuclear Reactor Portfolio modified",
+    "last_semantic_update_at": "2024-12-13"
+  },
+  {
+    "id": "qMIbJEViD4zzMccSCFbi",
+    "name": "Beta Baller_Wil's Mix",
+    "last_semantic_update_at": "2024-12-14"
+  },
+  {
+    "id": "QU45tE4JhUsyAHkcNRxR",
+    "name": "The Futurist | Gobi",
+    "last_semantic_update_at": "2024-12-14"
+  },
+  {
+    "id": "xZlcZEZuYOHiNb9lUMRY",
+    "name": "CS 90+ FR V5 12-16-24 Risk Off",
+    "last_semantic_update_at": "2024-12-16"
+  },
+  {
+    "id": "IVoas2lQ0RiFosLlvwl5",
+    "name": "Sometimes TQQQ | Simplified | 2011-10-06 with DereckN Hedge System",
+    "last_semantic_update_at": "2024-12-22"
+  },
+  {
+    "id": "Mj9j1U8HMPwGePPQfI1L",
+    "name": "Simple AF",
+    "last_semantic_update_at": "2025-01-07"
+  },
+  {
+    "id": "B3G4fTjXrPYG0RjDBzj9",
+    "name": "Sector Rotator (No Leverage)",
+    "last_semantic_update_at": "2025-01-09"
+  },
+  {
+    "id": "lbgKxZ1bqbjMyOH8lSWR",
+    "name": "AI Boom Strategy",
+    "last_semantic_update_at": "2025-01-12"
+  },
+  {
+    "id": "QA2ycRVdXX9wJjX66wg4",
+    "name": "Leveraged High Yield Tracker / Curved",
+    "last_semantic_update_at": "2025-01-13"
+  },
+  {
+    "id": "OuxRoYN7gteVxzusscV6",
+    "name": "Eagle's  Protoculture v16 - Group D [Internal]",
+    "last_semantic_update_at": "2025-01-16"
+  },
+  {
+    "id": "gYmr6DEqWm6RauWRn0Kw",
+    "name": "SMH vs FTLS RSI compare w/ Pre Runner WM 74",
+    "last_semantic_update_at": "2025-01-29"
+  },
+  {
+    "id": "bVNyWSpTr3b2zC1JzmKQ",
+    "name": "SMH/WTMF and SMH/FTLS compares  WM 74",
+    "last_semantic_update_at": "2025-02-01"
+  },
+  {
+    "id": "bZ23UL6wGhfgtXhguCSm",
+    "name": "IEF > PSQ  WM 74",
+    "last_semantic_update_at": "2025-02-10"
+  },
+  {
+    "id": "YpZbwNdRoxBuaKYM1P7x",
+    "name": "ugl ftlt",
+    "last_semantic_update_at": "2025-02-12"
+  },
+  {
+    "id": "PsDGiAnWrG4qiOeuV8jB",
+    "name": "Gold FTLT",
+    "last_semantic_update_at": "2025-02-12"
+  },
+  {
+    "id": "LU3IzHVCYlKVme3SMdgG",
+    "name": "What More Do You Need?",
+    "last_semantic_update_at": "2025-02-20"
+  },
+  {
+    "id": "9B6B7f1XHZwmqGtgtFaE",
+    "name": "Grok 3 VGT-SPY-QQQ w/ Super Frontrunner | 3x ETF WM 74",
+    "last_semantic_update_at": "2025-02-20"
+  },
+  {
+    "id": "NOP4p5gb4ISf9wRk9xP9",
+    "name": "Simple Beta Baller Signal - no semis, no UVXY, 3x | Anansi",
+    "last_semantic_update_at": "2025-02-21"
+  },
+  {
+    "id": "G6chjQ7De9hv0GhVeWQF",
+    "name": "\ud83d\udd31 Battleship III - 3YrBT: | USMC/JEB |AR 55.5% | MDD 65.6% | CR 0.85",
+    "last_semantic_update_at": "2025-02-22"
+  },
+  {
+    "id": "Av97vWuvMryd4mIXCjAc",
+    "name": "FTL's \ud83c\udf1f Starburst GEN-II v1.c w/ BWC Ultimate FR [Removed BB] Added Walter's Champagne and Cocaine Strats  and NOVA | (multiple TQQQ, one crypto) KMLM Switcher MonkeyBusiness WM74 + Wash",
+    "last_semantic_update_at": "2025-02-23"
+  },
+  {
+    "id": "a1BNsApwaZS4IIpNTry1",
+    "name": "Simple Beta Baller Signal - no semis, no UVXY, 3x | Anansi",
+    "last_semantic_update_at": "2025-02-23"
+  },
+  {
+    "id": "PUSRLx04x49rtpKJp9ZG",
+    "name": "V2 BWC: Ultimate Frontrunner  -> The Classics + Wash",
+    "last_semantic_update_at": "2025-02-23"
+  },
+  {
+    "id": "jeKm0nLF5Ji5FZqPRJK3",
+    "name": "zoop's Leveraged Frontrunner (Longer Backtest)",
+    "last_semantic_update_at": "2025-02-26"
+  },
+  {
+    "id": "XNgcqBAnRJu2cwKhKozX",
+    "name": "KMLM Switcher Testfolio",
+    "last_semantic_update_at": "2025-03-13"
+  },
+  {
+    "id": "zbT0sv6DAZuNRYv1Unxm",
+    "name": "KMLM Switcher Testfolio - No Shorts",
+    "last_semantic_update_at": "2025-03-13"
+  },
+  {
+    "id": "zq2XuSI9qxLUJuLDTNNm",
+    "name": "TQQQ Reddit Simplified (Testfolio)",
+    "last_semantic_update_at": "2025-03-13"
+  },
+  {
+    "id": "9i95fKB5VxBmCx0CC6Yn",
+    "name": "Leveraged Equities Risk Parity - Dumpster Fire \ud83d\uddd1",
+    "last_semantic_update_at": "2025-03-15"
+  },
+  {
+    "id": "ODMFEUtSQcZNm0x2f0vS",
+    "name": "All In (Short Term Inverse Volatility Weighting of Diversified Asset Classes w/ Leverage)",
+    "last_semantic_update_at": "2025-03-19"
+  },
+  {
+    "id": "RePtPHQHlfT0AIncUvq8",
+    "name": "Maximum Overdrive V0.1 (53,31,2011)",
+    "last_semantic_update_at": "2025-03-20"
+  },
+  {
+    "id": "Pf30hSuCDTrxstaQ2w44",
+    "name": "(B) Maximum Overdrive (122/28% MDD) Since 2018",
+    "last_semantic_update_at": "2025-03-20"
+  },
+  {
+    "id": "Nshw1HR1EuBNYHrgKwKI",
+    "name": "[*] VT | QQQ Indicator | Template",
+    "last_semantic_update_at": "2025-03-20"
+  },
+  {
+    "id": "yN15AB8vbuS9VzxbIBuy",
+    "name": "Metals Contrarian Switch (187,35,2011)",
+    "last_semantic_update_at": "2025-03-29"
+  },
+  {
+    "id": "hzrniARtdnCuOJxAwqvL",
+    "name": "Metals Contrarian Switch FrankRound edit (257,33,2011)",
+    "last_semantic_update_at": "2025-03-29"
+  },
+  {
+    "id": "mej8etZY9JAFPWtL1RGU",
+    "name": "Metals Contrarian no FR (135,48,2011)",
+    "last_semantic_update_at": "2025-03-29"
+  },
+  {
+    "id": "x6j9BjSLk34Zekc89B20",
+    "name": "Enhanced Strategy with Leveraged Assets",
+    "last_semantic_update_at": "2025-04-01"
+  },
+  {
+    "id": "Me80nGu1Cfk0JyzA6YvW",
+    "name": "Holy Grail | KMLM | Simplified | No FR | Longer backtest",
+    "last_semantic_update_at": "2025-04-05"
+  },
+  {
+    "id": "qvJOrf6jo9mwNohuvgCO",
+    "name": "KMLM TQQQ Test",
+    "last_semantic_update_at": "2025-04-10"
+  },
+  {
+    "id": "XpYU2QTQ3D8BAcez9Yns",
+    "name": "Ra Ra USA | Curved",
+    "last_semantic_update_at": "2025-04-24"
+  },
+  {
+    "id": "KMLEYSgcPQWeJl63Ah88",
+    "name": "V2 BWC: Ultimate Frontrunner  -> KMLM Super Long Block Rotator WM74 + Wash",
+    "last_semantic_update_at": "2025-04-24"
+  },
+  {
+    "id": "O6mSG2VUNeA4uSdRanqp",
+    "name": "1x TQQQ FTLT 5-2-25",
+    "last_semantic_update_at": "2025-04-28"
+  },
+  {
+    "id": "OdAKVWRTa90sgYgY7Vqo",
+    "name": "Metals Contrarian no FR (10,56,2011)",
+    "last_semantic_update_at": "2025-05-13"
+  },
+  {
+    "id": "nNCQekscMCWUaDk93HzR",
+    "name": "(C) V1 BWC: Not Boring Trends with Inflation Haven + Caesar's TQQQ For the Long Term (539/33%MDD) Since 2019",
+    "last_semantic_update_at": "2025-05-15"
+  },
+  {
+    "id": "GQf1AOcAxS3fOUe6RdHY",
+    "name": "(C) V1 BWC: Not Boring Trends with Inflation Haven + Caesar's TQQQ For the Long Term (593/34%MDD) 6/19/2019",
+    "last_semantic_update_at": "2025-05-15"
+  },
+  {
+    "id": "W8hpiheymHgbJ1iQjutP",
+    "name": "The Gold Digger But 2x & Longer BT This Time and Oh Boy",
+    "last_semantic_update_at": "2025-05-18"
+  },
+  {
+    "id": "RgicQmA0WrzaMh6YIvZx",
+    "name": "CounterBalancer - Low R/R (Dec) (Low Risk)",
+    "last_semantic_update_at": "2025-05-19"
+  },
+  {
     "id": "gtOlKCViWEiqAFyZeB6N",
     "name": "Pals Minor Spell of Summon Money",
     "last_semantic_update_at": "2025-05-25"
+  },
+  {
+    "id": "Xu4UMiIPT63OI8DAOMwW",
+    "name": "bum ass symphony",
+    "last_semantic_update_at": "2025-06-02"
+  },
+  {
+    "id": "f0aexBgzAMQ70FZLtOFM",
+    "name": "Voting Machine QQQ/SPY/Semis  (43.8% RR, 45.5% MD, 35.7% SD, 2012 BT)",
+    "last_semantic_update_at": "2025-06-06"
+  },
+  {
+    "id": "p3NVppPj2wCmwze6yKTv",
+    "name": "Inflation Protected Simple Beta Baller Signal | IEF>IBTK (Other IBT*, SPTI ,SCHQ are related) & SHY>SBND (IBTF, ITBG, ITBE are related)",
+    "last_semantic_update_at": "2025-06-06"
+  },
+  {
+    "id": "zpjRTo6PfpPOKojUF8VT",
+    "name": "042 [DNL] Supersonic Starburst Rocket Ship V1.2 RL | PWN IRA",
+    "last_semantic_update_at": "2025-06-06"
+  },
+  {
+    "id": "r39dudAU26HvoM45eXaZ",
+    "name": "Compares EQT TQQQ/COM/EM/BND (144.7% RR, 30.2% MD, 40.3% SD, 2011 BT)",
+    "last_semantic_update_at": "2025-06-06"
+  },
+  {
+    "id": "KnNbjhPJYE3LGlDyzBl9",
+    "name": "SR x Compares (164.2% RR, 27.8% MD, 46.2% SD, 2019 BT)",
+    "last_semantic_update_at": "2025-06-06"
+  },
+  {
+    "id": "5JcbgTC6lS70simeUGTp",
+    "name": "Inflation Protected Simple Beta Baller Sort",
+    "last_semantic_update_at": "2025-06-09"
+  },
+  {
+    "id": "KXKyBlUmCB0n9qLVMmVK",
+    "name": "KMLM Switcher - Single Pops (zoop's No K-1 Edit)",
+    "last_semantic_update_at": "2025-06-17"
+  },
+  {
+    "id": "Lgc19dRf3IpfZLjMgqUp",
+    "name": "FTLT V5 W/ Frontrunner V5 WM 74 Mod / KMLM Switch or Battleship  WM 74",
+    "last_semantic_update_at": "2025-06-24"
+  },
+  {
+    "id": "6uw44DaOTVRT554sZCFP",
+    "name": "FTLT V5 W/ Frontrunner V5 WM 74 mod / KMLM Switch or Battleship  WM 74",
+    "last_semantic_update_at": "2025-06-24"
+  },
+  {
+    "id": "eHsPjKYTZEoypcesMgQX",
+    "name": "AMD Flipper | Curved",
+    "last_semantic_update_at": "2025-07-16"
+  },
+  {
+    "id": "5yuGmGM74YmAO9JiUiyx",
+    "name": "zoop frontruns SOXL (Longer Backtest)",
+    "last_semantic_update_at": "2025-07-25"
+  },
+  {
+    "id": "SLP6JQ1k6hguIv1dc5vy",
+    "name": "zoop's Holy SOXL Grail",
+    "last_semantic_update_at": "2025-07-27"
+  },
+  {
+    "id": "vntcnJDzNUDUDBspcJQD",
+    "name": "zoop's Holy SOXL Grail (Longer Backtest)",
+    "last_semantic_update_at": "2025-07-27"
+  },
+  {
+    "id": "XyjcUzhRzIGIJPKjZLCL",
+    "name": "V7 TQQQ FTLT Original - The Final Form Dereck N",
+    "last_semantic_update_at": "2025-08-02"
+  },
+  {
+    "id": "Zanx9eZgJptdOanNz9d0",
+    "name": "zoop uses ChatGPT with Leverage",
+    "last_semantic_update_at": "2025-08-09"
+  },
+  {
+    "id": "LMBUDpkPiowcqehdgPqF",
+    "name": "What More Do You Need?",
+    "last_semantic_update_at": "2025-09-09"
   },
   {
     "id": "j5mE2CLGPkyZpzAe2eSs",
