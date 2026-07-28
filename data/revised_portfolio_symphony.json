@@ -1,0 +1,1565 @@
+{
+  "id": "c814311c-133a-44ed-a961-2628963929af",
+  "step": "root",
+  "name": "Claude's Revised OOS Portfolio (5 eq-wt, diversified)",
+  "collapsed?": true,
+  "children": [
+    {
+      "id": "3da16a2a-9f04-4a58-9e7e-5ba0b42cd7c0",
+      "step": "wt-cash-specified",
+      "name": "Weight",
+      "suppress_incomplete_warnings": true,
+      "children": [
+        {
+          "id": "55e2d950-ffec-4256-aaad-01d1c0dec827",
+          "step": "group",
+          "name": "Pop Bot (SPY vs BND) l BrianE l May 30th 2007 (20%)",
+          "collapsed?": true,
+          "weight": {
+            "num": "20",
+            "den": "100"
+          },
+          "children": [
+            {
+              "id": "3970c0d0-5564-4878-8f87-8596ff0301bd",
+              "step": "wt-cash-equal",
+              "children": [
+                {
+                  "id": "23462120-3072-4a41-830a-2089bb21299d",
+                  "step": "group",
+                  "name": "Pop Bot (SPY vs BND) l BrianE l May 30th 2007",
+                  "children": [
+                    {
+                      "step": "wt-cash-equal",
+                      "id": "0bcf22de-2275-488b-8395-a3990f42dea4",
+                      "children": [
+                        {
+                          "id": "06bdff0e-4411-4b74-93ac-54c194205af7",
+                          "step": "if",
+                          "children": [
+                            {
+                              "children": [
+                                {
+                                  "weight": {
+                                    "num": 100,
+                                    "den": 100
+                                  },
+                                  "id": "01a31f80-92c1-46be-a3c5-4adc5725b7ec",
+                                  "step": "group",
+                                  "name": "SPY vs BND RSI 20 Day Pop Bot",
+                                  "children": [
+                                    {
+                                      "step": "wt-cash-equal",
+                                      "id": "0aef7953-328b-41e2-861b-a718927ee5d3",
+                                      "children": [
+                                        {
+                                          "id": "131e7728-c5cd-4d03-8a9b-d932d9541848",
+                                          "step": "if",
+                                          "children": [
+                                            {
+                                              "children": [
+                                                {
+                                                  "name": "ProShares Ultra QQQ",
+                                                  "ticker": "QLD",
+                                                  "has_marketcap": false,
+                                                  "id": "ddf424b0-bc48-4cd0-aaa1-1045b8434cf9",
+                                                  "exchange": "ARCX",
+                                                  "price": 36.14,
+                                                  "step": "asset",
+                                                  "dollar_volume": 98309690.44,
+                                                  "children-count": 0
+                                                }
+                                              ],
+                                              "rhs-fn": "relative-strength-index",
+                                              "is-else-condition?": false,
+                                              "lhs-fn": "relative-strength-index",
+                                              "rhs-window-days": "20",
+                                              "lhs-window-days": "20",
+                                              "lhs-val": "BND",
+                                              "id": "a9dc8617-8672-4893-9702-f6da7a676bc5",
+                                              "comparator": "gt",
+                                              "rhs-val": "SPY",
+                                              "step": "if-child"
+                                            },
+                                            {
+                                              "id": "f4111617-3943-4c4c-90ed-7510de29e3e3",
+                                              "step": "if-child",
+                                              "is-else-condition?": true,
+                                              "children": [
+                                                {
+                                                  "name": "SPDR Bloomberg 1-3 Month T-Bill ETF",
+                                                  "ticker": "BIL",
+                                                  "has_marketcap": false,
+                                                  "id": "a753c247-582e-47ba-92cb-e6efa1dacc5a",
+                                                  "exchange": "ARCX",
+                                                  "price": 91.46,
+                                                  "step": "asset",
+                                                  "dollar_volume": 594575240.7199999
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "collapsed?": true
+                                }
+                              ],
+                              "is-else-condition?": false,
+                              "rhs-fixed-value?": true,
+                              "lhs-fn": "relative-strength-index",
+                              "lhs-window-days": "60",
+                              "lhs-val": "SPY",
+                              "id": "3fb151b4-c961-4698-b283-738ef12bd93f",
+                              "comparator": "gt",
+                              "rhs-val": "50",
+                              "step": "if-child"
+                            },
+                            {
+                              "id": "6fd06d8d-4d6b-467c-acf9-38efad548b99",
+                              "step": "if-child",
+                              "is-else-condition?": true,
+                              "children": [
+                                {
+                                  "id": "473268e9-c5d4-4552-aa53-161a73d76ec8",
+                                  "step": "group",
+                                  "name": "My shot at trying to identify an Inverted Yield Bond Market Environment",
+                                  "children": [
+                                    {
+                                      "step": "wt-cash-equal",
+                                      "id": "9749f929-207c-4f58-b581-76bfb143f977",
+                                      "children": [
+                                        {
+                                          "id": "9e6bb4b0-2a99-4831-9eb4-1c8299328a90",
+                                          "step": "if",
+                                          "children": [
+                                            {
+                                              "children": [
+                                                {
+                                                  "weight": {
+                                                    "num": 100,
+                                                    "den": 100
+                                                  },
+                                                  "id": "7452f9f2-5dbb-4524-9739-75e7e6e8a3ea",
+                                                  "step": "group",
+                                                  "name": "SPY vs BND RSI 20 Day Pop Bot",
+                                                  "children": [
+                                                    {
+                                                      "step": "wt-cash-equal",
+                                                      "id": "ecb7318f-7427-4b8d-89c3-fcccc68f411f",
+                                                      "children": [
+                                                        {
+                                                          "id": "959541be-78df-4a90-a6c6-7ba87d989426",
+                                                          "step": "if",
+                                                          "children": [
+                                                            {
+                                                              "children": [
+                                                                {
+                                                                  "name": "ProShares Ultra QQQ",
+                                                                  "ticker": "QLD",
+                                                                  "has_marketcap": false,
+                                                                  "id": "c60e8552-8015-430f-9845-2e9cf3972e94",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 36.14,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 98309690.44,
+                                                                  "children-count": 0
+                                                                }
+                                                              ],
+                                                              "rhs-fn": "relative-strength-index",
+                                                              "is-else-condition?": false,
+                                                              "lhs-fn": "relative-strength-index",
+                                                              "rhs-window-days": "20",
+                                                              "lhs-window-days": "20",
+                                                              "lhs-val": "BND",
+                                                              "id": "75ec9a27-d5eb-431b-aeb4-90b1580cf177",
+                                                              "comparator": "gt",
+                                                              "rhs-val": "SPY",
+                                                              "step": "if-child"
+                                                            },
+                                                            {
+                                                              "id": "cecd1ed2-740a-41da-a40a-465b6db52edb",
+                                                              "step": "if-child",
+                                                              "is-else-condition?": true,
+                                                              "children": [
+                                                                {
+                                                                  "name": "SPDR Bloomberg 1-3 Month T-Bill ETF",
+                                                                  "ticker": "BIL",
+                                                                  "has_marketcap": false,
+                                                                  "id": "d443017c-e300-4319-b5ef-c48f464cafe2",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 91.46,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 594575240.7199999
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ],
+                                                  "collapsed?": true
+                                                }
+                                              ],
+                                              "rhs-fn": "relative-strength-index",
+                                              "is-else-condition?": false,
+                                              "lhs-fn": "relative-strength-index",
+                                              "rhs-window-days": "200",
+                                              "lhs-window-days": "200",
+                                              "lhs-val": "IEF",
+                                              "id": "eaa0062b-8b10-4d89-b691-8544ebad5e82",
+                                              "comparator": "lt",
+                                              "rhs-val": "TLT",
+                                              "step": "if-child",
+                                              "collapsed?": false
+                                            },
+                                            {
+                                              "id": "443b3858-052c-4dd5-8413-1f96d64f1b45",
+                                              "step": "if-child",
+                                              "is-else-condition?": true,
+                                              "children": [
+                                                {
+                                                  "id": "2a9f47a4-fdd6-4011-8828-14f9cdf7828e",
+                                                  "step": "group",
+                                                  "name": "Inverted Yield Bond Market?",
+                                                  "children": [
+                                                    {
+                                                      "step": "wt-cash-equal",
+                                                      "id": "552b4811-ba57-4cc2-ae5d-bf0f0be30fb3",
+                                                      "children": [
+                                                        {
+                                                          "name": "SPDR Bloomberg 1-3 Month T-Bill ETF",
+                                                          "ticker": "BIL",
+                                                          "has_marketcap": false,
+                                                          "id": "670b942b-106e-4649-91b6-39d1fe7f6652",
+                                                          "exchange": "ARCX",
+                                                          "price": 91.46,
+                                                          "step": "asset",
+                                                          "dollar_volume": 594575240.7199999
+                                                        }
+                                                      ]
+                                                    }
+                                                  ],
+                                                  "collapsed?": true
+                                                }
+                                              ],
+                                              "collapsed?": false
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "collapsed?": false
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "collapsed?": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "b29b49a4-f8ce-4d7f-9847-bf9a1d00fb91",
+          "step": "group",
+          "name": "Simple Regime Switching and Dip Buying (20%)",
+          "collapsed?": true,
+          "weight": {
+            "num": "20",
+            "den": "100"
+          },
+          "children": [
+            {
+              "id": "b60cdf53-f8da-4754-9ede-ef5fba7db89d",
+              "step": "wt-cash-equal",
+              "children": [
+                {
+                  "weight": {
+                    "num": 100,
+                    "den": 100
+                  },
+                  "id": "84a211a5-d525-4860-8175-1bb243ef138e",
+                  "step": "if",
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "name": "Invesco QQQ Trust",
+                          "ticker": "QQQ",
+                          "has_marketcap": false,
+                          "id": "ca6d5db5-803c-4934-834a-c52217074cd8",
+                          "exchange": "XNAS",
+                          "price": 275.51,
+                          "step": "asset",
+                          "dollar_volume": 20226170466.62,
+                          "children-count": 0
+                        }
+                      ],
+                      "rhs-fn": "moving-average-price",
+                      "is-else-condition?": false,
+                      "lhs-fn": "current-price",
+                      "rhs-window-days": "200",
+                      "lhs-val": "SPY",
+                      "id": "d95a019d-7319-41e5-9252-4818bb04e9d1",
+                      "comparator": "gt",
+                      "rhs-val": "SPY",
+                      "step": "if-child"
+                    },
+                    {
+                      "id": "f8818764-7704-48bd-adbd-70ca703675b5",
+                      "step": "if-child",
+                      "is-else-condition?": true,
+                      "children": [
+                        {
+                          "id": "1a70d67e-4acf-488c-aadd-0bbbaf4761fd",
+                          "step": "wt-cash-equal",
+                          "children": [
+                            {
+                              "id": "b5dd908e-f567-483a-b834-7d52b0a342b7",
+                              "step": "if",
+                              "children": [
+                                {
+                                  "children": [
+                                    {
+                                      "name": "ProShares Ultra QQQ",
+                                      "ticker": "QLD",
+                                      "has_marketcap": false,
+                                      "id": "fdfd8cf0-fd18-4405-81df-a497f962fa55",
+                                      "exchange": "ARCX",
+                                      "price": 39.08,
+                                      "step": "asset",
+                                      "dollar_volume": 269021483.28,
+                                      "children-count": 0
+                                    }
+                                  ],
+                                  "is-else-condition?": false,
+                                  "rhs-fixed-value?": true,
+                                  "lhs-fn": "relative-strength-index",
+                                  "lhs-window-days": "10",
+                                  "lhs-val": "SPY",
+                                  "id": "775f8d37-297a-41dc-b4e0-66f2b8d2e126",
+                                  "comparator": "lt",
+                                  "rhs-val": "30",
+                                  "step": "if-child"
+                                },
+                                {
+                                  "id": "33cc916f-1cd7-4350-947e-94bcb73b3f4d",
+                                  "step": "if-child",
+                                  "is-else-condition?": true,
+                                  "children": [
+                                    {
+                                      "name": "Consumer Staples Select Sector SPDR Fund",
+                                      "ticker": "XLP",
+                                      "has_marketcap": false,
+                                      "id": "6e4f46de-28d6-4723-888e-0ec1fb41d308",
+                                      "exchange": "ARCX",
+                                      "price": 71.33,
+                                      "step": "asset",
+                                      "dollar_volume": 959259963.34,
+                                      "children-count": 0
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "b6217c60-ced4-4b5f-b405-c22ddb96cadb",
+          "step": "group",
+          "name": "OG Adaptive Asset Allocation 2x (SPY/TLT/UUP/GLD) (20%)",
+          "collapsed?": true,
+          "weight": {
+            "num": "20",
+            "den": "100"
+          },
+          "children": [
+            {
+              "id": "d015abe6-87df-4fe2-8a79-810271595706",
+              "step": "wt-cash-equal",
+              "children": [
+                {
+                  "weight": {
+                    "num": 100,
+                    "den": 100
+                  },
+                  "id": "94db699d-e5d3-42ba-a6a8-17230a204243",
+                  "step": "if",
+                  "children": [
+                    {
+                      "children": [
+                        {
+                          "id": "66dc48ac-1fff-472d-ad6b-17f04b3537a7",
+                          "step": "wt-cash-equal",
+                          "children": [
+                            {
+                              "id": "ffaeee4b-31e6-4adf-901a-38a9cb9864fc",
+                              "step": "if",
+                              "children": [
+                                {
+                                  "children": [
+                                    {
+                                      "id": "fb6e8051-259c-40b1-a5fe-40809cf4ee46",
+                                      "step": "wt-cash-equal",
+                                      "children": [
+                                        {
+                                          "id": "03c16a9d-e53d-41b1-88bf-1cd2c3d7b24f",
+                                          "step": "if",
+                                          "children": [
+                                            {
+                                              "children": [
+                                                {
+                                                  "id": "b183463b-f62c-49b7-80d2-538c5931e0a8",
+                                                  "step": "wt-cash-equal",
+                                                  "children": [
+                                                    {
+                                                      "id": "ca5a756a-21b0-4eca-9905-c999c35c809e",
+                                                      "step": "if",
+                                                      "children": [
+                                                        {
+                                                          "children": [
+                                                            {
+                                                              "id": "e62376fb-3a60-4072-80cb-d3cfee66d3be",
+                                                              "step": "wt-inverse-vol",
+                                                              "children": [
+                                                                {
+                                                                  "name": "ProShares Ultra S&P 500",
+                                                                  "ticker": "SSO",
+                                                                  "has_marketcap": false,
+                                                                  "id": "2cf8b35c-5676-4841-b3a2-4c674461ce80",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 46.63,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 303296907.90000004,
+                                                                  "children-count": 0
+                                                                },
+                                                                {
+                                                                  "name": "Direxion Daily 20+ Year Treasury Bull 3X Shares",
+                                                                  "ticker": "TMF",
+                                                                  "has_marketcap": false,
+                                                                  "id": "063c26de-d3e4-4efb-a61b-3ba5f79aaf72",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 7.17,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 84408093.66,
+                                                                  "children-count": 0
+                                                                }
+                                                              ],
+                                                              "window-days": "21"
+                                                            }
+                                                          ],
+                                                          "rhs-fn": "cumulative-return",
+                                                          "is-else-condition?": false,
+                                                          "lhs-fn": "cumulative-return",
+                                                          "rhs-window-days": "126",
+                                                          "lhs-window-days": "126",
+                                                          "lhs-val": "TMF",
+                                                          "id": "e5fb2f60-9801-4b8a-8cb0-970f357f9225",
+                                                          "comparator": "gte",
+                                                          "rhs-val": "GLD",
+                                                          "step": "if-child"
+                                                        },
+                                                        {
+                                                          "id": "7e45a738-4767-427d-a43f-d476943f34e4",
+                                                          "step": "if-child",
+                                                          "is-else-condition?": true,
+                                                          "children": [
+                                                            {
+                                                              "id": "92c3a2d6-b20c-4fc9-b991-0bbe74c3f60d",
+                                                              "step": "wt-inverse-vol",
+                                                              "children": [
+                                                                {
+                                                                  "name": "ProShares Ultra S&P 500",
+                                                                  "ticker": "SSO",
+                                                                  "has_marketcap": false,
+                                                                  "id": "a6603c18-bacd-4df2-a62c-28a68f8dd10c",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 46.63,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 303296907.90000004,
+                                                                  "children-count": 0
+                                                                },
+                                                                {
+                                                                  "name": "SPDR Gold Shares",
+                                                                  "ticker": "GLD",
+                                                                  "has_marketcap": false,
+                                                                  "id": "8d5226ae-fe63-4843-8a8b-3fb0a6ee4ff9",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 153.16,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 707078149.68
+                                                                }
+                                                              ],
+                                                              "window-days": "21"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ],
+                                              "rhs-fn": "cumulative-return",
+                                              "is-else-condition?": false,
+                                              "lhs-fn": "cumulative-return",
+                                              "rhs-window-days": "126",
+                                              "lhs-window-days": "126",
+                                              "lhs-val": "TMF",
+                                              "id": "a58673bb-4e60-4643-a02d-91c236e9a2eb",
+                                              "comparator": "gte",
+                                              "rhs-val": "UUP",
+                                              "step": "if-child"
+                                            },
+                                            {
+                                              "id": "c2789c3c-71b3-416f-a8fc-a36713b23415",
+                                              "step": "if-child",
+                                              "is-else-condition?": true,
+                                              "children": [
+                                                {
+                                                  "id": "f2e2c080-602c-45c8-a8b2-ab596bd701bd",
+                                                  "step": "wt-cash-equal",
+                                                  "children": [
+                                                    {
+                                                      "id": "8afbdef8-17e1-4140-9136-6bd4b409a892",
+                                                      "step": "if",
+                                                      "children": [
+                                                        {
+                                                          "children": [
+                                                            {
+                                                              "id": "55359fa4-9c98-4953-bbea-b59997f5a805",
+                                                              "step": "wt-inverse-vol",
+                                                              "children": [
+                                                                {
+                                                                  "name": "ProShares Ultra S&P 500",
+                                                                  "ticker": "SSO",
+                                                                  "has_marketcap": false,
+                                                                  "id": "4c27cf87-6123-4f1c-bda2-f1195b9ebdcf",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 46.63,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 303296907.90000004,
+                                                                  "children-count": 0
+                                                                },
+                                                                {
+                                                                  "name": "Invesco DB US Dollar Index Bullish Fund",
+                                                                  "ticker": "UUP",
+                                                                  "has_marketcap": false,
+                                                                  "id": "f062eff0-d4bd-40c9-a7a0-33a16181c311",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 29.78,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 73736769
+                                                                }
+                                                              ],
+                                                              "window-days": "21"
+                                                            }
+                                                          ],
+                                                          "rhs-fn": "cumulative-return",
+                                                          "is-else-condition?": false,
+                                                          "lhs-fn": "cumulative-return",
+                                                          "rhs-window-days": "126",
+                                                          "lhs-window-days": "126",
+                                                          "lhs-val": "UUP",
+                                                          "id": "1a763421-c6f4-4317-9f81-d17be1931082",
+                                                          "comparator": "gte",
+                                                          "rhs-val": "GLD",
+                                                          "step": "if-child"
+                                                        },
+                                                        {
+                                                          "id": "5baba138-bd3f-496d-ba85-a9de2472f80b",
+                                                          "step": "if-child",
+                                                          "is-else-condition?": true,
+                                                          "children": [
+                                                            {
+                                                              "id": "9f12a1e0-ddd9-4d82-9530-b4e538a04b94",
+                                                              "step": "wt-inverse-vol",
+                                                              "children": [
+                                                                {
+                                                                  "name": "ProShares Ultra S&P 500",
+                                                                  "ticker": "SSO",
+                                                                  "has_marketcap": false,
+                                                                  "id": "140dd426-b81d-49c0-9aca-132e24d50c0e",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 46.63,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 303296907.90000004,
+                                                                  "children-count": 0
+                                                                },
+                                                                {
+                                                                  "name": "SPDR Gold Shares",
+                                                                  "ticker": "GLD",
+                                                                  "has_marketcap": false,
+                                                                  "id": "6a8f366c-8f97-4209-8ed5-717b0757da5b",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 153.16,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 707078149.68
+                                                                }
+                                                              ],
+                                                              "window-days": "21"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "rhs-fn": "cumulative-return",
+                                  "is-else-condition?": false,
+                                  "lhs-fn": "cumulative-return",
+                                  "rhs-window-days": "126",
+                                  "lhs-window-days": "126",
+                                  "lhs-val": "SSO",
+                                  "id": "592f36c1-079e-4a71-88e3-aa05e0d98af5",
+                                  "comparator": "gte",
+                                  "rhs-val": "GLD",
+                                  "step": "if-child"
+                                },
+                                {
+                                  "id": "205c6c3f-a903-4160-ae8e-9bb706e78598",
+                                  "step": "if-child",
+                                  "is-else-condition?": true,
+                                  "children": [
+                                    {
+                                      "id": "b6e5d4a8-b1fc-444e-ab33-747fcfc544ef",
+                                      "step": "wt-cash-equal",
+                                      "children": [
+                                        {
+                                          "id": "2a8b4850-08cf-4a63-94e9-746c62186e43",
+                                          "step": "if",
+                                          "children": [
+                                            {
+                                              "children": [
+                                                {
+                                                  "id": "8e59aa88-6738-4a8d-a834-a294414d42c2",
+                                                  "step": "wt-inverse-vol",
+                                                  "children": [
+                                                    {
+                                                      "name": "ProShares Ultra S&P 500",
+                                                      "ticker": "SSO",
+                                                      "has_marketcap": false,
+                                                      "id": "31324ef1-63b9-459b-a4b7-a785b7c17fa7",
+                                                      "exchange": "ARCX",
+                                                      "price": 46.63,
+                                                      "step": "asset",
+                                                      "dollar_volume": 303296907.90000004,
+                                                      "children-count": 0
+                                                    },
+                                                    {
+                                                      "name": "SPDR Gold Shares",
+                                                      "ticker": "GLD",
+                                                      "has_marketcap": false,
+                                                      "id": "e1b75284-14cc-4094-9b69-779b11b2e270",
+                                                      "exchange": "ARCX",
+                                                      "price": 153.16,
+                                                      "step": "asset",
+                                                      "dollar_volume": 707078149.68
+                                                    }
+                                                  ],
+                                                  "window-days": "21"
+                                                }
+                                              ],
+                                              "rhs-fn": "cumulative-return",
+                                              "is-else-condition?": false,
+                                              "lhs-fn": "cumulative-return",
+                                              "rhs-window-days": "126",
+                                              "lhs-window-days": "126",
+                                              "lhs-val": "SSO",
+                                              "id": "0ecde8cf-18cb-4888-a344-2c582e1025de",
+                                              "comparator": "gte",
+                                              "rhs-val": "TMF",
+                                              "step": "if-child"
+                                            },
+                                            {
+                                              "id": "e5af0522-2b36-4c89-904f-c15b27fafa74",
+                                              "step": "if-child",
+                                              "is-else-condition?": true,
+                                              "children": [
+                                                {
+                                                  "id": "e4d18f2a-a0b9-4162-ac23-649da891b5eb",
+                                                  "step": "wt-inverse-vol",
+                                                  "children": [
+                                                    {
+                                                      "name": "Direxion Daily 20+ Year Treasury Bull 3X Shares",
+                                                      "ticker": "TMF",
+                                                      "has_marketcap": false,
+                                                      "id": "1ce6e603-2745-4439-935e-4a4631cd0722",
+                                                      "exchange": "ARCX",
+                                                      "price": 7.17,
+                                                      "step": "asset",
+                                                      "dollar_volume": 84408093.66,
+                                                      "children-count": 0
+                                                    },
+                                                    {
+                                                      "name": "SPDR Gold Shares",
+                                                      "ticker": "GLD",
+                                                      "has_marketcap": false,
+                                                      "id": "1c1cbf6a-3fab-4d1c-9131-a283c30501f5",
+                                                      "exchange": "ARCX",
+                                                      "price": 153.16,
+                                                      "step": "asset",
+                                                      "dollar_volume": 707078149.68
+                                                    }
+                                                  ],
+                                                  "window-days": "21"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ],
+                      "rhs-fn": "cumulative-return",
+                      "is-else-condition?": false,
+                      "lhs-fn": "cumulative-return",
+                      "rhs-window-days": "126",
+                      "lhs-window-days": "126",
+                      "lhs-val": "SSO",
+                      "id": "8cd34cc7-2119-49a5-adeb-9e21865af14d",
+                      "comparator": "gte",
+                      "rhs-val": "UUP",
+                      "step": "if-child"
+                    },
+                    {
+                      "id": "881855b5-0aa5-482e-9f54-21ae94cf0e6f",
+                      "step": "if-child",
+                      "is-else-condition?": true,
+                      "children": [
+                        {
+                          "id": "fee862c4-e9fb-4ebe-89b1-91e5c2279f0b",
+                          "step": "wt-cash-equal",
+                          "children": [
+                            {
+                              "id": "0ad66113-bb63-4b63-93b9-764f3d0d2ca3",
+                              "step": "if",
+                              "children": [
+                                {
+                                  "children": [
+                                    {
+                                      "id": "bb02fb8a-3bbb-4dae-ba4f-488186c258a9",
+                                      "step": "wt-cash-equal",
+                                      "children": [
+                                        {
+                                          "id": "541191f6-0816-45d8-932a-3d3b110dd4e1",
+                                          "step": "if",
+                                          "children": [
+                                            {
+                                              "children": [
+                                                {
+                                                  "id": "4a30efa9-012f-4cf2-ad52-a8f6b470828c",
+                                                  "step": "wt-cash-equal",
+                                                  "children": [
+                                                    {
+                                                      "id": "cbe98b3b-55e6-4f56-9c54-2dad73599091",
+                                                      "step": "if",
+                                                      "children": [
+                                                        {
+                                                          "children": [
+                                                            {
+                                                              "id": "25d62ebd-082a-4182-b43e-b209be563c71",
+                                                              "step": "wt-inverse-vol",
+                                                              "children": [
+                                                                {
+                                                                  "name": "Invesco DB US Dollar Index Bullish Fund",
+                                                                  "ticker": "UUP",
+                                                                  "has_marketcap": false,
+                                                                  "id": "5d7afdbd-7033-4351-a3a4-b1bd1f0a4e68",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 29.78,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 73736769
+                                                                },
+                                                                {
+                                                                  "name": "SPDR Gold Shares",
+                                                                  "ticker": "GLD",
+                                                                  "has_marketcap": false,
+                                                                  "id": "546db988-18a5-4a58-9c92-c1758c01ae71",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 153.16,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 707078149.68
+                                                                }
+                                                              ],
+                                                              "window-days": "21"
+                                                            }
+                                                          ],
+                                                          "rhs-fn": "cumulative-return",
+                                                          "is-else-condition?": false,
+                                                          "lhs-fn": "cumulative-return",
+                                                          "rhs-window-days": "126",
+                                                          "lhs-window-days": "126",
+                                                          "lhs-val": "GLD",
+                                                          "id": "9e8740e0-792d-428c-a73d-a629decb1e92",
+                                                          "comparator": "gte",
+                                                          "rhs-val": "TMF",
+                                                          "step": "if-child"
+                                                        },
+                                                        {
+                                                          "id": "aeaac88f-ff90-4798-8757-1ac65dfdb4a3",
+                                                          "step": "if-child",
+                                                          "is-else-condition?": true,
+                                                          "children": [
+                                                            {
+                                                              "id": "4572fe28-539b-42ef-bb4f-f1b98afcfaa3",
+                                                              "step": "wt-inverse-vol",
+                                                              "children": [
+                                                                {
+                                                                  "name": "Direxion Daily 20+ Year Treasury Bull 3X Shares",
+                                                                  "ticker": "TMF",
+                                                                  "has_marketcap": false,
+                                                                  "id": "4923f22b-3464-43a3-a014-00a63d45671a",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 7.17,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 84408093.66,
+                                                                  "children-count": 0
+                                                                },
+                                                                {
+                                                                  "name": "Invesco DB US Dollar Index Bullish Fund",
+                                                                  "ticker": "UUP",
+                                                                  "has_marketcap": false,
+                                                                  "id": "04742513-a8b8-4494-9c86-092261be43fb",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 29.78,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 73736769
+                                                                }
+                                                              ],
+                                                              "window-days": "21"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ],
+                                              "rhs-fn": "cumulative-return",
+                                              "is-else-condition?": false,
+                                              "lhs-fn": "cumulative-return",
+                                              "rhs-window-days": "126",
+                                              "lhs-window-days": "126",
+                                              "lhs-val": "UUP",
+                                              "id": "884bc06f-01b4-43ff-92f5-07826b5e43c0",
+                                              "comparator": "gte",
+                                              "rhs-val": "TMF",
+                                              "step": "if-child"
+                                            },
+                                            {
+                                              "id": "b484f444-2aad-4131-80e8-1f17a4538960",
+                                              "step": "if-child",
+                                              "is-else-condition?": true,
+                                              "children": [
+                                                {
+                                                  "id": "93e9542b-3010-4590-8a79-35e96c1450ef",
+                                                  "step": "wt-cash-equal",
+                                                  "children": [
+                                                    {
+                                                      "id": "bc304dce-cd99-4956-866f-eb89b446d3b7",
+                                                      "step": "if",
+                                                      "children": [
+                                                        {
+                                                          "children": [
+                                                            {
+                                                              "id": "819a8c2e-8f18-4e1b-b951-aa3cd1bae4c0",
+                                                              "step": "wt-inverse-vol",
+                                                              "children": [
+                                                                {
+                                                                  "name": "Direxion Daily 20+ Year Treasury Bull 3X Shares",
+                                                                  "ticker": "TMF",
+                                                                  "has_marketcap": false,
+                                                                  "id": "6fd6db2d-6cd7-4533-9619-77035576ff9a",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 7.17,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 84408093.66,
+                                                                  "children-count": 0
+                                                                },
+                                                                {
+                                                                  "name": "SPDR Gold Shares",
+                                                                  "ticker": "GLD",
+                                                                  "has_marketcap": false,
+                                                                  "id": "9c170d89-518d-4c7a-b39e-b8673dc13197",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 153.16,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 707078149.68
+                                                                }
+                                                              ],
+                                                              "collapsed?": false,
+                                                              "window-days": "21"
+                                                            }
+                                                          ],
+                                                          "rhs-fn": "cumulative-return",
+                                                          "is-else-condition?": false,
+                                                          "lhs-fn": "cumulative-return",
+                                                          "rhs-window-days": "126",
+                                                          "lhs-window-days": "126",
+                                                          "lhs-val": "GLD",
+                                                          "id": "a64c248f-c7b4-4711-a225-89526776bc99",
+                                                          "comparator": "gte",
+                                                          "rhs-val": "UUP",
+                                                          "step": "if-child"
+                                                        },
+                                                        {
+                                                          "id": "e2651189-fd40-47ef-8b99-d951bbb9f434",
+                                                          "step": "if-child",
+                                                          "is-else-condition?": true,
+                                                          "children": [
+                                                            {
+                                                              "id": "192cafac-4581-4ea6-aa3d-0485b946edf0",
+                                                              "step": "wt-inverse-vol",
+                                                              "children": [
+                                                                {
+                                                                  "name": "Direxion Daily 20+ Year Treasury Bull 3X Shares",
+                                                                  "ticker": "TMF",
+                                                                  "has_marketcap": false,
+                                                                  "id": "eff3cfcb-f740-439d-a002-e0347a17190c",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 7.17,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 84408093.66,
+                                                                  "children-count": 0
+                                                                },
+                                                                {
+                                                                  "name": "Invesco DB US Dollar Index Bullish Fund",
+                                                                  "ticker": "UUP",
+                                                                  "has_marketcap": false,
+                                                                  "id": "aeae80e3-d07c-462f-8457-22a5175fd51d",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 29.78,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 73736769
+                                                                }
+                                                              ],
+                                                              "window-days": "21"
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ]
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "rhs-fn": "cumulative-return",
+                                  "is-else-condition?": false,
+                                  "lhs-fn": "cumulative-return",
+                                  "rhs-window-days": "126",
+                                  "lhs-window-days": "126",
+                                  "lhs-val": "GLD",
+                                  "id": "d0039854-cb6a-483f-a4ca-4e0ed39d9e5c",
+                                  "comparator": "gte",
+                                  "rhs-val": "SSO",
+                                  "step": "if-child"
+                                },
+                                {
+                                  "id": "db56d085-1ea3-4992-a76b-cc75f6b1b490",
+                                  "step": "if-child",
+                                  "is-else-condition?": true,
+                                  "children": [
+                                    {
+                                      "id": "0cf8b9bd-5129-4440-9970-af56fd7d9a92",
+                                      "step": "wt-cash-equal",
+                                      "children": [
+                                        {
+                                          "id": "44dda5fc-584d-44d3-aab1-d662bb729b3c",
+                                          "step": "if",
+                                          "children": [
+                                            {
+                                              "children": [
+                                                {
+                                                  "id": "1a992beb-0ef8-4da1-8fb5-adab5fe5a370",
+                                                  "step": "wt-inverse-vol",
+                                                  "children": [
+                                                    {
+                                                      "name": "Direxion Daily 20+ Year Treasury Bull 3X Shares",
+                                                      "ticker": "TMF",
+                                                      "has_marketcap": false,
+                                                      "id": "e70c9e4c-0f9c-432b-9951-d09df50f40ba",
+                                                      "exchange": "ARCX",
+                                                      "price": 7.17,
+                                                      "step": "asset",
+                                                      "dollar_volume": 84408093.66,
+                                                      "children-count": 0
+                                                    },
+                                                    {
+                                                      "name": "Invesco DB US Dollar Index Bullish Fund",
+                                                      "ticker": "UUP",
+                                                      "has_marketcap": false,
+                                                      "id": "c9e890f2-dbc4-4c07-81b7-8f8727e4cc4c",
+                                                      "exchange": "ARCX",
+                                                      "price": 29.78,
+                                                      "step": "asset",
+                                                      "dollar_volume": 73736769
+                                                    }
+                                                  ],
+                                                  "window-days": "21"
+                                                }
+                                              ],
+                                              "rhs-fn": "cumulative-return",
+                                              "is-else-condition?": false,
+                                              "lhs-fn": "cumulative-return",
+                                              "rhs-window-days": "126",
+                                              "lhs-window-days": "126",
+                                              "lhs-val": "TMF",
+                                              "id": "312f3b6f-a9dc-4b76-9eab-83da8178b814",
+                                              "comparator": "gte",
+                                              "rhs-val": "SSO",
+                                              "step": "if-child"
+                                            },
+                                            {
+                                              "id": "59db898d-463c-40ef-a8c8-cfee0ce289d8",
+                                              "step": "if-child",
+                                              "is-else-condition?": true,
+                                              "children": [
+                                                {
+                                                  "id": "c86e3dbe-3190-4d56-8b30-4679385a3133",
+                                                  "step": "wt-inverse-vol",
+                                                  "children": [
+                                                    {
+                                                      "name": "ProShares Ultra S&P 500",
+                                                      "ticker": "SSO",
+                                                      "has_marketcap": false,
+                                                      "id": "2c22ee62-edfd-40d0-817c-8e5472020e42",
+                                                      "exchange": "ARCX",
+                                                      "price": 46.63,
+                                                      "step": "asset",
+                                                      "dollar_volume": 303296907.90000004,
+                                                      "children-count": 0
+                                                    },
+                                                    {
+                                                      "name": "Invesco DB US Dollar Index Bullish Fund",
+                                                      "ticker": "UUP",
+                                                      "has_marketcap": false,
+                                                      "id": "b9949a70-a33a-4b18-b517-237a60172f36",
+                                                      "exchange": "ARCX",
+                                                      "price": 29.78,
+                                                      "step": "asset",
+                                                      "dollar_volume": 73736769
+                                                    }
+                                                  ],
+                                                  "window-days": "21"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "f9ff5c2f-0eed-45c4-b399-ffa1557f0412",
+          "step": "group",
+          "name": "OG V 1bb | Gain Train DGAF | Deez (20%)",
+          "collapsed?": true,
+          "weight": {
+            "num": "20",
+            "den": "100"
+          },
+          "children": [
+            {
+              "id": "19b25206-ec2e-46b9-9c4f-77024fa0a1d1",
+              "step": "wt-cash-equal",
+              "children": [
+                {
+                  "id": "50af0e8c-27f1-42e9-979e-2c0ea74d6e01",
+                  "step": "group",
+                  "name": "V 1b | 🚂 Gain Train DGAF | Deez | (A: 0.30, B: 0.01, R^2: 0, R: 0.02) BT - 1JAN2015",
+                  "children": [
+                    {
+                      "step": "wt-cash-equal",
+                      "id": "27584bd2-f969-4278-90e9-a68020462b42",
+                      "children": [
+                        {
+                          "id": "1eea3c9f-e926-41f8-8efe-86eea61f7482",
+                          "step": "wt-cash-specified",
+                          "children": [
+                            {
+                              "id": "61e432ba-29e8-41af-8ca0-31001f9c39fc",
+                              "step": "if",
+                              "children": [
+                                {
+                                  "children": [
+                                    {
+                                      "id": "fb29b472-6cfc-4a9b-96f5-64cdf84c3db6",
+                                      "step": "wt-cash-equal",
+                                      "children": [
+                                        {
+                                          "select?": true,
+                                          "children": [
+                                            {
+                                              "name": "Invesco DB US Dollar Index Bullish Fund",
+                                              "ticker": "UUP",
+                                              "has_marketcap": false,
+                                              "id": "7da26881-aed1-4071-9b84-2a53b35bdb5e",
+                                              "exchange": "ARCX",
+                                              "price": 30.3,
+                                              "step": "asset",
+                                              "dollar_volume": 143317515.3
+                                            }
+                                          ],
+                                          "select-fn": "bottom",
+                                          "select-n": "1",
+                                          "sort-by-fn": "relative-strength-index",
+                                          "sort-by-window-days": "14",
+                                          "id": "8da1e6e3-baab-4c03-be40-2e2a27edd058",
+                                          "sort-by?": true,
+                                          "step": "filter"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "rhs-fn": "exponential-moving-average-price",
+                                  "is-else-condition?": false,
+                                  "lhs-fn": "exponential-moving-average-price",
+                                  "rhs-window-days": "100",
+                                  "lhs-window-days": "42",
+                                  "lhs-val": "UUP",
+                                  "id": "4be4a631-06d4-4764-b3fd-193b0f2808e4",
+                                  "comparator": "gt",
+                                  "rhs-val": "UUP",
+                                  "step": "if-child"
+                                },
+                                {
+                                  "id": "2dba943d-d927-43d2-82aa-d4a8f08f11fa",
+                                  "step": "if-child",
+                                  "is-else-condition?": true,
+                                  "children": [
+                                    {
+                                      "id": "57a959ca-135c-4b18-80e5-1333f9f1dd4f",
+                                      "step": "wt-cash-equal",
+                                      "children": [
+                                        {
+                                          "select?": true,
+                                          "children": [
+                                            {
+                                              "name": "SPDR Bloomberg 1-3 Month T-Bill ETF",
+                                              "ticker": "BIL",
+                                              "has_marketcap": false,
+                                              "id": "bfab82f7-104b-470a-8403-c21622b40b12",
+                                              "exchange": "ARCX",
+                                              "price": 91.47,
+                                              "step": "asset",
+                                              "dollar_volume": 460220237.13
+                                            },
+                                            {
+                                              "name": "Direxion Daily Semiconductor Bull 3x Shares",
+                                              "ticker": "SOXL",
+                                              "has_marketcap": false,
+                                              "id": "e8032838-3c4c-43ca-bb46-d60f01872621",
+                                              "exchange": "ARCX",
+                                              "price": 9.21,
+                                              "step": "asset",
+                                              "dollar_volume": 1225944278.88
+                                            },
+                                            {
+                                              "name": "Invesco DB Commodity Index Tracking Fund",
+                                              "ticker": "DBC",
+                                              "has_marketcap": false,
+                                              "id": "27d95f48-0dcf-49a9-bbf1-40dadf363d6a",
+                                              "exchange": "ARCX",
+                                              "price": 25.99,
+                                              "step": "asset",
+                                              "dollar_volume": 61908959.699999996
+                                            }
+                                          ],
+                                          "select-fn": "top",
+                                          "select-n": "2",
+                                          "sort-by-fn": "standard-deviation-price",
+                                          "sort-by-window-days": "14",
+                                          "id": "5ab64d19-df5e-49c7-ae1a-0a52b912bf02",
+                                          "sort-by?": true,
+                                          "step": "filter"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ],
+                              "weight": {
+                                "num": 40,
+                                "den": 100
+                              },
+                              "collapsed-specified-weight?": false
+                            },
+                            {
+                              "id": "aca96a3e-966a-488e-91d2-b53e45223ba5",
+                              "step": "if",
+                              "children": [
+                                {
+                                  "children": [
+                                    {
+                                      "id": "e96c9e14-c439-41b6-a3a8-128f6dd82ddf",
+                                      "step": "wt-cash-equal",
+                                      "children": [
+                                        {
+                                          "name": "SPDR Bloomberg 1-3 Month T-Bill ETF",
+                                          "ticker": "BIL",
+                                          "has_marketcap": false,
+                                          "id": "50c98087-6b8c-4ef8-a6d7-014ae7950750",
+                                          "exchange": "ARCX",
+                                          "price": 91.46,
+                                          "step": "asset",
+                                          "dollar_volume": 594575240.7199999
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "rhs-fn": "relative-strength-index",
+                                  "is-else-condition?": false,
+                                  "rhs-fixed-value?": true,
+                                  "lhs-fn": "relative-strength-index",
+                                  "rhs-window-days": "3",
+                                  "lhs-window-days": "3",
+                                  "lhs-val": "BIL",
+                                  "id": "bbc1caf9-3385-479d-ae43-c5cd6e8f5fd1",
+                                  "comparator": "gt",
+                                  "rhs-val": "100",
+                                  "step": "if-child"
+                                },
+                                {
+                                  "id": "a6730809-bfa7-4b1a-84fb-70310cd05eec",
+                                  "step": "if-child",
+                                  "is-else-condition?": true,
+                                  "children": [
+                                    {
+                                      "id": "92c89e8e-3852-4959-8509-3ac4298591c7",
+                                      "step": "wt-cash-equal",
+                                      "children": [
+                                        {
+                                          "id": "32494533-0677-4e15-baf9-e06293842b81",
+                                          "step": "if",
+                                          "children": [
+                                            {
+                                              "children": [
+                                                {
+                                                  "id": "24f9d628-7616-492b-9808-af6c87098b38",
+                                                  "step": "group",
+                                                  "name": "Extremely oversold S&P (low RSI). Double check with bond mkt before going long",
+                                                  "children": [
+                                                    {
+                                                      "step": "wt-cash-equal",
+                                                      "id": "eb7a1002-e55d-4374-9d93-fc967500d134",
+                                                      "children": [
+                                                        {
+                                                          "id": "42403935-2008-4497-8172-197b8005db6b",
+                                                          "step": "if",
+                                                          "children": [
+                                                            {
+                                                              "children": [
+                                                                {
+                                                                  "name": "Direxion Daily Semiconductor Bear 3x Shares",
+                                                                  "ticker": "SOXS",
+                                                                  "has_marketcap": false,
+                                                                  "id": "3e1336e7-4308-4c33-8bd8-35c44206bafa",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 53.72,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 871353441.6
+                                                                }
+                                                              ],
+                                                              "rhs-fn": "relative-strength-index",
+                                                              "is-else-condition?": false,
+                                                              "lhs-fn": "relative-strength-index",
+                                                              "rhs-window-days": "10",
+                                                              "lhs-window-days": "10",
+                                                              "lhs-val": "SHY",
+                                                              "id": "d5b06356-ec85-4e46-b116-bd14149a436d",
+                                                              "comparator": "lte",
+                                                              "rhs-val": "VTI",
+                                                              "step": "if-child"
+                                                            },
+                                                            {
+                                                              "id": "18129b0d-81e5-44f1-8dbc-dcaa6407b2ae",
+                                                              "step": "if-child",
+                                                              "is-else-condition?": true,
+                                                              "children": [
+                                                                {
+                                                                  "name": "Direxion Daily Semiconductor Bull 3x Shares",
+                                                                  "ticker": "SOXL",
+                                                                  "has_marketcap": false,
+                                                                  "id": "a4057f73-e53c-41c1-bd4a-6fc66b842ff6",
+                                                                  "exchange": "ARCX",
+                                                                  "price": 11.19,
+                                                                  "step": "asset",
+                                                                  "dollar_volume": 1275587444.04
+                                                                }
+                                                              ]
+                                                            }
+                                                          ]
+                                                        }
+                                                      ]
+                                                    }
+                                                  ],
+                                                  "collapsed?": false
+                                                }
+                                              ],
+                                              "is-else-condition?": false,
+                                              "rhs-fixed-value?": true,
+                                              "lhs-fn": "relative-strength-index",
+                                              "lhs-window-days": "7",
+                                              "lhs-val": "SPY",
+                                              "id": "b5b52d93-e982-42b6-9fb1-0b63e92a433f",
+                                              "comparator": "lt",
+                                              "rhs-val": "27",
+                                              "step": "if-child"
+                                            },
+                                            {
+                                              "id": "f9268404-66b6-4807-b0ce-c02c816be0d2",
+                                              "step": "if-child",
+                                              "is-else-condition?": true,
+                                              "children": [
+                                                {
+                                                  "name": "AGFiQ US Market Neutral Anti-Beta Fund",
+                                                  "ticker": "BTAL",
+                                                  "has_marketcap": false,
+                                                  "id": "3bf2a974-78d0-4152-84e0-d3db5dc84eb3",
+                                                  "exchange": "ARCX",
+                                                  "price": 21.18,
+                                                  "step": "asset",
+                                                  "dollar_volume": 7705093.38
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ],
+                              "weight": {
+                                "num": "40",
+                                "den": 100
+                              },
+                              "collapsed-specified-weight?": false
+                            },
+                            {
+                              "id": "70ab8a8f-f87b-42f4-859c-e18e3f606440",
+                              "step": "if",
+                              "children": [
+                                {
+                                  "children": [
+                                    {
+                                      "id": "912bd19a-4b19-4af5-8f24-1520b7fc182f",
+                                      "step": "wt-cash-equal",
+                                      "children": [
+                                        {
+                                          "select?": true,
+                                          "children": [
+                                            {
+                                              "name": "Invesco DB US Dollar Index Bullish Fund",
+                                              "ticker": "UUP",
+                                              "has_marketcap": false,
+                                              "id": "457adca0-2414-4a47-b1cf-2b1d380582b1",
+                                              "exchange": "ARCX",
+                                              "price": 30.3,
+                                              "step": "asset",
+                                              "dollar_volume": 143317515.3
+                                            }
+                                          ],
+                                          "select-fn": "bottom",
+                                          "select-n": "1",
+                                          "sort-by-fn": "relative-strength-index",
+                                          "sort-by-window-days": "14",
+                                          "id": "14d1505d-5d7f-44c1-a5c3-ec98d4dd38de",
+                                          "sort-by?": true,
+                                          "step": "filter"
+                                        }
+                                      ]
+                                    }
+                                  ],
+                                  "rhs-fn": "exponential-moving-average-price",
+                                  "is-else-condition?": false,
+                                  "lhs-fn": "exponential-moving-average-price",
+                                  "rhs-window-days": "100",
+                                  "lhs-window-days": "42",
+                                  "lhs-val": "UUP",
+                                  "id": "5d08ccb5-3712-439f-ac19-97d39c4ac194",
+                                  "comparator": "gt",
+                                  "rhs-val": "UUP",
+                                  "step": "if-child"
+                                },
+                                {
+                                  "id": "26b112ea-e818-4c5a-80d9-c6ece3bd5632",
+                                  "step": "if-child",
+                                  "is-else-condition?": true,
+                                  "children": [
+                                    {
+                                      "id": "1d7845a3-bf49-481d-8414-c0114e4f5651",
+                                      "step": "wt-cash-equal",
+                                      "children": [
+                                        {
+                                          "select?": true,
+                                          "children": [
+                                            {
+                                              "name": "SPDR Bloomberg 1-3 Month T-Bill ETF",
+                                              "ticker": "BIL",
+                                              "has_marketcap": false,
+                                              "id": "98be32a6-ead5-4d77-a849-134d83cbfcc6",
+                                              "exchange": "ARCX",
+                                              "price": 91.47,
+                                              "step": "asset",
+                                              "dollar_volume": 460220237.13
+                                            },
+                                            {
+                                              "name": "Direxion Daily Semiconductor Bull 3x Shares",
+                                              "ticker": "SOXL",
+                                              "has_marketcap": false,
+                                              "id": "3672db6b-7b85-41e6-ad4b-837b1faa7480",
+                                              "exchange": "ARCX",
+                                              "price": 9.21,
+                                              "step": "asset",
+                                              "dollar_volume": 1225944278.88
+                                            },
+                                            {
+                                              "name": "Invesco DB Commodity Index Tracking Fund",
+                                              "ticker": "DBC",
+                                              "has_marketcap": false,
+                                              "id": "8ec232c3-99e1-4bdc-8f33-288f2c36d5a5",
+                                              "exchange": "ARCX",
+                                              "price": 25.99,
+                                              "step": "asset",
+                                              "dollar_volume": 61908959.699999996
+                                            }
+                                          ],
+                                          "select-fn": "top",
+                                          "select-n": "2",
+                                          "sort-by-fn": "standard-deviation-price",
+                                          "sort-by-window-days": "14",
+                                          "id": "7e887735-8a24-4da2-9e17-450e848a5945",
+                                          "sort-by?": true,
+                                          "step": "filter"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ],
+                              "weight": {
+                                "num": "20",
+                                "den": 100
+                              },
+                              "collapsed-specified-weight?": false
+                            }
+                          ],
+                          "window-days": "35",
+                          "weight": {
+                            "num": "27.5",
+                            "den": 100
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "weight": {
+                    "num": "80",
+                    "den": 100
+                  },
+                  "collapsed?": false
+                }
+              ],
+              "window-days": "35"
+            }
+          ]
+        },
+        {
+          "id": "2afed57e-2fab-44da-a7f1-57dbcbe02a23",
+          "step": "group",
+          "name": "Diversify with Gold & the Dollar (20%)",
+          "collapsed?": true,
+          "weight": {
+            "num": "20",
+            "den": "100"
+          },
+          "children": [
+            {
+              "id": "d637f555-fc7a-411b-b762-8a1313b9992d",
+              "step": "wt-inverse-vol",
+              "children": [
+                {
+                  "name": "SPDR Gold Shares",
+                  "ticker": "GLD",
+                  "has_marketcap": false,
+                  "weight": {
+                    "num": 100,
+                    "den": 100
+                  },
+                  "id": "f26af8bf-0a14-4bb0-9103-763fa06cb297",
+                  "exchange": "ARCX",
+                  "price": 178.29,
+                  "step": "asset",
+                  "dollar_volume": 2079818104.1399999
+                },
+                {
+                  "name": "Invesco DB US Dollar Index Bullish Fund",
+                  "ticker": "UUP",
+                  "has_marketcap": false,
+                  "id": "3c53f0e4-c6d8-4600-a139-faf412bd5834",
+                  "exchange": "ARCX",
+                  "price": 25.76,
+                  "step": "asset",
+                  "dollar_volume": 31271738.400000002,
+                  "children-count": 0
+                }
+              ],
+              "window-days": "26"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "description": "Equal-weight blend of 5 adaptive, OOS-consistent Composer strategies. Survivor-biased single-stock sleeves (Joseph Story, Simple Dividends) replaced with non-equity diversifiers (OG 2x Adaptive Asset Allocation; Gold & Dollar). No individual stocks; all sleeves rule-driven.",
+  "rebalance": "none",
+  "rebalance-corridor-width": 0.05
+}
