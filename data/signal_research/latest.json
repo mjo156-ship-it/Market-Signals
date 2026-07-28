@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-07-28T16:30:51+00:00",
+  "generated_at_utc": "2026-07-28T21:13:30+00:00",
   "data_through": "2026-07-28",
   "universe_size": 90,
   "combinations_evaluated": 1270,
@@ -28,7 +28,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "3-mo momentum +21.5%, rank #5",
+      "today_value": "3-mo momentum +19.9%, rank #5",
       "backtest": {
         "n": 121,
         "win_rate": 0.612,
@@ -656,7 +656,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "3-mo momentum +14.3%, rank #7",
+      "today_value": "3-mo momentum +14.4%, rank #7",
       "backtest": {
         "n": 45,
         "win_rate": 0.667,
@@ -904,7 +904,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 110.32 vs 52w high 110.31",
+      "today_value": "close 110.33 vs 52w high 110.31",
       "backtest": {
         "n": 370,
         "win_rate": 0.949,
@@ -2779,7 +2779,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +45.3%, rank #10",
+      "today_value": "6-mo momentum +46.2%, rank #9",
       "backtest": {
         "n": 73,
         "win_rate": 0.644,
@@ -3167,7 +3167,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -1.73",
+      "today_value": "dist-z -1.76",
       "backtest": {
         "n": 57,
         "win_rate": 0.667,
@@ -3475,7 +3475,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +100.0%, rank #9",
+      "today_value": "12-mo momentum +97.4%, rank #9",
       "backtest": {
         "n": 98,
         "win_rate": 0.622,
@@ -5424,7 +5424,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 30.98 vs 52w high 31.54",
+      "today_value": "close 31.04 vs 52w high 31.54",
       "backtest": {
         "n": 28,
         "win_rate": 0.643,
@@ -6118,7 +6118,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 81.96 vs 52w high 82.09",
+      "today_value": "close 81.94 vs 52w high 82.09",
       "backtest": {
         "n": 226,
         "win_rate": 0.717,
@@ -7271,7 +7271,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "3-mo momentum +11.2%, rank #11",
+      "today_value": "3-mo momentum +11.5%, rank #10",
       "backtest": {
         "n": 99,
         "win_rate": 0.636,
@@ -7789,7 +7789,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 36.63 vs 52w high 37.19",
+      "today_value": "close 36.58 vs 52w high 37.19",
       "backtest": {
         "n": 47,
         "win_rate": 0.681,
