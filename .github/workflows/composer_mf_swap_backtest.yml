@@ -1,0 +1,35 @@
+name: Composer MF Swap Backtest
+permissions:
+  contents: write
+on:
+  workflow_dispatch:
+jobs:
+  swap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install requests numpy
+      - name: Swap backtest
+        env:
+          COMPOSER_KEY_ID: ${{ secrets.COMPOSER_KEY_ID }}
+          COMPOSER_KEY_SECRET: ${{ secrets.COMPOSER_KEY_SECRET }}
+        run: python scripts/composer_mf_swap_backtest.py
+      - name: Commit symphony JSONs
+        if: success()
+        run: |
+          set -e
+          shopt -s nullglob
+          files=(data/swap_gold_to_mftech_symphony.json data/add_mftech_6sleeve_symphony.json)
+          [ ${#files[@]} -eq 0 ] && { echo "none"; exit 0; }
+          git config user.name "composer-oos-bot"
+          git config user.email "composer-oos-bot@users.noreply.github.com"
+          git add "${files[@]}"
+          if git diff --cached --quiet; then echo "no change"; else
+            git commit -m "Build MF/tech swap + 6-sleeve symphonies $(date -u +%Y-%m-%d)"
+            git pull --rebase origin "${GITHUB_REF_NAME:-main}" || true
+            git push origin "HEAD:${GITHUB_REF_NAME:-main}"
+          fi
