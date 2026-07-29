@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-07-29T15:37:37+00:00",
+  "generated_at_utc": "2026-07-29T16:18:53+00:00",
   "data_through": "2026-07-29",
   "universe_size": 90,
   "combinations_evaluated": 1270,
@@ -28,7 +28,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +43.1%, rank #8",
+      "today_value": "6-mo momentum +43.4%, rank #8",
       "backtest": {
         "n": 73,
         "win_rate": 0.644,
@@ -416,7 +416,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "3-mo momentum +14.3%, rank #7",
+      "today_value": "3-mo momentum +14.7%, rank #7",
       "backtest": {
         "n": 91,
         "win_rate": 0.615,
@@ -894,7 +894,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B -0.00",
+      "today_value": "%B -0.09",
       "backtest": {
         "n": 116,
         "win_rate": 0.603,
@@ -1497,7 +1497,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B -0.10",
+      "today_value": "%B -0.14",
       "backtest": {
         "n": 71,
         "win_rate": 0.62,
@@ -1877,7 +1877,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -1.89",
+      "today_value": "dist-z -1.97",
       "backtest": {
         "n": 57,
         "win_rate": 0.667,
@@ -2185,7 +2185,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +92.7%, rank #10",
+      "today_value": "12-mo momentum +90.0%, rank #10",
       "backtest": {
         "n": 98,
         "win_rate": 0.622,
@@ -2698,7 +2698,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -1.92",
+      "today_value": "dist-z -1.99",
       "backtest": {
         "n": 61,
         "win_rate": 0.656,
@@ -3179,7 +3179,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 31.16 vs 52w high 31.54",
+      "today_value": "close 31.13 vs 52w high 31.54",
       "backtest": {
         "n": 28,
         "win_rate": 0.643,
@@ -3342,7 +3342,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B 0.06",
+      "today_value": "%B 0.02",
       "backtest": {
         "n": 163,
         "win_rate": 0.601,
@@ -4180,14 +4180,14 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 81.89 vs 52w high 82.09",
+      "today_value": "close 81.86 vs 52w high 82.09",
       "backtest": {
         "n": 226,
         "win_rate": 0.717,
         "avg_return": 0.0026,
         "median_return": 0.0019,
         "baseline_return": 0.0016,
-        "baseline_win_rate": 0.6577,
+        "baseline_win_rate": 0.6575,
         "edge": 0.0011,
         "fired_today": false,
         "events": [
@@ -5333,7 +5333,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "3-mo momentum +11.5%, rank #10",
+      "today_value": "3-mo momentum +11.3%, rank #10",
       "backtest": {
         "n": 99,
         "win_rate": 0.636,
