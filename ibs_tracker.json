@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-29T21:00:36.437256",
+  "updated_at": "2026-07-30T15:36:47.665922",
   "gate_state": {
     "SPY": "IN",
     "QQQ": "IN",
@@ -8,11 +8,11 @@
   },
   "current_multiplier": {
     "SPY": 1.0,
-    "TQQQ": 2.0,
-    "SOXL": 2.0,
-    "TECL": 2.0
+    "TQQQ": 1.0,
+    "SOXL": 1.0,
+    "TECL": 1.0
   },
-  "breadth_today": 3,
+  "breadth_today": 0,
   "baseline": {
     "gate_entry_SPY": {
       "n": 478,
