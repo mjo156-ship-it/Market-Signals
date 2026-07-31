@@ -1,7 +1,8 @@
 {
-  "timestamp": "2026-07-31T22:12:20.703167+00:00",
-  "mode": "rewrite",
-  "succeeded": [
+  "timestamp": "2026-07-31T23:32:52.498005+00:00",
+  "mode": "append",
+  "succeeded": [],
+  "skipped": [
     "AMD",
     "AMZN",
     "AVGO",
@@ -94,13 +95,12 @@
     "XLY",
     "YINN"
   ],
-  "skipped": [],
   "failed": [],
   "warnings": [],
   "counts": {
     "total": 91,
-    "ok": 91,
-    "skipped": 0,
+    "ok": 0,
+    "skipped": 91,
     "failed": 0
   }
 }
