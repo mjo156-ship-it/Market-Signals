@@ -1,6 +1,6 @@
 # Signal Research — 2026-07-31
 
-_Generated 2026-07-31T15:51:10+00:00 · 90 tickers · 1 firing · 7 approaching_
+_Generated 2026-07-31T16:33:07+00:00 · 90 tickers · 1 firing · 8 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -15,6 +15,7 @@ _Generated 2026-07-31T15:51:10+00:00 · 90 tickers · 1 firing · 7 approaching_
 | Rotation: entered top-8 3-mo momentum (long) | UGA | UGA | manual_swing | 21d | 62% | +3.0% | +2.0pp | 91 |
 | CPER/GLD ratio z>2 (stretched) (short) | CPER | short CPER | manual_swing | 20d | 61% | +1.1% | +1.6pp | 31 |
 | Rotation: entered top-8 12-mo momentum (long) | USO | USO | manual_swing | 21d | 62% | +0.9% | +1.1pp | 26 |
+| Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 64% | +1.5% | +0.7pp | 28 |
 | 4+ down-day streak (long) | VOOV | VOOV | composer_ready | 5d | 63% | +0.6% | +0.3pp | 86 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 72% | +0.3% | +0.1pp | 226 |
 | Rotation: entered top-8 3-mo momentum (long) | XLF | FAS | manual_swing | 21d | 64% | +0.9% | +0.1pp | 99 |
