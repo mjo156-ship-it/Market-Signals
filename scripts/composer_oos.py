@@ -19,13 +19,23 @@ USAGE
     python composer_oos.py report --min-days 120
 """
 from __future__ import annotations
-import os, sys, json, time, argparse
+import os, sys, json, time, csv, argparse
 from datetime import datetime, date, timezone, timedelta
 
 import requests
 
 BASE = "https://api.composer.trade"
 OOS_PATH = os.environ.get("COMPOSER_OOS_PATH", "data/composer_oos.jsonl")
+# SPY benchmark for the OOS tabs: adjusted-close buy-and-hold from the repo's
+# committed OHLCV (same source as yfinance Adj Close, no slippage — a cleaner
+# beta reference than a fee-laden Composer SPY backtest). Loaded once per run.
+SPY_BENCH_PATH = os.environ.get("COMPOSER_OOS_SPY_CSV", "data/ohlcv/SPY.csv")
+
+# A window must be at least this long to publish an ANNUALIZED figure (CAGR,
+# Calmar, Martin). Below it, annualizing turns a 37-day run into "1,387,327%".
+MIN_ANNUALIZE_YEARS = 1.0
+# A window must be at least this many trading days to publish a Sharpe ratio.
+MIN_SHARPE_DAYS = 60
 
 # Backtest cost assumptions — match the house standard, not Composer's 1bp default.
 SLIPPAGE = float(os.environ.get("COMPOSER_OOS_SLIPPAGE", 0.0005))   # 5 bps
@@ -161,11 +171,175 @@ def _curve_stats(curve: dict[str, float]) -> dict:
     return {
         "n_days": n,
         "cum_pct": round(cum * 100, 2),
-        "cagr_pct": round(((1 + cum) ** (1 / yrs) - 1) * 100, 2) if yrs > 0.08 else None,
-        "sharpe": round((mean * 252) / (sd * 252 ** 0.5), 2) if sd > 0 else None,
+        # Annualize only over >= 1 year; suppress Sharpe on windows < ~60 days.
+        # Below those thresholds these are noise dressed up as results.
+        "cagr_pct": round(((1 + cum) ** (1 / yrs) - 1) * 100, 2)
+                    if (yrs >= MIN_ANNUALIZE_YEARS and (1 + cum) > 0) else None,
+        "sharpe": round((mean * 252) / (sd * 252 ** 0.5), 2)
+                  if (sd > 0 and n >= MIN_SHARPE_DAYS) else None,
         "maxdd_pct": round(mdd * 100, 2),
         "start": ds[0], "end": ds[-1],
     }
+
+
+# ──────────────────────────────────────────────────────────────────────
+# OOS confidence tier from the OOS window length. Shared by the watchlist
+# and discover ledgers so both carry the same schema. The SE of an
+# annualized Sharpe is ~ sqrt(252/n_days): short windows can't separate
+# skill from noise. High >=3y, Good >=2y, Fair >=1y, Low >=6mo, Thin <6mo.
+# ──────────────────────────────────────────────────────────────────────
+def _confidence(oos_days):
+    d = oos_days or 0
+    se = round((252.0 / d) ** 0.5, 3) if d else None
+    if d >= 756:
+        return "High", 4, se
+    if d >= 504:
+        return "Good", 3, se
+    if d >= 252:
+        return "Fair", 2, se
+    if d >= 126:
+        return "Low", 1, se
+    return "Thin", 0, se
+
+
+# ──────────────────────────────────────────────────────────────────────
+# SPY benchmark + OOS uncertainty fields (P0-1 / P0-2 / P0-3).
+# Kept here, in one place, so the watchlist and discover row dicts stay
+# schema-identical — the dashboard treats the two ledgers uniformly.
+# ──────────────────────────────────────────────────────────────────────
+_SPY_CACHE: dict[str, float] | None = None
+
+
+def spy_series(path: str = SPY_BENCH_PATH) -> dict[str, float]:
+    """date(iso) -> SPY adjusted close, loaded once and cached for the run."""
+    global _SPY_CACHE
+    if _SPY_CACHE is not None:
+        return _SPY_CACHE
+    out: dict[str, float] = {}
+    try:
+        with open(path) as f:
+            for row in csv.DictReader(f):
+                d = (row.get("Date") or "")[:10]
+                v = row.get("Adj Close") or row.get("Close")
+                if not d or v in (None, ""):
+                    continue
+                try:
+                    out[d] = float(v)
+                except ValueError:
+                    pass
+    except FileNotFoundError:
+        print(f"[oos] SPY benchmark file not found: {path} — benchmark fields "
+              f"will be null", file=sys.stderr)
+    _SPY_CACHE = out
+    return out
+
+
+def _daily_returns(curve: dict[str, float]) -> dict[str, float]:
+    """date -> simple return vs the prior available date in the curve."""
+    ds = sorted(curve)
+    out = {}
+    for i in range(1, len(ds)):
+        prev = curve[ds[i - 1]]
+        if prev:
+            out[ds[i]] = curve[ds[i]] / prev - 1
+    return out
+
+
+def _corr_beta(sym_curve: dict[str, float], bench_curve: dict[str, float]):
+    """Pearson corr + OLS beta of symphony daily returns vs SPY, on the trading
+    days both share. Returns (corr, beta, n_overlap); None,None if too few days."""
+    sr, br = _daily_returns(sym_curve), _daily_returns(bench_curve)
+    days = sorted(set(sr) & set(br))
+    n = len(days)
+    if n < 20:
+        return None, None, n
+    x = [br[d] for d in days]   # SPY (independent)
+    y = [sr[d] for d in days]   # symphony (dependent)
+    mx, my = sum(x) / n, sum(y) / n
+    sxy = sum((xi - mx) * (yi - my) for xi, yi in zip(x, y))
+    sxx = sum((xi - mx) ** 2 for xi in x)
+    syy = sum((yi - my) ** 2 for yi in y)
+    corr = sxy / (sxx * syy) ** 0.5 if (sxx > 0 and syy > 0) else None
+    beta = sxy / sxx if sxx > 0 else None
+    return (round(corr, 3) if corr is not None else None,
+            round(beta, 3) if beta is not None else None, n)
+
+
+def _raw_annualized(curve: dict[str, float]):
+    """UNGATED annualized CAGR% and Sharpe from a curve — used only to size the
+    CAGR standard error / low-power flag, where the whole point is to quantify
+    short, high-vol windows that _curve_stats deliberately suppresses for display."""
+    ds = sorted(curve)
+    vals = [curve[d] for d in ds]
+    rets = [vals[i] / vals[i - 1] - 1 for i in range(1, len(vals)) if vals[i - 1]]
+    if len(rets) < 2:
+        return None, None, len(rets)
+    n = len(rets)
+    mean = sum(rets) / n
+    sd = (sum((r - mean) ** 2 for r in rets) / (n - 1)) ** 0.5
+    cum = vals[-1] / vals[0] - 1
+    yrs = n / 252
+    cagr = ((1 + cum) ** (1 / yrs) - 1) * 100 if (yrs > 0 and (1 + cum) > 0) else None
+    sharpe = (mean * 252) / (sd * 252 ** 0.5) if sd > 0 else None
+    return cagr, sharpe, n
+
+
+def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
+                     is_cagr_pct, cagr_gap_pct, spy: dict | None = None) -> dict:
+    """All P0 fields for one symphony's OOS window, from its equity curve:
+        P0-1 benchmark   spy_oos_cagr_pct, spy_oos_maxdd_pct, oos_alpha_pct,
+                         oos_excess_sharpe
+        P0-2 corr/beta   spy_corr_oos, spy_beta_oos, stream_bucket
+        P0-3 z-score     oos_vol_pct, cagr_se_pct, gap_z, low_power
+    `out_stats` is _curve_stats(oos_curve) (already computed by the caller)."""
+    spy = spy if spy is not None else spy_series()
+    f = {"spy_oos_cagr_pct": None, "spy_oos_maxdd_pct": None,
+         "oos_alpha_pct": None, "oos_excess_sharpe": None,
+         "spy_corr_oos": None, "spy_beta_oos": None, "stream_bucket": None,
+         "oos_vol_pct": None, "cagr_se_pct": None, "gap_z": None, "low_power": None}
+    if not oos_curve:
+        return f
+    ds = sorted(oos_curve)
+    w0, w1 = ds[0], ds[-1]
+
+    # ── P0-1: SPY over the identical [oos_start, oos_end] window ──
+    bench = {d: v for d, v in spy.items() if w0 <= d <= w1}
+    bstat = _curve_stats(bench) if len(bench) >= 2 else {}
+    f["spy_oos_cagr_pct"] = bstat.get("cagr_pct")
+    f["spy_oos_maxdd_pct"] = bstat.get("maxdd_pct")
+    oc, sc = out_stats.get("cagr_pct"), bstat.get("cagr_pct")
+    if oc is not None and sc is not None:
+        f["oos_alpha_pct"] = round(oc - sc, 2)
+    osh, bsh = out_stats.get("sharpe"), bstat.get("sharpe")
+    if osh is not None and bsh is not None:
+        f["oos_excess_sharpe"] = round(osh - bsh, 2)
+
+    # ── P0-2: correlation + beta vs SPY daily returns ──
+    corr, beta, _ = _corr_beta(oos_curve, bench)
+    f["spy_corr_oos"], f["spy_beta_oos"] = corr, beta
+    if corr is not None:
+        a = abs(corr)
+        f["stream_bucket"] = ("equity" if a > 0.60 else
+                              "mixed" if a >= 0.30 else "diversifier")
+
+    # ── P0-3: gap z-score + low-power flag ──
+    # SE uses the UNGATED annualized figures so short/high-vol windows are
+    # flagged (low_power) rather than silently dropped. gap_z, however, uses the
+    # published (gated) gap, which is None below 1y — you cannot annualize a gap
+    # over a sub-year window without it exploding.
+    raw_cagr, raw_sharpe, _ = _raw_annualized(oos_curve)
+    if raw_cagr is not None and raw_sharpe and raw_sharpe > 0:
+        vol = raw_cagr / raw_sharpe
+        f["oos_vol_pct"] = round(vol, 2)
+        nd = out_stats.get("n_days") or 0
+        if nd > 0:
+            se = vol / (nd / 252.0) ** 0.5
+            f["cagr_se_pct"] = round(se, 2)
+            if cagr_gap_pct is not None and se > 0:
+                f["gap_z"] = round(cagr_gap_pct / se, 2)
+            if is_cagr_pct is not None:
+                f["low_power"] = bool(se > abs(is_cagr_pct))
+    return f
 
 
 # ──────────────────────────────────────────────────────────────────────
