@@ -293,19 +293,22 @@ def main():
             f.write(json.dumps(r) + "\n")
 
     # Confidence-gated ranking: only strategies with a usable OOS window (>=1y,
-    # rank>=2) compete on OOS Sharpe; the rest are listed but not "high confidence".
+    # rank>=2) compete on the sample-size-shrunk Sharpe (P2-7): sharpe_lcb =
+    # OOS Sharpe − 1 SE, so a longer-OOS strategy outranks a flashier short one.
     def score(r):
-        return (r.get("oos_conf_rank") or 0, r.get("oos_sharpe")
-                if r.get("oos_sharpe") is not None else -9)
+        lcb = r.get("sharpe_lcb")
+        return (r.get("oos_conf_rank") or 0, lcb if lcb is not None else -9)
     hi = sorted([r for r in rows if (r.get("oos_conf_rank") or 0) >= 2
                  and (r.get("oos_sharpe") or -9) > 0], key=score, reverse=True)
-    hdr = (f"{'conf':>4} {'oosDays':>7} {'OOScagr':>7} {'OOSsh':>5} {'gap':>7} "
+    hdr = (f"{'conf':>4} {'oosDays':>7} {'OOScagr':>7} {'OOSsh':>5} {'shLCB':>6} {'gap':>7} "
            f"{'calmar':>6}  name")
     print("\n=== HIGH-CONFIDENCE OOS (>=1y window, positive OOS Sharpe) ===")
     print(hdr); print("-" * len(hdr))
     for r in hi:
+        lcb = r.get("sharpe_lcb")
         print(f"{r.get('oos_conf') or '?':>4} {r.get('oos_days') or 0:7d} "
               f"{r.get('oos_cagr_pct') or 0:7.1f} {r.get('oos_sharpe') or 0:5.2f} "
+              f"{(lcb if lcb is not None else 0):6.2f} "
               f"{r.get('cagr_gap_pct') or 0:7.1f} {r.get('oos_calmar') or 0:6.2f}  "
               f"{(r.get('name') or '')[:44]}")
     print(f"\n[discover] {len(rows)}/{len(watch)} evaluated, "
