@@ -237,7 +237,7 @@ def _ext(curve):
     mean = sum(rets) / n
     cum = vals[-1] / vals[0] - 1
     yrs = n / 252
-    cagr = ((1 + cum) ** (1 / yrs) - 1) if (yrs > 0.08 and (1 + cum) > 0) else None
+    cagr = ((1 + cum) ** (1 / yrs) - 1) if (yrs >= oos.MIN_ANNUALIZE_YEARS and (1 + cum) > 0) else None
     dd_dev = (sum(min(r, 0.0) ** 2 for r in rets) / n) ** 0.5
     sortino = round((mean * 252) / (dd_dev * 252 ** 0.5), 2) if dd_dev > 0 else None
     peak, mdd, sq = vals[0], 0.0, 0.0
@@ -286,6 +286,12 @@ def main():
         ins = _cs({d: v for d, v in curve.items() if d < oosdate})
         out = _cs(oos_curve)
         oute = _ext(oos_curve)          # Calmar / Sortino / Ulcer / Martin (OOS side)
+        conf, conf_rank, sharpe_se = oos._confidence(out.get("n_days"))
+        if ins.get("cagr_pct") is not None and out.get("cagr_pct") is not None:
+            gap = round(out["cagr_pct"] - ins["cagr_pct"], 2)
+        else:
+            gap = None
+        extra = oos.oos_extra_fields(oos_curve, out, ins.get("cagr_pct"), gap)
         row = {
             "date": asof, "scope": "oos_split", "sym_id": sid, "name": name,
             "oos_date": oosdate,
@@ -297,11 +303,10 @@ def main():
             "oos_cum_pct": out.get("cum_pct"),
             "oos_calmar": oute.get("calmar"), "oos_sortino": oute.get("sortino"),
             "oos_ulcer": oute.get("ulcer"), "oos_martin": oute.get("martin"),
+            "oos_conf": conf, "oos_conf_rank": conf_rank, "sharpe_se": sharpe_se,
+            "cagr_gap_pct": gap,
+            **extra,
         }
-        if ins.get("cagr_pct") is not None and out.get("cagr_pct") is not None:
-            row["cagr_gap_pct"] = round(out["cagr_pct"] - ins["cagr_pct"], 2)
-        else:
-            row["cagr_gap_pct"] = None
         rows.append(row)
         print(f"[{i}/{len(WATCH)}] {name}: OOS {out.get('oos_days') or out.get('n_days')}d "
               f"cagr {out.get('cagr_pct')} sharpe {out.get('sharpe')}")

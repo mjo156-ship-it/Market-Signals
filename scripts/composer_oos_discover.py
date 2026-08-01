@@ -59,21 +59,9 @@ _DISCOVER_CANDIDATES = [
 ]
 
 
-# ── OOS confidence: statistical tier from the OOS window length ──────────────
-# Mirrors the dashboard's confOf(): High >=3y, Good >=2y, Fair >=1y, Low >=6mo,
-# Thin <6mo. rank is used for confidence-gated ranking; se is the Sharpe SE.
-def _confidence(oos_days):
-    d = oos_days or 0
-    se = round((252.0 / d) ** 0.5, 3) if d else None
-    if d >= 756:
-        return "High", 4, se
-    if d >= 504:
-        return "Good", 3, se
-    if d >= 252:
-        return "Fair", 2, se
-    if d >= 126:
-        return "Low", 1, se
-    return "Thin", 0, se
+# OOS confidence tier now lives in composer_oos._confidence (shared with the
+# watchlist ledger so both carry oos_conf / oos_conf_rank / sharpe_se).
+_confidence = oos._confidence
 
 
 def _cs(c):
@@ -93,7 +81,7 @@ def _ext(curve):
     mean = sum(rets) / n
     cum = vals[-1] / vals[0] - 1
     yrs = n / 252
-    cagr = ((1 + cum) ** (1 / yrs) - 1) if (yrs > 0.08 and (1 + cum) > 0) else None
+    cagr = ((1 + cum) ** (1 / yrs) - 1) if (yrs >= oos.MIN_ANNUALIZE_YEARS and (1 + cum) > 0) else None
     dd_dev = (sum(min(r, 0.0) ** 2 for r in rets) / n) ** 0.5
     sortino = round((mean * 252) / (dd_dev * 252 ** 0.5), 2) if dd_dev > 0 else None
     peak, mdd, sq = vals[0], 0.0, 0.0
@@ -275,6 +263,11 @@ def main():
         out = _cs(oos_curve)
         oute = _ext(oos_curve)
         conf, conf_rank, sharpe_se = _confidence(out.get("n_days"))
+        if ins.get("cagr_pct") is not None and out.get("cagr_pct") is not None:
+            gap = round(out["cagr_pct"] - ins["cagr_pct"], 2)
+        else:
+            gap = None
+        extra = oos.oos_extra_fields(oos_curve, out, ins.get("cagr_pct"), gap)
         row = {
             "date": asof, "scope": "oos_split", "sym_id": sid, "name": name,
             "oos_date": oosdate,
@@ -287,11 +280,9 @@ def main():
             "oos_calmar": oute.get("calmar"), "oos_sortino": oute.get("sortino"),
             "oos_ulcer": oute.get("ulcer"), "oos_martin": oute.get("martin"),
             "oos_conf": conf, "oos_conf_rank": conf_rank, "sharpe_se": sharpe_se,
+            "cagr_gap_pct": gap,
+            **extra,
         }
-        if ins.get("cagr_pct") is not None and out.get("cagr_pct") is not None:
-            row["cagr_gap_pct"] = round(out["cagr_pct"] - ins["cagr_pct"], 2)
-        else:
-            row["cagr_gap_pct"] = None
         rows.append(row)
         print(f"[{i}/{len(watch)}] {name}: OOS {out.get('n_days')}d "
               f"cagr {out.get('cagr_pct')} sharpe {out.get('oos_sharpe')} conf {conf}")
