@@ -36,6 +36,11 @@ SPY_BENCH_PATH = os.environ.get("COMPOSER_OOS_SPY_CSV", "data/ohlcv/SPY.csv")
 MIN_ANNUALIZE_YEARS = 1.0
 # A window must be at least this many trading days to publish a Sharpe ratio.
 MIN_SHARPE_DAYS = 60
+# P2-9: "current regime" window — the trailing slice of the backtest used as a
+# funding gate. A strong historical OOS is not a reason to fund a strategy whose
+# backtest over the CURRENT regime is negative (the B- Blue Chip Backup case:
+# "Held up" on history, but -56% annualized over the window it was funded into).
+RECENT_REGIME_DAYS = int(os.environ.get("COMPOSER_OOS_RECENT_DAYS", "126"))  # ~6mo
 
 # Backtest cost assumptions — match the house standard, not Composer's 1bp default.
 SLIPPAGE = float(os.environ.get("COMPOSER_OOS_SLIPPAGE", 0.0005))   # 5 bps
@@ -311,7 +316,8 @@ def _raw_annualized(curve: dict[str, float]):
 
 
 def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
-                     is_cagr_pct, cagr_gap_pct, spy: dict | None = None) -> dict:
+                     is_cagr_pct, cagr_gap_pct, spy: dict | None = None,
+                     full_curve: dict | None = None) -> dict:
     """All P0 fields for one symphony's OOS window, from its equity curve:
         P0-1 benchmark   spy_oos_cagr_pct, spy_oos_maxdd_pct, oos_alpha_pct,
                          oos_excess_sharpe
@@ -326,7 +332,9 @@ def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
          "oos_vol_pct": None, "cagr_se_pct": None, "gap_z": None, "low_power": None,
          "sharpe_lcb": None,
          "oos_spans_bear": None, "oos_worst_20d_pct": None,
-         "oos_bear_cagr_pct": None, "oos_bear_days": None}
+         "oos_bear_cagr_pct": None, "oos_bear_days": None,
+         "recent_days": None, "recent_cum_pct": None, "recent_sharpe": None,
+         "recent_maxdd_pct": None, "funding_block": None}
     if not oos_curve:
         return f
     ds = sorted(oos_curve)
@@ -412,6 +420,25 @@ def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
         yrs = len(brets) / 252.0
         if yrs > 0 and cum > 0:
             f["oos_bear_cagr_pct"] = round((cum ** (1 / yrs) - 1) * 100, 2)
+
+    # ── P2-9: current-regime funding gate ──
+    # Backtest performance over the trailing RECENT_REGIME_DAYS (the current
+    # regime). funding_block=True when that return is negative — a reason to
+    # withhold funding no matter how good the historical OOS looks. Uses the FULL
+    # backtest curve so a recently-frozen (short-OOS) strategy still gets a real
+    # 6-month window. This is a THIRD, separate measure — it does not blend with
+    # the IS-vs-OOS gap or the live-vs-backtest sync (see composer_oos.sync).
+    fc = full_curve if full_curve else oos_curve
+    fds = sorted(fc)
+    if len(fds) >= 2:
+        recent = {d: fc[d] for d in fds[-RECENT_REGIME_DAYS:]}
+        rstat = _curve_stats(recent)
+        f["recent_days"] = rstat.get("n_days")
+        f["recent_cum_pct"] = rstat.get("cum_pct")
+        f["recent_sharpe"] = rstat.get("sharpe")
+        f["recent_maxdd_pct"] = rstat.get("maxdd_pct")
+        if rstat.get("cum_pct") is not None:
+            f["funding_block"] = bool(rstat["cum_pct"] < 0)
     return f
 
 

@@ -37,7 +37,10 @@ import requests
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import composer_oos as oos
 
-EARLY_START = "2015-01-01"
+# P2-8: request each symphony's full available history (Composer clamps to the
+# earliest its constituents allow), so the in-sample window is per-symphony, not
+# a hardcoded 2015. Configurable floor.
+EARLY_START = os.environ.get("COMPOSER_OOS_EARLY_START", "1990-01-01")
 OUT = os.environ.get("COMPOSER_OOS_DISC_PATH", "data/composer_oos_discover.jsonl")
 SEED = os.environ.get("COMPOSER_DISCOVER_SEED", "data/composer_discover_seed.json")
 # Only backtest strategies whose OOS window is at least this many days — the
@@ -270,12 +273,15 @@ def main(rewrite=False):
             gap = round(out["cagr_pct"] - ins["cagr_pct"], 2)
         else:
             gap = None
-        extra = oos.oos_extra_fields(oos_curve, out, ins.get("cagr_pct"), gap)
+        extra = oos.oos_extra_fields(oos_curve, out, ins.get("cagr_pct"), gap,
+                                     full_curve=curve)
+        is_days = ins.get("n_days")
         row = {
             "date": asof, "scope": "oos_split", "sym_id": sid, "name": name,
             "oos_date": oosdate,
             "bt_start": min(curve), "bt_end": max(curve),
-            "is_days": ins.get("n_days"), "oos_days": out.get("n_days"),
+            "is_days": is_days, "is_years": round(is_days / 252, 1) if is_days else None,
+            "oos_days": out.get("n_days"),
             "is_cagr_pct": ins.get("cagr_pct"), "oos_cagr_pct": out.get("cagr_pct"),
             "is_sharpe": ins.get("sharpe"), "oos_sharpe": out.get("sharpe"),
             "is_maxdd_pct": ins.get("maxdd_pct"), "oos_maxdd_pct": out.get("maxdd_pct"),
