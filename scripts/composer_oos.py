@@ -234,6 +234,32 @@ def spy_series(path: str = SPY_BENCH_PATH) -> dict[str, float]:
     return out
 
 
+# Set of dates on which SPY closed below its 200-day SMA (a downtrend / "bear"
+# regime day). Computed once over the full SPY series and cached — used to
+# condition strategy performance on the market regime (P1-6).
+_BEAR_CACHE: set | None = None
+
+
+def spy_bear_days(spy: dict | None = None) -> set:
+    global _BEAR_CACHE
+    if _BEAR_CACHE is not None:
+        return _BEAR_CACHE
+    spy = spy if spy is not None else spy_series()
+    ds = sorted(spy)
+    bear, run = set(), 0.0
+    from collections import deque
+    win: deque = deque()
+    for d in ds:
+        v = spy[d]
+        win.append(v); run += v
+        if len(win) > 200:
+            run -= win.popleft()
+        if len(win) == 200 and v < run / 200.0:
+            bear.add(d)
+    _BEAR_CACHE = bear
+    return bear
+
+
 def _daily_returns(curve: dict[str, float]) -> dict[str, float]:
     """date -> simple return vs the prior available date in the curve."""
     ds = sorted(curve)
@@ -298,7 +324,9 @@ def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
          "oos_alpha_pct": None, "oos_excess_sharpe": None,
          "spy_corr_oos": None, "spy_beta_oos": None, "stream_bucket": None,
          "oos_vol_pct": None, "cagr_se_pct": None, "gap_z": None, "low_power": None,
-         "sharpe_lcb": None}
+         "sharpe_lcb": None,
+         "oos_spans_bear": None, "oos_worst_20d_pct": None,
+         "oos_bear_cagr_pct": None, "oos_bear_days": None}
     if not oos_curve:
         return f
     ds = sorted(oos_curve)
@@ -350,6 +378,40 @@ def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
     nd = out_stats.get("n_days") or 0
     if sh is not None and nd > 0:
         f["sharpe_lcb"] = round(sh - (252.0 / nd) ** 0.5, 2)
+
+    # ── P1-6: regime-conditional context ──
+    # A short OOS window in a single bull leg says nothing about drawdown
+    # resilience; these separate "held up across a regime change" from "held up
+    # during one bull leg."
+    svals = [oos_curve[d] for d in ds]
+    # oos_spans_bear: did SPY fall >= 15% peak-to-trough anywhere in the window?
+    bspy = sorted(d for d in spy if w0 <= d <= w1)
+    if len(bspy) >= 2:
+        pk, dd = spy[bspy[0]], 0.0
+        for d in bspy:
+            pk = max(pk, spy[d]); dd = min(dd, spy[d] / pk - 1)
+        f["oos_spans_bear"] = bool(dd <= -0.15)
+    # oos_worst_20d_pct: the strategy's worst rolling 20-trading-day return —
+    # the closest available tail proxy when the window contains no real bear.
+    if len(svals) > 20:
+        worst = min(svals[i + 20] / svals[i] - 1
+                    for i in range(len(svals) - 20) if svals[i])
+        f["oos_worst_20d_pct"] = round(worst * 100, 2)
+    # oos_bear_cagr_pct / oos_bear_days: strategy performance restricted to days
+    # SPY closed below its 200-day SMA. Annualized only when there are enough
+    # such days to be meaningful (same guard as Sharpe), else left null with the
+    # day count reported for context.
+    bearset = spy_bear_days(spy)
+    f["oos_bear_days"] = sum(1 for d in ds if d in bearset)
+    brets = [svals[i] / svals[i - 1] - 1 for i in range(1, len(ds))
+             if ds[i] in bearset and svals[i - 1]]
+    if len(brets) >= MIN_SHARPE_DAYS:
+        cum = 1.0
+        for r in brets:
+            cum *= (1 + r)
+        yrs = len(brets) / 252.0
+        if yrs > 0 and cum > 0:
+            f["oos_bear_cagr_pct"] = round((cum ** (1 / yrs) - 1) * 100, 2)
     return f
 
 
