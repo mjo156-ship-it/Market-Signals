@@ -354,6 +354,82 @@ def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
 
 
 # ──────────────────────────────────────────────────────────────────────
+# P1-4: append-with-history. The OOS ledgers used to be truncated (open "w")
+# every run, so every row carried the same date and there was no way to see a
+# symphony's OOS Sharpe degrading run over run. These helpers append instead:
+# one row per (sym_id, date), preserving prior runs, and stamp the run-over-run
+# Sharpe change onto each new row.
+# ──────────────────────────────────────────────────────────────────────
+def load_jsonl(path: str) -> list[dict]:
+    rows = []
+    if os.path.exists(path):
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    rows.append(json.loads(line))
+                except Exception:
+                    continue
+    return rows
+
+
+def _days_between(newer_iso: str, older_iso: str) -> int:
+    """Calendar days from older_iso to newer_iso (both 'YYYY-MM-DD...')."""
+    a = date(*(int(x) for x in newer_iso[:10].split("-")))
+    b = date(*(int(x) for x in older_iso[:10].split("-")))
+    return (a - b).days
+
+
+def sharpe_delta(history: list[dict], sym_id: str, asof: str,
+                 cur_sharpe, n_days_ago: int):
+    """Current OOS Sharpe minus the OOS Sharpe from the most recent PRIOR run at
+    least `n_days_ago` calendar days before `asof`. None if unavailable — the
+    earliest-available warning of run-over-run decay before cumulative stats move."""
+    if cur_sharpe is None:
+        return None
+    best = None
+    for r in history:
+        if (r.get("sym_id") != sym_id or r.get("scope") != "oos_split"
+                or not r.get("date") or r["date"][:10] >= asof[:10]
+                or r.get("oos_sharpe") is None):
+            continue
+        if _days_between(asof, r["date"]) >= n_days_ago and (best is None or r["date"] > best["date"]):
+            best = r
+    return None if best is None else round(cur_sharpe - best["oos_sharpe"], 2)
+
+
+def stamp_sharpe_deltas(new_rows: list[dict], history: list[dict], asof: str) -> None:
+    """Add d_sharpe_30d / d_sharpe_90d to each new row in place, from history."""
+    for r in new_rows:
+        sid, sh = r.get("sym_id"), r.get("oos_sharpe")
+        r["d_sharpe_30d"] = sharpe_delta(history, sid, asof, sh, 30)
+        r["d_sharpe_90d"] = sharpe_delta(history, sid, asof, sh, 90)
+
+
+def append_history(path: str, new_rows: list[dict], asof: str,
+                   rewrite: bool = False) -> tuple[int, int]:
+    """Write new_rows to the JSONL, keeping prior runs. Dedup on (sym_id, date):
+    drop any existing row whose date == asof for a symphony in new_rows, then
+    append (so a same-day re-run replaces that day, older runs are preserved).
+    rewrite=True truncates to only new_rows (the old, history-less behaviour).
+    Returns (kept_historical_rows, new_rows)."""
+    kill = {r.get("sym_id") for r in new_rows}
+    keep = []
+    if not rewrite:
+        for r in load_jsonl(path):
+            if r.get("date", "")[:10] == asof[:10] and r.get("sym_id") in kill:
+                continue
+            keep.append(r)
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    with open(path, "w") as f:
+        for r in keep + new_rows:
+            f.write(json.dumps(r) + "\n")
+    return len(keep), len(new_rows)
+
+
+# ──────────────────────────────────────────────────────────────────────
 # Sync
 # ──────────────────────────────────────────────────────────────────────
 def sync(path: str = OOS_PATH, start: str | None = None,

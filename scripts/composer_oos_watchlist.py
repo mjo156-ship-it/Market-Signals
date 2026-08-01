@@ -268,8 +268,9 @@ def _backtest_resilient(sid, start, end, tries=5):
             raise
 
 
-def main():
+def main(rewrite=False):
     asof = date.today().isoformat()
+    history = oos.load_jsonl(OUT)          # prior runs, for run-over-run deltas
     rows = []
     for i, (sid, oosdate, name) in enumerate(WATCH, 1):
         time.sleep(0.5)                       # gentle pacing to avoid burst 429s
@@ -311,10 +312,12 @@ def main():
         print(f"[{i}/{len(WATCH)}] {name}: OOS {out.get('oos_days') or out.get('n_days')}d "
               f"cagr {out.get('cagr_pct')} sharpe {out.get('sharpe')}")
 
-    os.makedirs(os.path.dirname(OUT) or ".", exist_ok=True)
-    with open(OUT, "w") as f:
-        for r in rows:
-            f.write(json.dumps(r) + "\n")
+    # P1-4: stamp run-over-run Sharpe deltas, then append (keeping prior runs)
+    # with dedup on (sym_id, date). --rewrite restores the old truncate behaviour.
+    oos.stamp_sharpe_deltas(rows, history, asof)
+    kept, added = oos.append_history(OUT, rows, asof, rewrite=rewrite)
+    print(f"[oos-split] {'rewrote' if rewrite else 'appended'}: "
+          f"{added} new rows + {kept} historical -> {OUT}")
 
     # Ranked report: by OOS length (longest first), then show the split.
     rows.sort(key=lambda r: r.get("oos_days") or 0, reverse=True)
@@ -331,4 +334,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--rewrite", action="store_true",
+                    help="truncate the ledger instead of appending history")
+    main(rewrite=ap.parse_args().rewrite)

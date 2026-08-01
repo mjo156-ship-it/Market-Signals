@@ -216,15 +216,18 @@ def discover_list():
 
 
 # ── Main ─────────────────────────────────────────────────────────────────────
-def main():
+def main(rewrite=False):
     asof = date.today().isoformat()
+    history = oos.load_jsonl(OUT)          # prior runs, for run-over-run deltas
     watch = discover_list()
     if not watch:
-        print("[discover] no Discover symphonies to evaluate — wrote nothing.",
-              file=sys.stderr)
-        # Still (re)write an empty ledger so the dashboard tab shows a clean state.
+        print("[discover] no Discover symphonies to evaluate — leaving the "
+              "existing ledger untouched (preserving history).", file=sys.stderr)
+        # Do NOT truncate: a transient empty seed must not wipe accumulated
+        # history. Only seed an empty file if none exists yet.
         os.makedirs(os.path.dirname(OUT) or ".", exist_ok=True)
-        open(OUT, "w").close()
+        if not os.path.exists(OUT):
+            open(OUT, "w").close()
         return
 
     # Freeze-date prefilter: skip strategies whose OOS window is shorter than
@@ -287,10 +290,12 @@ def main():
         print(f"[{i}/{len(watch)}] {name}: OOS {out.get('n_days')}d "
               f"cagr {out.get('cagr_pct')} sharpe {out.get('oos_sharpe')} conf {conf}")
 
-    os.makedirs(os.path.dirname(OUT) or ".", exist_ok=True)
-    with open(OUT, "w") as f:
-        for r in rows:
-            f.write(json.dumps(r) + "\n")
+    # P1-4: stamp run-over-run Sharpe deltas, then append (keeping prior runs)
+    # with dedup on (sym_id, date). --rewrite restores the old truncate behaviour.
+    oos.stamp_sharpe_deltas(rows, history, asof)
+    kept, added = oos.append_history(OUT, rows, asof, rewrite=rewrite)
+    print(f"[discover] {'rewrote' if rewrite else 'appended'}: "
+          f"{added} new rows + {kept} historical -> {OUT}")
 
     # Confidence-gated ranking: only strategies with a usable OOS window (>=1y,
     # rank>=2) compete on the sample-size-shrunk Sharpe (P2-7): sharpe_lcb =
@@ -316,4 +321,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--rewrite", action="store_true",
+                    help="truncate the ledger instead of appending history")
+    main(rewrite=ap.parse_args().rewrite)
