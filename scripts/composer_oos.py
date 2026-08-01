@@ -291,12 +291,14 @@ def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
                          oos_excess_sharpe
         P0-2 corr/beta   spy_corr_oos, spy_beta_oos, stream_bucket
         P0-3 z-score     oos_vol_pct, cagr_se_pct, gap_z, low_power
+        P2-7 ranking     sharpe_lcb (OOS Sharpe shrunk by 1 SE for sample size)
     `out_stats` is _curve_stats(oos_curve) (already computed by the caller)."""
     spy = spy if spy is not None else spy_series()
     f = {"spy_oos_cagr_pct": None, "spy_oos_maxdd_pct": None,
          "oos_alpha_pct": None, "oos_excess_sharpe": None,
          "spy_corr_oos": None, "spy_beta_oos": None, "stream_bucket": None,
-         "oos_vol_pct": None, "cagr_se_pct": None, "gap_z": None, "low_power": None}
+         "oos_vol_pct": None, "cagr_se_pct": None, "gap_z": None, "low_power": None,
+         "sharpe_lcb": None}
     if not oos_curve:
         return f
     ds = sorted(oos_curve)
@@ -339,6 +341,15 @@ def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
                 f["gap_z"] = round(cagr_gap_pct / se, 2)
             if is_cagr_pct is not None:
                 f["low_power"] = bool(se > abs(is_cagr_pct))
+
+    # ── P2-7: sample-size-shrunk Sharpe for ranking ──
+    # The SE of an annualized Sharpe is ≈ √(252/n). Subtracting one SE gives a
+    # lower-confidence bound that penalizes short OOS windows: a 1.45-Sharpe /
+    # 900d strategy (lcb ≈ 0.92) outranks a 1.60-Sharpe / 200d one (lcb ≈ 0.48).
+    sh = out_stats.get("sharpe")
+    nd = out_stats.get("n_days") or 0
+    if sh is not None and nd > 0:
+        f["sharpe_lcb"] = round(sh - (252.0 / nd) ** 0.5, 2)
     return f
 
 
