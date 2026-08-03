@@ -1,6 +1,6 @@
 # Signal Research — 2026-08-03
 
-_Generated 2026-08-03T17:06:17+00:00 · 90 tickers · 1 firing · 14 approaching_
+_Generated 2026-08-03T21:08:20+00:00 · 90 tickers · 1 firing · 13 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -25,4 +25,3 @@ _Generated 2026-08-03T17:06:17+00:00 · 90 tickers · 1 firing · 14 approaching
 | Bollinger %B oversold (<0) (long) | BIL | BIL | composer_ready | 5d | 63% | +0.0% | +0.1pp | 71 |
 | Bollinger %B oversold (<0) (long) | SHY | SHY | composer_ready | 5d | 61% | +0.1% | +0.0pp | 139 |
 | Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |
-| Bollinger %B oversold (<0) (long) | DBMF | DBMF | composer_ready | 5d | 60% | +0.2% | +0.0pp | 35 |

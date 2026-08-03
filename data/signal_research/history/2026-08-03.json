@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-08-03T17:06:17+00:00",
+  "generated_at_utc": "2026-08-03T21:08:20+00:00",
   "data_through": "2026-08-03",
   "universe_size": 90,
   "combinations_evaluated": 1270,
@@ -9,7 +9,7 @@
   },
   "summary": {
     "n_results": 1,
-    "n_watchlist": 14,
+    "n_watchlist": 13,
     "by_family": {
       "mean_reversion": 1
     },
@@ -26,7 +26,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -9.07",
+      "today_value": "dist-z -9.13",
       "backtest": {
         "n": 91,
         "win_rate": 0.846,
@@ -506,7 +506,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 58.46 vs 52w high 58.95",
+      "today_value": "close 58.26 vs 52w high 58.95",
       "backtest": {
         "n": 125,
         "win_rate": 0.64,
@@ -1140,7 +1140,7 @@
           {
             "date": "2026-07-06",
             "i": 3706,
-            "ret": 0.00663
+            "ret": 0.00327
           }
         ]
       },
@@ -1154,7 +1154,7 @@
       "direction": "short",
       "horizon_days": 10,
       "mode": "manual_swing",
-      "today_value": "+21.9% over 50DMA",
+      "today_value": "+21.7% over 50DMA",
       "backtest": {
         "n": 25,
         "win_rate": 0.68,
@@ -1302,7 +1302,7 @@
       "direction": "short",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B 0.93",
+      "today_value": "%B 0.94",
       "backtest": {
         "n": 133,
         "win_rate": 0.602,
@@ -1990,7 +1990,7 @@
       "direction": "short",
       "horizon_days": 20,
       "mode": "manual_swing",
-      "today_value": "copper/gold growth-vs-fear proxy; z=1.94",
+      "today_value": "copper/gold growth-vs-fear proxy; z=1.91",
       "backtest": {
         "n": 31,
         "win_rate": 0.613,
@@ -2168,7 +2168,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +73.0%, rank #12",
+      "today_value": "12-mo momentum +73.4%, rank #12",
       "backtest": {
         "n": 26,
         "win_rate": 0.615,
@@ -2321,7 +2321,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 91.43 vs 52w high 91.69",
+      "today_value": "close 91.42 vs 52w high 91.69",
       "backtest": {
         "n": 337,
         "win_rate": 0.988,
@@ -4737,7 +4737,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 110.07 vs 52w high 110.40",
+      "today_value": "close 110.08 vs 52w high 110.40",
       "backtest": {
         "n": 370,
         "win_rate": 0.949,
@@ -6610,7 +6610,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 81.76 vs 52w high 82.09",
+      "today_value": "close 81.77 vs 52w high 82.09",
       "backtest": {
         "n": 226,
         "win_rate": 0.717,
@@ -7763,7 +7763,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "3-mo momentum +11.3%, rank #10",
+      "today_value": "3-mo momentum +12.0%, rank #9",
       "backtest": {
         "n": 99,
         "win_rate": 0.636,
@@ -8281,7 +8281,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B 0.08",
+      "today_value": "%B 0.05",
       "backtest": {
         "n": 71,
         "win_rate": 0.634,
@@ -8659,7 +8659,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B 0.05",
+      "today_value": "%B 0.07",
       "backtest": {
         "n": 139,
         "win_rate": 0.612,
@@ -9377,7 +9377,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 36.51 vs 52w high 37.19",
+      "today_value": "close 36.58 vs 52w high 37.19",
       "backtest": {
         "n": 47,
         "win_rate": 0.681,
@@ -9626,204 +9626,6 @@
         ]
       },
       "score": 0.0007
-    },
-    {
-      "family": "mean_reversion",
-      "name": "Bollinger %B oversold (<0)",
-      "ticker": "DBMF",
-      "suggested_instrument": "DBMF",
-      "direction": "long",
-      "horizon_days": 5,
-      "mode": "composer_ready",
-      "today_value": "%B 0.07",
-      "backtest": {
-        "n": 35,
-        "win_rate": 0.6,
-        "avg_return": 0.0021,
-        "median_return": 0.0021,
-        "baseline_return": 0.0019,
-        "baseline_win_rate": 0.5841,
-        "edge": 0.0001,
-        "fired_today": false,
-        "events": [
-          {
-            "date": "2019-09-13",
-            "i": 75,
-            "ret": 0.03852
-          },
-          {
-            "date": "2020-02-27",
-            "i": 165,
-            "ret": 0.03198
-          },
-          {
-            "date": "2020-03-12",
-            "i": 175,
-            "ret": 0.0021
-          },
-          {
-            "date": "2020-05-18",
-            "i": 216,
-            "ret": -0.01068
-          },
-          {
-            "date": "2020-06-03",
-            "i": 227,
-            "ret": 0.00334
-          },
-          {
-            "date": "2020-09-21",
-            "i": 301,
-            "ret": -0.00036
-          },
-          {
-            "date": "2021-06-18",
-            "i": 484,
-            "ret": 0.02014
-          },
-          {
-            "date": "2021-07-19",
-            "i": 504,
-            "ret": 0.03797
-          },
-          {
-            "date": "2021-08-09",
-            "i": 519,
-            "ret": 0.01859
-          },
-          {
-            "date": "2021-08-18",
-            "i": 526,
-            "ret": 0.0218
-          },
-          {
-            "date": "2021-09-20",
-            "i": 548,
-            "ret": 0.00357
-          },
-          {
-            "date": "2021-11-26",
-            "i": 596,
-            "ret": -0.01162
-          },
-          {
-            "date": "2021-12-01",
-            "i": 599,
-            "ret": 0.02361
-          },
-          {
-            "date": "2022-07-22",
-            "i": 759,
-            "ret": -0.01358
-          },
-          {
-            "date": "2022-07-28",
-            "i": 763,
-            "ret": -0.01528
-          },
-          {
-            "date": "2022-11-10",
-            "i": 837,
-            "ret": -0.02092
-          },
-          {
-            "date": "2023-02-02",
-            "i": 893,
-            "ret": 0.00925
-          },
-          {
-            "date": "2023-03-09",
-            "i": 917,
-            "ret": -0.06281
-          },
-          {
-            "date": "2023-03-17",
-            "i": 923,
-            "ret": -0.00772
-          },
-          {
-            "date": "2023-11-02",
-            "i": 1082,
-            "ret": -0.00354
-          },
-          {
-            "date": "2023-11-14",
-            "i": 1090,
-            "ret": -0.00652
-          },
-          {
-            "date": "2023-12-01",
-            "i": 1102,
-            "ret": 0.00186
-          },
-          {
-            "date": "2023-12-14",
-            "i": 1111,
-            "ret": 0.00151
-          },
-          {
-            "date": "2024-06-04",
-            "i": 1228,
-            "ret": 0.02804
-          },
-          {
-            "date": "2024-07-24",
-            "i": 1262,
-            "ret": -0.00992
-          },
-          {
-            "date": "2024-08-01",
-            "i": 1268,
-            "ret": -0.03941
-          },
-          {
-            "date": "2024-10-31",
-            "i": 1332,
-            "ret": 0.01374
-          },
-          {
-            "date": "2024-12-18",
-            "i": 1365,
-            "ret": 0.00186
-          },
-          {
-            "date": "2025-02-25",
-            "i": 1409,
-            "ret": -0.01773
-          },
-          {
-            "date": "2025-03-03",
-            "i": 1413,
-            "ret": -0.03114
-          },
-          {
-            "date": "2025-03-10",
-            "i": 1418,
-            "ret": 0.0225
-          },
-          {
-            "date": "2025-04-07",
-            "i": 1438,
-            "ret": 0.01176
-          },
-          {
-            "date": "2025-08-01",
-            "i": 1518,
-            "ret": 0.01258
-          },
-          {
-            "date": "2026-03-20",
-            "i": 1677,
-            "ret": 0.01409
-          },
-          {
-            "date": "2026-06-05",
-            "i": 1730,
-            "ret": 0.00522
-          }
-        ]
-      },
-      "score": 0.0006
     }
   ]
 }
