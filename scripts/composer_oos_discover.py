@@ -43,6 +43,10 @@ import composer_oos as oos
 EARLY_START = os.environ.get("COMPOSER_OOS_EARLY_START", "1990-01-01")
 OUT = os.environ.get("COMPOSER_OOS_DISC_PATH", "data/composer_oos_discover.jsonl")
 SEED = os.environ.get("COMPOSER_DISCOVER_SEED", "data/composer_discover_seed.json")
+# Survival panel: a committed registry of Discover membership over time so we can
+# measure attrition (which strategies drop out of Discover — the survivorship bias
+# the OOS base rates can't otherwise see). Accrues from the first run forward.
+SURVIVAL = os.environ.get("COMPOSER_DISCOVER_SURVIVAL", "data/composer_discover_survival.json")
 # Only backtest strategies whose OOS window is at least this many days — the
 # confidence tier is a function of the freeze date alone, so recently-tweaked
 # "Thin" strategies (no meaningful OOS) can be skipped without a backtest. This
@@ -214,6 +218,48 @@ def _auto_fetch():
     return []
 
 
+def _update_survival(seed_items, asof):
+    """Maintain a survival panel of Discover membership: {id: {first_seen,
+    last_seen, name, freeze_date}}.
+
+    Each run stamps last_seen=asof for every id currently in the seed. An id whose
+    last_seen falls behind asof has dropped out of Discover (delisted) since its
+    last capture — that gap is the only observable measure of the survivorship
+    bias in the OOS base rates. It accrues from the first run forward and can't be
+    reconstructed retroactively, so we start banking it now. Never deletes rows —
+    delisted strategies stay with their frozen last_seen."""
+    reg = {}
+    if os.path.exists(SURVIVAL):
+        try:
+            with open(SURVIVAL) as f:
+                reg = json.load(f)
+        except Exception as e:
+            print(f"[discover] survival registry unreadable, starting fresh: {e}",
+                  file=sys.stderr)
+            reg = {}
+    live = set()
+    for sid, oosdate, name in seed_items:
+        live.add(sid)
+        e = reg.get(sid)
+        if e is None:
+            reg[sid] = {"first_seen": asof, "last_seen": asof,
+                        "name": name, "freeze_date": oosdate}
+        else:
+            e["last_seen"] = asof
+            e["name"] = name
+            e["freeze_date"] = oosdate
+    delisted = sum(1 for e in reg.values() if e.get("last_seen") != asof)
+    try:
+        os.makedirs(os.path.dirname(SURVIVAL) or ".", exist_ok=True)
+        with open(SURVIVAL, "w") as f:
+            json.dump(reg, f, indent=0, sort_keys=True)
+    except Exception as e:
+        print(f"[discover] could not write survival registry: {e}", file=sys.stderr)
+    print(f"[discover] survival panel -> {SURVIVAL}: {len(live)} listed now, "
+          f"{len(reg)} ever seen, {delisted} delisted since first capture")
+    return reg
+
+
 def discover_list():
     return _load_seed() or _auto_fetch()
 
@@ -232,6 +278,10 @@ def main(rewrite=False):
         if not os.path.exists(OUT):
             open(OUT, "w").close()
         return
+
+    # Record Discover membership BEFORE the OOS prefilter, so the survival panel
+    # tracks every seeded strategy (attrition is about listing, not OOS length).
+    _update_survival(watch, asof)
 
     # Freeze-date prefilter: skip strategies whose OOS window is shorter than
     # MIN_OOS_DAYS *before* backtesting. Confidence is a function of the freeze
