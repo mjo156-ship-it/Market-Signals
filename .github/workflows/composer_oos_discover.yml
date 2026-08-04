@@ -6,6 +6,8 @@
 # comes from data/composer_discover_seed.json (a pasted Discover network response,
 # normalized) or a best-effort read-only auto-fetch. Uses only the permitted
 # backtest POST.
+# To refresh that seed (and feed the survival panel): capture the Discover
+# response in your browser and run  scripts/refresh_discover_seed.py capture.json.
 
 name: Composer Discover OOS Report
 
