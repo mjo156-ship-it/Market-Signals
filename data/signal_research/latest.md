@@ -1,6 +1,6 @@
 # Signal Research — 2026-08-04
 
-_Generated 2026-08-04T16:51:14+00:00 · 90 tickers · 3 firing · 7 approaching_
+_Generated 2026-08-04T21:16:32+00:00 · 90 tickers · 3 firing · 6 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -17,7 +17,6 @@ _Generated 2026-08-04T16:51:14+00:00 · 90 tickers · 3 firing · 7 approaching_
 | Donchian 52-week breakout (long) | FNGS | FNGS | composer_ready | 20d | 64% | +18.3% | +12.1pp | 55 |
 | Donchian 52-week breakout (long) | SVXY | SVXY | composer_ready | 20d | 64% | +6.5% | +2.3pp | 125 |
 | Parabolic extension (>25% over 50DMA) fade (short) | MSFT | short MSFT | manual_swing | 10d | 68% | +1.3% | +3.0pp | 25 |
-| Rotation: entered top-8 3-mo momentum (long) | NAIL | NAIL | manual_swing | 21d | 61% | +4.7% | +1.1pp | 121 |
 | CPER/GLD ratio z>2 (stretched) (short) | CPER | short CPER | manual_swing | 20d | 61% | +1.1% | +1.6pp | 31 |
 | Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 337 |
 | Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |
