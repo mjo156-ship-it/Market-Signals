@@ -27,6 +27,44 @@ import composer_oos as oos
 # hardcoded 2015 that truncates 8 years. Configurable floor for a fixed window.
 EARLY_START = os.environ.get("COMPOSER_OOS_EARLY_START", "1990-01-01")
 OUT = os.environ.get("COMPOSER_OOS_WL_PATH", "data/composer_oos_watchlist.jsonl")
+# Watched-symphony list: prefer a committed seed (a normalized Composer watchlist
+# capture) so new follows show up without editing this file; fall back to the
+# inline WATCH below. Session-gated like Discover — refresh via
+# scripts/refresh_watchlist_seed.py.
+WL_SEED = os.environ.get("COMPOSER_WATCHLIST_SEED", "data/composer_watchlist_seed.json")
+
+
+def _wl_freeze_iso(frz):
+    s = str(frz)
+    return s[:10] if (s[:4].isdigit() and "-" in s) else s[:10]
+
+
+def _load_wl_seed():
+    """Return [(id, freeze_date, name), …] from WL_SEED, or None to fall back to
+    the inline WATCH list (missing/unreadable/empty seed)."""
+    if not os.path.exists(WL_SEED):
+        return None
+    try:
+        with open(WL_SEED) as f:
+            raw = json.load(f)
+    except Exception as e:
+        print(f"[watchlist] seed {WL_SEED} unreadable, using inline WATCH: {e}", file=sys.stderr)
+        return None
+    items = raw if isinstance(raw, list) else (raw.get("symphonies") or raw.get("watchlist") or [])
+    out = []
+    for s in items:
+        if not isinstance(s, dict):
+            continue
+        sid = s.get("id") or s.get("symphony_id") or s.get("symphonyId")
+        frz = (s.get("last_semantic_update_at") or s.get("lastSemanticUpdateAt") or s.get("frozen_at"))
+        if sid and frz:
+            out.append((sid, _wl_freeze_iso(frz), s.get("name") or s.get("title") or sid))
+    if not out:
+        print(f"[watchlist] seed {WL_SEED} had no usable entries, using inline WATCH", file=sys.stderr)
+        return None
+    print(f"[watchlist] using seed {WL_SEED}: {len(out)} symphonies")
+    return out
+
 
 WATCH = [
     # All watchlisted symphonies (every strategy followed), extracted from the
@@ -275,17 +313,18 @@ def _backtest_resilient(sid, start, end, tries=5):
 def main(rewrite=False):
     asof = date.today().isoformat()
     history = oos.load_jsonl(OUT)          # prior runs, for run-over-run deltas
+    watch = _load_wl_seed() or WATCH
     rows = []
-    for i, (sid, oosdate, name) in enumerate(WATCH, 1):
+    for i, (sid, oosdate, name) in enumerate(watch, 1):
         time.sleep(0.5)                       # gentle pacing to avoid burst 429s
         try:
             curve, _ = _backtest_resilient(sid, EARLY_START, asof)
         except Exception as e:
-            print(f"[{i}/{len(WATCH)}] {name}: FAIL {type(e).__name__}: {str(e)[:80]}",
+            print(f"[{i}/{len(watch)}] {name}: FAIL {type(e).__name__}: {str(e)[:80]}",
                   file=sys.stderr)
             continue
         if not curve:
-            print(f"[{i}/{len(WATCH)}] {name}: empty curve", file=sys.stderr)
+            print(f"[{i}/{len(watch)}] {name}: empty curve", file=sys.stderr)
             continue
         oos_curve = {d: v for d, v in curve.items() if d >= oosdate}
         ins = _cs({d: v for d, v in curve.items() if d < oosdate})
@@ -316,7 +355,7 @@ def main(rewrite=False):
             **extra,
         }
         rows.append(row)
-        print(f"[{i}/{len(WATCH)}] {name}: OOS {out.get('oos_days') or out.get('n_days')}d "
+        print(f"[{i}/{len(watch)}] {name}: OOS {out.get('oos_days') or out.get('n_days')}d "
               f"cagr {out.get('cagr_pct')} sharpe {out.get('sharpe')}")
 
     # P1-4: stamp run-over-run Sharpe deltas, then append (keeping prior runs)
@@ -337,7 +376,7 @@ def main(rewrite=False):
               f"{r.get('oos_cagr_pct') or 0:7.1f} {r.get('cagr_gap_pct') or 0:7.1f} "
               f"{r.get('is_sharpe') or 0:5.2f} {r.get('oos_sharpe') or 0:5.2f} "
               f"{r.get('oos_maxdd_pct') or 0:7.1f}  {(r.get('name') or '')[:46]}")
-    print(f"\n[oos-split] {len(rows)}/{len(WATCH)} symphonies -> {OUT}")
+    print(f"\n[oos-split] {len(rows)}/{len(watch)} symphonies -> {OUT}")
 
 
 if __name__ == "__main__":
