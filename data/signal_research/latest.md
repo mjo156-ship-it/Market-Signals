@@ -1,6 +1,6 @@
 # Signal Research — 2026-08-05
 
-_Generated 2026-08-05T15:52:59+00:00 · 90 tickers · 2 firing · 10 approaching_
+_Generated 2026-08-05T16:28:53+00:00 · 90 tickers · 2 firing · 9 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -18,7 +18,6 @@ _Generated 2026-08-05T15:52:59+00:00 · 90 tickers · 2 firing · 10 approaching
 | 4+ down-day streak (long) | OILU | OILU | composer_ready | 5d | 73% | +5.3% | +4.3pp | 33 |
 | 4+ up-day streak fade (short) | TMF | short TMF | manual_swing | 5d | 64% | +1.3% | +1.6pp | 138 |
 | Parabolic extension (>25% over 50DMA) fade (short) | MSFT | short MSFT | manual_swing | 10d | 68% | +1.3% | +3.0pp | 25 |
-| 4+ down-day streak (long) | TMV | TMV | composer_ready | 5d | 61% | +1.0% | +1.0pp | 140 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 72% | +0.3% | +0.1pp | 226 |
 | Rotation: entered top-8 3-mo momentum (long) | XLF | FAS | manual_swing | 21d | 64% | +0.9% | +0.1pp | 99 |
 | Donchian 52-week breakout (long) | UPRO | UPRO | composer_ready | 20d | 66% | +6.4% | +0.0pp | 199 |
