@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-04T22:19:30.315042+00:00",
+  "timestamp": "2026-08-05T22:17:17.018685+00:00",
   "mode": "append",
   "succeeded": [
     "AMD",
@@ -96,7 +96,92 @@
   ],
   "skipped": [],
   "failed": [],
-  "warnings": [],
+  "warnings": [
+    {
+      "ticker": "DRN",
+      "yf_close": 11.24,
+      "snapshot_price": 11.17,
+      "pct_diff": 0.627
+    },
+    {
+      "ticker": "EDC",
+      "yf_close": 75.82,
+      "snapshot_price": 76.27,
+      "pct_diff": 0.59
+    },
+    {
+      "ticker": "HIBL",
+      "yf_close": 109.58,
+      "snapshot_price": 111.29,
+      "pct_diff": 1.537
+    },
+    {
+      "ticker": "KORU",
+      "yf_close": 18.44,
+      "snapshot_price": 18.69,
+      "pct_diff": 1.338
+    },
+    {
+      "ticker": "LABU",
+      "yf_close": 255.66,
+      "snapshot_price": 248.77,
+      "pct_diff": 2.77
+    },
+    {
+      "ticker": "NAIL",
+      "yf_close": 44.93,
+      "snapshot_price": 45.28,
+      "pct_diff": 0.773
+    },
+    {
+      "ticker": "SMH",
+      "yf_close": 569.7,
+      "snapshot_price": 574.52,
+      "pct_diff": 0.839
+    },
+    {
+      "ticker": "SOXL",
+      "yf_close": 132.07,
+      "snapshot_price": 134.63,
+      "pct_diff": 1.902
+    },
+    {
+      "ticker": "SOXS",
+      "yf_close": 45.08,
+      "snapshot_price": 44.18,
+      "pct_diff": 2.037
+    },
+    {
+      "ticker": "TECL",
+      "yf_close": 204.99,
+      "snapshot_price": 208.42,
+      "pct_diff": 1.646
+    },
+    {
+      "ticker": "TQQQ",
+      "yf_close": 72.84,
+      "snapshot_price": 73.49,
+      "pct_diff": 0.884
+    },
+    {
+      "ticker": "UPRO",
+      "yf_close": 153.24,
+      "snapshot_price": 154.16,
+      "pct_diff": 0.597
+    },
+    {
+      "ticker": "UVXY",
+      "yf_close": 22.06,
+      "snapshot_price": 21.86,
+      "pct_diff": 0.915
+    },
+    {
+      "ticker": "VIXY",
+      "yf_close": 19.77,
+      "snapshot_price": 19.67,
+      "pct_diff": 0.508
+    }
+  ],
   "counts": {
     "total": 91,
     "ok": 91,
