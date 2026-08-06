@@ -113,6 +113,22 @@ Two discriminating metrics tie them together:
   cumulative after-tax position non-negative before stabilized operating losses
   draw it down (`null` = sustained).
 
+## Week-over-week changes
+
+Each listing carries a `changes` block comparing it to the **prior week's archived
+report** (`history/<prior-week>.json`, matched by RentCast id then normalized
+address):
+
+- **`is_new`** — the listing was absent from the prior week (🆕).
+- **`price_drop`** — the list price fell vs. the prior week (🔻), with
+  `prior_price`, `price_change`, and `price_change_pct`.
+- **`compared_to_week`** — which archived week it was compared against (`null` on
+  the first run, before any prior week exists — flags begin the following week).
+
+Counts roll up into `summary.new_listings` and `summary.price_drops`, and the
+report shows a **Week-over-week changes** section plus a `WoW` column in the
+ranking table.
+
 ## Assumptions (all overridable via env vars)
 
 Every assumption is echoed into `latest.json → assumptions` so results are
