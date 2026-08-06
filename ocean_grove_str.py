@@ -657,7 +657,63 @@ def _revenue_basis_label(basis):
     return basis
 
 
-def build_report(asof_date, archive=True):
+def _addr_key(address):
+    """Municipality-agnostic key for matching a listing across weeks by its
+    stored formatted address (drops the trailing city/state/zip segments)."""
+    parts = [p.strip().lower() for p in (address or "").split(",")]
+    return "|".join(parts[:-2]) if len(parts) > 2 else "|".join(parts)
+
+
+def load_prior_week(history_dir, current_week):
+    """Load the most recent archived report strictly before `current_week`.
+    Returns (prior_week_str, {"by_id":..., "by_addr":...}) or (None, {})."""
+    if not history_dir or not Path(history_dir).exists():
+        return None, {}
+    weeks = sorted(p.stem for p in Path(history_dir).glob("*.json") if p.stem < current_week)
+    if not weeks:
+        return None, {}
+    prior_week = weeks[-1]
+    try:
+        prior = json.loads((Path(history_dir) / f"{prior_week}.json").read_text())
+    except (ValueError, OSError):
+        return None, {}
+    by_id, by_addr = {}, {}
+    for l in prior.get("listings", []):
+        rec = {"price": l.get("list_price")}
+        if l.get("id") is not None:
+            by_id[str(l["id"])] = rec
+        by_addr[_addr_key(l.get("address"))] = rec
+    return prior_week, {"by_id": by_id, "by_addr": by_addr}
+
+
+def compute_changes(listing, prior_map, compared_week):
+    """Week-over-week change flags for one listing vs. the prior week's report.
+
+    is_new: absent from the prior week. price_drop: list price fell vs. prior.
+    All fields are None/absent-of-signal when there is no prior week to compare."""
+    ch = {"compared_to_week": compared_week, "is_new": None, "prior_price": None,
+          "price_change": None, "price_change_pct": None, "price_drop": False}
+    if not compared_week:
+        return ch  # no baseline week — cannot flag new vs. existing
+    prior = None
+    if listing.get("id") is not None:
+        prior = prior_map.get("by_id", {}).get(str(listing["id"]))
+    if prior is None:
+        prior = prior_map.get("by_addr", {}).get(_addr_key(listing.get("address")))
+    if prior is None:
+        ch["is_new"] = True
+        return ch
+    ch["is_new"] = False
+    pp, cur = prior.get("price"), listing.get("list_price")
+    if pp and cur is not None:
+        ch["prior_price"] = pp
+        ch["price_change"] = cur - pp
+        ch["price_change_pct"] = round((cur - pp) / pp, 4)
+        ch["price_drop"] = (cur - pp) < 0
+    return ch
+
+
+def build_report(asof_date, archive=True, history_dir=None):
     listings, source = fetch_listings()
     market, market_label = resolve_market_revenue()
     analyzed = [analyze(l, market) for l in listings]
@@ -689,6 +745,17 @@ def build_report(asof_date, archive=True):
 
     now_utc = datetime.now(timezone.utc)
     week_monday = asof_date - timedelta(days=asof_date.weekday())
+    current_week = week_monday.strftime("%Y-%m-%d")
+
+    # Week-over-week: flag new listings and price drops vs. the prior week's report.
+    compared_week, prior_map = load_prior_week(history_dir, current_week)
+    new_count = drop_count = 0
+    for a in analyzed:
+        a["changes"] = compute_changes(a, prior_map, compared_week)
+        if a["changes"].get("is_new"):
+            new_count += 1
+        if a["changes"].get("price_drop"):
+            drop_count += 1
 
     report = {
         "meta": {
@@ -767,12 +834,25 @@ def build_report(asof_date, archive=True):
             "median_breakeven_down_pct": _median(
                 [a["breakeven"]["down_payment_pct"] for a in analyzed
                  if a["breakeven"]["down_payment_pct"] is not None]),
+            "compared_to_week": compared_week,
+            "new_listings": new_count if compared_week else None,
+            "price_drops": drop_count if compared_week else None,
         },
         "listings": analyzed,
     }
 
     markdown = render_markdown(report)
     return report, markdown
+
+
+def _wow_badge(x):
+    """Compact week-over-week badge for a listing: new, price drop, or —."""
+    c = x.get("changes", {})
+    if c.get("is_new"):
+        return "🆕 new"
+    if c.get("price_drop"):
+        return f"🔻 {_money(c['price_change'])} ({_pct(c['price_change_pct'])})"
+    return "—"
 
 
 def render_markdown(report):
@@ -806,6 +886,8 @@ def render_markdown(report):
     lines.append(f"- **{s['breakeven_sustained']}** self-fund every year as **financed** at {int(report['assumptions']['financing']['down_payment_pct']*100)}% down / {_pct(report['assumptions']['financing']['mortgage_rate'])} (strict sustained break-even)")
     lines.append(f"- **{s['breakeven_purchase_year']}** break even in the **purchase year** net of tax once the 100% bonus-depreciation benefit is applied")
     lines.append(f"- Median list price **{_money(s['median_list_price'])}** · median gross STR revenue **{_money(s['median_gross_str_revenue'])}** · median NOI **{_money(s['median_noi'])}** · median break-even down payment **{_pct(s['median_breakeven_down_pct'])}**")
+    if s.get("compared_to_week"):
+        lines.append(f"- **Week over week** (vs. {s['compared_to_week']}): 🆕 **{s['new_listings']}** new · 🔻 **{s['price_drops']}** price drop(s)")
     lines.append("")
     lines.append("> **Read this first.** In this market, 100% bonus depreciation makes essentially every "
                  "property cash-positive *in the purchase year* (a one-time tax windfall of 60% of price "
@@ -814,6 +896,41 @@ def render_markdown(report):
                  "**break-even down payment** (how much equity it takes to get there). Lower list price / "
                  "higher-yield units come closest.")
     lines.append("")
+
+    # --- Week-over-week changes ---
+    if s.get("compared_to_week"):
+        new_l = [x for x in report["listings"] if x["changes"].get("is_new")]
+        drops = [x for x in report["listings"] if x["changes"].get("price_drop")]
+        lines.append(f"## 📆 Week-over-week changes — vs. week of {s['compared_to_week']}")
+        lines.append("")
+        lines.append(f"🆕 **{len(new_l)} new** · 🔻 **{len(drops)} price drop(s)**")
+        lines.append("")
+        if drops:
+            lines.append("**🔻 Price drops**")
+            lines.append("")
+            lines.append("| Property | Type | Prior | Now | Change |")
+            lines.append("|---|---|--:|--:|--:|")
+            for x in sorted(drops, key=lambda z: z["changes"]["price_change"]):
+                c = x["changes"]
+                lines.append(f"| {x['address']} | {x['property_type']} | {_money(c['prior_price'])} "
+                             f"| {_money(x['list_price'])} | {_money(c['price_change'])} ({_pct(c['price_change_pct'])}) |")
+            lines.append("")
+        if new_l:
+            lines.append("**🆕 New this week**")
+            lines.append("")
+            lines.append("| Property | Type | Bd | List |")
+            lines.append("|---|---|--:|--:|")
+            for x in new_l:
+                lines.append(f"| {x['address']} | {x['property_type']} | {x['beds']} | {_money(x['list_price'])} |")
+            lines.append("")
+        if not drops and not new_l:
+            lines.append("_No new listings or price drops this week._")
+            lines.append("")
+    else:
+        lines.append("## 📆 Week-over-week changes")
+        lines.append("")
+        lines.append("_No prior week archived yet — new/price-drop flags begin next week._")
+        lines.append("")
 
     # --- Break-even flags ---
     lines.append("## 🚩 Break-even flags")
@@ -855,12 +972,12 @@ def render_markdown(report):
     # --- Full ranking ---
     lines.append("## All listings — ranked by stabilized after-tax cash flow (financed)")
     lines.append("")
-    lines.append("| # | Property | Bd/Ba | List | Gross STR | NOI | Cap | Pre-tax CF | Yr-1 after-tax | Stabilized after-tax | BE down | Rating |")
-    lines.append("|--:|---|---|--:|--:|--:|--:|--:|--:|--:|--:|---|")
+    lines.append("| # | Property | WoW | Bd/Ba | List | Gross STR | NOI | Cap | Pre-tax CF | Yr-1 after-tax | Stabilized after-tax | BE down | Rating |")
+    lines.append("|--:|---|---|---|--:|--:|--:|--:|--:|--:|--:|--:|---|")
     for i, x in enumerate(report["listings"], 1):
         fin = x["operating_income"]["financed"]
         lines.append(
-            f"| {i} | {x['address']} | {x['beds']}/{x['baths']} | {_money(x['list_price'])} "
+            f"| {i} | {x['address']} | {_wow_badge(x)} | {x['beds']}/{x['baths']} | {_money(x['list_price'])} "
             f"| {_money(x['str_revenue']['gross_annual'])} | {_money(x['noi'])} | {_pct(x['yields']['cap_rate'])} "
             f"| {_money(fin['pretax_cash_flow'])} | {_money(fin['aftertax_cash_flow_year1'])} "
             f"| {_money(fin['aftertax_cash_flow_stabilized'])} | {_pct(x['breakeven']['down_payment_pct'])} "
@@ -981,9 +1098,10 @@ def main():
     else:
         asof = datetime.now(timezone.utc).date()
 
-    report, markdown = build_report(asof, archive=not args.no_archive)
-
     out = Path(args.output_dir)
+    report, markdown = build_report(asof, archive=not args.no_archive,
+                                    history_dir=out / "history")
+
     out.mkdir(parents=True, exist_ok=True)
     (out / "latest.json").write_text(json.dumps(report, indent=2, default=str))
     (out / "latest.md").write_text(markdown)
@@ -1009,6 +1127,8 @@ def main():
     print(f"  Revenue source: {rs.get('primary')} {dict(rs.get('by_basis', {}))}")
     print(f"  {s['listing_count']} listings · {s['breakeven_operating_allcash']} unlevered break-even · "
           f"{s['breakeven_sustained']} financed-sustained · {s['breakeven_purchase_year']} purchase-year")
+    if s.get("compared_to_week"):
+        print(f"  Week-over-week (vs {s['compared_to_week']}): {s['new_listings']} new · {s['price_drops']} price drop(s)")
     print(f"  Wrote {out/'latest.json'}, {out/'latest.md'}")
     for x in report["listings"]:
         fin = x["operating_income"]["financed"]
