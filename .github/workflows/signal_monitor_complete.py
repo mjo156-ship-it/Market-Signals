@@ -1757,6 +1757,26 @@ def write_state_json(alerts, status, mode, hormuz_data=None, rj_state=None,
         except Exception:
             pass
 
+    # Retirement projection snapshot (v5.17 CHF dashboard writes retirement_state.json;
+    # the monitor merges it here if it's available in this environment, and omits the
+    # block gracefully if not — the monitor has no portfolio access of its own).
+    try:
+        ret_candidates = [
+            os.environ.get('RETIREMENT_STATE_JSON'),
+            'retirement_state.json',
+            os.path.join(os.environ.get('PORTFOLIO_SNAPSHOT_REPO', ''), 'data',
+                         'retirement_state.json') if os.environ.get('PORTFOLIO_SNAPSHOT_REPO') else None,
+            os.path.expanduser('~/portfolio-snapshot/data/retirement_state.json'),
+        ]
+        for rp in ret_candidates:
+            if rp and os.path.isfile(rp):
+                with open(rp) as rf:
+                    state['retirement'] = json.load(rf)
+                print(f"[STATE] Merged retirement block from {rp}")
+                break
+    except Exception as e:
+        print(f"[STATE] Retirement block skipped: {e}")
+
     try:
         with open(path, 'w') as f:
             json.dump(state, f, indent=2, default=str)
