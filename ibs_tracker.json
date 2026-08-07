@@ -1,16 +1,16 @@
 {
-  "updated_at": "2026-08-07T00:54:34.968616",
+  "updated_at": "2026-08-07T14:41:02.581348",
   "gate_state": {
     "SPY": "IN",
-    "QQQ": "OUT",
-    "SMH": "OUT",
-    "XLK": "OUT"
+    "QQQ": "IN",
+    "SMH": "IN",
+    "XLK": "IN"
   },
   "current_multiplier": {
     "SPY": 1.0,
-    "TQQQ": 0.0,
-    "SOXL": 0.0,
-    "TECL": 0.0
+    "TQQQ": 1.0,
+    "SOXL": 1.0,
+    "TECL": 1.0
   },
   "breadth_today": 0,
   "baseline": {
@@ -116,10 +116,10 @@
       "own_rsi10": 41.9,
       "breadth": 0,
       "entry_price": 738.9299926757812,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 0.022,
+      "fwd_5d": 1.096,
+      "fwd_10d": 4.508,
+      "matured": true
     },
     {
       "date": "2026-07-24",
@@ -131,10 +131,10 @@
       "own_rsi10": 35.4,
       "breadth": 0,
       "entry_price": null,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": -0.987,
+      "fwd_5d": 0.919,
+      "fwd_10d": 14.786,
+      "matured": true
     },
     {
       "date": "2026-07-27",
@@ -240,9 +240,69 @@
       "fwd_5d": null,
       "fwd_10d": null,
       "matured": false
+    },
+    {
+      "date": "2026-08-07",
+      "sleeve": "TQQQ",
+      "underlying": "QQQ",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.3824,
+      "own_rsi10": 59.4,
+      "breadth": 0,
+      "entry_price": 73.49500274658203,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    },
+    {
+      "date": "2026-08-07",
+      "sleeve": "SOXL",
+      "underlying": "SMH",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.3224,
+      "own_rsi10": 54.1,
+      "breadth": 0,
+      "entry_price": 134.92210388183594,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    },
+    {
+      "date": "2026-08-07",
+      "sleeve": "TECL",
+      "underlying": "XLK",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.3693,
+      "own_rsi10": 61.8,
+      "breadth": 0,
+      "entry_price": 207.10809326171875,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
     }
   ],
-  "rolling": {},
+  "rolling": {
+    "gate_entry_SPY": {
+      "trailing_n": 1,
+      "trailing_wr": 1.0,
+      "trailing_avg_1d": 0.022,
+      "brier": 0.1418,
+      "status": "OK"
+    },
+    "gate_entry_TQQQ": {
+      "trailing_n": 1,
+      "trailing_wr": 1.0,
+      "trailing_avg_1d": -0.987,
+      "brier": 0.1687,
+      "status": "OK"
+    }
+  },
   "equity": {
     "engine_only": [],
     "engine_plus_btal": []
