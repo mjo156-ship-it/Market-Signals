@@ -1,16 +1,16 @@
 {
-  "updated_at": "2026-08-07T20:44:59.404274",
+  "updated_at": "2026-08-10T14:44:24.157743",
   "gate_state": {
-    "SPY": "IN",
-    "QQQ": "IN",
+    "SPY": "OUT",
+    "QQQ": "OUT",
     "SMH": "IN",
-    "XLK": "IN"
+    "XLK": "OUT"
   },
   "current_multiplier": {
-    "SPY": 1.0,
-    "TQQQ": 1.0,
+    "SPY": 0.0,
+    "TQQQ": 0.0,
     "SOXL": 1.0,
-    "TECL": 1.0
+    "TECL": 0.0
   },
   "breadth_today": 0,
   "baseline": {
@@ -146,10 +146,10 @@
       "own_rsi10": 35.1,
       "breadth": 0,
       "entry_price": 121.06999969482422,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": -14.572,
+      "fwd_5d": -8.977,
+      "fwd_10d": 6.575,
+      "matured": true
     },
     {
       "date": "2026-07-27",
@@ -161,10 +161,10 @@
       "own_rsi10": 36.5,
       "breadth": 0,
       "entry_price": 169.05999755859375,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": -5.589,
+      "fwd_5d": 4.962,
+      "fwd_10d": 22.512,
+      "matured": true
     },
     {
       "date": "2026-07-29",
@@ -300,6 +300,20 @@
       "trailing_wr": 1.0,
       "trailing_avg_1d": -0.987,
       "brier": 0.1687,
+      "status": "OK"
+    },
+    "gate_entry_SOXL": {
+      "trailing_n": 1,
+      "trailing_wr": 0.0,
+      "trailing_avg_1d": -14.572,
+      "brier": 0.3134,
+      "status": "OK"
+    },
+    "gate_entry_TECL": {
+      "trailing_n": 1,
+      "trailing_wr": 1.0,
+      "trailing_avg_1d": -5.589,
+      "brier": 0.1868,
       "status": "OK"
     }
   },
