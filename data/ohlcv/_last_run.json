@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-10T21:51:25.459183+00:00",
+  "timestamp": "2026-08-11T21:58:02.178342+00:00",
   "mode": "append",
   "succeeded": [
     "AMD",
@@ -99,213 +99,249 @@
   "warnings": [
     {
       "ticker": "AMD",
-      "yf_close": 469.56,
+      "yf_close": 474.32,
       "snapshot_price": 483.36,
-      "pct_diff": 2.855
+      "pct_diff": 1.87
     },
     {
       "ticker": "BOIL",
-      "yf_close": 20.71,
+      "yf_close": 20.45,
       "snapshot_price": 19.12,
-      "pct_diff": 8.316
-    },
-    {
-      "ticker": "BTAL",
-      "yf_close": 12.08,
-      "snapshot_price": 11.92,
-      "pct_diff": 1.342
+      "pct_diff": 6.956
     },
     {
       "ticker": "BTC-USD",
-      "yf_close": 63926.8594,
+      "yf_close": 63622.8516,
       "snapshot_price": 64964.52,
-      "pct_diff": 1.597
+      "pct_diff": 2.065
     },
     {
       "ticker": "CTA",
-      "yf_close": 26.99,
+      "yf_close": 27.18,
       "snapshot_price": 25.87,
-      "pct_diff": 4.329
+      "pct_diff": 5.064
     },
     {
       "ticker": "CURE",
-      "yf_close": 131.19,
+      "yf_close": 130.1,
       "snapshot_price": 125.18,
-      "pct_diff": 4.801
+      "pct_diff": 3.93
     },
     {
       "ticker": "DBC",
-      "yf_close": 29.93,
+      "yf_close": 29.97,
       "snapshot_price": 28.91,
-      "pct_diff": 3.528
+      "pct_diff": 3.667
     },
     {
       "ticker": "DBMF",
-      "yf_close": 31.32,
+      "yf_close": 31.33,
       "snapshot_price": 30.93,
-      "pct_diff": 1.261
+      "pct_diff": 1.293
     },
     {
       "ticker": "DRN",
-      "yf_close": 10.62,
+      "yf_close": 10.39,
       "snapshot_price": 11.07,
-      "pct_diff": 4.065
+      "pct_diff": 6.143
     },
     {
       "ticker": "EDC",
-      "yf_close": 73.7,
+      "yf_close": 74.56,
       "snapshot_price": 75.4,
-      "pct_diff": 2.255
+      "pct_diff": 1.114
     },
     {
       "ticker": "EURL",
-      "yf_close": 51.31,
+      "yf_close": 51.6,
       "snapshot_price": 52.06,
-      "pct_diff": 1.441
+      "pct_diff": 0.884
     },
     {
       "ticker": "FAS",
-      "yf_close": 181.37,
+      "yf_close": 181.25,
       "snapshot_price": 179.57,
-      "pct_diff": 1.002
+      "pct_diff": 0.936
+    },
+    {
+      "ticker": "FNGO",
+      "yf_close": 150.38,
+      "snapshot_price": 153.15,
+      "pct_diff": 1.809
     },
     {
       "ticker": "GLD",
-      "yf_close": 402.54,
+      "yf_close": 400.96,
       "snapshot_price": 398.47,
-      "pct_diff": 1.021
+      "pct_diff": 0.625
     },
     {
       "ticker": "HIBL",
-      "yf_close": 105.87,
+      "yf_close": 107.52,
       "snapshot_price": 108.17,
-      "pct_diff": 2.126
+      "pct_diff": 0.601
     },
     {
       "ticker": "INDL",
-      "yf_close": 46.1544,
+      "yf_close": 46.0164,
       "snapshot_price": 46.57,
-      "pct_diff": 0.892
-    },
-    {
-      "ticker": "IWM",
-      "yf_close": 299.98,
-      "snapshot_price": 301.56,
-      "pct_diff": 0.524
+      "pct_diff": 1.189
     },
     {
       "ticker": "KMLM",
-      "yf_close": 28.8,
+      "yf_close": 28.83,
       "snapshot_price": 28.21,
-      "pct_diff": 2.091
+      "pct_diff": 2.198
     },
     {
       "ticker": "KOLD",
-      "yf_close": 28.64,
+      "yf_close": 28.94,
       "snapshot_price": 31.22,
-      "pct_diff": 8.264
+      "pct_diff": 7.303
     },
     {
       "ticker": "KORU",
-      "yf_close": 16.41,
+      "yf_close": 17.64,
       "snapshot_price": 17.36,
-      "pct_diff": 5.472
+      "pct_diff": 1.613
     },
     {
       "ticker": "LABU",
-      "yf_close": 280.02,
+      "yf_close": 280.67,
       "snapshot_price": 277.23,
-      "pct_diff": 1.006
+      "pct_diff": 1.241
     },
     {
       "ticker": "LQD",
-      "yf_close": 105.96,
+      "yf_close": 105.99,
       "snapshot_price": 106.55,
-      "pct_diff": 0.554
+      "pct_diff": 0.526
     },
     {
       "ticker": "NAIL",
-      "yf_close": 41.54,
+      "yf_close": 44.13,
       "snapshot_price": 45.03,
-      "pct_diff": 7.75
+      "pct_diff": 1.999
     },
     {
       "ticker": "NVDA",
-      "yf_close": 217.55,
+      "yf_close": 217.5,
       "snapshot_price": 223.96,
-      "pct_diff": 2.862
+      "pct_diff": 2.884
+    },
+    {
+      "ticker": "QQQ",
+      "yf_close": 718.45,
+      "snapshot_price": 723.03,
+      "pct_diff": 0.633
     },
     {
       "ticker": "SMH",
-      "yf_close": 569.41,
+      "yf_close": 572.93,
       "snapshot_price": 582.7,
-      "pct_diff": 2.281
+      "pct_diff": 1.677
     },
     {
       "ticker": "SOXL",
-      "yf_close": 130.0,
+      "yf_close": 133.0,
       "snapshot_price": 140.25,
-      "pct_diff": 7.308
+      "pct_diff": 5.169
     },
     {
       "ticker": "SOXS",
-      "yf_close": 45.21,
+      "yf_close": 44.03,
       "snapshot_price": 42.08,
-      "pct_diff": 7.438
+      "pct_diff": 4.634
+    },
+    {
+      "ticker": "SVXY",
+      "yf_close": 59.75,
+      "snapshot_price": 59.36,
+      "pct_diff": 0.657
     },
     {
       "ticker": "TECL",
-      "yf_close": 205.98,
+      "yf_close": 204.95,
       "snapshot_price": 211.64,
-      "pct_diff": 2.674
+      "pct_diff": 3.161
     },
     {
       "ticker": "TLT",
-      "yf_close": 82.06,
+      "yf_close": 82.19,
       "snapshot_price": 82.76,
-      "pct_diff": 0.846
+      "pct_diff": 0.689
     },
     {
       "ticker": "TMV",
-      "yf_close": 42.9,
+      "yf_close": 42.67,
       "snapshot_price": 41.79,
-      "pct_diff": 2.656
+      "pct_diff": 2.106
     },
     {
       "ticker": "TQQQ",
-      "yf_close": 73.8,
+      "yf_close": 73.06,
       "snapshot_price": 74.47,
-      "pct_diff": 0.9
+      "pct_diff": 1.893
     },
     {
       "ticker": "UCO",
-      "yf_close": 41.21,
+      "yf_close": 41.82,
       "snapshot_price": 37.0,
-      "pct_diff": 11.378
+      "pct_diff": 13.027
+    },
+    {
+      "ticker": "UPRO",
+      "yf_close": 153.36,
+      "snapshot_price": 155.06,
+      "pct_diff": 1.096
+    },
+    {
+      "ticker": "UVXY",
+      "yf_close": 21.19,
+      "snapshot_price": 21.62,
+      "pct_diff": 1.989
+    },
+    {
+      "ticker": "VIXM",
+      "yf_close": 14.24,
+      "snapshot_price": 14.35,
+      "pct_diff": 0.767
+    },
+    {
+      "ticker": "VIXY",
+      "yf_close": 19.3,
+      "snapshot_price": 19.56,
+      "pct_diff": 1.329
+    },
+    {
+      "ticker": "VOOG",
+      "yf_close": 84.7,
+      "snapshot_price": 85.42,
+      "pct_diff": 0.843
     },
     {
       "ticker": "XLE",
-      "yf_close": 60.18,
+      "yf_close": 60.93,
       "snapshot_price": 57.5,
-      "pct_diff": 4.661
+      "pct_diff": 5.965
     },
     {
-      "ticker": "XLU",
-      "yf_close": 43.13,
-      "snapshot_price": 43.61,
-      "pct_diff": 1.101
+      "ticker": "XLP",
+      "yf_close": 84.69,
+      "snapshot_price": 85.12,
+      "pct_diff": 0.505
     },
     {
       "ticker": "XLV",
-      "yf_close": 168.44,
+      "yf_close": 168.01,
       "snapshot_price": 165.68,
-      "pct_diff": 1.666
+      "pct_diff": 1.406
     },
     {
       "ticker": "YINN",
-      "yf_close": 32.3,
+      "yf_close": 30.07,
       "snapshot_price": 31.5,
-      "pct_diff": 2.54
+      "pct_diff": 4.54
     }
   ],
   "counts": {
