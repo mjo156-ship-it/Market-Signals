@@ -1,14 +1,14 @@
 {
-  "updated_at": "2026-08-11T20:50:39.857801",
+  "updated_at": "2026-08-12T14:44:30.543682",
   "gate_state": {
-    "SPY": "OUT",
-    "QQQ": "OUT",
+    "SPY": "IN",
+    "QQQ": "IN",
     "SMH": "IN",
     "XLK": "IN"
   },
   "current_multiplier": {
-    "SPY": 0.0,
-    "TQQQ": 0.0,
+    "SPY": 1.0,
+    "TQQQ": 1.0,
     "SOXL": 1.0,
     "TECL": 1.0
   },
@@ -176,10 +176,10 @@
       "own_rsi10": 28.3,
       "breadth": 2,
       "entry_price": 59.209999084472656,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 9.56,
+      "fwd_5d": 26.08,
+      "fwd_10d": 29.967,
+      "matured": true
     },
     {
       "date": "2026-07-29",
@@ -191,10 +191,10 @@
       "own_rsi10": 28.5,
       "breadth": 2,
       "entry_price": 97.04000091552734,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 24.659,
+      "fwd_5d": 43.52,
+      "fwd_10d": 58.32,
+      "matured": true
     },
     {
       "date": "2026-07-29",
@@ -206,10 +206,10 @@
       "own_rsi10": 27.2,
       "breadth": 3,
       "entry_price": 58.209999084472656,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 9.56,
+      "fwd_5d": 26.08,
+      "fwd_10d": 29.967,
+      "matured": true
     },
     {
       "date": "2026-07-29",
@@ -221,10 +221,10 @@
       "own_rsi10": 28.8,
       "breadth": 3,
       "entry_price": 151.3350067138672,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 16.157,
+      "fwd_5d": 36.501,
+      "fwd_10d": 43.635,
+      "matured": true
     },
     {
       "date": "2026-08-06",
@@ -300,6 +300,36 @@
       "fwd_5d": null,
       "fwd_10d": null,
       "matured": false
+    },
+    {
+      "date": "2026-08-12",
+      "sleeve": "SPY",
+      "underlying": "SPY",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.3763,
+      "own_rsi10": 67.8,
+      "breadth": 0,
+      "entry_price": 772.9600219726562,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    },
+    {
+      "date": "2026-08-12",
+      "sleeve": "TQQQ",
+      "underlying": "QQQ",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.3292,
+      "own_rsi10": 61.1,
+      "breadth": 0,
+      "entry_price": 75.08499908447266,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
     }
   ],
   "rolling": {
@@ -329,6 +359,27 @@
       "trailing_wr": 1.0,
       "trailing_avg_1d": -5.589,
       "brier": 0.1868,
+      "status": "OK"
+    },
+    "conviction_1.5x_TQQQ": {
+      "trailing_n": 1,
+      "trailing_wr": 1.0,
+      "trailing_avg_1d": 9.56,
+      "brier": 0.1746,
+      "status": "OK"
+    },
+    "conviction_2.0x_single_SOXL": {
+      "trailing_n": 1,
+      "trailing_wr": 1.0,
+      "trailing_avg_1d": 24.659,
+      "brier": 0.1767,
+      "status": "OK"
+    },
+    "conviction_2.0x_breadth": {
+      "trailing_n": 2,
+      "trailing_wr": 1.0,
+      "trailing_avg_1d": 12.858,
+      "brier": 0.1643,
       "status": "OK"
     }
   },
