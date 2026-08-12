@@ -1,6 +1,6 @@
 # Signal Research — 2026-08-12
 
-_Generated 2026-08-12T14:46:49+00:00 · 90 tickers · 5 firing · 11 approaching_
+_Generated 2026-08-12T15:52:48+00:00 · 90 tickers · 5 firing · 7 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -17,13 +17,9 @@ _Generated 2026-08-12T14:46:49+00:00 · 90 tickers · 5 firing · 11 approaching
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Rotation: entered top-8 3-mo momentum (long) | FNGO | FNGO | manual_swing | 21d | 76% | +35.8% | +26.7pp | 70 |
-| Donchian 52-week breakout (long) | FNGS | FNGS | composer_ready | 20d | 64% | +18.3% | +12.1pp | 55 |
-| Rotation: entered top-8 3-mo momentum (long) | SVXY | SVXY | manual_swing | 21d | 77% | +8.4% | +4.0pp | 94 |
 | Parabolic extension (>25% over 50DMA) fade (short) | MSFT | short MSFT | manual_swing | 10d | 68% | +1.3% | +3.0pp | 25 |
 | Rotation: entered top-8 12-mo momentum (long) | USO | USO | manual_swing | 21d | 62% | +0.9% | +1.1pp | 26 |
 | 4+ down-day streak (long) | XLY | XLY | composer_ready | 5d | 62% | +0.6% | +0.3pp | 167 |
 | Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 339 |
 | Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 64% | +1.5% | +0.7pp | 28 |
-| 4+ down-day streak (long) | XLP | XLP | composer_ready | 5d | 61% | +0.4% | +0.2pp | 137 |
-| Donchian 52-week breakout (long) | UPRO | UPRO | composer_ready | 20d | 66% | +6.4% | +0.0pp | 199 |
 | Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |
