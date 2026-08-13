@@ -1,24 +1,23 @@
 # Signal Research — 2026-08-13
 
-_Generated 2026-08-13T15:51:06+00:00 · 90 tickers · 1 firing · 10 approaching_
+_Generated 2026-08-13T20:51:05+00:00 · 90 tickers · 3 firing · 7 approaching_
 
 ## Firing today (backtest-gated)
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Rotation: entered top-8 3-mo momentum (long) | FNGO | FNGO | manual_swing | 21d | 76% | +35.8% | +26.7pp | 70 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 72% | +0.3% | +0.1pp | 226 |
+| Donchian 52-week breakout (long) | UPRO | UPRO | composer_ready | 20d | 66% | +6.4% | +0.0pp | 199 |
 
 ## Approaching / primed (passed gate, just inside threshold)
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Rotation: entered top-8 3-mo momentum (long) | FNGO | FNGO | manual_swing | 21d | 76% | +35.8% | +26.7pp | 70 |
+| Donchian 52-week breakout (long) | FNGO | FNGO | composer_ready | 20d | 67% | +24.2% | +15.6pp | 64 |
 | Donchian 52-week breakout (long) | FNGS | FNGS | composer_ready | 20d | 64% | +18.3% | +12.1pp | 55 |
-| Rotation: entered top-8 6-mo momentum (long) | QLD | QLD | manual_swing | 21d | 70% | +7.9% | +2.7pp | 94 |
 | Donchian 52-week breakout (long) | SVXY | SVXY | composer_ready | 20d | 65% | +6.4% | +2.3pp | 127 |
 | Parabolic extension (>25% over 50DMA) fade (short) | MSFT | short MSFT | manual_swing | 10d | 68% | +1.3% | +3.0pp | 25 |
-| Bollinger squeeze breakout (long) | KORU | KORU | composer_ready | 10d | 63% | +6.3% | +1.5pp | 27 |
 | Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 339 |
 | Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 64% | +1.5% | +0.7pp | 28 |
-| Donchian 52-week breakout (long) | UPRO | UPRO | composer_ready | 20d | 66% | +6.4% | +0.0pp | 199 |
 | Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |
