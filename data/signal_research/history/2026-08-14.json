@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-08-14T14:42:38+00:00",
+  "generated_at_utc": "2026-08-14T15:44:22+00:00",
   "data_through": "2026-08-14",
   "universe_size": 90,
   "combinations_evaluated": 1270,
@@ -2089,7 +2089,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 80.89 vs 52w high 81.41",
+      "today_value": "close 80.50 vs 52w high 81.41",
       "backtest": {
         "n": 55,
         "win_rate": 0.636,
@@ -2387,7 +2387,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 60.74 vs 52w high 60.85",
+      "today_value": "close 60.47 vs 52w high 60.85",
       "backtest": {
         "n": 127,
         "win_rate": 0.646,
@@ -3193,7 +3193,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 98.43 vs 52w high 98.79",
+      "today_value": "close 98.14 vs 52w high 98.79",
       "backtest": {
         "n": 168,
         "win_rate": 0.649,
@@ -4056,7 +4056,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +74.5%, rank #10",
+      "today_value": "12-mo momentum +74.4%, rank #9",
       "backtest": {
         "n": 26,
         "win_rate": 0.615,
@@ -4209,7 +4209,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 31.25 vs 52w high 31.54",
+      "today_value": "close 31.26 vs 52w high 31.54",
       "backtest": {
         "n": 28,
         "win_rate": 0.643,
@@ -5525,7 +5525,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 157.11 vs 52w high 158.63",
+      "today_value": "close 156.38 vs 52w high 158.63",
       "backtest": {
         "n": 199,
         "win_rate": 0.658,
@@ -6543,7 +6543,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 36.81 vs 52w high 37.19",
+      "today_value": "close 36.82 vs 52w high 37.19",
       "backtest": {
         "n": 47,
         "win_rate": 0.681,
