@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-08-14T21:32:34.103219+00:00",
-  "mode": "append",
+  "timestamp": "2026-08-14T22:53:52.704506+00:00",
+  "mode": "rewrite",
   "succeeded": [
     "AMD",
     "AMZN",
