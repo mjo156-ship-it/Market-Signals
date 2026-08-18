@@ -1,6 +1,6 @@
 # Signal Research — 2026-08-18
 
-_Generated 2026-08-18T14:19:16+00:00 · 90 tickers · 3 firing · 13 approaching_
+_Generated 2026-08-18T20:29:56+00:00 · 90 tickers · 3 firing · 13 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -19,8 +19,8 @@ _Generated 2026-08-18T14:19:16+00:00 · 90 tickers · 3 firing · 13 approaching
 | 4+ down-day streak (long) | TQQQ | TQQQ | composer_ready | 5d | 62% | +4.0% | +1.9pp | 80 |
 | 4+ down-day streak (long) | QQQ | TQQQ | composer_ready | 5d | 61% | +1.6% | +1.2pp | 144 |
 | 4+ down-day streak (long) | SPY | UPRO | composer_ready | 5d | 70% | +1.1% | +0.8pp | 180 |
-| Bollinger %B overbought (>1) fade (short) | TMV | short TMV | composer_ready | 5d | 60% | +0.9% | +0.9pp | 134 |
 | 4+ down-day streak (long) | VOO | VOO | composer_ready | 5d | 68% | +0.8% | +0.5pp | 84 |
+| 4+ down-day streak (long) | XLY | XLY | composer_ready | 5d | 62% | +0.6% | +0.3pp | 167 |
 | Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 64% | +1.5% | +0.7pp | 28 |
 | 4+ up-day streak fade (short) | PSQ | short PSQ | manual_swing | 5d | 66% | +0.8% | +0.4pp | 94 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 72% | +0.3% | +0.1pp | 226 |
