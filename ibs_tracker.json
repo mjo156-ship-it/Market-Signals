@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-19T20:32:28.683814",
+  "updated_at": "2026-08-20T14:23:10.669741",
   "gate_state": {
     "SPY": "IN",
     "QQQ": "IN",
@@ -236,10 +236,10 @@
       "own_rsi10": 67.1,
       "breadth": 0,
       "entry_price": 768.5599975585938,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 0.612,
+      "fwd_5d": 1.213,
+      "fwd_10d": -0.277,
+      "matured": true
     },
     {
       "date": "2026-08-07",
@@ -334,9 +334,9 @@
   ],
   "rolling": {
     "gate_entry_SPY": {
-      "trailing_n": 1,
+      "trailing_n": 2,
       "trailing_wr": 1.0,
-      "trailing_avg_1d": 0.022,
+      "trailing_avg_1d": 0.317,
       "brier": 0.1418,
       "status": "OK"
     },
