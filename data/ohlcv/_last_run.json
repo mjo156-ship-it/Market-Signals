@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-08-21T21:32:07.756842+00:00",
-  "mode": "append",
+  "timestamp": "2026-08-21T22:54:29.333927+00:00",
+  "mode": "rewrite",
   "succeeded": [
     "AMD",
     "AMZN",
@@ -96,14 +96,7 @@
   ],
   "skipped": [],
   "failed": [],
-  "warnings": [
-    {
-      "ticker": "BTC-USD",
-      "yf_close": 78107.5391,
-      "snapshot_price": 77641.27,
-      "pct_diff": 0.601
-    }
-  ],
+  "warnings": [],
   "counts": {
     "total": 91,
     "ok": 91,
