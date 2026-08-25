@@ -1,6 +1,6 @@
 {
-  "generated_at_local": "2026-08-25T14:32:41.493736",
-  "generated_at_utc": "2026-08-25T14:32:41.493740Z",
+  "generated_at_local": "2026-08-25T15:34:36.254895",
+  "generated_at_utc": "2026-08-25T15:34:36.254900Z",
   "mode": "close",
   "summary": {
     "total_alerts": 2,
@@ -11,69 +11,69 @@
   "alerts": [
     {
       "title": "\ud83d\udfe2 BTC MOMENTUM",
-      "message": "BTC RSI=86.0 > 79 \u2192 Hold/Add BTC: 67% win, +5.2% avg (5d)",
+      "message": "BTC RSI=86.1 > 79 \u2192 Hold/Add BTC: 67% win, +5.2% avg (5d)",
       "category": "buy"
     },
     {
       "title": "\ud83d\udfe1 Z-SCORE QQQ_RSP APPROACHING",
-      "message": "QQQ/RSP z = -1.46\u03c3 (threshold \u2264 -1.5\u03c3, gap +0.04\u03c3)",
+      "message": "QQQ/RSP z = -1.45\u03c3 (threshold \u2264 -1.5\u03c3, gap +0.05\u03c3)",
       "category": "watch"
     }
   ],
   "indicators": {
     "SMH": {
-      "price": 553.22,
-      "rsi10": 42.0,
-      "rsi50": 50.6,
-      "sma200": 468.92,
-      "sma50": 586.71,
-      "ema21": 567.85,
-      "pct_above_sma200": 17.98
+      "price": 555.22,
+      "rsi10": 43.2,
+      "rsi50": 50.8,
+      "sma200": 468.93,
+      "sma50": 586.75,
+      "ema21": 568.03,
+      "pct_above_sma200": 18.4
     },
     "SPY": {
-      "price": 764.58,
-      "rsi10": 50.7,
-      "rsi50": 56.1,
-      "sma200": 705.91,
-      "sma50": 752.6,
-      "ema21": 763.42,
-      "pct_above_sma200": 8.31
+      "price": 765.17,
+      "rsi10": 51.5,
+      "rsi50": 56.2,
+      "sma200": 705.92,
+      "sma50": 752.62,
+      "ema21": 763.47,
+      "pct_above_sma200": 8.39
     },
     "QQQ": {
-      "price": 709.66,
-      "rsi10": 46.5,
-      "rsi50": 52.3,
-      "sma200": 652.63,
-      "sma50": 712.93,
-      "ema21": 713.13,
-      "pct_above_sma200": 8.74
+      "price": 710.67,
+      "rsi10": 47.4,
+      "rsi50": 52.4,
+      "sma200": 652.64,
+      "sma50": 712.95,
+      "ema21": 713.22,
+      "pct_above_sma200": 8.89
     },
     "IWM": {
-      "price": 298.45,
-      "rsi10": 48.1,
-      "rsi50": 54.7,
+      "price": 299.04,
+      "rsi10": 49.5,
+      "rsi50": 54.9,
       "sma200": 269.69,
-      "sma50": 296.94,
-      "ema21": 298.99,
-      "pct_above_sma200": 10.67
+      "sma50": 296.95,
+      "ema21": 299.04,
+      "pct_above_sma200": 10.88
     },
     "XLK": {
-      "price": 181.27,
-      "rsi10": 43.7,
-      "rsi50": 52.6,
-      "sma200": 158.47,
+      "price": 181.72,
+      "rsi10": 44.9,
+      "rsi50": 52.8,
+      "sma200": 158.48,
       "sma50": 182.89,
-      "ema21": 183.51,
-      "pct_above_sma200": 14.39
+      "ema21": 183.55,
+      "pct_above_sma200": 14.67
     },
     "XLP": {
-      "price": 86.54,
-      "rsi10": 55.9,
-      "rsi50": 53.5,
+      "price": 86.46,
+      "rsi10": 55.4,
+      "rsi50": 53.4,
       "sma200": 82.25,
       "sma50": 84.78,
       "ema21": 85.62,
-      "pct_above_sma200": 5.22
+      "pct_above_sma200": 5.13
     },
     "XLU": {
       "price": 43.26,
@@ -85,121 +85,121 @@
       "pct_above_sma200": -2.4
     },
     "XLV": {
-      "price": 175.1,
-      "rsi10": 70.7,
-      "rsi50": 62.0,
+      "price": 175.64,
+      "rsi10": 71.7,
+      "rsi50": 62.2,
       "sma200": 153.59,
-      "sma50": 162.49,
-      "ema21": 168.72,
-      "pct_above_sma200": 14.0
+      "sma50": 162.5,
+      "ema21": 168.77,
+      "pct_above_sma200": 14.36
     },
     "GLD": {
-      "price": 424.17,
-      "rsi10": 73.0,
-      "rsi50": 54.9,
-      "sma200": 414.07,
-      "sma50": 384.59,
-      "ema21": 401.85,
-      "pct_above_sma200": 2.44
+      "price": 426.39,
+      "rsi10": 76.4,
+      "rsi50": 55.4,
+      "sma200": 414.08,
+      "sma50": 384.63,
+      "ema21": 402.05,
+      "pct_above_sma200": 2.97
     },
     "TLT": {
-      "price": 83.09,
-      "rsi10": 55.8,
-      "rsi50": 47.8,
+      "price": 83.36,
+      "rsi10": 58.1,
+      "rsi50": 48.5,
       "sma200": 85.07,
-      "sma50": 83.75,
-      "ema21": 82.61,
-      "pct_above_sma200": -2.33
+      "sma50": 83.76,
+      "ema21": 82.63,
+      "pct_above_sma200": -2.02
     },
     "HYG": {
-      "price": 79.79,
-      "rsi10": 62.5,
-      "rsi50": 56.0,
+      "price": 79.86,
+      "rsi10": 64.9,
+      "rsi50": 56.5,
       "sma200": 78.44,
       "sma50": 79.32,
-      "ema21": 79.52,
-      "pct_above_sma200": 1.72
+      "ema21": 79.53,
+      "pct_above_sma200": 1.82
     },
     "LQD": {
-      "price": 106.58,
-      "rsi10": 55.3,
-      "rsi50": 48.7,
+      "price": 106.74,
+      "rsi10": 57.3,
+      "rsi50": 49.2,
       "sma200": 107.41,
       "sma50": 106.92,
-      "ema21": 106.29,
-      "pct_above_sma200": -0.77
+      "ema21": 106.3,
+      "pct_above_sma200": -0.63
     },
     "TMV": {
-      "price": 41.38,
-      "rsi10": 44.7,
-      "rsi50": 53.3,
+      "price": 40.99,
+      "rsi10": 42.6,
+      "rsi50": 52.6,
       "sma200": 37.28,
       "sma50": 40.18,
-      "ema21": 42.03,
-      "pct_above_sma200": 11.0
+      "ema21": 42.0,
+      "pct_above_sma200": 9.97
     },
     "USDU": {
-      "price": 26.26,
-      "rsi10": 35.6,
-      "rsi50": 48.5,
+      "price": 26.24,
+      "rsi10": 33.9,
+      "rsi50": 48.0,
       "sma200": 26.1,
-      "sma50": 26.58,
+      "sma50": 26.57,
       "ema21": 26.4,
-      "pct_above_sma200": 0.63
+      "pct_above_sma200": 0.54
     },
     "UCO": {
-      "price": 42.36,
-      "rsi10": 51.7,
-      "rsi50": 52.3,
+      "price": 41.96,
+      "rsi10": 50.1,
+      "rsi50": 52.0,
       "sma200": 33.34,
-      "sma50": 38.69,
-      "ema21": 41.8,
-      "pct_above_sma200": 27.04
+      "sma50": 38.68,
+      "ema21": 41.76,
+      "pct_above_sma200": 25.85
     },
     "BOIL": {
-      "price": 18.97,
-      "rsi10": 40.8,
-      "rsi50": 42.8,
-      "sma200": 36.86,
-      "sma50": 22.82,
-      "ema21": 20.03,
-      "pct_above_sma200": -48.54
+      "price": 19.28,
+      "rsi10": 43.2,
+      "rsi50": 43.0,
+      "sma200": 36.87,
+      "sma50": 22.83,
+      "ema21": 20.06,
+      "pct_above_sma200": -47.7
     },
     "UVXY": {
-      "price": 19.38,
-      "rsi10": 30.7,
-      "rsi50": 40.9,
-      "sma200": 36.84,
+      "price": 19.07,
+      "rsi10": 28.9,
+      "rsi50": 40.7,
+      "sma200": 36.83,
       "sma50": 23.62,
-      "ema21": 21.25,
-      "pct_above_sma200": -47.39
+      "ema21": 21.22,
+      "pct_above_sma200": -48.23
     },
     "EDC": {
-      "price": 78.26,
-      "rsi10": 54.0,
-      "rsi50": 50.7,
-      "sma200": 69.74,
-      "sma50": 78.58,
-      "ema21": 76.35,
-      "pct_above_sma200": 12.21
+      "price": 79.61,
+      "rsi10": 56.2,
+      "rsi50": 51.1,
+      "sma200": 69.75,
+      "sma50": 78.61,
+      "ema21": 76.47,
+      "pct_above_sma200": 14.14
     },
     "YINN": {
-      "price": 29.48,
-      "rsi10": 49.1,
+      "price": 29.47,
+      "rsi10": 49.0,
       "rsi50": 48.4,
       "sma200": 36.12,
       "sma50": 27.52,
-      "ema21": 29.53,
-      "pct_above_sma200": -18.37
+      "ema21": 29.52,
+      "pct_above_sma200": -18.4
     },
     "KORU": {
-      "price": 20.23,
-      "rsi10": 51.3,
-      "rsi50": 48.0,
+      "price": 20.57,
+      "rsi10": 52.3,
+      "rsi50": 48.1,
       "sma200": 22.18,
       "sma50": 25.62,
-      "ema21": 19.99,
-      "pct_above_sma200": -8.8
+      "ema21": 20.02,
+      "pct_above_sma200": -7.27
     },
     "EURL": {
       "price": 52.23,
@@ -211,193 +211,193 @@
       "pct_above_sma200": 19.62
     },
     "INDL": {
-      "price": 45.86,
-      "rsi10": 57.0,
-      "rsi50": 50.4,
+      "price": 46.0,
+      "rsi10": 58.3,
+      "rsi50": 50.7,
       "sma200": 48.71,
-      "sma50": 44.96,
-      "ema21": 45.24,
-      "pct_above_sma200": -5.85
+      "sma50": 44.97,
+      "ema21": 45.26,
+      "pct_above_sma200": -5.56
     },
     "BTC-USD": {
-      "price": 79193.53,
-      "rsi10": 86.0,
-      "rsi50": 61.8,
-      "sma200": 69129.02,
-      "sma50": 65766.98,
-      "ema21": 70160.29,
-      "pct_above_sma200": 14.56
+      "price": 79296.82,
+      "rsi10": 86.1,
+      "rsi50": 61.9,
+      "sma200": 69129.54,
+      "sma50": 65769.05,
+      "ema21": 70169.68,
+      "pct_above_sma200": 14.71
     },
     "AMD": {
-      "price": 474.3,
-      "rsi10": 46.7,
-      "rsi50": 51.9,
-      "sma200": 331.99,
-      "sma50": 508.85,
-      "ema21": 484.54,
-      "pct_above_sma200": 42.87
+      "price": 478.69,
+      "rsi10": 48.2,
+      "rsi50": 52.2,
+      "sma200": 332.01,
+      "sma50": 508.94,
+      "ema21": 484.94,
+      "pct_above_sma200": 44.18
     },
     "NVDA": {
-      "price": 211.81,
-      "rsi10": 45.3,
-      "rsi50": 51.6,
-      "sma200": 195.26,
-      "sma50": 207.78,
-      "ema21": 214.33,
-      "pct_above_sma200": 8.48
+      "price": 211.09,
+      "rsi10": 44.1,
+      "rsi50": 51.5,
+      "sma200": 195.25,
+      "sma50": 207.77,
+      "ema21": 214.26,
+      "pct_above_sma200": 8.11
     },
     "NAIL": {
-      "price": 40.01,
-      "rsi10": 47.0,
-      "rsi50": 48.2,
+      "price": 39.78,
+      "rsi10": 46.5,
+      "rsi50": 48.1,
       "sma200": 49.16,
       "sma50": 42.95,
-      "ema21": 41.07,
-      "pct_above_sma200": -18.62
+      "ema21": 41.05,
+      "pct_above_sma200": -19.08
     },
     "CURE": {
-      "price": 146.62,
-      "rsi10": 70.4,
-      "rsi50": 61.4,
+      "price": 147.2,
+      "rsi10": 70.9,
+      "rsi50": 61.5,
       "sma200": 106.72,
-      "sma50": 119.51,
-      "ema21": 132.14,
-      "pct_above_sma200": 37.39
+      "sma50": 119.53,
+      "ema21": 132.19,
+      "pct_above_sma200": 37.93
     },
     "FAS": {
-      "price": 182.84,
-      "rsi10": 57.3,
-      "rsi50": 58.1,
+      "price": 183.26,
+      "rsi10": 58.1,
+      "rsi50": 58.3,
       "sma200": 148.76,
-      "sma50": 168.05,
-      "ema21": 177.96,
-      "pct_above_sma200": 22.91
+      "sma50": 168.06,
+      "ema21": 178.0,
+      "pct_above_sma200": 23.19
     },
     "LABU": {
-      "price": 333.26,
-      "rsi10": 65.7,
-      "rsi50": 59.3,
-      "sma200": 192.33,
-      "sma50": 268.45,
-      "ema21": 288.05,
-      "pct_above_sma200": 73.27
+      "price": 337.98,
+      "rsi10": 66.7,
+      "rsi50": 59.7,
+      "sma200": 192.36,
+      "sma50": 268.55,
+      "ema21": 288.48,
+      "pct_above_sma200": 75.71
     },
     "TQQQ": {
-      "price": 69.97,
-      "rsi10": 44.8,
-      "rsi50": 50.6,
+      "price": 70.25,
+      "rsi10": 45.6,
+      "rsi50": 50.7,
       "sma200": 60.64,
       "sma50": 72.69,
-      "ema21": 71.63,
-      "pct_above_sma200": 15.39
+      "ema21": 71.65,
+      "pct_above_sma200": 15.85
     },
     "SOXL": {
-      "price": 115.23,
-      "rsi10": 39.0,
-      "rsi50": 47.6,
+      "price": 116.23,
+      "rsi10": 39.7,
+      "rsi50": 47.7,
       "sma200": 105.97,
-      "sma50": 167.72,
-      "ema21": 132.73,
-      "pct_above_sma200": 8.74
+      "sma50": 167.74,
+      "ema21": 132.82,
+      "pct_above_sma200": 9.68
     },
     "TECL": {
-      "price": 187.38,
-      "rsi10": 41.4,
-      "rsi50": 50.5,
-      "sma200": 149.11,
-      "sma50": 200.21,
-      "ema21": 197.54,
-      "pct_above_sma200": 25.67
+      "price": 189.5,
+      "rsi10": 43.2,
+      "rsi50": 50.8,
+      "sma200": 149.12,
+      "sma50": 200.25,
+      "ema21": 197.73,
+      "pct_above_sma200": 27.08
     },
     "DRN": {
-      "price": 11.18,
-      "rsi10": 53.5,
-      "rsi50": 52.3,
+      "price": 11.27,
+      "rsi10": 56.3,
+      "rsi50": 52.7,
       "sma200": 9.88,
       "sma50": 11.04,
       "ema21": 11.07,
-      "pct_above_sma200": 13.16
+      "pct_above_sma200": 14.11
     },
     "UPRO": {
-      "price": 149.22,
-      "rsi10": 48.9,
-      "rsi50": 54.5,
+      "price": 149.62,
+      "rsi10": 49.8,
+      "rsi50": 54.6,
       "sma200": 125.34,
       "sma50": 144.28,
-      "ema21": 149.34,
-      "pct_above_sma200": 19.05
+      "ema21": 149.38,
+      "pct_above_sma200": 19.37
     },
     "VOOV": {
-      "price": 229.2,
-      "rsi10": 59.0,
-      "rsi50": 59.7,
+      "price": 229.24,
+      "rsi10": 59.3,
+      "rsi50": 59.8,
       "sma200": 212.09,
       "sma50": 223.86,
-      "ema21": 227.5,
-      "pct_above_sma200": 8.07
+      "ema21": 227.51,
+      "pct_above_sma200": 8.09
     },
     "VOOG": {
-      "price": 83.24,
-      "rsi10": 47.1,
-      "rsi50": 53.6,
+      "price": 83.33,
+      "rsi10": 47.9,
+      "rsi50": 53.7,
       "sma200": 76.66,
-      "sma50": 82.42,
-      "ema21": 83.48,
-      "pct_above_sma200": 8.58
+      "sma50": 82.43,
+      "ema21": 83.49,
+      "pct_above_sma200": 8.71
     },
     "VTV": {
-      "price": 226.32,
-      "rsi10": 59.7,
-      "rsi50": 61.6,
+      "price": 226.62,
+      "rsi10": 62.0,
+      "rsi50": 62.0,
       "sma200": 203.62,
-      "sma50": 220.91,
-      "ema21": 224.59,
-      "pct_above_sma200": 11.15
+      "sma50": 220.92,
+      "ema21": 224.62,
+      "pct_above_sma200": 11.3
     },
     "QQQE": {
-      "price": 122.19,
-      "rsi10": 53.5,
-      "rsi50": 56.4,
+      "price": 122.53,
+      "rsi10": 55.5,
+      "rsi50": 56.7,
       "sma200": 108.82,
-      "sma50": 120.05,
-      "ema21": 121.56,
-      "pct_above_sma200": 12.29
+      "sma50": 120.06,
+      "ema21": 121.59,
+      "pct_above_sma200": 12.6
     },
     "XLE": {
-      "price": 62.6,
-      "rsi10": 62.6,
-      "rsi50": 58.1,
+      "price": 62.71,
+      "rsi10": 63.8,
+      "rsi50": 58.3,
       "sma200": 53.59,
-      "sma50": 57.69,
-      "ema21": 61.08,
-      "pct_above_sma200": 16.81
+      "sma50": 57.7,
+      "ema21": 61.09,
+      "pct_above_sma200": 17.01
     },
     "XLF": {
-      "price": 58.06,
-      "rsi10": 58.6,
-      "rsi50": 59.4,
+      "price": 58.08,
+      "rsi10": 58.9,
+      "rsi50": 59.5,
       "sma200": 52.99,
-      "sma50": 56.17,
+      "sma50": 56.18,
       "ema21": 57.43,
-      "pct_above_sma200": 9.59
+      "pct_above_sma200": 9.62
     },
     "TMF": {
-      "price": 31.65,
-      "rsi10": 54.4,
-      "rsi50": 45.9,
+      "price": 31.92,
+      "rsi10": 56.6,
+      "rsi50": 46.5,
       "sma200": 35.81,
       "sma50": 32.87,
-      "ema21": 31.28,
-      "pct_above_sma200": -11.62
+      "ema21": 31.31,
+      "pct_above_sma200": -10.86
     },
     "RSP": {
-      "price": 221.47,
-      "rsi10": 58.0,
-      "rsi50": 59.5,
+      "price": 221.71,
+      "rsi10": 59.3,
+      "rsi50": 59.7,
       "sma200": 201.25,
-      "sma50": 215.56,
-      "ema21": 219.58,
-      "pct_above_sma200": 10.05
+      "sma50": 215.57,
+      "ema21": 219.61,
+      "pct_above_sma200": 10.16
     }
   },
   "smh_days_below_sma200": 0,
@@ -408,13 +408,13 @@
     "phase": null
   },
   "composer_dry_run": {
-    "symphonies_evaluated": 13,
-    "symphonies_rebalancing": 13,
-    "total_pv": 788205.6
+    "symphonies_evaluated": 11,
+    "symphonies_rebalancing": 11,
+    "total_pv": 637885.5
   },
   "zscore_signals": {
     "QQQ_SPY": {
-      "z_today": -0.852,
+      "z_today": -0.819,
       "threshold": 1.5,
       "direction": "ge",
       "fired_today": false,
@@ -422,7 +422,7 @@
       "days_since_fire": 55
     },
     "QQQ_RSP": {
-      "z_today": -1.464,
+      "z_today": -1.454,
       "threshold": -1.5,
       "direction": "le",
       "fired_today": false,
@@ -430,7 +430,7 @@
       "days_since_fire": 1
     },
     "QQQE_QQQ": {
-      "z_today": 2.475,
+      "z_today": 2.534,
       "threshold": -2.5,
       "direction": "le",
       "fired_today": false,
@@ -453,16 +453,16 @@
     },
     "breadth": 0,
     "ibs_sma3": {
-      "SPY": 0.4247,
-      "QQQ": 0.5004,
-      "SMH": 0.3455,
-      "XLK": 0.404
+      "SPY": 0.4774,
+      "QQQ": 0.5515,
+      "SMH": 0.4146,
+      "XLK": 0.4657
     },
     "rsi10": {
-      "SPY": 50.7,
-      "QQQ": 46.5,
-      "SMH": 42.0,
-      "XLK": 43.7
+      "SPY": 51.5,
+      "QQQ": 47.4,
+      "SMH": 43.2,
+      "XLK": 44.9
     },
     "equity_budget": 0.8,
     "faltering": {},
