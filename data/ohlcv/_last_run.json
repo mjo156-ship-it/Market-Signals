@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-24T21:37:46.257608+00:00",
+  "timestamp": "2026-08-25T21:38:31.832002+00:00",
   "mode": "append",
   "succeeded": [
     "AMD",
@@ -96,20 +96,7 @@
   ],
   "skipped": [],
   "failed": [],
-  "warnings": [
-    {
-      "ticker": "HIBL",
-      "yf_close": 102.5,
-      "snapshot_price": 101.2,
-      "pct_diff": 1.285
-    },
-    {
-      "ticker": "UVXY",
-      "yf_close": 19.52,
-      "snapshot_price": 19.41,
-      "pct_diff": 0.567
-    }
-  ],
+  "warnings": [],
   "counts": {
     "total": 91,
     "ok": 91,
