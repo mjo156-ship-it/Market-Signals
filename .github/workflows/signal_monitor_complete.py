@@ -989,6 +989,28 @@ def check_signals(data):
     except Exception as e:
         print(f"[IBS] Group 14 skipped (non-fatal): {e}")
 
+    # =========================================================================
+    # SIGNAL GROUP 15: MERGED LEVERAGED TRIGGERS (state visibility only)
+    # =========================================================================
+    # Mirrors the deployed Composer symphony "Merged Leveraged Triggers
+    # (LABU + VolDrag + CPER + SPHB, no BTAL)". Composer rebalances it daily at
+    # 3:45 PM ET on its own; this group only reports which branch is currently
+    # resolving so the state is legible before execution and recorded after.
+    #
+    # ⚠️ Alerts from this group are category 'watch' and must stay that way.
+    #    'buy'/'exit'/'short' would escalate the email subject to
+    #    "🟢 BUY SIGNALS" — for a symphony that is already automated that reads
+    #    as a manual trade instruction and risks duplicate execution.
+    #    These are state observations, not trade signals.
+    # See merged_triggers_group15() below for the full decision tree.
+    try:
+        mt_alerts, mt_status = merged_triggers_group15(data, indicators)
+        alerts.extend(mt_alerts)
+        if mt_status:
+            status['merged_triggers'] = mt_status
+    except Exception as e:
+        print(f"[MT] Group 15 skipped (non-fatal): {e}")
+
     return alerts, status
 
 # =============================================================================
@@ -1105,6 +1127,385 @@ def _ibs_log_conviction(itr, eng, state, u, veh, mult, breadth, data, ibs3_by, r
     itr.log_firing(state, data[u].index[-1].strftime('%Y-%m-%d'), veh, stype, mult, u,
                    round(ibs3_by[u], 4), rsi_r, breadth, entry_price)
 
+
+# =============================================================================
+# SIGNAL GROUP 15: MERGED LEVERAGED TRIGGERS  (helper)
+# =============================================================================
+# Read-only state mirror of the deployed Composer symphony
+#   "Merged Leveraged Triggers (LABU + VolDrag + CPER + SPHB, no BTAL)"
+# (~$106K, deployed 2026-05-04, Composer rebalances it daily at 3:45 PM ET).
+#
+# ⚠️ OBSERVABILITY ONLY. Composer executes this symphony automatically and
+#    independently. Nothing in this group places, recommends, or implies a
+#    manual trade. Every alert emitted here MUST use category 'watch' —
+#    'buy'/'exit'/'short' escalate the email subject to "🟢 BUY SIGNALS",
+#    which for an already-automated symphony reads as a manual trade
+#    instruction and invites duplicate execution.
+#
+# Decision tree (top-down, first match wins) — from the deployed spec:
+#   L1  LABU RSI(10) < 25                          -> bottom-1 by 20d cumret {LABU, SOXL}
+#   L2A SPY>SMA200(SPY) & UPRO>SMA200(UPRO) & SMA25(UPRO)<SMA200(UPRO)  -> TQQQ
+#   L2B QQQ>SMA200(QQQ) & TQQQ>SMA200(TQQQ) & SMA20(TQQQ)<SMA200(TQQQ)  -> USD
+#   L2C GDXJ RSI(10) < 21                          -> GDXJ
+#   L3  CPER>EMA9(CPER) & SPY<EMA9(SPY) & COPX>EMA9(COPX)               -> TQQQ
+#   L4  SPHB RSI(10) > 77 & XLP RSI(10) < 40       -> TQQQ
+#   L5  (default)                                  -> bottom-2 by RSI(14) {CTA,DBMF,KMLM,MNA}
+#
+# Note the non-standard windows: SMA25(UPRO), SMA20(TQQQ), EMA9, and RSI(14)
+# for the default rotation (NOT the RSI(10) used elsewhere in this file).
+# None of these are in the prebuilt `indicators` dict; they are computed here.
+#
+# On L4: the deployed spec itself labels this leg "vestigial, near-zero
+# contribution". Independent testing (2011-09 -> 2026-08, n=19 signal days /
+# n=10 deduped episodes) found the 1-day horizon Composer actually trades gave
+# 70% WR / +0.07% avg vs +0.20% unconditional — i.e. no positive mean edge, and
+# 6 of the 10 episodes clustered in Nov 2016-Oct 2017. These results are tested,
+# not validated. No win-rate or edge claims belong in the alert copy for L4.
+
+# Tickers the branch resolver reads. Missing ones degrade a branch to 'unknown'.
+MT_TICKERS = ['LABU', 'SOXL', 'SPY', 'UPRO', 'QQQ', 'TQQQ', 'GDXJ',
+              'CPER', 'COPX', 'SPHB', 'XLP', 'USD', 'CTA', 'DBMF', 'KMLM', 'MNA']
+
+MT_ROTATION = ['CTA', 'DBMF', 'KMLM', 'MNA']
+
+# Proximity margins for the "near threshold" flag (Group 15 requirement 5).
+MT_RSI_MARGIN = 5.0    # RSI points
+MT_PCT_MARGIN = 1.0    # percent, for price-vs-SMA/EMA crossings
+
+
+def _mt_close(data, ticker):
+    """Extract a clean Close Series, guarding the DataFrame-not-Series case
+    that Group 13 already defends against."""
+    df = data.get(ticker)
+    if df is None or len(df) == 0:
+        return None
+    close = df['Close']
+    if isinstance(close, pd.DataFrame):
+        close = close.iloc[:, 0]
+    close = close.dropna()
+    return close if len(close) > 0 else None
+
+
+def _sma(close, window):
+    """Simple moving average series."""
+    return close.rolling(window=window).mean()
+
+
+def _ema(close, span):
+    """Exponential moving average series. adjust=False matches the `ema21`
+    convention used by check_signals()."""
+    return close.ewm(span=span, adjust=False).mean()
+
+
+def _rsi14(close):
+    """Wilder RSI(14) — the default rotation uses 14, not the house 10."""
+    return calculate_rsi_wilder(close, 14)
+
+
+def _cumret(close, days):
+    """Rolling `days`-bar cumulative return series (for the L1 tiebreak)."""
+    return close / close.shift(days) - 1.0
+
+
+def _mt_build_series(data):
+    """Precompute every series the resolver needs, once, for all tickers that
+    are actually present. Returns {ticker: {name: Series}}.
+
+    Precomputing lets the same resolver run over a single day (the monitor) or
+    over a multi-month backfill without recomputing indicators per day.
+    """
+    series = {}
+    for t in MT_TICKERS:
+        close = _mt_close(data, t)
+        if close is None or len(close) < 30:
+            continue
+        s = {'close': close}
+        try:
+            s['rsi10'] = calculate_rsi_wilder(close, 10)
+            s['rsi14'] = _rsi14(close)
+            if len(close) >= 200:
+                s['sma200'] = _sma(close, 200)
+            s['sma25'] = _sma(close, 25)
+            s['sma20'] = _sma(close, 20)
+            s['ema9'] = _ema(close, 9)
+            s['cum20'] = _cumret(close, 20)
+        except Exception as e:
+            print(f"[MT] series build failed for {t}: {e}")
+            continue
+        series[t] = s
+    return series
+
+
+def _mt_at(series, ticker, name, i):
+    """Value of `name` for `ticker` at integer position `i`, or None if the
+    ticker is absent, the series is missing, or the value is NaN/out of range."""
+    s = series.get(ticker)
+    if not s or name not in s:
+        return None
+    sr = s[name]
+    if len(sr) == 0:
+        return None
+    try:
+        idx = i if i >= 0 else len(sr) + i
+        if idx < 0 or idx >= len(sr):
+            return None
+        v = float(sr.iloc[idx])
+    except (TypeError, ValueError, IndexError):
+        return None
+    if v != v:  # NaN
+        return None
+    return v
+
+
+def _mt_resolve(series, i=-1):
+    """Resolve the symphony's branch at integer position `i`.
+
+    Returns the structured dict written to status['merged_triggers'].
+
+    Graceful degradation: a branch whose inputs are missing is marked
+    active=None ('unknown') rather than False, and resolution STOPS there —
+    an unknown high-priority branch means we genuinely cannot know whether a
+    lower branch would have been reached. Reporting a gap beats reporting a
+    confidently wrong allocation.
+    """
+    v = lambda t, n: _mt_at(series, t, n, i)
+
+    branches = {}
+    near = []
+
+    def _rsi_near(label, ticker, rsi, threshold, direction):
+        """Flag an RSI that is inactive but within MT_RSI_MARGIN of firing."""
+        if rsi is None:
+            return
+        if direction == 'lt' and threshold <= rsi < threshold + MT_RSI_MARGIN:
+            near.append(f'{label}: {ticker} RSI {rsi:.1f} (needs <{threshold:g})')
+        elif direction == 'gt' and threshold - MT_RSI_MARGIN < rsi <= threshold:
+            near.append(f'{label}: {ticker} RSI {rsi:.1f} (needs >{threshold:g})')
+
+    def _cross_near(label, ticker, a, b, direction, a_name, b_name):
+        """Flag a price/MA comparison that is inactive but within MT_PCT_MARGIN."""
+        if a is None or b is None or b == 0:
+            return
+        gap = (a / b - 1.0) * 100.0
+        if direction == 'gt' and -MT_PCT_MARGIN <= gap <= 0:
+            near.append(f'{label}: {ticker} {a_name} {gap:+.2f}% vs {b_name} (needs >)')
+        elif direction == 'lt' and 0 <= gap <= MT_PCT_MARGIN:
+            near.append(f'{label}: {ticker} {a_name} {gap:+.2f}% vs {b_name} (needs <)')
+
+    # --- L1: LABU dip-buy -----------------------------------------------
+    labu_rsi = v('LABU', 'rsi10')
+    branches['L1'] = {
+        'active': (labu_rsi < 25) if labu_rsi is not None else None,
+        'labu_rsi10': labu_rsi,
+        'threshold': 25,
+        'desc': 'LABU RSI(10) < 25',
+    }
+    _rsi_near('L1', 'LABU', labu_rsi, 25, 'lt')
+
+    # --- L2A: Vol Drag, SPY/UPRO -> TQQQ ---------------------------------
+    spy_p, spy_s200 = v('SPY', 'close'), v('SPY', 'sma200')
+    upro_p, upro_s200, upro_s25 = v('UPRO', 'close'), v('UPRO', 'sma200'), v('UPRO', 'sma25')
+    l2a_inputs = [spy_p, spy_s200, upro_p, upro_s200, upro_s25]
+    branches['L2A'] = {
+        'active': None if any(x is None for x in l2a_inputs) else bool(
+            spy_p > spy_s200 and upro_p > upro_s200 and upro_s25 < upro_s200),
+        'spy_price': spy_p, 'spy_sma200': spy_s200,
+        'upro_price': upro_p, 'upro_sma200': upro_s200, 'upro_sma25': upro_s25,
+        'desc': 'SPY>SMA200 & UPRO>SMA200 & SMA25(UPRO)<SMA200(UPRO)',
+    }
+    if branches['L2A']['active'] is False:
+        _cross_near('L2A', 'SPY', spy_p, spy_s200, 'gt', 'price', 'SMA200')
+        _cross_near('L2A', 'UPRO', upro_p, upro_s200, 'gt', 'price', 'SMA200')
+        _cross_near('L2A', 'UPRO', upro_s25, upro_s200, 'lt', 'SMA25', 'SMA200')
+
+    # --- L2B: Vol Drag, QQQ/TQQQ -> USD ----------------------------------
+    qqq_p, qqq_s200 = v('QQQ', 'close'), v('QQQ', 'sma200')
+    tqqq_p, tqqq_s200, tqqq_s20 = v('TQQQ', 'close'), v('TQQQ', 'sma200'), v('TQQQ', 'sma20')
+    l2b_inputs = [qqq_p, qqq_s200, tqqq_p, tqqq_s200, tqqq_s20]
+    branches['L2B'] = {
+        'active': None if any(x is None for x in l2b_inputs) else bool(
+            qqq_p > qqq_s200 and tqqq_p > tqqq_s200 and tqqq_s20 < tqqq_s200),
+        'qqq_price': qqq_p, 'qqq_sma200': qqq_s200,
+        'tqqq_price': tqqq_p, 'tqqq_sma200': tqqq_s200, 'tqqq_sma20': tqqq_s20,
+        'desc': 'QQQ>SMA200 & TQQQ>SMA200 & SMA20(TQQQ)<SMA200(TQQQ)',
+    }
+    if branches['L2B']['active'] is False:
+        _cross_near('L2B', 'QQQ', qqq_p, qqq_s200, 'gt', 'price', 'SMA200')
+        _cross_near('L2B', 'TQQQ', tqqq_p, tqqq_s200, 'gt', 'price', 'SMA200')
+        _cross_near('L2B', 'TQQQ', tqqq_s20, tqqq_s200, 'lt', 'SMA20', 'SMA200')
+
+    # --- L2C: GDXJ oversold ----------------------------------------------
+    gdxj_rsi = v('GDXJ', 'rsi10')
+    branches['L2C'] = {
+        'active': (gdxj_rsi < 21) if gdxj_rsi is not None else None,
+        'gdxj_rsi10': gdxj_rsi,
+        'threshold': 21,
+        'desc': 'GDXJ RSI(10) < 21',
+    }
+    _rsi_near('L2C', 'GDXJ', gdxj_rsi, 21, 'lt')
+
+    # --- L3: CPER Shines ---------------------------------------------------
+    cper_p, cper_e9 = v('CPER', 'close'), v('CPER', 'ema9')
+    spy_e9 = v('SPY', 'ema9')
+    copx_p, copx_e9 = v('COPX', 'close'), v('COPX', 'ema9')
+    l3_inputs = [cper_p, cper_e9, spy_p, spy_e9, copx_p, copx_e9]
+    branches['L3'] = {
+        'active': None if any(x is None for x in l3_inputs) else bool(
+            cper_p > cper_e9 and spy_p < spy_e9 and copx_p > copx_e9),
+        'cper_price': cper_p, 'cper_ema9': cper_e9,
+        'spy_price': spy_p, 'spy_ema9': spy_e9,
+        'copx_price': copx_p, 'copx_ema9': copx_e9,
+        'desc': 'CPER>EMA9 & SPY<EMA9 & COPX>EMA9',
+    }
+    if branches['L3']['active'] is False:
+        _cross_near('L3', 'CPER', cper_p, cper_e9, 'gt', 'price', 'EMA9')
+        _cross_near('L3', 'SPY', spy_p, spy_e9, 'lt', 'price', 'EMA9')
+        _cross_near('L3', 'COPX', copx_p, copx_e9, 'gt', 'price', 'EMA9')
+
+    # --- L4: SPHB/XLP pairs (vestigial per deployed spec) ------------------
+    sphb_rsi = v('SPHB', 'rsi10')
+    xlp_rsi = v('XLP', 'rsi10')
+    branches['L4'] = {
+        'active': None if (sphb_rsi is None or xlp_rsi is None) else bool(
+            sphb_rsi > 77 and xlp_rsi < 40),
+        'sphb_rsi10': sphb_rsi, 'xlp_rsi10': xlp_rsi,
+        'desc': 'SPHB RSI(10)>77 & XLP RSI(10)<40',
+    }
+    if branches['L4']['active'] is False:
+        _rsi_near('L4', 'SPHB', sphb_rsi, 77, 'gt')
+        _rsi_near('L4', 'XLP', xlp_rsi, 40, 'lt')
+
+    # --- L5 default rotation: bottom-2 by RSI(14) --------------------------
+    ranking = []
+    for t in MT_ROTATION:
+        r = _mt_at(series, t, 'rsi14', i)
+        if r is not None:
+            ranking.append({'ticker': t, 'rsi14': r})
+    ranking.sort(key=lambda d: d['rsi14'])
+    rotation_ok = len(ranking) == len(MT_ROTATION)
+    default_alloc = [d['ticker'] for d in ranking[:2]] if rotation_ok else None
+
+    # --- L1 tiebreak: bottom-1 by 20-day cumulative return ------------------
+    l1_alloc = None
+    l1_cumrets = {}
+    for t in ('LABU', 'SOXL'):
+        c = _mt_at(series, t, 'cum20', i)
+        if c is not None:
+            l1_cumrets[t] = c
+    if len(l1_cumrets) == 2:
+        l1_alloc = min(l1_cumrets, key=l1_cumrets.get)
+    branches['L1']['cumret_20d'] = l1_cumrets or None
+
+    # --- Resolve top-down, first match wins --------------------------------
+    ORDER = [
+        ('L1',  'L1_LABU_DIP',      lambda: l1_alloc),
+        ('L2A', 'L2A_VOLDRAG_SPY',  lambda: 'TQQQ'),
+        ('L2B', 'L2B_VOLDRAG_QQQ',  lambda: 'USD'),
+        ('L2C', 'L2C_GDXJ',         lambda: 'GDXJ'),
+        ('L3',  'L3_CPER_SHINES',   lambda: 'TQQQ'),
+        ('L4',  'L4_SPHB_XLP',      lambda: 'TQQQ'),
+    ]
+
+    selected, target = None, None
+    for key, label, alloc_fn in ORDER:
+        act = branches[key]['active']
+        if act is None:
+            # Cannot know whether this branch pre-empts everything below it.
+            selected, target = 'UNKNOWN', None
+            break
+        if act:
+            selected, target = label, alloc_fn()
+            break
+    else:
+        if rotation_ok:
+            selected, target = 'L5_DEFAULT', default_alloc
+        else:
+            selected, target = 'UNKNOWN', None
+
+    return {
+        'selected_branch': selected,
+        'target_allocation': target,
+        'branches': branches,
+        'default_rotation_ranking': ranking,
+        'near_threshold': near,
+    }
+
+
+def _mt_format_message(mt):
+    """Human-readable body for the single Group 15 'watch' alert."""
+    b = mt['branches']
+    L = []
+
+    tgt = mt['target_allocation']
+    if isinstance(tgt, list):
+        tgt_str = ' + '.join(tgt) + ' (50/50)'
+    else:
+        tgt_str = tgt or 'unknown'
+    L.append(f"Resolved branch: {mt['selected_branch']} -> target {tgt_str}")
+    L.append("   (Composer executes this symphony automatically at 3:45 PM ET —")
+    L.append("    this alert is state observation only, not a trade instruction.)")
+    L.append("")
+
+    def _mark(key):
+        a = b[key]['active']
+        return '  FIRED  ' if a else ('  ??     ' if a is None else '  -      ')
+
+    def _f(x, places=1):
+        return 'n/a' if x is None else f'{x:.{places}f}'
+
+    L.append("Branch state (top-down, first match wins):")
+    L.append(f" {_mark('L1')}L1  LABU RSI={_f(b['L1'].get('labu_rsi10'))} (needs <25)")
+    L.append(f" {_mark('L2A')}L2A SPY {_f(b['L2A'].get('spy_price'),2)}/SMA200 {_f(b['L2A'].get('spy_sma200'),2)} | "
+             f"UPRO {_f(b['L2A'].get('upro_price'),2)}/SMA200 {_f(b['L2A'].get('upro_sma200'),2)} | "
+             f"UPRO SMA25 {_f(b['L2A'].get('upro_sma25'),2)}")
+    L.append(f" {_mark('L2B')}L2B QQQ {_f(b['L2B'].get('qqq_price'),2)}/SMA200 {_f(b['L2B'].get('qqq_sma200'),2)} | "
+             f"TQQQ {_f(b['L2B'].get('tqqq_price'),2)}/SMA200 {_f(b['L2B'].get('tqqq_sma200'),2)} | "
+             f"TQQQ SMA20 {_f(b['L2B'].get('tqqq_sma20'),2)}")
+    L.append(f" {_mark('L2C')}L2C GDXJ RSI={_f(b['L2C'].get('gdxj_rsi10'))} (needs <21)")
+    L.append(f" {_mark('L3')}L3  CPER {_f(b['L3'].get('cper_price'),2)}/EMA9 {_f(b['L3'].get('cper_ema9'),2)} | "
+             f"SPY {_f(b['L3'].get('spy_price'),2)}/EMA9 {_f(b['L3'].get('spy_ema9'),2)} | "
+             f"COPX {_f(b['L3'].get('copx_price'),2)}/EMA9 {_f(b['L3'].get('copx_ema9'),2)}")
+    L.append(f" {_mark('L4')}L4  SPHB RSI={_f(b['L4'].get('sphb_rsi10'))} (needs >77) / "
+             f"XLP RSI={_f(b['L4'].get('xlp_rsi10'))} (needs <40)  [vestigial leg]")
+
+    rank = mt.get('default_rotation_ranking') or []
+    if rank:
+        rank_str = ', '.join(f"{d['ticker']} {d['rsi14']:.1f}" for d in rank)
+        L.append(f"          L5  default rotation by RSI(14): {rank_str} -> bottom-2")
+    else:
+        L.append("          L5  default rotation: RSI(14) unavailable")
+
+    near = mt.get('near_threshold') or []
+    if near:
+        L.append("")
+        L.append("⚠️ Near threshold (may flip before the 3:45 PM Composer rebalance):")
+        for n in near:
+            L.append(f"   • {n}")
+
+    if mt['selected_branch'] == 'UNKNOWN':
+        unknown = [k for k, vv in b.items() if vv['active'] is None]
+        L.append("")
+        L.append(f"⚠️ Branch unresolved — missing inputs for: {', '.join(unknown) or 'rotation legs'}")
+
+    return "\n".join(L)
+
+
+def merged_triggers_group15(data, indicators):
+    """Resolve the Merged Leveraged Triggers branch state.
+
+    Returns (alerts, status_dict). Emits exactly one alert, always category
+    'watch' (see the ⚠️ note at the top of this section).
+    """
+    series = _mt_build_series(data)
+    mt = _mt_resolve(series, i=-1)
+
+    label = mt['selected_branch']
+    alerts = [(
+        f'🔵 MERGED TRIGGERS: {label}',
+        _mt_format_message(mt),
+        'watch',
+    )]
+    return alerts, mt
 
 # =============================================================================
 # HORMUZ INTELLIGENCE (Windward)
@@ -1856,6 +2257,10 @@ def main():
         'TMF',
         # Equal-weight S&P 500 (for SIGNAL GROUP 13 z-score ratios)
         'RSP',
+        # Merged Leveraged Triggers symphony legs (Group 15 visibility)
+        'SPHB', 'CPER', 'COPX', 'GDXJ', 'MNA', 'USD',
+        # Group 15 L5 default-rotation legs (managed futures / merger arb)
+        'CTA', 'DBMF', 'KMLM',
     ]
 
     print("Downloading market data...")
