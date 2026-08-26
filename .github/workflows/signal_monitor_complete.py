@@ -2158,6 +2158,28 @@ def write_state_json(alerts, status, mode, hormuz_data=None, rj_state=None,
         except Exception:
             pass
 
+    # Group 15 Merged Leveraged Triggers branch state (observability only —
+    # Composer executes this symphony itself; nothing downstream should treat
+    # `target_allocation` as an instruction to trade).
+    mt = status.get('merged_triggers') if isinstance(status, dict) else None
+    if mt:
+        try:
+            def _mt_clean(node):
+                # Recursively sanitize floats through _safe_num so NaN -> null,
+                # consistent with the rest of this file.
+                if isinstance(node, dict):
+                    return {k: _mt_clean(v) for k, v in node.items()}
+                if isinstance(node, list):
+                    return [_mt_clean(v) for v in node]
+                if isinstance(node, bool) or node is None or isinstance(node, str):
+                    return node
+                if isinstance(node, (int, float)):
+                    return _safe_num(node, 4)
+                return node
+            state['merged_triggers'] = _mt_clean(mt)
+        except Exception:
+            pass
+
     # Retirement projection snapshot (v5.17 CHF dashboard writes retirement_state.json;
     # the monitor merges it here if it's available in this environment, and omits the
     # block gracefully if not — the monitor has no portfolio access of its own).
