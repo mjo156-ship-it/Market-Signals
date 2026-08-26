@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-08-25T20:33:47.616303",
+  "updated_at": "2026-08-26T14:29:39.400182",
   "gate_state": {
     "SPY": "IN",
     "QQQ": "IN",
@@ -311,10 +311,10 @@
       "own_rsi10": 67.8,
       "breadth": 0,
       "entry_price": 772.9600219726562,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 0.698,
+      "fwd_5d": -0.444,
+      "fwd_10d": -0.951,
+      "matured": true
     },
     {
       "date": "2026-08-12",
@@ -326,25 +326,25 @@
       "own_rsi10": 61.1,
       "breadth": 0,
       "entry_price": 75.08499908447266,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 3.368,
+      "fwd_5d": -3.455,
+      "fwd_10d": -6.665,
+      "matured": true
     }
   ],
   "rolling": {
     "gate_entry_SPY": {
-      "trailing_n": 2,
-      "trailing_wr": 1.0,
-      "trailing_avg_1d": 0.317,
-      "brier": 0.1418,
+      "trailing_n": 3,
+      "trailing_wr": 0.6667,
+      "trailing_avg_1d": 0.444,
+      "brier": 0.2241,
       "status": "OK"
     },
     "gate_entry_TQQQ": {
-      "trailing_n": 2,
-      "trailing_wr": 1.0,
-      "trailing_avg_1d": -0.968,
-      "brier": 0.1687,
+      "trailing_n": 3,
+      "trailing_wr": 0.6667,
+      "trailing_avg_1d": 0.477,
+      "brier": 0.2282,
       "status": "OK"
     },
     "gate_entry_SOXL": {
