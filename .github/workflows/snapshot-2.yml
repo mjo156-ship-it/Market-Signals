@@ -1,5 +1,9 @@
-# Signal Snapshot Generator v1.1
-# Now includes BOIL/KOLD natural gas signals with weather integration
+# Signal Snapshot Generator v1.2
+# Includes BOIL/KOLD natural gas signals with weather integration, plus
+# merged_triggers: read-only branch state for the deployed Composer symphony
+# "Merged Leveraged Triggers (LABU + VolDrag + CPER + SPHB, no BTAL)".
+# merged_triggers is OBSERVABILITY ONLY — Composer rebalances that symphony
+# itself at 3:45 PM ET; target_allocation is not a trade instruction.
 #
 # Writes data/snapshot.json every 15 minutes during market hours
 # To test: Actions → Signal Snapshot → Run workflow
@@ -62,6 +66,8 @@ jobs:
               'VOOV','VOOG','VTV','QQQE',
               'KMLM','DBMF','CTA','BTAL',
               'KOLD',
+              # Merged Leveraged Triggers symphony legs (merged_triggers branch state)
+              'SPHB','CPER','COPX','GDXJ','MNA','USD',
           ]
 
           def calc_rsi(prices, period):
@@ -405,6 +411,7 @@ jobs:
           spy_r=rsi('SPY'); qqq_r=rsi('QQQ'); smh_r=rsi('SMH')
           xlf_r=rsi('XLF'); uvxy_r=rsi('UVXY'); vixm_r=rsi('VIXM')
           corp_r=rsi('CORP')
+          sphb_r=rsi('SPHB'); labu_r=rsi('LABU'); gdxj_r=rsi('GDXJ')
 
           playbook = {
               'GLD_RSI_gt_79':  {'value':gld_r,  'threshold':79, 'active': gld_r>79 if gld_r else False},
@@ -423,6 +430,12 @@ jobs:
               'SPY_RSI_lt_CORP_RSI': {'value': (spy_r - corp_r) if (spy_r is not None and corp_r is not None) else None,
                                        'threshold': 0,
                                        'active': (spy_r is not None and corp_r is not None and spy_r < corp_r)},
+              # Merged Leveraged Triggers legs (see merged_triggers below).
+              # Reported for visibility; Composer trades this symphony itself.
+              'SPHB_RSI_gt_77': {'value':sphb_r, 'threshold':77, 'active': sphb_r>77 if sphb_r is not None else False},
+              'XLP_RSI_lt_40':  {'value':xlp_r,  'threshold':40, 'active': xlp_r<40 if xlp_r is not None else False},
+              'LABU_RSI_lt_25': {'value':labu_r, 'threshold':25, 'active': labu_r<25 if labu_r is not None else False},
+              'GDXJ_RSI_lt_21': {'value':gdxj_r, 'threshold':21, 'active': gdxj_r<21 if gdxj_r is not None else False},
           }
 
           ga = gld_r and gld_r>79
@@ -434,6 +447,143 @@ jobs:
               'double_signal': {'active':bool(ga and ua), 'desc':'GLD>79+USDU<25 → TQQQ'},
               'triple_signal': {'active':bool(ga and ua and x65), 'desc':'Double+XLP>65 → TQQQ high conviction'},
               'xlp_cascade':   {'active':bool(x75), 'desc':'XLP>75 → UVXY 1-day hold'},
+          }
+
+          # =================================================================
+          # MERGED LEVERAGED TRIGGERS - branch state (OBSERVABILITY ONLY)
+          # =================================================================
+          # Mirrors the deployed Composer symphony "Merged Leveraged Triggers
+          # (LABU + VolDrag + CPER + SPHB, no BTAL)", which Composer rebalances
+          # on its own at 3:45 PM ET. Nothing here is a trade instruction, and
+          # no merged_triggers state is pushed into `alerts`.
+          #
+          # Tree (top-down, first match wins):
+          #   L1  LABU RSI(10)<25                  -> bottom-1 by 20d cumret {LABU,SOXL}
+          #   L2A SPY>SMA200 & UPRO>SMA200 & SMA25(UPRO)<SMA200(UPRO)  -> TQQQ
+          #   L2B QQQ>SMA200 & TQQQ>SMA200 & SMA20(TQQQ)<SMA200(TQQQ)  -> USD
+          #   L2C GDXJ RSI(10)<21                  -> GDXJ
+          #   L3  CPER>EMA9 & SPY<EMA9 & COPX>EMA9 -> TQQQ
+          #   L4  SPHB RSI(10)>77 & XLP RSI(10)<40 -> TQQQ   [vestigial per spec]
+          #   L5  default                          -> bottom-2 by RSI(14) {CTA,DBMF,KMLM,MNA}
+          #
+          # SMA25/SMA20/RSI(14) are not in `indicators`; computed from `raw`.
+          # A branch with missing inputs is active=None ('unknown') and STOPS
+          # resolution - reporting a gap beats reporting a wrong allocation.
+
+          def mt_ind(t, k):
+              return indicators.get(t, {}).get(k)
+
+          def mt_sma(t, w):
+              df = raw.get(t)
+              if df is None or len(df) < w:
+                  return None
+              try:
+                  return sf(df['Close'].rolling(w).mean().iloc[-1])
+              except Exception:
+                  return None
+
+          def mt_rsi14(t):
+              df = raw.get(t)
+              if df is None or len(df) < 20:
+                  return None
+              try:
+                  v = sf(calc_rsi(df['Close'], 14).iloc[-1])
+                  return v if v == v else None
+              except Exception:
+                  return None
+
+          mt_branches = {}
+
+          # L1
+          mt_branches['L1'] = {
+              'active': (labu_r < 25) if labu_r is not None else None,
+              'desc': 'LABU RSI(10)<25', 'labu_rsi10': labu_r,
+          }
+          # L2A
+          _spy_p, _spy_s200 = mt_ind('SPY','price'), mt_ind('SPY','sma200')
+          _upro_p, _upro_s200, _upro_s25 = mt_ind('UPRO','price'), mt_ind('UPRO','sma200'), mt_sma('UPRO',25)
+          _l2a = [_spy_p,_spy_s200,_upro_p,_upro_s200,_upro_s25]
+          mt_branches['L2A'] = {
+              'active': None if any(x is None for x in _l2a) else bool(
+                  _spy_p>_spy_s200 and _upro_p>_upro_s200 and _upro_s25<_upro_s200),
+              'desc': 'SPY>SMA200 & UPRO>SMA200 & SMA25(UPRO)<SMA200(UPRO)',
+              'upro_sma25': round(_upro_s25,2) if _upro_s25 else None,
+              'upro_sma200': _upro_s200,
+          }
+          # L2B
+          _qqq_p, _qqq_s200 = mt_ind('QQQ','price'), mt_ind('QQQ','sma200')
+          _tqqq_p, _tqqq_s200, _tqqq_s20 = mt_ind('TQQQ','price'), mt_ind('TQQQ','sma200'), mt_sma('TQQQ',20)
+          _l2b = [_qqq_p,_qqq_s200,_tqqq_p,_tqqq_s200,_tqqq_s20]
+          mt_branches['L2B'] = {
+              'active': None if any(x is None for x in _l2b) else bool(
+                  _qqq_p>_qqq_s200 and _tqqq_p>_tqqq_s200 and _tqqq_s20<_tqqq_s200),
+              'desc': 'QQQ>SMA200 & TQQQ>SMA200 & SMA20(TQQQ)<SMA200(TQQQ)',
+              'tqqq_sma20': round(_tqqq_s20,2) if _tqqq_s20 else None,
+              'tqqq_sma200': _tqqq_s200,
+          }
+          # L2C
+          mt_branches['L2C'] = {
+              'active': (gdxj_r < 21) if gdxj_r is not None else None,
+              'desc': 'GDXJ RSI(10)<21', 'gdxj_rsi10': gdxj_r,
+          }
+          # L3
+          _cper_p, _cper_e9 = mt_ind('CPER','price'), mt_ind('CPER','ema9')
+          _spy_e9 = mt_ind('SPY','ema9')
+          _copx_p, _copx_e9 = mt_ind('COPX','price'), mt_ind('COPX','ema9')
+          _l3 = [_cper_p,_cper_e9,_spy_p,_spy_e9,_copx_p,_copx_e9]
+          mt_branches['L3'] = {
+              'active': None if any(x is None for x in _l3) else bool(
+                  _cper_p>_cper_e9 and _spy_p<_spy_e9 and _copx_p>_copx_e9),
+              'desc': 'CPER>EMA9 & SPY<EMA9 & COPX>EMA9',
+          }
+          # L4 (vestigial per the deployed spec - no edge claims here)
+          mt_branches['L4'] = {
+              'active': None if (sphb_r is None or xlp_r is None) else bool(sphb_r>77 and xlp_r<40),
+              'desc': 'SPHB RSI(10)>77 & XLP RSI(10)<40 [vestigial]',
+              'sphb_rsi10': sphb_r, 'xlp_rsi10': xlp_r,
+          }
+
+          # L5 default rotation: bottom-2 by RSI(14)
+          mt_rank = []
+          for _t in ['CTA','DBMF','KMLM','MNA']:
+              _r = mt_rsi14(_t)
+              if _r is not None:
+                  mt_rank.append({'ticker':_t, 'rsi14':round(_r,1)})
+          mt_rank.sort(key=lambda d: d['rsi14'])
+          mt_rot_ok = len(mt_rank) == 4
+
+          # L1 tiebreak: bottom-1 by 20d cumulative return (ret_20d is already %)
+          _l1_ret = {}
+          for _t in ['LABU','SOXL']:
+              _v = mt_ind(_t,'ret_20d')
+              if _v is not None:
+                  _l1_ret[_t] = _v
+          _l1_alloc = min(_l1_ret, key=_l1_ret.get) if len(_l1_ret)==2 else None
+
+          mt_order = [('L1','L1_LABU_DIP',_l1_alloc), ('L2A','L2A_VOLDRAG_SPY','TQQQ'),
+                      ('L2B','L2B_VOLDRAG_QQQ','USD'), ('L2C','L2C_GDXJ','GDXJ'),
+                      ('L3','L3_CPER_SHINES','TQQQ'), ('L4','L4_SPHB_XLP','TQQQ')]
+          mt_selected, mt_target = None, None
+          for _k,_label,_alloc in mt_order:
+              _a = mt_branches[_k]['active']
+              if _a is None:
+                  mt_selected, mt_target = 'UNKNOWN', None
+                  break
+              if _a:
+                  mt_selected, mt_target = _label, _alloc
+                  break
+          else:
+              if mt_rot_ok:
+                  mt_selected, mt_target = 'L5_DEFAULT', [d['ticker'] for d in mt_rank[:2]]
+              else:
+                  mt_selected, mt_target = 'UNKNOWN', None
+
+          merged_triggers = {
+              'selected_branch': mt_selected,
+              'target_allocation': mt_target,
+              'branches': mt_branches,
+              'default_rotation_ranking': mt_rank,
+              'note': 'Observability only - Composer executes this symphony automatically at 3:45 PM ET',
           }
 
           tlt_r10 = indicators.get('TLT',{}).get('ret_10d')
@@ -510,11 +660,12 @@ jobs:
                   'generated_utc': now_utc.isoformat(),
                   'generated_et': now_et.strftime('%Y-%m-%d %H:%M:%S ET'),
                   'ticker_count': len(indicators),
-                  'version': '1.1',
+                  'version': '1.2',
               },
               'signals': {
                   'playbook': playbook,
                   'combos': combos,
+                  'merged_triggers': merged_triggers,
                   'bond_momentum': bond,
                   'smh_levels': smh_lev,
                   'contrarian': contrarian,
