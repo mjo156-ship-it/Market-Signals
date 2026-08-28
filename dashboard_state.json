@@ -1,33 +1,18 @@
 {
-  "generated_at_local": "2026-08-27T23:04:55.841194",
-  "generated_at_utc": "2026-08-27T23:04:55.841204Z",
+  "generated_at_local": "2026-08-28T00:10:08.111061",
+  "generated_at_utc": "2026-08-28T00:10:08.111070Z",
   "mode": "close",
   "summary": {
-    "total_alerts": 5,
+    "total_alerts": 2,
     "buy_count": 1,
-    "exit_count": 3,
+    "exit_count": 0,
     "warning_count": 1
   },
   "alerts": [
     {
       "title": "\ud83d\udfe2 BTC MOMENTUM",
-      "message": "BTC RSI=85.4 > 79 \u2192 Hold/Add BTC: 67% win, +5.2% avg (5d)",
+      "message": "BTC RSI=85.3 > 79 \u2192 Hold/Add BTC: 67% win, +5.2% avg (5d)",
       "category": "buy"
-    },
-    {
-      "title": "\ud83d\udd34 IBS EXIT: TQQQ",
-      "message": "Gate OUT (QQQ IBS 0.71, RSI 57, breadth 0) \u2192 sell TQQQ, go flat",
-      "category": "exit"
-    },
-    {
-      "title": "\ud83d\udd34 IBS EXIT: SOXL",
-      "message": "Gate OUT (SMH IBS 0.74, RSI 53, breadth 0) \u2192 sell SOXL, go flat",
-      "category": "exit"
-    },
-    {
-      "title": "\ud83d\udd34 IBS EXIT: TECL",
-      "message": "Gate OUT (XLK IBS 0.75, RSI 61, breadth 0) \u2192 sell TECL, go flat",
-      "category": "exit"
     },
     {
       "title": "\ud83d\udd35 MERGED TRIGGERS: L5_DEFAULT",
@@ -235,13 +220,13 @@
       "pct_above_sma200": -7.59
     },
     "BTC-USD": {
-      "price": 80250.01,
-      "rsi10": 85.4,
+      "price": 80197.57,
+      "rsi10": 85.3,
       "rsi50": 62.4,
-      "sma200": 69224.53,
-      "sma50": 66428.86,
-      "ema21": 71763.13,
-      "pct_above_sma200": 15.93
+      "sma200": 69224.27,
+      "sma50": 66427.81,
+      "ema21": 71758.37,
+      "pct_above_sma200": 15.85
     },
     "AMD": {
       "price": 476.67,
@@ -557,7 +542,7 @@
     },
     "equity_budget": 0.8,
     "faltering": {},
-    "as_of": "2026-08-27"
+    "as_of": "2026-08-28"
   },
   "merged_triggers": {
     "selected_branch": "L5_DEFAULT",
