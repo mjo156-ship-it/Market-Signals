@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-29T02:46:37.540146",
+  "timestamp": "2026-08-29T09:16:21.653311",
   "ok": [
     "AMD",
     "AMZN",
@@ -96,8 +96,8 @@
   "failed": [],
   "skipped": [],
   "actions_detected": [],
-  "quarantined": 0,
-  "rows_written": 455,
+  "quarantined": 90,
+  "rows_written": 365,
   "coverage": {
     "tickers": 91,
     "latest_date": "2026-08-29",
