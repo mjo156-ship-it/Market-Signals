@@ -1,6 +1,6 @@
 # Signal Research — 2026-09-01
 
-_Generated 2026-09-01T18:05:59+00:00 · 90 tickers · 9 firing · 12 approaching_
+_Generated 2026-09-01T22:30:43+00:00 · 90 tickers · 9 firing · 13 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -25,6 +25,7 @@ _Generated 2026-09-01T18:05:59+00:00 · 90 tickers · 9 firing · 12 approaching
 | 4+ down-day streak (long) | UPRO | UPRO | composer_ready | 5d | 66% | +3.8% | +2.1pp | 98 |
 | Rotation: entered top-8 3-mo momentum (long) | UGA | UGA | manual_swing | 21d | 62% | +3.0% | +2.0pp | 92 |
 | 4+ down-day streak (long) | SPY | UPRO | composer_ready | 5d | 70% | +1.1% | +0.8pp | 180 |
+| Bollinger %B oversold (<0) (long) | XLF | FAS | composer_ready | 5d | 66% | +0.8% | +0.6pp | 216 |
 | Bollinger %B overbought (>1) fade (short) | SOXS | short SOXS | composer_ready | 5d | 67% | +5.4% | +1.3pp | 48 |
 | 4+ down-day streak (long) | VOO | VOO | composer_ready | 5d | 68% | +0.8% | +0.5pp | 84 |
 | Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 341 |
