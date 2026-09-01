@@ -1,6 +1,6 @@
 # Signal Research — 2026-09-01
 
-_Generated 2026-09-01T17:29:53+00:00 · 90 tickers · 8 firing · 14 approaching_
+_Generated 2026-09-01T18:05:59+00:00 · 90 tickers · 9 firing · 12 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -9,6 +9,7 @@ _Generated 2026-09-01T17:29:53+00:00 · 90 tickers · 8 firing · 14 approaching
 | 4+ down-day streak (long) | DUSL | DUSL | composer_ready | 5d | 62% | +2.6% | +1.9pp | 53 |
 | Donchian 52-week breakout (long) | DBC | DBC | composer_ready | 20d | 62% | +1.6% | +1.2pp | 81 |
 | 4+ down-day streak (long) | VTV | VTV | composer_ready | 5d | 61% | +0.8% | +0.6pp | 128 |
+| Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 62% | +1.4% | +0.6pp | 29 |
 | Distance-from-50DMA z < -2 (long) | BND | BND | composer_ready | 5d | 64% | +0.2% | +0.1pp | 94 |
 | Distance-from-50DMA z < -2 (long) | BIL | BIL | composer_ready | 5d | 85% | +0.1% | +0.1pp | 91 |
 | Bollinger %B oversold (<0) (long) | BIL | BIL | composer_ready | 5d | 64% | +0.0% | +0.1pp | 70 |
@@ -19,7 +20,6 @@ _Generated 2026-09-01T17:29:53+00:00 · 90 tickers · 8 firing · 14 approaching
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Donchian 52-week breakout (long) | FNGS | FNGS | composer_ready | 20d | 64% | +18.3% | +12.1pp | 55 |
 | Rotation: entered top-8 6-mo momentum (long) | SVXY | SVXY | manual_swing | 21d | 78% | +10.0% | +5.6pp | 63 |
 | Donchian 52-week breakout (long) | SVXY | SVXY | composer_ready | 20d | 65% | +6.4% | +2.2pp | 127 |
 | 4+ down-day streak (long) | UPRO | UPRO | composer_ready | 5d | 66% | +3.8% | +2.1pp | 98 |
@@ -29,7 +29,6 @@ _Generated 2026-09-01T17:29:53+00:00 · 90 tickers · 8 firing · 14 approaching
 | 4+ down-day streak (long) | VOO | VOO | composer_ready | 5d | 68% | +0.8% | +0.5pp | 84 |
 | Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 341 |
 | Bollinger %B oversold (<0) (long) | VOO | VOO | composer_ready | 5d | 61% | +0.6% | +0.3pp | 117 |
-| Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 62% | +1.4% | +0.6pp | 29 |
 | Distance-from-50DMA z < -2 (long) | VTV | VTV | composer_ready | 5d | 60% | +0.5% | +0.3pp | 123 |
 | Donchian 52-week breakout (long) | SHV | SHV | composer_ready | 20d | 95% | +0.2% | +0.1pp | 375 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 227 |
