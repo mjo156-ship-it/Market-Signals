@@ -1,15 +1,15 @@
 {
-  "updated_at": "2026-08-31T23:40:59.804553",
+  "updated_at": "2026-09-01T17:28:13.719270",
   "gate_state": {
-    "SPY": "OUT",
+    "SPY": "IN",
     "QQQ": "OUT",
-    "SMH": "OUT",
+    "SMH": "IN",
     "XLK": "OUT"
   },
   "current_multiplier": {
-    "SPY": 0.0,
+    "SPY": 1.0,
     "TQQQ": 0.0,
-    "SOXL": 0.0,
+    "SOXL": 1.0,
     "TECL": 0.0
   },
   "breadth_today": 0,
@@ -330,6 +330,36 @@
       "fwd_5d": -3.455,
       "fwd_10d": -6.665,
       "matured": true
+    },
+    {
+      "date": "2026-09-01",
+      "sleeve": "SPY",
+      "underlying": "SPY",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.3583,
+      "own_rsi10": 44.2,
+      "breadth": 0,
+      "entry_price": 761.5800170898438,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    },
+    {
+      "date": "2026-09-01",
+      "sleeve": "SOXL",
+      "underlying": "SMH",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.3776,
+      "own_rsi10": 40.2,
+      "breadth": 0,
+      "entry_price": 104.79000091552734,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
     }
   ],
   "rolling": {
