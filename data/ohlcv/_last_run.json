@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-01T00:32:33.761531+00:00",
+  "timestamp": "2026-09-01T23:15:12.885312+00:00",
   "mode": "append",
   "succeeded": [
     "AMD",
@@ -10,7 +10,6 @@
     "BOIL",
     "BOND",
     "BTAL",
-    "BTC-USD",
     "CORP",
     "CPER",
     "CRAK",
@@ -94,13 +93,34 @@
     "XLY",
     "YINN"
   ],
-  "skipped": [],
+  "skipped": [
+    "BTC-USD"
+  ],
   "failed": [],
-  "warnings": [],
+  "warnings": [
+    {
+      "ticker": "DRN",
+      "yf_close": 10.29,
+      "snapshot_price": 10.23,
+      "pct_diff": 0.587
+    },
+    {
+      "ticker": "FNGO",
+      "yf_close": 149.222,
+      "snapshot_price": 151.2,
+      "pct_diff": 1.308
+    },
+    {
+      "ticker": "KORU",
+      "yf_close": 19.18,
+      "snapshot_price": 19.32,
+      "pct_diff": 0.725
+    }
+  ],
   "counts": {
     "total": 91,
-    "ok": 91,
-    "skipped": 0,
+    "ok": 90,
+    "skipped": 1,
     "failed": 0
   }
 }
