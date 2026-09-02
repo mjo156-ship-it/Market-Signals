@@ -1,13 +1,13 @@
 {
-  "updated_at": "2026-09-02T17:22:50.034367",
+  "updated_at": "2026-09-02T18:14:49.599909",
   "gate_state": {
-    "SPY": "IN",
+    "SPY": "OUT",
     "QQQ": "OUT",
     "SMH": "OUT",
     "XLK": "OUT"
   },
   "current_multiplier": {
-    "SPY": 1.0,
+    "SPY": 0.0,
     "TQQQ": 0.0,
     "SOXL": 0.0,
     "TECL": 0.0
