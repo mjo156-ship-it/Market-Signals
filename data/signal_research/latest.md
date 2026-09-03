@@ -1,25 +1,26 @@
-# Signal Research — 2026-09-02
+# Signal Research — 2026-09-03
 
-_Generated 2026-09-02T22:30:04+00:00 · 90 tickers · 2 firing · 10 approaching_
+_Generated 2026-09-03T17:17:27+00:00 · 90 tickers · 5 firing · 8 approaching_
 
 ## Firing today (backtest-gated)
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Rotation: entered top-8 6-mo momentum (long) | SVXY | SVXY | manual_swing | 21d | 78% | +10.0% | +5.6pp | 63 |
-| Low-volatility (ATR) regime (long) | QQQE | QQQE | manual_swing | 20d | 60% | +2.2% | +0.4pp | 63 |
+| Donchian 52-week breakout (long) | SVXY | SVXY | composer_ready | 20d | 65% | +6.4% | +2.2pp | 128 |
+| Donchian 52-week breakout (long) | DBC | DBC | composer_ready | 20d | 62% | +1.6% | +1.2pp | 81 |
+| Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 342 |
+| Bollinger squeeze breakout (long) | USO | USO | composer_ready | 10d | 62% | +0.5% | +0.6pp | 37 |
+| Donchian 52-week breakout (long) | SHV | SHV | composer_ready | 20d | 95% | +0.2% | +0.1pp | 375 |
 
 ## Approaching / primed (passed gate, just inside threshold)
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Rotation: entered top-8 6-mo momentum (long) | EURL | EURL | manual_swing | 21d | 61% | +7.2% | +5.7pp | 31 |
-| 4+ down-day streak (long) | MSFT | MSFT | composer_ready | 5d | 63% | +2.6% | +1.7pp | 233 |
-| Donchian 52-week breakout (long) | SVXY | SVXY | composer_ready | 20d | 65% | +6.4% | +2.3pp | 128 |
+| Donchian 52-week breakout (long) | FNGO | FNGO | composer_ready | 20d | 67% | +24.2% | +15.6pp | 64 |
+| Donchian 52-week breakout (long) | FNGS | FNGS | composer_ready | 20d | 64% | +18.3% | +12.1pp | 55 |
+| Rotation: entered top-8 6-mo momentum (long) | SVXY | SVXY | manual_swing | 21d | 78% | +10.0% | +5.6pp | 63 |
 | Rotation: entered top-8 3-mo momentum (long) | UGA | UGA | manual_swing | 21d | 62% | +3.0% | +2.0pp | 92 |
-| Donchian 52-week breakout (long) | DBC | DBC | composer_ready | 20d | 62% | +1.6% | +1.2pp | 81 |
-| Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 341 |
+| Donchian 52-week breakout (long) | EWJ | EWJ | composer_ready | 20d | 65% | +0.9% | +0.7pp | 168 |
 | Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 62% | +1.4% | +0.6pp | 29 |
-| Donchian 52-week breakout (long) | SHV | SHV | composer_ready | 20d | 95% | +0.2% | +0.1pp | 375 |
 | Distance-from-50DMA z < -2 (long) | IWM | TNA | composer_ready | 5d | 63% | +0.5% | +0.2pp | 134 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 227 |
