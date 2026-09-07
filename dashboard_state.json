@@ -1,6 +1,6 @@
 {
-  "generated_at_local": "2026-09-04T22:14:02.290641",
-  "generated_at_utc": "2026-09-04T22:14:02.290650Z",
+  "generated_at_local": "2026-09-07T18:25:15.247377",
+  "generated_at_utc": "2026-09-07T18:25:15.247387Z",
   "mode": "close",
   "summary": {
     "total_alerts": 1,
@@ -215,13 +215,13 @@
       "pct_above_sma200": -5.73
     },
     "BTC-USD": {
-      "price": 79674.99,
-      "rsi10": 65.1,
-      "rsi50": 59.7,
-      "sma200": 69622.36,
-      "sma50": 68776.32,
-      "ema21": 75440.15,
-      "pct_above_sma200": 14.44
+      "price": 79142.98,
+      "rsi10": 60.2,
+      "rsi50": 58.8,
+      "sma200": 69814.54,
+      "sma50": 69694.86,
+      "ema21": 76511.69,
+      "pct_above_sma200": 13.36
     },
     "AMD": {
       "price": 477.57,
@@ -526,7 +526,7 @@
     "ibs_sma3": {
       "SPY": 0.6355,
       "QQQ": 0.7328,
-      "SMH": 0.8244,
+      "SMH": 0.8252,
       "XLK": 0.7575
     },
     "rsi10": {
@@ -537,7 +537,7 @@
     },
     "equity_budget": 0.8,
     "faltering": {},
-    "as_of": "2026-09-04"
+    "as_of": "2026-09-07"
   },
   "merged_triggers": {
     "selected_branch": "L5_DEFAULT",
