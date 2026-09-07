@@ -1,11 +1,7 @@
 {
-  "timestamp": "2026-09-05T00:19:59.863406+00:00",
+  "timestamp": "2026-09-07T23:25:08.988653+00:00",
   "mode": "append",
   "succeeded": [
-    "BTC-USD",
-    "IMF"
-  ],
-  "skipped": [
     "AMD",
     "AMZN",
     "AVGO",
@@ -14,6 +10,7 @@
     "BOIL",
     "BOND",
     "BTAL",
+    "BTC-USD",
     "CORP",
     "CPER",
     "CRAK",
@@ -38,6 +35,7 @@
     "HYG",
     "IAK",
     "IGV",
+    "IMF",
     "INDL",
     "IWM",
     "KMLM",
@@ -96,12 +94,13 @@
     "XLY",
     "YINN"
   ],
+  "skipped": [],
   "failed": [],
   "warnings": [],
   "counts": {
     "total": 91,
-    "ok": 2,
-    "skipped": 89,
+    "ok": 91,
+    "skipped": 0,
     "failed": 0
   }
 }
