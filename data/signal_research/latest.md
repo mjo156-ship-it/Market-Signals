@@ -1,6 +1,6 @@
 # Signal Research — 2026-09-08
 
-_Generated 2026-09-08T17:33:46+00:00 · 90 tickers · 5 firing · 9 approaching_
+_Generated 2026-09-08T18:14:49+00:00 · 90 tickers · 4 firing · 9 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -8,7 +8,6 @@ _Generated 2026-09-08T17:33:46+00:00 · 90 tickers · 5 firing · 9 approaching_
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Rotation: entered top-8 6-mo momentum (long) | SVXY | SVXY | manual_swing | 21d | 78% | +10.0% | +5.6pp | 63 |
 | Rotation: entered top-8 3-mo momentum (long) | UGA | UGA | manual_swing | 21d | 62% | +3.0% | +2.0pp | 92 |
-| 4+ up-day streak fade (short) | TMF | short TMF | manual_swing | 5d | 64% | +1.3% | +1.6pp | 138 |
 | Donchian 52-week breakout (long) | DBC | DBC | composer_ready | 20d | 62% | +1.6% | +1.2pp | 81 |
 | Bollinger squeeze breakout (long) | KORU | KORU | composer_ready | 10d | 63% | +6.3% | +1.4pp | 27 |
 
