@@ -1,6 +1,6 @@
 # Signal Research — 2026-09-10
 
-_Generated 2026-09-10T18:00:10+00:00 · 90 tickers · 15 firing · 17 approaching_
+_Generated 2026-09-10T22:22:49+00:00 · 90 tickers · 14 firing · 16 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -14,7 +14,6 @@ _Generated 2026-09-10T18:00:10+00:00 · 90 tickers · 15 firing · 17 approachin
 | Bollinger %B overbought (>1) fade (short) | TMV | short TMV | composer_ready | 5d | 61% | +0.9% | +1.0pp | 135 |
 | 4+ down-day streak (long) | VTV | VTV | composer_ready | 5d | 60% | +0.8% | +0.6pp | 129 |
 | 4+ down-day streak (long) | VOO | VOO | composer_ready | 5d | 68% | +0.8% | +0.5pp | 84 |
-| Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 343 |
 | 4+ down-day streak (long) | XLY | XLY | composer_ready | 5d | 62% | +0.6% | +0.3pp | 167 |
 | Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 62% | +1.4% | +0.6pp | 29 |
 | 4+ down-day streak (long) | VOOV | VOOV | composer_ready | 5d | 63% | +0.6% | +0.3pp | 86 |
@@ -33,11 +32,10 @@ _Generated 2026-09-10T18:00:10+00:00 · 90 tickers · 15 firing · 17 approachin
 | Bollinger %B oversold (<0) (long) | XLF | FAS | composer_ready | 5d | 66% | +0.8% | +0.6pp | 216 |
 | Distance-from-50DMA z < -2 (long) | XLF | FAS | composer_ready | 5d | 64% | +0.7% | +0.5pp | 138 |
 | Bollinger %B oversold (<0) (long) | XLV | CURE | composer_ready | 5d | 61% | +0.5% | +0.3pp | 199 |
+| Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 343 |
 | Bollinger %B oversold (<0) (long) | VOO | VOO | composer_ready | 5d | 61% | +0.6% | +0.3pp | 117 |
 | 4+ up-day streak fade (short) | PSQ | short PSQ | manual_swing | 5d | 65% | +0.8% | +0.4pp | 95 |
 | Low-volatility (ATR) regime (long) | QQQE | QQQE | manual_swing | 20d | 60% | +2.2% | +0.4pp | 63 |
-| Bollinger %B oversold (<0) (long) | IAK | IAK | composer_ready | 5d | 61% | +0.4% | +0.2pp | 146 |
-| Distance-from-50DMA z < -2 (long) | XLP | XLP | composer_ready | 5d | 63% | +0.4% | +0.2pp | 123 |
 | Donchian 52-week breakout (long) | SHV | SHV | composer_ready | 20d | 95% | +0.2% | +0.1pp | 376 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 72% | +0.3% | +0.1pp | 228 |
 | Distance-from-50DMA z < -2 (long) | SPLV | SPLV | composer_ready | 5d | 63% | +0.4% | +0.2pp | 51 |
