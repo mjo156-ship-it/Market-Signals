@@ -1,16 +1,16 @@
 {
-  "updated_at": "2026-09-18T17:58:25.558510",
+  "updated_at": "2026-09-18T22:25:00.657707",
   "gate_state": {
-    "SPY": "IN",
-    "QQQ": "IN",
-    "SMH": "IN",
-    "XLK": "IN"
+    "SPY": "OUT",
+    "QQQ": "OUT",
+    "SMH": "OUT",
+    "XLK": "OUT"
   },
   "current_multiplier": {
-    "SPY": 1.0,
-    "TQQQ": 1.0,
-    "SOXL": 1.0,
-    "TECL": 1.0
+    "SPY": 0.0,
+    "TQQQ": 0.0,
+    "SOXL": 0.0,
+    "TECL": 0.0
   },
   "breadth_today": 0,
   "baseline": {

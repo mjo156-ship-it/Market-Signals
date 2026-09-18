@@ -1,6 +1,6 @@
 # Signal Research — 2026-09-18
 
-_Generated 2026-09-18T17:59:55+00:00 · 90 tickers · 4 firing · 8 approaching_
+_Generated 2026-09-18T22:26:34+00:00 · 90 tickers · 4 firing · 10 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -20,6 +20,8 @@ _Generated 2026-09-18T17:59:55+00:00 · 90 tickers · 4 firing · 8 approaching_
 | Low-volatility (ATR) regime (long) | TECL | TECL | manual_swing | 20d | 62% | +14.0% | +3.5pp | 91 |
 | Donchian 52-week breakout (long) | SVXY | SVXY | composer_ready | 20d | 65% | +6.4% | +2.2pp | 130 |
 | Bollinger %B oversold (<0) (long) | XLF | FAS | composer_ready | 5d | 66% | +0.8% | +0.6pp | 216 |
+| Donchian 52-week breakout (long) | EWJ | EWJ | composer_ready | 20d | 64% | +0.9% | +0.7pp | 169 |
 | Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 62% | +1.4% | +0.6pp | 29 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
 | Distance-from-50DMA z < -2 (long) | BND | BND | composer_ready | 5d | 64% | +0.2% | +0.1pp | 95 |
+| Bollinger %B oversold (<0) (long) | SHY | SHY | composer_ready | 5d | 61% | +0.0% | +0.0pp | 140 |
