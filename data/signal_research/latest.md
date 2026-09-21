@@ -1,6 +1,6 @@
 # Signal Research — 2026-09-21
 
-_Generated 2026-09-21T18:57:06+00:00 · 90 tickers · 6 firing · 12 approaching_
+_Generated 2026-09-21T19:51:51+00:00 · 90 tickers · 6 firing · 11 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -17,14 +17,13 @@ _Generated 2026-09-21T18:57:06+00:00 · 90 tickers · 6 firing · 12 approaching
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Rotation: entered top-8 6-mo momentum (long) | SVXY | SVXY | manual_swing | 21d | 78% | +10.0% | +5.6pp | 63 |
 | Low-volatility (ATR) regime (long) | TECL | TECL | manual_swing | 20d | 62% | +14.0% | +3.5pp | 91 |
 | Donchian 52-week breakout (long) | SVXY | SVXY | composer_ready | 20d | 66% | +6.3% | +2.2pp | 131 |
-| Rotation: entered top-8 3-mo momentum (long) | UGA | UGA | manual_swing | 21d | 62% | +3.2% | +2.1pp | 93 |
 | Distance-from-50DMA z < -2 (long) | DUSL | DUSL | composer_ready | 5d | 69% | +3.4% | +2.7pp | 42 |
+| Bollinger %B oversold (<0) (long) | XLF | FAS | composer_ready | 5d | 66% | +0.8% | +0.6pp | 216 |
 | Donchian 52-week breakout (long) | EWJ | EWJ | composer_ready | 20d | 64% | +0.9% | +0.7pp | 169 |
-| Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 345 |
 | Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 62% | +1.4% | +0.6pp | 29 |
+| Bollinger %B oversold (<0) (long) | IAK | IAK | composer_ready | 5d | 61% | +0.4% | +0.2pp | 146 |
 | Donchian 52-week breakout (long) | SHV | SHV | composer_ready | 20d | 95% | +0.2% | +0.1pp | 377 |
 | Distance-from-50DMA z < -2 (long) | IWM | TNA | composer_ready | 5d | 63% | +0.4% | +0.2pp | 136 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
