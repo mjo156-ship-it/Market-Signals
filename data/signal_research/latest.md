@@ -1,6 +1,6 @@
 # Signal Research — 2026-09-22
 
-_Generated 2026-09-22T17:48:33+00:00 · 91 tickers · 5 firing · 11 approaching_
+_Generated 2026-09-22T18:27:17+00:00 · 91 tickers · 5 firing · 10 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -16,7 +16,6 @@ _Generated 2026-09-22T17:48:33+00:00 · 91 tickers · 5 firing · 11 approaching
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Donchian 52-week breakout (long) | FNGS | FNGS | composer_ready | 20d | 64% | +18.3% | +12.1pp | 55 |
 | Rotation: entered top-8 6-mo momentum (long) | SVXY | SVXY | manual_swing | 21d | 78% | +10.0% | +5.6pp | 63 |
 | 4+ down-day streak (long) | OILU | OILU | composer_ready | 5d | 73% | +5.3% | +4.3pp | 33 |
 | Distance-from-50DMA z < -2 (long) | DUSL | DUSL | composer_ready | 5d | 69% | +3.4% | +2.7pp | 42 |
