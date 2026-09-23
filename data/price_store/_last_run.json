@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-22T22:49:33.775880",
+  "timestamp": "2026-09-23T18:00:03.815380",
   "ok": [
     "AMD",
     "AMZN",
@@ -95,12 +95,29 @@
   ],
   "failed": [],
   "skipped": [],
-  "actions_detected": [],
-  "quarantined": 0,
-  "rows_written": 457,
+  "actions_detected": [
+    "CURE",
+    "DRN",
+    "DUSL",
+    "EDC",
+    "EURL",
+    "FAS",
+    "INDL",
+    "NAIL",
+    "QQQE",
+    "SOXL",
+    "SOXS",
+    "TECL",
+    "TMF",
+    "TMV",
+    "TPOR",
+    "YINN"
+  ],
+  "quarantined": 2665,
+  "rows_written": 59021,
   "coverage": {
     "tickers": 91,
-    "latest_date": "2026-09-22",
-    "total_rows": 402757
+    "latest_date": "2026-09-23",
+    "total_rows": 402832
   }
 }
