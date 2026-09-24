@@ -1,13 +1,13 @@
 {
-  "updated_at": "2026-09-23T22:50:07.709926",
+  "updated_at": "2026-09-24T17:59:36.880139",
   "gate_state": {
-    "SPY": "OUT",
+    "SPY": "IN",
     "QQQ": "OUT",
     "SMH": "OUT",
     "XLK": "OUT"
   },
   "current_multiplier": {
-    "SPY": 0.0,
+    "SPY": 1.0,
     "TQQQ": 0.0,
     "SOXL": 0.0,
     "TECL": 0.0
@@ -386,10 +386,10 @@
       "own_rsi10": 43.4,
       "breadth": 0,
       "entry_price": 69.20999908447266,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 2.507,
+      "fwd_5d": 3.085,
+      "fwd_10d": 13.057,
+      "matured": true
     },
     {
       "date": "2026-09-10",
@@ -401,10 +401,10 @@
       "own_rsi10": 48.1,
       "breadth": 0,
       "entry_price": 115.76000213623047,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 5.185,
+      "fwd_5d": -0.862,
+      "fwd_10d": 24.081,
+      "matured": true
     },
     {
       "date": "2026-09-10",
@@ -435,6 +435,21 @@
       "fwd_5d": null,
       "fwd_10d": null,
       "matured": false
+    },
+    {
+      "date": "2026-09-24",
+      "sleeve": "SPY",
+      "underlying": "SPY",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.3955,
+      "own_rsi10": 53.9,
+      "breadth": 0,
+      "entry_price": 767.0750122070312,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
     }
   ],
   "rolling": {
@@ -446,17 +461,17 @@
       "status": "OK"
     },
     "gate_entry_TQQQ": {
-      "trailing_n": 3,
-      "trailing_wr": 0.6667,
-      "trailing_avg_1d": 0.477,
-      "brier": 0.2282,
+      "trailing_n": 4,
+      "trailing_wr": 0.75,
+      "trailing_avg_1d": 0.985,
+      "brier": 0.2133,
       "status": "OK"
     },
     "gate_entry_SOXL": {
-      "trailing_n": 3,
-      "trailing_wr": 0.6667,
-      "trailing_avg_1d": -7.188,
-      "brier": 0.2336,
+      "trailing_n": 4,
+      "trailing_wr": 0.5,
+      "trailing_avg_1d": -4.095,
+      "brier": 0.2536,
       "status": "OK"
     },
     "gate_entry_TECL": {
