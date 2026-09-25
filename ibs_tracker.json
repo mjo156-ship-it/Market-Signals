@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-24T23:06:27.511379",
+  "updated_at": "2026-09-25T18:05:39.667099",
   "gate_state": {
     "SPY": "IN",
     "QQQ": "OUT",
@@ -416,10 +416,10 @@
       "own_rsi10": 49.7,
       "breadth": 0,
       "entry_price": 198.27999877929688,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 3.849,
+      "fwd_5d": 4.282,
+      "fwd_10d": 15.664,
+      "matured": true
     },
     {
       "date": "2026-09-15",
@@ -475,10 +475,10 @@
       "status": "OK"
     },
     "gate_entry_TECL": {
-      "trailing_n": 3,
-      "trailing_wr": 0.6667,
-      "trailing_avg_1d": -1.308,
-      "brier": 0.232,
+      "trailing_n": 4,
+      "trailing_wr": 0.75,
+      "trailing_avg_1d": -0.019,
+      "brier": 0.2207,
       "status": "OK"
     },
     "conviction_1.5x_TQQQ": {
