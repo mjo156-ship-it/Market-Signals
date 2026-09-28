@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated_utc": "2026-09-28T23:10:56.413355+00:00",
-    "generated_et": "2026-09-28 18:10:56 ET",
+    "generated_utc": "2026-09-28T23:44:18.118194+00:00",
+    "generated_et": "2026-09-28 18:44:18 ET",
     "ticker_count": 59,
     "version": "1.2"
   },
@@ -231,8 +231,8 @@
         "supply_shock": false
       },
       "weather": {
-        "current_temp": 60.1,
-        "temp_change_7d": 1.4,
+        "current_temp": 60.6,
+        "temp_change_7d": 3.5,
         "severe_cold": false,
         "is_winter": false
       },
@@ -1040,23 +1040,23 @@
       "ret_20d": -10.53
     },
     "BTC-USD": {
-      "price": 83458.24,
-      "change_pct": -1.18,
-      "rsi10": 59.2,
-      "ema9": 83460.46,
-      "ema20": 81589.15,
-      "ema50": 77293.71,
-      "ema200": 74234.62,
-      "sma50": 76476.82,
-      "sma200": 71137.55,
+      "price": 83550.05,
+      "change_pct": -1.08,
+      "rsi10": 59.8,
+      "ema9": 83478.82,
+      "ema20": 81597.89,
+      "ema50": 77297.31,
+      "ema200": 74235.53,
+      "sma50": 76478.66,
+      "sma200": 71138.01,
       "ema_cross": "BULL",
       "above_sma200": true,
-      "vs_sma200": 17.3,
-      "vs_sma50": 9.1,
-      "ret_1d": -1.18,
-      "ret_5d": -1.1,
-      "ret_10d": 3.16,
-      "ret_20d": 6.4
+      "vs_sma200": 17.4,
+      "vs_sma50": 9.2,
+      "ret_1d": -1.08,
+      "ret_5d": -0.99,
+      "ret_10d": 3.27,
+      "ret_20d": 6.52
     },
     "AMD": {
       "price": 607.87,
