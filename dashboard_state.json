@@ -1,11 +1,11 @@
 {
-  "generated_at_local": "2026-09-28T20:15:27.084954",
-  "generated_at_utc": "2026-09-28T20:15:27.084963Z",
+  "generated_at_local": "2026-09-28T20:57:04.294752",
+  "generated_at_utc": "2026-09-28T20:57:04.294761Z",
   "mode": "close",
   "summary": {
-    "total_alerts": 3,
+    "total_alerts": 2,
     "buy_count": 1,
-    "exit_count": 1,
+    "exit_count": 0,
     "warning_count": 1
   },
   "alerts": [
@@ -13,11 +13,6 @@
       "title": "\ud83d\udfe2 FAS BUY",
       "message": "FAS RSI=24.7 < 30 \u2192 Buy FAS: 63% win, +3.3% avg (5d) | n=195",
       "category": "buy"
-    },
-    {
-      "title": "\ud83d\udd34 IBS EXIT: SPY",
-      "message": "Gate OUT (SPY IBS 0.62, RSI 51, breadth 0) \u2192 sell SPY, go flat",
-      "category": "exit"
     },
     {
       "title": "\ud83d\udd35 MERGED TRIGGERS: L5_DEFAULT",
@@ -90,13 +85,13 @@
       "pct_above_sma200": -10.45
     },
     "XLV": {
-      "price": 171.24,
-      "rsi10": 62.2,
+      "price": 171.26,
+      "rsi10": 62.3,
       "rsi50": 57.3,
       "sma200": 155.17,
       "sma50": 167.35,
       "ema21": 168.94,
-      "pct_above_sma200": 10.36
+      "pct_above_sma200": 10.37
     },
     "GLD": {
       "price": 377.91,
@@ -225,13 +220,13 @@
       "pct_above_sma200": -14.53
     },
     "BTC-USD": {
-      "price": 83510.12,
-      "rsi10": 59.5,
+      "price": 83476.82,
+      "rsi10": 59.3,
       "rsi50": 59.3,
-      "sma200": 71137.81,
-      "sma50": 76477.86,
-      "ema21": 81431.85,
-      "pct_above_sma200": 17.39
+      "sma200": 71137.64,
+      "sma50": 76477.19,
+      "ema21": 81428.82,
+      "pct_above_sma200": 17.35
     },
     "AMD": {
       "price": 607.87,
