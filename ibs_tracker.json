@@ -1,14 +1,14 @@
 {
-  "updated_at": "2026-09-29T00:16:50.562677",
+  "updated_at": "2026-09-29T18:54:02.387317",
   "gate_state": {
     "SPY": "IN",
-    "QQQ": "IN",
+    "QQQ": "OUT",
     "SMH": "IN",
     "XLK": "IN"
   },
   "current_multiplier": {
     "SPY": 1.0,
-    "TQQQ": 1.0,
+    "TQQQ": 0.0,
     "SOXL": 1.0,
     "TECL": 1.0
   },
@@ -431,10 +431,10 @@
       "own_rsi10": 39.2,
       "breadth": 0,
       "entry_price": 101.41999816894531,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 1.563,
+      "fwd_5d": 48.552,
+      "fwd_10d": 45.178,
+      "matured": true
     },
     {
       "date": "2026-09-24",
@@ -528,10 +528,10 @@
       "status": "OK"
     },
     "gate_entry_SOXL": {
-      "trailing_n": 4,
-      "trailing_wr": 0.5,
-      "trailing_avg_1d": -4.095,
-      "brier": 0.2536,
+      "trailing_n": 5,
+      "trailing_wr": 0.6,
+      "trailing_avg_1d": -2.963,
+      "brier": 0.2416,
       "status": "OK"
     },
     "gate_entry_TECL": {
