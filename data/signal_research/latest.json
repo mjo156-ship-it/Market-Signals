@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-09-29T19:45:21+00:00",
+  "generated_at_utc": "2026-09-29T23:35:14+00:00",
   "data_through": "2026-09-29",
   "universe_size": 91,
   "combinations_evaluated": 1284,
@@ -9,7 +9,7 @@
   },
   "summary": {
     "n_results": 7,
-    "n_watchlist": 10,
+    "n_watchlist": 9,
     "by_family": {
       "rotation": 6,
       "mean_reversion": 1
@@ -28,7 +28,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "3-mo momentum +33.9%, rank #4",
+      "today_value": "3-mo momentum +34.3%, rank #4",
       "backtest": {
         "n": 216,
         "win_rate": 0.63,
@@ -1131,7 +1131,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +153.1%, rank #4",
+      "today_value": "12-mo momentum +153.9%, rank #4",
       "backtest": {
         "n": 109,
         "win_rate": 0.633,
@@ -1699,7 +1699,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +44.4%, rank #2",
+      "today_value": "6-mo momentum +45.2%, rank #2",
       "backtest": {
         "n": 74,
         "win_rate": 0.635,
@@ -2092,7 +2092,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +20.4%, rank #8",
+      "today_value": "6-mo momentum +20.6%, rank #8",
       "backtest": {
         "n": 138,
         "win_rate": 0.609,
@@ -2805,7 +2805,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +161.6%, rank #3",
+      "today_value": "12-mo momentum +162.0%, rank #3",
       "backtest": {
         "n": 105,
         "win_rate": 0.6,
@@ -3353,15 +3353,15 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +99.8%, rank #8",
+      "today_value": "12-mo momentum +99.5%, rank #8",
       "backtest": {
         "n": 29,
         "win_rate": 0.655,
-        "avg_return": 0.0216,
+        "avg_return": 0.0215,
         "median_return": 0.0377,
         "baseline_return": -0.0017,
         "baseline_win_rate": 0.5264,
-        "edge": 0.0232,
+        "edge": 0.0231,
         "fired_today": true,
         "events": [
           {
@@ -3507,11 +3507,11 @@
           {
             "date": "2026-08-28",
             "i": 5128,
-            "ret": 0.1069
+            "ret": 0.10524
           }
         ]
       },
-      "score": 0.1249
+      "score": 0.1244
     },
     {
       "family": "mean_reversion",
@@ -3521,7 +3521,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -2.11",
+      "today_value": "dist-z -2.04",
       "backtest": {
         "n": 125,
         "win_rate": 0.624,
@@ -4171,7 +4171,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 82.21 vs 52w high 83.80",
+      "today_value": "close 82.29 vs 52w high 83.80",
       "backtest": {
         "n": 55,
         "win_rate": 0.636,
@@ -4469,7 +4469,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +19.4%, rank #9",
+      "today_value": "6-mo momentum +19.6%, rank #9",
       "backtest": {
         "n": 64,
         "win_rate": 0.781,
@@ -5000,11 +5000,11 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 63.99 vs 52w high 64.60",
+      "today_value": "close 64.09 vs 52w high 64.60",
       "backtest": {
         "n": 133,
         "win_rate": 0.662,
-        "avg_return": 0.0628,
+        "avg_return": 0.0629,
         "median_return": 0.0324,
         "baseline_return": 0.0418,
         "baseline_win_rate": 0.6603,
@@ -5674,469 +5674,11 @@
           {
             "date": "2026-08-31",
             "i": 3746,
-            "ret": 0.01531
+            "ret": 0.01698
           }
         ]
       },
       "score": 0.2433
-    },
-    {
-      "family": "volatility_breakout",
-      "name": "Bollinger squeeze breakout",
-      "ticker": "MSFT",
-      "suggested_instrument": "MSFT",
-      "direction": "long",
-      "horizon_days": 10,
-      "mode": "composer_ready",
-      "today_value": "bandwidth pctile 0.05, %B 0.89",
-      "backtest": {
-        "n": 87,
-        "win_rate": 0.621,
-        "avg_return": 0.0279,
-        "median_return": 0.0132,
-        "baseline_return": 0.0173,
-        "baseline_win_rate": 0.5808,
-        "edge": 0.0106,
-        "fired_today": false,
-        "events": [
-          {
-            "date": "1991-01-10",
-            "i": 259,
-            "ret": 0.15655
-          },
-          {
-            "date": "1991-01-15",
-            "i": 262,
-            "ret": 0.18022
-          },
-          {
-            "date": "1991-10-14",
-            "i": 451,
-            "ret": -0.02168
-          },
-          {
-            "date": "1991-10-30",
-            "i": 463,
-            "ret": 0.06878
-          },
-          {
-            "date": "1991-11-06",
-            "i": 468,
-            "ret": 0.01312
-          },
-          {
-            "date": "1992-05-28",
-            "i": 608,
-            "ret": -0.09244
-          },
-          {
-            "date": "1992-07-28",
-            "i": 650,
-            "ret": -0.03547
-          },
-          {
-            "date": "1992-10-08",
-            "i": 701,
-            "ret": 0.07646
-          },
-          {
-            "date": "1994-01-06",
-            "i": 1016,
-            "ret": 0.0192
-          },
-          {
-            "date": "1994-03-14",
-            "i": 1062,
-            "ret": 0.02981
-          },
-          {
-            "date": "1996-04-18",
-            "i": 1592,
-            "ret": 0.02408
-          },
-          {
-            "date": "1996-06-05",
-            "i": 1625,
-            "ret": 0.00724
-          },
-          {
-            "date": "1996-06-07",
-            "i": 1627,
-            "ret": 0.02165
-          },
-          {
-            "date": "1996-06-11",
-            "i": 1629,
-            "ret": -0.00102
-          },
-          {
-            "date": "1996-09-12",
-            "i": 1694,
-            "ret": 0.02624
-          },
-          {
-            "date": "1997-07-14",
-            "i": 1904,
-            "ret": 0.00782
-          },
-          {
-            "date": "1997-10-08",
-            "i": 1965,
-            "ret": -0.02383
-          },
-          {
-            "date": "1998-06-16",
-            "i": 2137,
-            "ret": 0.20584
-          },
-          {
-            "date": "1999-03-15",
-            "i": 2324,
-            "ret": 1.22758
-          },
-          {
-            "date": "1999-06-09",
-            "i": 2384,
-            "ret": 0.0448
-          },
-          {
-            "date": "2001-04-10",
-            "i": 2848,
-            "ret": 0.16773
-          },
-          {
-            "date": "2001-06-05",
-            "i": 2886,
-            "ret": -0.07273
-          },
-          {
-            "date": "2001-06-07",
-            "i": 2888,
-            "ret": -0.05212
-          },
-          {
-            "date": "2001-12-05",
-            "i": 3010,
-            "ret": 0.02041
-          },
-          {
-            "date": "2003-01-07",
-            "i": 3283,
-            "ret": -0.08602
-          },
-          {
-            "date": "2003-01-14",
-            "i": 3288,
-            "ret": -0.12392
-          },
-          {
-            "date": "2003-06-16",
-            "i": 3393,
-            "ret": 0.00985
-          },
-          {
-            "date": "2003-09-02",
-            "i": 3447,
-            "ret": 0.06016
-          },
-          {
-            "date": "2003-12-10",
-            "i": 3517,
-            "ret": 0.01692
-          },
-          {
-            "date": "2004-01-26",
-            "i": 3547,
-            "ret": -0.06597
-          },
-          {
-            "date": "2004-04-23",
-            "i": 3609,
-            "ret": -0.06391
-          },
-          {
-            "date": "2004-06-07",
-            "i": 3639,
-            "ret": 0.07037
-          },
-          {
-            "date": "2004-10-01",
-            "i": 3720,
-            "ret": -0.0092
-          },
-          {
-            "date": "2005-07-12",
-            "i": 3915,
-            "ret": -0.00273
-          },
-          {
-            "date": "2006-11-09",
-            "i": 4252,
-            "ret": 0.02057
-          },
-          {
-            "date": "2007-01-11",
-            "i": 4293,
-            "ret": -0.00326
-          },
-          {
-            "date": "2007-07-17",
-            "i": 4421,
-            "ret": -0.05815
-          },
-          {
-            "date": "2007-09-25",
-            "i": 4470,
-            "ret": 0.01827
-          },
-          {
-            "date": "2008-04-18",
-            "i": 4612,
-            "ret": -0.02533
-          },
-          {
-            "date": "2009-04-24",
-            "i": 4868,
-            "ret": -0.07126
-          },
-          {
-            "date": "2009-05-29",
-            "i": 4892,
-            "ret": 0.1168
-          },
-          {
-            "date": "2009-08-21",
-            "i": 4951,
-            "ret": 0.0086
-          },
-          {
-            "date": "2009-09-22",
-            "i": 4972,
-            "ret": -0.02561
-          },
-          {
-            "date": "2009-10-15",
-            "i": 4989,
-            "ret": 0.05653
-          },
-          {
-            "date": "2009-12-18",
-            "i": 5034,
-            "ret": 0.01976
-          },
-          {
-            "date": "2010-03-17",
-            "i": 5093,
-            "ret": -0.01147
-          },
-          {
-            "date": "2010-04-09",
-            "i": 5109,
-            "ret": 0.02044
-          },
-          {
-            "date": "2010-10-15",
-            "i": 5241,
-            "ret": 0.04424
-          },
-          {
-            "date": "2011-01-06",
-            "i": 5298,
-            "ret": -0.02776
-          },
-          {
-            "date": "2012-01-03",
-            "i": 5547,
-            "ret": 0.05454
-          },
-          {
-            "date": "2012-09-06",
-            "i": 5718,
-            "ret": 0.00319
-          },
-          {
-            "date": "2013-03-28",
-            "i": 5856,
-            "ret": 0.00629
-          },
-          {
-            "date": "2013-12-04",
-            "i": 6030,
-            "ret": -0.06061
-          },
-          {
-            "date": "2014-03-18",
-            "i": 6100,
-            "ret": 0.04728
-          },
-          {
-            "date": "2014-07-15",
-            "i": 6182,
-            "ret": 0.03392
-          },
-          {
-            "date": "2015-10-02",
-            "i": 6490,
-            "ret": 0.04257
-          },
-          {
-            "date": "2015-12-01",
-            "i": 6531,
-            "ret": -0.00036
-          },
-          {
-            "date": "2016-10-21",
-            "i": 6756,
-            "ret": -0.01592
-          },
-          {
-            "date": "2017-01-24",
-            "i": 6819,
-            "ret": -0.00142
-          },
-          {
-            "date": "2017-04-21",
-            "i": 6880,
-            "ret": 0.03916
-          },
-          {
-            "date": "2017-11-28",
-            "i": 7033,
-            "ret": 0.00825
-          },
-          {
-            "date": "2018-08-28",
-            "i": 7221,
-            "ret": 0.01315
-          },
-          {
-            "date": "2019-04-18",
-            "i": 7381,
-            "ret": 0.04482
-          },
-          {
-            "date": "2019-09-19",
-            "i": 7487,
-            "ret": -0.03395
-          },
-          {
-            "date": "2019-12-12",
-            "i": 7546,
-            "ret": 0.03733
-          },
-          {
-            "date": "2020-06-05",
-            "i": 7666,
-            "ret": 0.04247
-          },
-          {
-            "date": "2020-10-09",
-            "i": 7754,
-            "ret": 0.00195
-          },
-          {
-            "date": "2020-12-16",
-            "i": 7801,
-            "ret": 0.01432
-          },
-          {
-            "date": "2020-12-21",
-            "i": 7804,
-            "ret": -0.04645
-          },
-          {
-            "date": "2021-04-01",
-            "i": 7873,
-            "ret": 0.07588
-          },
-          {
-            "date": "2021-08-16",
-            "i": 7967,
-            "ret": 0.03249
-          },
-          {
-            "date": "2021-08-19",
-            "i": 7970,
-            "ret": 0.01476
-          },
-          {
-            "date": "2022-07-28",
-            "i": 8206,
-            "ret": 0.03838
-          },
-          {
-            "date": "2023-03-16",
-            "i": 8365,
-            "ret": 0.02842
-          },
-          {
-            "date": "2023-04-26",
-            "i": 8393,
-            "ret": 0.05735
-          },
-          {
-            "date": "2023-05-25",
-            "i": 8414,
-            "ret": 0.00267
-          },
-          {
-            "date": "2023-07-18",
-            "i": 8449,
-            "ret": -0.0644
-          },
-          {
-            "date": "2023-09-05",
-            "i": 8483,
-            "ret": -0.01469
-          },
-          {
-            "date": "2024-01-10",
-            "i": 8571,
-            "ret": 0.05774
-          },
-          {
-            "date": "2024-10-29",
-            "i": 8773,
-            "ret": -0.02065
-          },
-          {
-            "date": "2024-12-04",
-            "i": 8798,
-            "ret": -7e-05
-          },
-          {
-            "date": "2025-06-09",
-            "i": 8924,
-            "ret": 0.03672
-          },
-          {
-            "date": "2025-06-12",
-            "i": 8927,
-            "ret": 0.03565
-          },
-          {
-            "date": "2025-07-31",
-            "i": 8960,
-            "ret": -0.02066
-          },
-          {
-            "date": "2025-09-19",
-            "i": 8995,
-            "ret": -0.00112
-          },
-          {
-            "date": "2025-10-27",
-            "i": 9021,
-            "ret": -0.04801
-          },
-          {
-            "date": "2026-07-30",
-            "i": 9210,
-            "ret": 0.10149
-          }
-        ]
-      },
-      "score": 0.0989
     },
     {
       "family": "mean_reversion",
@@ -6146,7 +5688,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B 0.09",
+      "today_value": "%B 0.08",
       "backtest": {
         "n": 218,
         "win_rate": 0.656,
@@ -7245,7 +6787,7 @@
           {
             "date": "2026-09-22",
             "i": 6978,
-            "ret": -0.01387
+            "ret": -0.01442
           }
         ]
       },
@@ -7259,7 +6801,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 32.42 vs 52w high 32.80",
+      "today_value": "close 32.43 vs 52w high 32.80",
       "backtest": {
         "n": 29,
         "win_rate": 0.621,
@@ -7427,7 +6969,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 81.17 vs 52w high 81.86",
+      "today_value": "close 81.16 vs 52w high 81.86",
       "backtest": {
         "n": 229,
         "win_rate": 0.712,
@@ -9058,7 +8600,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 36.78 vs 52w high 37.19",
+      "today_value": "close 36.75 vs 52w high 37.19",
       "backtest": {
         "n": 47,
         "win_rate": 0.681,

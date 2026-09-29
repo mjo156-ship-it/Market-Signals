@@ -1,6 +1,6 @@
 # Signal Research — 2026-09-29
 
-_Generated 2026-09-29T19:45:21+00:00 · 91 tickers · 7 firing · 10 approaching_
+_Generated 2026-09-29T23:35:14+00:00 · 91 tickers · 7 firing · 9 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -11,7 +11,7 @@ _Generated 2026-09-29T19:45:21+00:00 · 91 tickers · 7 firing · 10 approaching
 | Rotation: entered top-8 6-mo momentum (long) | CURE | CURE | manual_swing | 21d | 64% | +14.1% | +9.2pp | 74 |
 | Rotation: entered top-8 6-mo momentum (long) | AMD | AMD | manual_swing | 21d | 61% | +6.6% | +3.6pp | 138 |
 | Rotation: entered top-8 12-mo momentum (long) | AMD | AMD | manual_swing | 21d | 60% | +6.0% | +3.0pp | 105 |
-| Rotation: entered top-8 12-mo momentum (long) | USO | USO | manual_swing | 21d | 66% | +2.2% | +2.3pp | 29 |
+| Rotation: entered top-8 12-mo momentum (long) | USO | USO | manual_swing | 21d | 66% | +2.1% | +2.3pp | 29 |
 | Distance-from-50DMA z < -2 (long) | XLP | XLP | composer_ready | 5d | 62% | +0.4% | +0.2pp | 125 |
 
 ## Approaching / primed (passed gate, just inside threshold)
@@ -22,7 +22,6 @@ _Generated 2026-09-29T19:45:21+00:00 · 91 tickers · 7 firing · 10 approaching
 | Rotation: entered top-8 6-mo momentum (long) | SVXY | SVXY | manual_swing | 21d | 78% | +9.9% | +5.5pp | 64 |
 | 4+ down-day streak (long) | OILU | OILU | composer_ready | 5d | 73% | +5.3% | +4.3pp | 33 |
 | Donchian 52-week breakout (long) | SVXY | SVXY | composer_ready | 20d | 66% | +6.3% | +2.1pp | 133 |
-| Bollinger squeeze breakout (long) | MSFT | MSFT | composer_ready | 10d | 62% | +2.8% | +1.1pp | 87 |
 | Bollinger %B oversold (<0) (long) | XLF | FAS | composer_ready | 5d | 66% | +0.8% | +0.6pp | 218 |
 | Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 62% | +1.4% | +0.6pp | 29 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
