@@ -1,6 +1,6 @@
 # Signal Research — 2026-09-29
 
-_Generated 2026-09-29T18:56:05+00:00 · 91 tickers · 7 firing · 11 approaching_
+_Generated 2026-09-29T19:45:21+00:00 · 91 tickers · 7 firing · 10 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -24,7 +24,6 @@ _Generated 2026-09-29T18:56:05+00:00 · 91 tickers · 7 firing · 11 approaching
 | Donchian 52-week breakout (long) | SVXY | SVXY | composer_ready | 20d | 66% | +6.3% | +2.1pp | 133 |
 | Bollinger squeeze breakout (long) | MSFT | MSFT | composer_ready | 10d | 62% | +2.8% | +1.1pp | 87 |
 | Bollinger %B oversold (<0) (long) | XLF | FAS | composer_ready | 5d | 66% | +0.8% | +0.6pp | 218 |
-| Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 346 |
 | Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 62% | +1.4% | +0.6pp | 29 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
 | Distance-from-50DMA z < -2 (long) | IAK | IAK | composer_ready | 5d | 64% | +0.3% | +0.1pp | 88 |
