@@ -1,16 +1,16 @@
 {
-  "updated_at": "2026-09-28T20:57:03.124558",
+  "updated_at": "2026-09-29T00:16:50.562677",
   "gate_state": {
-    "SPY": "OUT",
-    "QQQ": "OUT",
-    "SMH": "OUT",
-    "XLK": "OUT"
+    "SPY": "IN",
+    "QQQ": "IN",
+    "SMH": "IN",
+    "XLK": "IN"
   },
   "current_multiplier": {
-    "SPY": 0.0,
-    "TQQQ": 0.0,
-    "SOXL": 0.0,
-    "TECL": 0.0
+    "SPY": 1.0,
+    "TQQQ": 1.0,
+    "SOXL": 1.0,
+    "TECL": 1.0
   },
   "breadth_today": 0,
   "baseline": {
@@ -446,6 +446,66 @@
       "own_rsi10": 53.9,
       "breadth": 0,
       "entry_price": 767.0750122070312,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    },
+    {
+      "date": "2026-09-28",
+      "sleeve": "SPY",
+      "underlying": "SPY",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.0,
+      "own_rsi10": 58.7,
+      "breadth": 0,
+      "entry_price": 0.0,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    },
+    {
+      "date": "2026-09-28",
+      "sleeve": "TQQQ",
+      "underlying": "QQQ",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.0,
+      "own_rsi10": 68.8,
+      "breadth": 0,
+      "entry_price": 0.0,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    },
+    {
+      "date": "2026-09-28",
+      "sleeve": "SOXL",
+      "underlying": "SMH",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.0,
+      "own_rsi10": 67.2,
+      "breadth": 0,
+      "entry_price": 0.0,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    },
+    {
+      "date": "2026-09-28",
+      "sleeve": "TECL",
+      "underlying": "XLK",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.0,
+      "own_rsi10": 69.5,
+      "breadth": 0,
+      "entry_price": 0.0,
       "fwd_1d": null,
       "fwd_5d": null,
       "fwd_10d": null,
