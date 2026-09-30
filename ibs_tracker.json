@@ -1,14 +1,14 @@
 {
-  "updated_at": "2026-09-30T19:44:58.824175",
+  "updated_at": "2026-09-30T23:34:33.985330",
   "gate_state": {
     "SPY": "IN",
-    "QQQ": "OUT",
+    "QQQ": "IN",
     "SMH": "IN",
     "XLK": "IN"
   },
   "current_multiplier": {
     "SPY": 1.0,
-    "TQQQ": 0.0,
+    "TQQQ": 1.0,
     "SOXL": 1.0,
     "TECL": 1.0
   },
@@ -506,6 +506,21 @@
       "own_rsi10": 69.5,
       "breadth": 0,
       "entry_price": 0.0,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    },
+    {
+      "date": "2026-09-30",
+      "sleeve": "TQQQ",
+      "underlying": "QQQ",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.35,
+      "own_rsi10": 62.0,
+      "breadth": 0,
+      "entry_price": 78.02999877929688,
       "fwd_1d": null,
       "fwd_5d": null,
       "fwd_10d": null,
