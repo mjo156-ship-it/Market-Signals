@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-10-01T20:00:51+00:00",
+  "generated_at_utc": "2026-10-01T23:49:09+00:00",
   "data_through": "2026-10-01",
   "universe_size": 91,
   "combinations_evaluated": 1284,
@@ -509,13 +509,13 @@
       "mode": "manual_swing",
       "today_value": "3-mo momentum +29.6%, rank #5",
       "backtest": {
-        "n": 94,
-        "win_rate": 0.628,
-        "avg_return": 0.033,
-        "median_return": 0.0373,
+        "n": 93,
+        "win_rate": 0.634,
+        "avg_return": 0.0339,
+        "median_return": 0.0377,
         "baseline_return": 0.0112,
         "baseline_win_rate": 0.5624,
-        "edge": 0.0218,
+        "edge": 0.0227,
         "fired_today": true,
         "events": [
           {
@@ -754,9 +754,9 @@
             "ret": 0.07575
           },
           {
-            "date": "2018-05-01",
-            "i": 2561,
-            "ret": 0.03694
+            "date": "2018-05-02",
+            "i": 2562,
+            "ret": 0.03298
           },
           {
             "date": "2019-03-22",
@@ -944,14 +944,9 @@
             "ret": -0.13675
           },
           {
-            "date": "2025-01-14",
-            "i": 4247,
-            "ret": -0.01313
-          },
-          {
-            "date": "2025-02-07",
-            "i": 4264,
-            "ret": -0.09239
+            "date": "2025-01-15",
+            "i": 4248,
+            "ret": -0.05092
           },
           {
             "date": "2026-03-03",
@@ -990,7 +985,7 @@
           }
         ]
       },
-      "score": 0.2114
+      "score": 0.2189
     },
     {
       "family": "volatility_breakout",
@@ -1000,7 +995,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 32.84 vs 52w high 32.80",
+      "today_value": "close 32.85 vs 52w high 32.80",
       "backtest": {
         "n": 30,
         "win_rate": 0.633,
@@ -1173,7 +1168,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -9.23",
+      "today_value": "dist-z -9.20",
       "backtest": {
         "n": 92,
         "win_rate": 0.837,
@@ -1642,7 +1637,7 @@
           {
             "date": "2026-09-24",
             "i": 4861,
-            "ret": -0.00191
+            "ret": -0.00186
           }
         ]
       },
@@ -1658,7 +1653,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 82.27 vs 52w high 83.80",
+      "today_value": "close 82.46 vs 52w high 83.80",
       "backtest": {
         "n": 55,
         "win_rate": 0.636,
@@ -1666,7 +1661,7 @@
         "median_return": 0.0237,
         "baseline_return": 0.0614,
         "baseline_win_rate": 0.6502,
-        "edge": 0.1212,
+        "edge": 0.1211,
         "fired_today": false,
         "events": [
           {
@@ -1946,7 +1941,7 @@
           }
         ]
       },
-      "score": 0.8988
+      "score": 0.8981
     },
     {
       "family": "rotation",
@@ -2888,9 +2883,9 @@
             "ret": 0.00308
           },
           {
-            "date": "2023-11-10",
-            "i": 6242,
-            "ret": -0.01394
+            "date": "2023-11-13",
+            "i": 6243,
+            "ret": -0.01086
           },
           {
             "date": "2024-01-26",
@@ -3036,13 +3031,13 @@
       "mode": "manual_swing",
       "today_value": "6-mo momentum +15.8%, rank #12",
       "backtest": {
-        "n": 64,
-        "win_rate": 0.781,
-        "avg_return": 0.0992,
-        "median_return": 0.0653,
+        "n": 63,
+        "win_rate": 0.778,
+        "avg_return": 0.0997,
+        "median_return": 0.0643,
         "baseline_return": 0.0439,
         "baseline_win_rate": 0.6598,
-        "edge": 0.0553,
+        "edge": 0.0557,
         "fired_today": false,
         "events": [
           {
@@ -3321,14 +3316,9 @@
             "ret": 0.04884
           },
           {
-            "date": "2023-11-16",
-            "i": 3049,
-            "ret": 0.0825
-          },
-          {
-            "date": "2023-11-21",
-            "i": 3052,
-            "ret": 0.02741
+            "date": "2023-11-24",
+            "i": 3054,
+            "ret": 0.03782
           },
           {
             "date": "2024-04-11",
@@ -3367,7 +3357,7 @@
           }
         ]
       },
-      "score": 0.4424
+      "score": 0.4421
     },
     {
       "family": "rotation",
@@ -3377,10 +3367,10 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +18.9%, rank #10",
+      "today_value": "6-mo momentum +18.8%, rank #10",
       "backtest": {
-        "n": 138,
-        "win_rate": 0.609,
+        "n": 136,
+        "win_rate": 0.61,
         "avg_return": 0.0662,
         "median_return": 0.0682,
         "baseline_return": 0.0306,
@@ -3709,11 +3699,6 @@
             "ret": -0.05755
           },
           {
-            "date": "2018-12-14",
-            "i": 7295,
-            "ret": -0.00854
-          },
-          {
             "date": "2019-02-28",
             "i": 7345,
             "ret": 0.08457
@@ -3984,19 +3969,14 @@
             "ret": 0.01748
           },
           {
-            "date": "2023-11-24",
-            "i": 8539,
-            "ret": 0.17251
+            "date": "2023-11-27",
+            "i": 8540,
+            "ret": 0.19095
           },
           {
             "date": "2023-11-29",
             "i": 8542,
             "ret": 0.19023
-          },
-          {
-            "date": "2023-12-07",
-            "i": 8548,
-            "ret": 0.16273
           },
           {
             "date": "2023-12-11",
@@ -4080,7 +4060,7 @@
           }
         ]
       },
-      "score": 0.4182
+      "score": 0.4152
     },
     {
       "family": "volatility_breakout",
@@ -4090,7 +4070,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 63.44 vs 52w high 64.60",
+      "today_value": "close 63.43 vs 52w high 64.60",
       "backtest": {
         "n": 133,
         "win_rate": 0.662,
@@ -5486,7 +5466,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 97.35 vs 52w high 99.01",
+      "today_value": "close 97.38 vs 52w high 99.01",
       "backtest": {
         "n": 169,
         "win_rate": 0.645,
@@ -6354,7 +6334,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 91.40 vs 52w high 91.65",
+      "today_value": "close 91.41 vs 52w high 91.65",
       "backtest": {
         "n": 347,
         "win_rate": 0.988,
@@ -8825,7 +8805,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 110.04 vs 52w high 110.32",
+      "today_value": "close 110.05 vs 52w high 110.32",
       "backtest": {
         "n": 378,
         "win_rate": 0.95,
@@ -10738,7 +10718,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -1.92",
+      "today_value": "dist-z -1.91",
       "backtest": {
         "n": 137,
         "win_rate": 0.628,
@@ -12614,7 +12594,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -1.81",
+      "today_value": "dist-z -1.79",
       "backtest": {
         "n": 49,
         "win_rate": 0.653,
@@ -12882,7 +12862,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -1.79",
+      "today_value": "dist-z -1.82",
       "backtest": {
         "n": 89,
         "win_rate": 0.629,
@@ -13350,7 +13330,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B 0.06",
+      "today_value": "%B 0.08",
       "backtest": {
         "n": 70,
         "win_rate": 0.643,
