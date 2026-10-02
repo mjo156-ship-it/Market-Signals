@@ -1,6 +1,6 @@
 # Signal Research — 2026-10-02
 
-_Generated 2026-10-02T18:44:11+00:00 · 91 tickers · 0 firing · 13 approaching_
+_Generated 2026-10-02T19:42:04+00:00 · 91 tickers · 0 firing · 12 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -18,7 +18,6 @@ _No backtest-gated signals firing today._
 | Donchian 52-week breakout (long) | SVXY | SVXY | composer_ready | 20d | 66% | +6.2% | +2.1pp | 134 |
 | Bollinger %B overbought (>1) fade (short) | TMV | short TMV | composer_ready | 5d | 61% | +0.9% | +0.9pp | 137 |
 | Donchian 52-week breakout (long) | EWJ | EWJ | composer_ready | 20d | 64% | +0.9% | +0.7pp | 169 |
-| Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 63% | +1.4% | +0.7pp | 30 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
 | Distance-from-50DMA z < -2 (long) | SPLV | SPLV | composer_ready | 5d | 60% | +0.3% | +0.1pp | 53 |
 | Distance-from-50DMA z < -2 (long) | CURE | CURE | composer_ready | 5d | 65% | +1.3% | +0.1pp | 49 |
