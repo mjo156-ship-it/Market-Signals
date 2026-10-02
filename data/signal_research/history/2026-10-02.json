@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-10-02T19:42:04+00:00",
+  "generated_at_utc": "2026-10-02T23:39:17+00:00",
   "data_through": "2026-10-02",
   "universe_size": 91,
   "combinations_evaluated": 1284,
@@ -406,7 +406,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 234.43 vs 52w high 236.00",
+      "today_value": "close 233.95 vs 52w high 236.00",
       "backtest": {
         "n": 211,
         "win_rate": 0.645,
@@ -1484,7 +1484,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 82.76 vs 52w high 83.80",
+      "today_value": "close 82.68 vs 52w high 83.80",
       "backtest": {
         "n": 55,
         "win_rate": 0.636,
@@ -2116,7 +2116,7 @@
           {
             "date": "2026-09-02",
             "i": 3748,
-            "ret": 0.01729
+            "ret": 0.01713
           }
         ]
       },
@@ -2130,7 +2130,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +23.0%, rank #9",
+      "today_value": "6-mo momentum +22.8%, rank #9",
       "backtest": {
         "n": 137,
         "win_rate": 0.613,
@@ -2838,7 +2838,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 64.12 vs 52w high 64.60",
+      "today_value": "close 64.11 vs 52w high 64.60",
       "backtest": {
         "n": 134,
         "win_rate": 0.664,
@@ -3517,7 +3517,7 @@
           {
             "date": "2026-09-03",
             "i": 3749,
-            "ret": 0.00659
+            "ret": 0.00644
           }
         ]
       },
@@ -3531,7 +3531,7 @@
       "direction": "short",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B 0.96",
+      "today_value": "%B 0.94",
       "backtest": {
         "n": 137,
         "win_rate": 0.606,
@@ -4239,7 +4239,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 98.89 vs 52w high 99.01",
+      "today_value": "close 98.92 vs 52w high 99.01",
       "backtest": {
         "n": 169,
         "win_rate": 0.645,
@@ -6275,7 +6275,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -1.88",
+      "today_value": "dist-z -1.87",
       "backtest": {
         "n": 53,
         "win_rate": 0.604,
@@ -6563,7 +6563,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -1.89",
+      "today_value": "dist-z -1.83",
       "backtest": {
         "n": 49,
         "win_rate": 0.653,
@@ -6831,7 +6831,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -1.71",
+      "today_value": "dist-z -1.74",
       "backtest": {
         "n": 89,
         "win_rate": 0.629,
