@@ -318,7 +318,7 @@ def main(rewrite=False):
     for i, (sid, oosdate, name) in enumerate(watch, 1):
         time.sleep(0.5)                       # gentle pacing to avoid burst 429s
         try:
-            curve, _ = _backtest_resilient(sid, EARLY_START, asof)
+            curve, btstats = _backtest_resilient(sid, EARLY_START, asof)
         except Exception as e:
             print(f"[{i}/{len(watch)}] {name}: FAIL {type(e).__name__}: {str(e)[:80]}",
                   file=sys.stderr)
@@ -353,6 +353,8 @@ def main(rewrite=False):
             "oos_conf": conf, "oos_conf_rank": conf_rank, "sharpe_se": sharpe_se,
             "cagr_gap_pct": gap,
             **extra,
+            # turnover_x / fees_bps / loss_per_50k — already inside the returns above
+            **(btstats.get("_trading_cost") or {}),
         }
         rows.append(row)
         print(f"[{i}/{len(watch)}] {name}: OOS {out.get('oos_days') or out.get('n_days')}d "
