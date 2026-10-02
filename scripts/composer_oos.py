@@ -148,7 +148,42 @@ def backtest(sym_id: str, start: str, end: str) -> tuple[dict[str, float], dict]
     d = _request("POST", f"/api/v0.1/symphonies/{sym_id}/backtest", json=body)
     dvm = d.get("dvm_capital") or {}
     curve = dvm.get(sym_id) or (next(iter(dvm.values()), {}) if dvm else {})
-    return ({_to_date(k): float(v) for k, v in curve.items()}, d.get("stats") or {})
+    stats = dict(d.get("stats") or {})
+    stats["_trading_cost"] = trading_cost_fields(d.get("costs"), curve.values(), SLIPPAGE)
+    return ({_to_date(k): float(v) for k, v in curve.items()}, stats)
+
+
+# Live execution cost per $ traded, per side. Measured 2026-10-02 from 1,878
+# symphony-days of live returns vs zero-cost backtests (1.3-1.9 bps; Huber
+# 1.32, trimmed OLS ~1.8). Composer's 5 bps backtest default overstates it.
+LIVE_COST_BPS = 1.5
+COST_PER = 50_000
+
+
+def trading_cost_fields(costs: dict | None, capital, slippage: float = SLIPPAGE) -> dict:
+    """Turnover and the estimated yearly loss to trading per $50K invested,
+    from a backtest's cost totals — no extra API call.
+
+    Composer charges `slippage` on every dollar traded, so
+        traded $ (both sides) = costs.slippage / slippage
+        turnover (one-way, x/yr) = traded / 2 / sum(daily capital) * 252
+    i.e. the capital-weighted average over the backtest; it tracks a trailing
+    1-year figure within ~10% for the funded book. Loss per $50K =
+    (turnover x 2 sides x LIVE_COST_BPS + SEC/FINRA/CAT fees) on $50K.
+
+    This cost is already inside every reported return (live and backtest —
+    the backtests charge 5 bps, more than live), so read it as the hurdle the
+    logic must clear, not an extra loss."""
+    cap_sum = sum(float(v) for v in (capital or []))
+    if not costs or cap_sum <= 0 or not slippage:
+        return {}
+    one_way = float(costs.get("slippage") or 0) / slippage / 2 / cap_sum * 252
+    fee_rate = sum(float(costs.get(k) or 0) for k in ("reg_fee", "taf_fee", "cat_fee")) / cap_sum * 252
+    return {
+        "turnover_x": round(one_way, 1),
+        "fees_bps": round(fee_rate * 1e4, 1),
+        "loss_per_50k": round((one_way * 2 * LIVE_COST_BPS / 1e4 + fee_rate) * COST_PER),
+    }
 
 
 # ──────────────────────────────────────────────────────────────────────
