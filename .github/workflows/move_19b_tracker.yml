@@ -1,0 +1,49 @@
+# MOVE 19B Episode Tracker v1.0 - 2026-10-05
+# Place at .github/workflows/move_19b_tracker.yml and the script at
+# .github/workflows/move_19b_tracker.py. Uses the same secrets as Signal Monitor.
+# Stateless: no commit-back step needed.
+
+name: MOVE 19B Tracker
+
+on:
+  schedule:
+    # Evening check after ^MOVE prints: 22:30 UTC = 6:30 PM EDT / 5:30 PM EST
+    - cron: '30 22 * * 1-5'
+    # Exit-day morning reminder: 13:30 UTC = 9:30 AM EDT / 8:30 AM EST
+    - cron: '30 13 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Run mode'
+        required: false
+        default: 'status'
+        type: choice
+        options: [status, test, evening, morning]
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install yfinance pandas numpy pandas_market_calendars
+      - name: Determine run mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
+          elif [ "$(date -u +%H)" -lt "18" ]; then
+            echo "mode=morning" >> $GITHUB_OUTPUT
+          else
+            echo "mode=evening" >> $GITHUB_OUTPUT
+          fi
+      - name: Run tracker
+        env:
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
+          RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+          PHONE_EMAIL: ${{ secrets.PHONE_EMAIL }}
+        run: python .github/workflows/move_19b_tracker.py ${{ steps.mode.outputs.mode }}
