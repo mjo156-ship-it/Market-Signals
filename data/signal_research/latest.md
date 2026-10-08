@@ -1,6 +1,6 @@
 # Signal Research — 2026-10-08
 
-_Generated 2026-10-08T19:29:10+00:00 · 91 tickers · 0 firing · 11 approaching_
+_Generated 2026-10-08T20:22:13+00:00 · 91 tickers · 0 firing · 12 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -20,4 +20,5 @@ _No backtest-gated signals firing today._
 | 4+ up-day streak fade (short) | TAIL | short TAIL | manual_swing | 5d | 67% | +0.8% | +0.6pp | 36 |
 | Distance-from-50DMA z < -2 (long) | IWM | TNA | composer_ready | 5d | 63% | +0.4% | +0.1pp | 138 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
+| Distance-from-50DMA z < -2 (long) | DRN | DRN | composer_ready | 5d | 61% | +1.5% | +0.1pp | 62 |
 | Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |
