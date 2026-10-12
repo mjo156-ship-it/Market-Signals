@@ -1,24 +1,14 @@
 {
-  "generated_at_local": "2026-10-12T21:53:20.357965",
-  "generated_at_utc": "2026-10-12T21:53:20.357972Z",
+  "generated_at_local": "2026-10-12T22:19:19.151566",
+  "generated_at_utc": "2026-10-12T22:19:19.151573Z",
   "mode": "close",
   "summary": {
-    "total_alerts": 3,
-    "buy_count": 2,
+    "total_alerts": 1,
+    "buy_count": 0,
     "exit_count": 0,
     "warning_count": 1
   },
   "alerts": [
-    {
-      "title": "\ud83d\udfe2 IBS BUY: TQQQ 1.0x",
-      "message": "Gate IN (QQQ IBS 0.40, RSI 55, breadth 0) \u2192 buy TQQQ at 1.0x base",
-      "category": "buy"
-    },
-    {
-      "title": "\ud83d\udfe2 IBS BUY: TECL 1.0x",
-      "message": "Gate IN (XLK IBS 0.40, RSI 52, breadth 0) \u2192 buy TECL at 1.0x base",
-      "category": "buy"
-    },
     {
       "title": "\ud83d\udd35 MERGED TRIGGERS: L5_DEFAULT",
       "message": "Resolved branch: L5_DEFAULT -> target MNA + CTA (50/50)\n   (Composer executes this symphony automatically at 3:45 PM ET \u2014\n    this alert is state observation only, not a trade instruction.)\n\nBranch state (top-down, first match wins):\n   -      L1  LABU RSI=40.1 (needs <25)\n   -      L2A SPY 778.10/SMA200 720.14 | UPRO 155.46/SMA200 131.21 | UPRO SMA25 149.80\n   -      L2B QQQ 746.04/SMA200 671.51 | TQQQ 79.61/SMA200 64.22 | TQQQ SMA20 78.00\n   -      L2C GDXJ RSI=43.0 (needs <21)\n   -      L3  CPER 40.63/EMA9 40.05 | SPY 778.10/EMA9 774.26 | COPX 85.35/EMA9 85.08\n   -      L4  SPHB RSI=47.4 (needs >77) / XLP RSI=67.8 (needs <40)  [vestigial leg]\n          L5  default rotation by RSI(14): MNA 52.3, CTA 55.8, KMLM 61.6, DBMF 68.6 -> bottom-2\n\n\u26a0\ufe0f Near threshold (may flip before the 3:45 PM Composer rebalance):\n   \u2022 L3: SPY price +0.50% vs EMA9 (needs <)",
@@ -225,13 +215,13 @@
       "pct_above_sma200": -15.71
     },
     "BTC-USD": {
-      "price": 82632.89,
-      "rsi10": 46.3,
-      "rsi50": 56.4,
-      "sma200": 72049.32,
-      "sma50": 81039.56,
-      "ema21": 83126.25,
-      "pct_above_sma200": 14.69
+      "price": 82526.39,
+      "rsi10": 45.7,
+      "rsi50": 56.2,
+      "sma200": 72048.79,
+      "sma50": 81037.43,
+      "ema21": 83116.57,
+      "pct_above_sma200": 14.54
     },
     "AMD": {
       "price": 594.24,
