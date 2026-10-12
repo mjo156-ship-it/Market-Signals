@@ -1,35 +1,32 @@
 # 🏖️ Ocean Grove STR Opportunity Report
 
-**Week of 2026-09-28**  ·  Ocean Grove, NJ (Neptune Township, Monmouth County)  ·  generated 2026-09-28 18:35 UTC
+**Week of 2026-10-12**  ·  Ocean Grove, NJ (Neptune Township, Monmouth County)  ·  generated 2026-10-12 20:14 UTC
 
 > 📈 **STR revenue: built-in seasonal model** — STR revenue from the built-in seasonal model. Optionally drop AirDNA MarketMinder figures into data/ocean_grove/airdna_market.json to calibrate to real market data.
 
 ## Summary
 
-- **15** listings assessed
-- **9** can break even on an annual operating basis net of tax when **unlevered** (the asset covers operating costs after tax)
+- **16** listings assessed
+- **10** can break even on an annual operating basis net of tax when **unlevered** (the asset covers operating costs after tax)
 - **0** self-fund every year as **financed** at 25% down / 6.5% (strict sustained break-even)
-- **15** break even in the **purchase year** net of tax once the 100% bonus-depreciation benefit is applied
-- Median list price **$1,350,000** · median gross STR revenue **$74,316** · median NOI **$3,262** · median break-even down payment **83.6%**
-- **Week over week** (vs. 2026-09-21): 🆕 **1** new · 🔻 **1** price drop(s)
+- **16** break even in the **purchase year** net of tax once the 100% bonus-depreciation benefit is applied
+- Median list price **$1,105,556** · median gross STR revenue **$74,316** · median NOI **$7,853** · median break-even down payment **78.4%**
+- **Week over week** (vs. 2026-09-28): 🆕 **4** new · 🔻 **0** price drop(s)
 
 > **Read this first.** In this market, 100% bonus depreciation makes essentially every property cash-positive *in the purchase year* (a one-time tax windfall of 60% of price × your rate). The real question is what happens *after* that. The two columns that matter are **stabilized after-tax cash flow** (does it self-fund every year?) and the **break-even down payment** (how much equity it takes to get there). Lower list price / higher-yield units come closest.
 
-## 📆 Week-over-week changes — vs. week of 2026-09-21
+## 📆 Week-over-week changes — vs. week of 2026-09-28
 
-🆕 **1 new** · 🔻 **1 price drop(s)**
-
-**🔻 Price drops**
-
-| Property | Type | Prior | Now | Change |
-|---|---|--:|--:|--:|
-| 97 Asbury Ave, Ocean Grove, NJ 07756 | Multi-Family | $1,200,000 | $1,111,111 | -$88,889 (-7.4%) |
+🆕 **4 new** · 🔻 **0 price drop(s)**
 
 **🆕 New this week**
 
 | Property | Type | Bd | List |
 |---|---|--:|--:|
-| 107 Stockton Ave, Ocean Grove, NJ 07756 | Single Family | 3 | $899,000 |
+| 67 Mount Hermon Way, Ocean Grove, NJ 07756 | Single Family | 3 | $799,000 |
+| 89 Mount Hermon Way, Ocean Grove, NJ 07756 | Single Family | 4 | $1,100,000 |
+| 143 Heck Ave, Ocean Grove, NJ 07756 | Single Family | 2 | $799,000 |
+| 103 Central Ave, Ocean Grove, NJ 07756 | Single Family | 7 | $1,999,000 |
 
 ## 🚩 Break-even flags
 
@@ -39,9 +36,9 @@ _No listing self-funds every year at the assumed financing (25% down / 6.5%)._ B
 |---|---|--:|--:|--:|--:|--:|
 | 130 Heck Ave, Ocean Grove, NJ 07756 | Multi-Family | 2 | $600,000 | -$14,766 | 72.4% | 9 |
 | 66 Whitefield Ave, Apt 125, Ocean Grove, NJ 07756 | Condo | 1 | $485,000 | -$16,831 | 91.8% | 6 |
+| 67 Mount Hermon Way, Ocean Grove, NJ 07756 | Single Family | 3 | $799,000 | -$18,900 | 70.6% | 9 |
 | 70 Clark Ave, Ocean Grove, NJ 07756 | Single Family | 3 | $815,000 | -$19,864 | 71.9% | 9 |
 | 132 Mount Tabor Way, Ocean Grove, NJ 07756 | Single Family | 3 | $899,000 | -$24,930 | 78.4% | 8 |
-| 107 Stockton Ave, Ocean Grove, NJ 07756 | Single Family | 3 | $899,000 | -$24,930 | 78.4% | 8 |
 
 ## All listings — ranked by stabilized after-tax cash flow (financed)
 
@@ -49,19 +46,20 @@ _No listing self-funds every year at the assumed financing (25% down / 6.5%)._ B
 |--:|---|---|---|--:|--:|--:|--:|--:|--:|--:|--:|---|
 | 1 | 130 Heck Ave, Ocean Grove, NJ 07756 | — | 2/2 | $600,000 | $56,480 | $13,647 | 2.3% | -$20,485 | $118,434 | -$14,766 | 72.4% | 🟢 Break-even over hold (depreciation-funded) |
 | 2 | 66 Whitefield Ave, Apt 125, Ocean Grove, NJ 07756 | — | 1/1 | $485,000 | $41,617 | $3,262 | 0.7% | -$24,328 | $90,839 | -$16,831 | 91.8% | 🟢 Break-even over hold (depreciation-funded) |
-| 3 | 70 Clark Ave, Ocean Grove, NJ 07756 | — | 3/2 | $815,000 | $74,316 | $18,844 | 2.3% | -$27,518 | $161,066 | -$19,864 | 71.9% | 🟢 Break-even over hold (depreciation-funded) |
-| 4 | 132 Mount Tabor Way, Ocean Grove, NJ 07756 | — | 3/2 | $899,000 | $74,316 | $15,996 | 1.8% | -$35,145 | $174,648 | -$24,930 | 78.4% | 🟢 Break-even over hold (depreciation-funded) |
-| 5 | 107 Stockton Ave, Ocean Grove, NJ 07756 | 🆕 new | 3/1.5 | $899,000 | $74,316 | $15,996 | 1.8% | -$35,145 | $174,648 | -$24,930 | 78.4% | 🟢 Break-even over hold (depreciation-funded) |
-| 6 | 97 Asbury Ave, Ocean Grove, NJ 07756 | 🔻 -$88,889 (-7.4%) | 3/3 | $1,111,111 | $74,316 | $8,805 | 0.8% | -$54,402 | $208,947 | -$37,719 | 90.4% | 🟢 Break-even over hold (depreciation-funded) |
-| 7 | 79 Stockton Ave, Ocean Grove, NJ 07756 | — | 4/2.5 | $1,375,000 | $101,070 | $18,587 | 1.4% | -$59,631 | $263,417 | -$41,833 | 83.6% | 🟢 Break-even over hold (depreciation-funded) |
-| 8 | 49 Embury Ave, Ocean Grove, NJ 07756 | — | 4/2 | $1,399,999 | $101,070 | $17,739 | 1.3% | -$61,902 | $267,459 | -$43,340 | 84.6% | 🟢 Break-even over hold (depreciation-funded) |
-| 9 | 9 1/2 Embury Ave, Ocean Grove, NJ 07756 | — | 3/3 | $1,350,000 | $74,316 | $479 | 0.0% | -$76,317 | $247,433 | -$52,267 | 99.6% | 🟢 Break-even over hold (depreciation-funded) |
+| 3 | 67 Mount Hermon Way, Ocean Grove, NJ 07756 | 🆕 new | 3/3 | $799,000 | $74,316 | $19,386 | 2.4% | -$26,066 | $158,478 | -$18,900 | 70.6% | 🟢 Break-even over hold (depreciation-funded) |
+| 4 | 70 Clark Ave, Ocean Grove, NJ 07756 | — | 3/2 | $815,000 | $74,316 | $18,844 | 2.3% | -$27,518 | $161,066 | -$19,864 | 71.9% | 🟢 Break-even over hold (depreciation-funded) |
+| 5 | 132 Mount Tabor Way, Ocean Grove, NJ 07756 | — | 3/2 | $899,000 | $74,316 | $15,996 | 1.8% | -$35,145 | $174,648 | -$24,930 | 78.4% | 🟢 Break-even over hold (depreciation-funded) |
+| 6 | 107 Stockton Ave, Ocean Grove, NJ 07756 | — | 3/1.5 | $899,000 | $74,316 | $15,996 | 1.8% | -$35,145 | $174,648 | -$24,930 | 78.4% | 🟢 Break-even over hold (depreciation-funded) |
+| 7 | 89 Mount Hermon Way, Ocean Grove, NJ 07756 | 🆕 new | 4/2.5 | $1,100,000 | $101,070 | $27,909 | 2.5% | -$34,666 | $218,949 | -$25,251 | 69.2% | 🟢 Break-even over hold (depreciation-funded) |
+| 8 | 143 Heck Ave, Ocean Grove, NJ 07756 | 🆕 new | 2/1 | $799,000 | $56,480 | $6,901 | 0.9% | -$38,551 | $150,613 | -$26,765 | 89.5% | 🟢 Break-even over hold (depreciation-funded) |
+| 9 | 97 Asbury Ave, Ocean Grove, NJ 07756 | — | 3/3 | $1,111,111 | $74,316 | $8,805 | 0.8% | -$54,402 | $208,947 | -$37,719 | 90.4% | 🟢 Break-even over hold (depreciation-funded) |
 | 10 | 24 Lake Ave, Ocean Grove, NJ 07756 | — | 0/0 | $1,295,000 | $35,672 | -$24,480 | -1.9% | -$98,148 | $221,640 | -$65,850 | — | 🔴 Cash-flow negative |
-| 11 | 42 Ocean Pathway, Ocean Grove, NJ 07756 | — | 3/2.5 | $1,599,000 | $74,316 | -$7,734 | -0.5% | -$98,695 | $287,841 | -$67,137 | — | 🟢 Break-even over hold (depreciation-funded) |
-| 12 | 39 Pitman Ave, Ocean Grove, NJ 07756 | — | 4/4 | $2,500,000 | $101,070 | -$19,551 | -0.8% | -$161,766 | $445,333 | -$109,667 | — | 🟢 Break-even over hold (depreciation-funded) |
-| 13 | 30 Central Ave, Ocean Grove, NJ 07756 | — | 4/4.5 | $2,750,000 | $101,070 | -$28,026 | -1.0% | -$184,463 | $485,759 | -$124,741 | — | 🔴 Cash-flow negative |
-| 14 | 5 Abbott Ave, Ocean Grove, NJ 07756 | — | 20/21.5 | $3,150,000 | $130,796 | -$20,778 | -0.7% | -$199,969 | $563,549 | -$135,751 | — | 🟢 Break-even over hold (depreciation-funded) |
-| 15 | 26 Lake Ave, Ocean Grove, NJ 07756 | — | 4/4 | $2,995,000 | $101,070 | -$36,331 | -1.2% | -$206,705 | $525,376 | -$139,514 | — | 🔴 Cash-flow negative |
+| 11 | 103 Central Ave, Ocean Grove, NJ 07756 | 🆕 new | 7/5 | $1,999,000 | $130,796 | $18,241 | 0.9% | -$95,474 | $377,429 | -$66,349 | 88.9% | 🟢 Break-even over hold (depreciation-funded) |
+| 12 | 42 Ocean Pathway, Ocean Grove, NJ 07756 | — | 3/2.5 | $1,599,000 | $74,316 | -$7,734 | -0.5% | -$98,695 | $287,841 | -$67,137 | — | 🟢 Break-even over hold (depreciation-funded) |
+| 13 | 39 Pitman Ave, Ocean Grove, NJ 07756 | — | 4/4 | $2,500,000 | $101,070 | -$19,551 | -0.8% | -$161,766 | $445,333 | -$109,667 | — | 🟢 Break-even over hold (depreciation-funded) |
+| 14 | 30 Central Ave, Ocean Grove, NJ 07756 | — | 4/4.5 | $2,750,000 | $101,070 | -$28,026 | -1.0% | -$184,463 | $485,759 | -$124,741 | — | 🔴 Cash-flow negative |
+| 15 | 5 Abbott Ave, Ocean Grove, NJ 07756 | — | 20/21.5 | $3,150,000 | $130,796 | -$20,778 | -0.7% | -$199,969 | $563,549 | -$135,751 | — | 🟢 Break-even over hold (depreciation-funded) |
+| 16 | 26 Lake Ave, Ocean Grove, NJ 07756 | — | 4/4 | $2,995,000 | $101,070 | -$36,331 | -1.2% | -$206,705 | $525,376 | -$139,514 | — | 🔴 Cash-flow negative |
 
 ## Property detail
 
@@ -94,6 +92,21 @@ Condo · 1 bd / 1 ba · 795 sqft · list **$485,000**
 - **All-cash operating income:** pre-tax $3,262/yr → year-1 net of tax $109,725 → stabilized net of tax $2,055
 - **Cash-on-cash (pre-tax, financed):** -17.9% on $135,800 invested
 - **Break-even:** self-funds annually at **91.8% down**; as financed, the year-1 tax windfall funds ~**6 years** of operating losses before the cumulative position turns negative.
+
+### 67 Mount Hermon Way, Ocean Grove, NJ 07756 — 🟢 Break-even over hold (depreciation-funded)
+
+Single Family · 3 bd / 3 ba · 0 sqft · list **$799,000**  
+[listing](https://www.rentcast.io/property/67-Mount-Hermon-Way,-Ocean-Grove,-NJ-07756)
+
+- **Gross STR revenue:** $74,316/yr (peak $5,000/wk · basis: seasonal model)
+- **Operating expenses:** $54,930/yr (mgmt $11,147, tax $14,302, ins $4,794, maint $7,990, utils $4,800)
+- **NOI:** $19,386/yr · cap rate 2.4% · gross yield 9.3%
+- **Debt service:** $45,452/yr (loan $599,250 @ 6.5%, yr-1 interest $38,754)
+- **Bonus depreciation (yr 1):** $479,400 (building basis $479,400 @ 100%; land $319,600 not depreciated)
+- **Financed operating income:** pre-tax -$26,066/yr → year-1 net of tax **$158,478** (tax benefit $184,544) → stabilized net of tax **-$18,900**
+- **All-cash operating income:** pre-tax $19,386/yr → year-1 net of tax $189,591 → stabilized net of tax $12,213
+- **Cash-on-cash (pre-tax, financed):** -11.7% on $223,720 invested
+- **Break-even:** self-funds annually at **70.6% down**; as financed, the year-1 tax windfall funds ~**9 years** of operating losses before the cumulative position turns negative.
 
 ### 70 Clark Ave, Ocean Grove, NJ 07756 — 🟢 Break-even over hold (depreciation-funded)
 
@@ -140,6 +153,36 @@ Single Family · 3 bd / 1.5 ba · 1,482 sqft · list **$899,000**
 - **Cash-on-cash (pre-tax, financed):** -14.0% on $251,720 invested
 - **Break-even:** self-funds annually at **78.4% down**; as financed, the year-1 tax windfall funds ~**8 years** of operating losses before the cumulative position turns negative.
 
+### 89 Mount Hermon Way, Ocean Grove, NJ 07756 — 🟢 Break-even over hold (depreciation-funded)
+
+Single Family · 4 bd / 2.5 ba · 1,906 sqft · list **$1,100,000**  
+[listing](https://www.rentcast.io/property/89-Mount-Hermon-Way,-Ocean-Grove,-NJ-07756)
+
+- **Gross STR revenue:** $101,070/yr (peak $6,800/wk · basis: seasonal model)
+- **Operating expenses:** $73,161/yr (mgmt $15,160, tax $19,690, ins $6,600, maint $11,000, utils $4,800)
+- **NOI:** $27,909/yr · cap rate 2.5% · gross yield 9.2%
+- **Debt service:** $62,575/yr (loan $825,000 @ 6.5%, yr-1 interest $53,353)
+- **Bonus depreciation (yr 1):** $660,000 (building basis $660,000 @ 100%; land $440,000 not depreciated)
+- **Financed operating income:** pre-tax -$34,666/yr → year-1 net of tax **$218,949** (tax benefit $253,614) → stabilized net of tax **-$25,251**
+- **All-cash operating income:** pre-tax $27,909/yr → year-1 net of tax $261,783 → stabilized net of tax $17,583
+- **Cash-on-cash (pre-tax, financed):** -11.3% on $308,000 invested
+- **Break-even:** self-funds annually at **69.2% down**; as financed, the year-1 tax windfall funds ~**9 years** of operating losses before the cumulative position turns negative.
+
+### 143 Heck Ave, Ocean Grove, NJ 07756 — 🟢 Break-even over hold (depreciation-funded)
+
+Single Family · 2 bd / 1 ba · 875 sqft · list **$799,000**  
+[listing](https://www.rentcast.io/property/143-Heck-Ave,-Ocean-Grove,-NJ-07756)
+
+- **Gross STR revenue:** $56,480/yr (peak $3,800/wk · basis: seasonal model)
+- **Operating expenses:** $49,579/yr (mgmt $8,472, tax $14,302, ins $4,794, maint $7,990, utils $4,800)
+- **NOI:** $6,901/yr · cap rate 0.9% · gross yield 7.1%
+- **Debt service:** $45,452/yr (loan $599,250 @ 6.5%, yr-1 interest $38,754)
+- **Bonus depreciation (yr 1):** $479,400 (building basis $479,400 @ 100%; land $319,600 not depreciated)
+- **Financed operating income:** pre-tax -$38,551/yr → year-1 net of tax **$150,613** (tax benefit $189,164) → stabilized net of tax **-$26,765**
+- **All-cash operating income:** pre-tax $6,901/yr → year-1 net of tax $181,726 → stabilized net of tax $4,348
+- **Cash-on-cash (pre-tax, financed):** -17.2% on $223,720 invested
+- **Break-even:** self-funds annually at **89.5% down**; as financed, the year-1 tax windfall funds ~**6 years** of operating losses before the cumulative position turns negative.
+
 ### 97 Asbury Ave, Ocean Grove, NJ 07756 — 🟢 Break-even over hold (depreciation-funded)
 
 Multi-Family · 3 bd / 3 ba · 2,217 sqft · list **$1,111,111**  
@@ -155,51 +198,6 @@ Multi-Family · 3 bd / 3 ba · 2,217 sqft · list **$1,111,111**
 - **Cash-on-cash (pre-tax, financed):** -17.5% on $311,111 invested
 - **Break-even:** self-funds annually at **90.4% down**; as financed, the year-1 tax windfall funds ~**6 years** of operating losses before the cumulative position turns negative.
 
-### 79 Stockton Ave, Ocean Grove, NJ 07756 — 🟢 Break-even over hold (depreciation-funded)
-
-Single Family · 4 bd / 2.5 ba · 2,608 sqft · list **$1,375,000**  
-[listing](https://www.rentcast.io/property/79-Stockton-Ave,-Ocean-Grove,-NJ-07756)
-
-- **Gross STR revenue:** $101,070/yr (peak $6,800/wk · basis: seasonal model)
-- **Operating expenses:** $82,483/yr (mgmt $15,160, tax $24,612, ins $8,250, maint $13,750, utils $4,800)
-- **NOI:** $18,587/yr · cap rate 1.4% · gross yield 7.3%
-- **Debt service:** $78,218/yr (loan $1,031,250 @ 6.5%, yr-1 interest $66,692)
-- **Bonus depreciation (yr 1):** $825,000 (building basis $825,000 @ 100%; land $550,000 not depreciated)
-- **Financed operating income:** pre-tax -$59,631/yr → year-1 net of tax **$263,417** (tax benefit $323,049) → stabilized net of tax **-$41,833**
-- **All-cash operating income:** pre-tax $18,587/yr → year-1 net of tax $316,960 → stabilized net of tax $11,710
-- **Cash-on-cash (pre-tax, financed):** -15.5% on $385,000 invested
-- **Break-even:** self-funds annually at **83.6% down**; as financed, the year-1 tax windfall funds ~**7 years** of operating losses before the cumulative position turns negative.
-
-### 49 Embury Ave, Ocean Grove, NJ 07756 — 🟢 Break-even over hold (depreciation-funded)
-
-Single Family · 4 bd / 2 ba · 1,732 sqft · list **$1,399,999**  
-[listing](https://www.rentcast.io/property/49-Embury-Ave,-Ocean-Grove,-NJ-07756)
-
-- **Gross STR revenue:** $101,070/yr (peak $6,800/wk · basis: seasonal model)
-- **Operating expenses:** $83,331/yr (mgmt $15,160, tax $25,060, ins $8,400, maint $14,000, utils $4,800)
-- **NOI:** $17,739/yr · cap rate 1.3% · gross yield 7.2%
-- **Debt service:** $79,641/yr (loan $1,049,999 @ 6.5%, yr-1 interest $67,904)
-- **Bonus depreciation (yr 1):** $839,999 (building basis $839,999 @ 100%; land $560,000 not depreciated)
-- **Financed operating income:** pre-tax -$61,902/yr → year-1 net of tax **$267,459** (tax benefit $329,361) → stabilized net of tax **-$43,340**
-- **All-cash operating income:** pre-tax $17,739/yr → year-1 net of tax $321,975 → stabilized net of tax $11,176
-- **Cash-on-cash (pre-tax, financed):** -15.8% on $392,000 invested
-- **Break-even:** self-funds annually at **84.6% down**; as financed, the year-1 tax windfall funds ~**7 years** of operating losses before the cumulative position turns negative.
-
-### 9 1/2 Embury Ave, Ocean Grove, NJ 07756 — 🟢 Break-even over hold (depreciation-funded)
-
-Single Family · 3 bd / 3 ba · 1,105 sqft · list **$1,350,000**  
-[listing](https://www.rentcast.io/property/9-1-2-Embury-Ave,-Ocean-Grove,-NJ-07756)
-
-- **Gross STR revenue:** $74,316/yr (peak $5,000/wk · basis: seasonal model)
-- **Operating expenses:** $73,837/yr (mgmt $11,147, tax $24,165, ins $8,100, maint $13,500, utils $4,800, condo $228)
-- **NOI:** $479/yr · cap rate 0.0% · gross yield 5.5%
-- **Debt service:** $76,796/yr (loan $1,012,500 @ 6.5%, yr-1 interest $65,479)
-- **Bonus depreciation (yr 1):** $810,000 (building basis $810,000 @ 100%; land $540,000 not depreciated)
-- **Financed operating income:** pre-tax -$76,317/yr → year-1 net of tax **$247,433** (tax benefit $323,750) → stabilized net of tax **-$52,267**
-- **All-cash operating income:** pre-tax $479/yr → year-1 net of tax $300,002 → stabilized net of tax $302
-- **Cash-on-cash (pre-tax, financed):** -20.2% on $378,000 invested
-- **Break-even:** self-funds annually at **99.6% down**; as financed, the year-1 tax windfall funds ~**5 years** of operating losses before the cumulative position turns negative.
-
 ### 24 Lake Ave, Ocean Grove, NJ 07756 — 🔴 Cash-flow negative
 
 Land · 0 bd / 0 ba · 0 sqft · list **$1,295,000**  
@@ -214,6 +212,21 @@ Land · 0 bd / 0 ba · 0 sqft · list **$1,295,000**
 - **All-cash operating income:** pre-tax -$24,480/yr → year-1 net of tax $272,068 → stabilized net of tax -$15,422
 - **Cash-on-cash (pre-tax, financed):** -27.1% on $362,600 invested
 - **Break-even:** self-funds annually at **— down**; as financed, the year-1 tax windfall funds ~**4 years** of operating losses before the cumulative position turns negative.
+
+### 103 Central Ave, Ocean Grove, NJ 07756 — 🟢 Break-even over hold (depreciation-funded)
+
+Single Family · 7 bd / 5 ba · 3,239 sqft · list **$1,999,000**  
+[listing](https://www.rentcast.io/property/103-Central-Ave,-Ocean-Grove,-NJ-07756)
+
+- **Gross STR revenue:** $130,796/yr (peak $8,800/wk · basis: seasonal model)
+- **Operating expenses:** $112,555/yr (mgmt $19,619, tax $35,782, ins $11,994, maint $19,990, utils $4,800)
+- **NOI:** $18,241/yr · cap rate 0.9% · gross yield 6.5%
+- **Debt service:** $113,715/yr (loan $1,499,250 @ 6.5%, yr-1 interest $96,958)
+- **Bonus depreciation (yr 1):** $1,199,400 (building basis $1,199,400 @ 100%; land $799,600 not depreciated)
+- **Financed operating income:** pre-tax -$95,474/yr → year-1 net of tax **$377,429** (tax benefit $472,903) → stabilized net of tax **-$66,349**
+- **All-cash operating income:** pre-tax $18,241/yr → year-1 net of tax $455,270 → stabilized net of tax $11,492
+- **Cash-on-cash (pre-tax, financed):** -17.1% on $559,720 invested
+- **Break-even:** self-funds annually at **88.9% down**; as financed, the year-1 tax windfall funds ~**6 years** of operating losses before the cumulative position turns negative.
 
 ### 42 Ocean Pathway, Ocean Grove, NJ 07756 — 🟢 Break-even over hold (depreciation-funded)
 
