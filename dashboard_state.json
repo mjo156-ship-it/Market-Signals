@@ -1,6 +1,6 @@
 {
-  "generated_at_local": "2026-10-12T22:19:19.151566",
-  "generated_at_utc": "2026-10-12T22:19:19.151573Z",
+  "generated_at_local": "2026-10-13T01:54:27.148415",
+  "generated_at_utc": "2026-10-13T01:54:27.148438Z",
   "mode": "close",
   "summary": {
     "total_alerts": 1,
@@ -11,7 +11,7 @@
   "alerts": [
     {
       "title": "\ud83d\udd35 MERGED TRIGGERS: L5_DEFAULT",
-      "message": "Resolved branch: L5_DEFAULT -> target MNA + CTA (50/50)\n   (Composer executes this symphony automatically at 3:45 PM ET \u2014\n    this alert is state observation only, not a trade instruction.)\n\nBranch state (top-down, first match wins):\n   -      L1  LABU RSI=40.1 (needs <25)\n   -      L2A SPY 778.10/SMA200 720.14 | UPRO 155.46/SMA200 131.21 | UPRO SMA25 149.80\n   -      L2B QQQ 746.04/SMA200 671.51 | TQQQ 79.61/SMA200 64.22 | TQQQ SMA20 78.00\n   -      L2C GDXJ RSI=43.0 (needs <21)\n   -      L3  CPER 40.63/EMA9 40.05 | SPY 778.10/EMA9 774.26 | COPX 85.35/EMA9 85.08\n   -      L4  SPHB RSI=47.4 (needs >77) / XLP RSI=67.8 (needs <40)  [vestigial leg]\n          L5  default rotation by RSI(14): MNA 52.3, CTA 55.8, KMLM 61.6, DBMF 68.6 -> bottom-2\n\n\u26a0\ufe0f Near threshold (may flip before the 3:45 PM Composer rebalance):\n   \u2022 L3: SPY price +0.50% vs EMA9 (needs <)",
+      "message": "Resolved branch: L5_DEFAULT -> target MNA + CTA (50/50)\n   (Composer executes this symphony automatically at 3:45 PM ET \u2014\n    this alert is state observation only, not a trade instruction.)\n\nBranch state (top-down, first match wins):\n   -      L1  LABU RSI=40.1 (needs <25)\n   -      L2A SPY 778.10/SMA200 720.14 | UPRO 155.46/SMA200 131.21 | UPRO SMA25 149.80\n   -      L2B QQQ 746.04/SMA200 671.51 | TQQQ 79.61/SMA200 64.22 | TQQQ SMA20 78.00\n   -      L2C GDXJ RSI=43.0 (needs <21)\n   -      L3  CPER 40.63/EMA9 40.05 | SPY 778.10/EMA9 774.26 | COPX 85.35/EMA9 85.08\n   -      L4  SPHB RSI=47.4 (needs >77) / XLP RSI=67.8 (needs <40)  [vestigial leg]\n          L5  default rotation by RSI(14): MNA 52.2, CTA 55.8, KMLM 61.6, DBMF 68.6 -> bottom-2\n\n\u26a0\ufe0f Near threshold (may flip before the 3:45 PM Composer rebalance):\n   \u2022 L3: SPY price +0.50% vs EMA9 (needs <)",
       "category": "watch"
     }
   ],
@@ -215,13 +215,13 @@
       "pct_above_sma200": -15.71
     },
     "BTC-USD": {
-      "price": 82526.39,
-      "rsi10": 45.7,
-      "rsi50": 56.2,
-      "sma200": 72048.79,
-      "sma50": 81037.43,
-      "ema21": 83116.57,
-      "pct_above_sma200": 14.54
+      "price": 82261.53,
+      "rsi10": 44.5,
+      "rsi50": 55.9,
+      "sma200": 72047.46,
+      "sma50": 81032.13,
+      "ema21": 83092.49,
+      "pct_above_sma200": 14.18
     },
     "AMD": {
       "price": 594.24,
@@ -432,7 +432,7 @@
     },
     "MNA": {
       "price": 36.81,
-      "rsi10": 52.5,
+      "rsi10": 52.4,
       "rsi50": 52.8,
       "sma200": 36.42,
       "sma50": 36.76,
@@ -524,8 +524,8 @@
     },
     "breadth": 0,
     "ibs_sma3": {
-      "SPY": 0.5912,
-      "QQQ": 0.3993,
+      "SPY": 0.591,
+      "QQQ": 0.3991,
       "SMH": 0.2114,
       "XLK": 0.3968
     },
@@ -537,7 +537,7 @@
     },
     "equity_budget": 0.8,
     "faltering": {},
-    "as_of": "2026-10-12"
+    "as_of": "2026-10-13"
   },
   "merged_triggers": {
     "selected_branch": "L5_DEFAULT",
@@ -600,7 +600,7 @@
     "default_rotation_ranking": [
       {
         "ticker": "MNA",
-        "rsi14": 52.2709
+        "rsi14": 52.2134
       },
       {
         "ticker": "CTA",
