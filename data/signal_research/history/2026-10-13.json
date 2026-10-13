@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-10-13T20:28:13+00:00",
+  "generated_at_utc": "2026-10-13T23:41:44+00:00",
   "data_through": "2026-10-13",
   "universe_size": 91,
   "combinations_evaluated": 1284,
@@ -1466,7 +1466,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 165.22 vs 52w high 166.64",
+      "today_value": "close 165.18 vs 52w high 166.64",
       "backtest": {
         "n": 64,
         "win_rate": 0.672,

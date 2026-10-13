@@ -1,6 +1,6 @@
 {
-  "generated_at_local": "2026-10-13T20:26:44.709049",
-  "generated_at_utc": "2026-10-13T20:26:44.709058Z",
+  "generated_at_local": "2026-10-13T23:40:11.999860",
+  "generated_at_utc": "2026-10-13T23:40:11.999868Z",
   "mode": "close",
   "summary": {
     "total_alerts": 1,
@@ -11,7 +11,7 @@
   "alerts": [
     {
       "title": "\ud83d\udd35 MERGED TRIGGERS: L5_DEFAULT",
-      "message": "Resolved branch: L5_DEFAULT -> target MNA + CTA (50/50)\n   (Composer executes this symphony automatically at 3:45 PM ET \u2014\n    this alert is state observation only, not a trade instruction.)\n\nBranch state (top-down, first match wins):\n   -      L1  LABU RSI=33.0 (needs <25)\n   -      L2A SPY 778.01/SMA200 720.60 | UPRO 155.38/SMA200 131.39 | UPRO SMA25 150.05\n   -      L2B QQQ 743.57/SMA200 672.12 | TQQQ 78.81/SMA200 64.34 | TQQQ SMA20 78.55\n   -      L2C GDXJ RSI=39.0 (needs <21)\n   -      L3  CPER 40.45/EMA9 40.13 | SPY 778.01/EMA9 775.01 | COPX 84.40/EMA9 84.94\n   -      L4  SPHB RSI=45.9 (needs >77) / XLP RSI=65.1 (needs <40)  [vestigial leg]\n          L5  default rotation by RSI(14): MNA 45.2, CTA 58.7, KMLM 61.3, DBMF 66.0 -> bottom-2\n\n\u26a0\ufe0f Near threshold (may flip before the 3:45 PM Composer rebalance):\n   \u2022 L3: SPY price +0.39% vs EMA9 (needs <)\n   \u2022 L3: COPX price -0.64% vs EMA9 (needs >)",
+      "message": "Resolved branch: L5_DEFAULT -> target MNA + CTA (50/50)\n   (Composer executes this symphony automatically at 3:45 PM ET \u2014\n    this alert is state observation only, not a trade instruction.)\n\nBranch state (top-down, first match wins):\n   -      L1  LABU RSI=33.0 (needs <25)\n   -      L2A SPY 778.01/SMA200 720.60 | UPRO 155.40/SMA200 131.39 | UPRO SMA25 150.05\n   -      L2B QQQ 743.57/SMA200 672.12 | TQQQ 78.81/SMA200 64.34 | TQQQ SMA20 78.55\n   -      L2C GDXJ RSI=39.0 (needs <21)\n   -      L3  CPER 40.45/EMA9 40.13 | SPY 778.01/EMA9 775.01 | COPX 84.40/EMA9 84.94\n   -      L4  SPHB RSI=45.9 (needs >77) / XLP RSI=65.1 (needs <40)  [vestigial leg]\n          L5  default rotation by RSI(14): MNA 45.2, CTA 58.7, KMLM 61.3, DBMF 66.0 -> bottom-2\n\n\u26a0\ufe0f Near threshold (may flip before the 3:45 PM Composer rebalance):\n   \u2022 L3: SPY price +0.39% vs EMA9 (needs <)\n   \u2022 L3: COPX price -0.64% vs EMA9 (needs >)",
       "category": "watch"
     }
   ],
@@ -44,8 +44,8 @@
       "pct_above_sma200": 10.63
     },
     "IWM": {
-      "price": 276.71,
-      "rsi10": 34.0,
+      "price": 276.7,
+      "rsi10": 33.9,
       "rsi50": 45.7,
       "sma200": 276.18,
       "sma50": 290.28,
@@ -53,13 +53,13 @@
       "pct_above_sma200": 0.19
     },
     "XLK": {
-      "price": 196.24,
-      "rsi10": 51.8,
-      "rsi50": 56.0,
+      "price": 196.28,
+      "rsi10": 51.9,
+      "rsi50": 56.1,
       "sma200": 166.54,
       "sma50": 189.69,
       "ema21": 195.32,
-      "pct_above_sma200": 17.83
+      "pct_above_sma200": 17.85
     },
     "XLP": {
       "price": 84.19,
@@ -197,13 +197,13 @@
       "pct_above_sma200": -39.67
     },
     "EURL": {
-      "price": 41.06,
-      "rsi10": 39.0,
+      "price": 41.07,
+      "rsi10": 39.1,
       "rsi50": 45.2,
       "sma200": 44.89,
       "sma50": 47.14,
       "ema21": 42.94,
-      "pct_above_sma200": -8.52
+      "pct_above_sma200": -8.5
     },
     "INDL": {
       "price": 40.33,
@@ -215,13 +215,13 @@
       "pct_above_sma200": -12.5
     },
     "BTC-USD": {
-      "price": 83152.75,
+      "price": 83158.84,
       "rsi10": 49.9,
       "rsi50": 56.6,
-      "sma200": 72129.04,
-      "sma50": 81105.92,
-      "ema21": 83056.73,
-      "pct_above_sma200": 15.28
+      "sma200": 72129.07,
+      "sma50": 81106.04,
+      "ema21": 83057.29,
+      "pct_above_sma200": 15.29
     },
     "AMD": {
       "price": 605.53,
@@ -314,13 +314,13 @@
       "pct_above_sma200": -11.5
     },
     "UPRO": {
-      "price": 155.38,
+      "price": 155.4,
       "rsi10": 60.0,
       "rsi50": 55.0,
       "sma200": 131.39,
-      "sma50": 150.94,
+      "sma50": 150.95,
       "ema21": 151.92,
-      "pct_above_sma200": 18.26
+      "pct_above_sma200": 18.27
     },
     "VOOV": {
       "price": 225.91,
@@ -359,13 +359,13 @@
       "pct_above_sma200": 7.65
     },
     "XLE": {
-      "price": 67.17,
-      "rsi10": 75.6,
+      "price": 67.2,
+      "rsi10": 75.7,
       "rsi50": 60.7,
       "sma200": 56.63,
       "sma50": 62.72,
       "ema21": 63.87,
-      "pct_above_sma200": 18.6
+      "pct_above_sma200": 18.66
     },
     "XLF": {
       "price": 54.82,
@@ -527,13 +527,13 @@
       "SPY": 0.6613,
       "QQQ": 0.5893,
       "SMH": 0.4297,
-      "XLK": 0.627
+      "XLK": 0.6326
     },
     "rsi10": {
       "SPY": 61.8,
       "QQQ": 52.1,
       "SMH": 41.2,
-      "XLK": 51.8
+      "XLK": 51.9
     },
     "equity_budget": 0.8,
     "faltering": {},
@@ -560,9 +560,9 @@
         "active": false,
         "spy_price": 778.01,
         "spy_sma200": 720.6001,
-        "upro_price": 155.38,
-        "upro_sma200": 131.394,
-        "upro_sma25": 150.0514,
+        "upro_price": 155.4,
+        "upro_sma200": 131.3941,
+        "upro_sma25": 150.0522,
         "desc": "SPY>SMA200 & UPRO>SMA200 & SMA25(UPRO)<SMA200(UPRO)"
       },
       "L2B": {
