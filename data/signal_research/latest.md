@@ -1,6 +1,6 @@
 # Signal Research — 2026-10-13
 
-_Generated 2026-10-13T20:00:14+00:00 · 91 tickers · 2 firing · 13 approaching_
+_Generated 2026-10-13T20:28:13+00:00 · 91 tickers · 2 firing · 14 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -18,6 +18,7 @@ _Generated 2026-10-13T20:00:14+00:00 · 91 tickers · 2 firing · 13 approaching
 | Rotation: entered top-8 12-mo momentum (long) | FNGO | FNGO | manual_swing | 21d | 78% | +18.9% | +9.8pp | 68 |
 | Rotation: entered top-8 6-mo momentum (long) | CURE | CURE | manual_swing | 21d | 64% | +14.1% | +9.2pp | 74 |
 | Rotation: entered top-8 6-mo momentum (long) | AMD | AMD | manual_swing | 21d | 61% | +6.7% | +3.6pp | 137 |
+| Donchian 52-week breakout (long) | SVXY | SVXY | composer_ready | 20d | 66% | +6.2% | +2.1pp | 134 |
 | Donchian 52-week breakout (long) | DBC | DBC | composer_ready | 20d | 62% | +1.5% | +1.1pp | 84 |
 | Donchian 52-week breakout (long) | MSFT | MSFT | composer_ready | 20d | 66% | +4.0% | +0.6pp | 274 |
 | Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 349 |
