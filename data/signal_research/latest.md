@@ -1,14 +1,17 @@
 # Signal Research — 2026-10-16
 
-_Generated 2026-10-16T18:34:07+00:00 · 91 tickers · 3 firing · 9 approaching_
+_Generated 2026-10-16T22:43:02+00:00 · 91 tickers · 6 firing · 9 approaching_
 
 ## Firing today (backtest-gated)
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Capitulation-volume down day (long) | SPY | UPRO | manual_swing | 5d | 66% | +0.8% | +0.5pp | 203 |
+| Capitulation-volume down day (long) | XLY | XLY | manual_swing | 5d | 62% | +0.9% | +0.6pp | 140 |
 | Distance-from-50DMA z < -2 (long) | SVXY | SVXY | composer_ready | 5d | 61% | +1.7% | +0.7pp | 61 |
 | 4+ up-day streak fade (short) | TAIL | short TAIL | manual_swing | 5d | 67% | +0.8% | +0.6pp | 36 |
 | 4+ down-day streak (long) | DBMF | DBMF | composer_ready | 5d | 67% | +0.8% | +0.6pp | 27 |
+| Capitulation-volume down day (long) | FNGS | FNGS | manual_swing | 5d | 60% | +2.0% | +0.4pp | 30 |
 
 ## Approaching / primed (passed gate, just inside threshold)
 
