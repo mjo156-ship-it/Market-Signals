@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-15T23:38:56.203872+00:00",
+  "timestamp": "2026-10-16T23:25:34.913068+00:00",
   "mode": "append",
   "succeeded": [
     "AMD",
@@ -96,14 +96,7 @@
   ],
   "skipped": [],
   "failed": [],
-  "warnings": [
-    {
-      "ticker": "FNGO",
-      "yf_close": 158.571,
-      "snapshot_price": 156.59,
-      "pct_diff": 1.265
-    }
-  ],
+  "warnings": [],
   "counts": {
     "total": 91,
     "ok": 91,
