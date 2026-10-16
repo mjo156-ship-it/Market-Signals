@@ -1,6 +1,6 @@
 # Signal Research — 2026-10-16
 
-_Generated 2026-10-16T17:45:33+00:00 · 91 tickers · 3 firing · 9 approaching_
+_Generated 2026-10-16T18:34:07+00:00 · 91 tickers · 3 firing · 9 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -16,8 +16,8 @@ _Generated 2026-10-16T17:45:33+00:00 · 91 tickers · 3 firing · 9 approaching_
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Rotation: entered top-8 12-mo momentum (long) | SOXL | SOXL | manual_swing | 21d | 64% | +26.0% | +12.6pp | 111 |
 | Rotation: entered top-8 12-mo momentum (long) | FNGO | FNGO | manual_swing | 21d | 78% | +18.9% | +9.8pp | 68 |
-| Low-volatility (ATR) regime (long) | NVDA | NVDA | manual_swing | 20d | 62% | +11.4% | +2.5pp | 138 |
 | Donchian 52-week breakout (long) | DBC | DBC | composer_ready | 20d | 62% | +1.5% | +1.1pp | 84 |
+| Distance-from-50DMA z < -2 (long) | VT | VT | composer_ready | 5d | 66% | +0.6% | +0.4pp | 96 |
 | Distance-from-50DMA z < -2 (long) | IWM | TNA | composer_ready | 5d | 63% | +0.4% | +0.1pp | 138 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
 | Bollinger %B overbought (>1) fade (short) | TAIL | short TAIL | composer_ready | 5d | 72% | +0.3% | +0.2pp | 74 |
