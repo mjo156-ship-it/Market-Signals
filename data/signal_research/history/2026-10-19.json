@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-10-19T20:19:40+00:00",
+  "generated_at_utc": "2026-10-19T23:28:46+00:00",
   "data_through": "2026-10-19",
   "universe_size": 91,
   "combinations_evaluated": 1284,
@@ -601,7 +601,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +50.1%, rank #10",
+      "today_value": "12-mo momentum +50.3%, rank #10",
       "backtest": {
         "n": 68,
         "win_rate": 0.779,
