@@ -1,6 +1,6 @@
 # Signal Research — 2026-10-20
 
-_Generated 2026-10-20T18:09:42+00:00 · 91 tickers · 2 firing · 9 approaching_
+_Generated 2026-10-20T18:51:48+00:00 · 91 tickers · 2 firing · 8 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -17,7 +17,6 @@ _Generated 2026-10-20T18:09:42+00:00 · 91 tickers · 2 firing · 9 approaching_
 | Rotation: entered top-8 12-mo momentum (long) | FNGO | FNGO | manual_swing | 21d | 78% | +18.9% | +9.8pp | 68 |
 | 4+ down-day streak (long) | DUSL | DUSL | composer_ready | 5d | 61% | +2.6% | +1.9pp | 54 |
 | Donchian 52-week breakout (long) | DBC | DBC | composer_ready | 20d | 62% | +1.5% | +1.1pp | 84 |
-| Distance-from-50DMA z < -2 (long) | SVXY | SVXY | composer_ready | 5d | 61% | +1.7% | +0.7pp | 61 |
 | Bollinger %B oversold (<0) (long) | SPMO | SPMO | composer_ready | 5d | 63% | +0.9% | +0.5pp | 73 |
 | Bollinger squeeze breakout (long) | USO | USO | composer_ready | 10d | 60% | +0.4% | +0.5pp | 38 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
