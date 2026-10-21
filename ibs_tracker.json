@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-20T23:01:44.778779",
+  "updated_at": "2026-10-21T18:17:40.085269",
   "gate_state": {
     "SPY": "IN",
     "QQQ": "IN",
@@ -9,10 +9,10 @@
   "current_multiplier": {
     "SPY": 1.0,
     "TQQQ": 1.0,
-    "SOXL": 2.0,
+    "SOXL": 1.0,
     "TECL": 1.0
   },
-  "breadth_today": 1,
+  "breadth_today": 0,
   "baseline": {
     "gate_entry_SPY": {
       "n": 478,
@@ -581,10 +581,10 @@
       "own_rsi10": 74.9,
       "breadth": 0,
       "entry_price": 0.0,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": -4.104,
+      "fwd_5d": -11.411,
+      "fwd_10d": -12.505,
+      "matured": true
     },
     {
       "date": "2026-10-07",
@@ -596,10 +596,10 @@
       "own_rsi10": 73.9,
       "breadth": 0,
       "entry_price": 0.0,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": -10.364,
+      "fwd_5d": -30.489,
+      "fwd_10d": -34.396,
+      "matured": true
     },
     {
       "date": "2026-10-12",
@@ -761,17 +761,17 @@
       "status": "OK"
     },
     "gate_entry_TQQQ": {
-      "trailing_n": 7,
-      "trailing_wr": 0.7143,
-      "trailing_avg_1d": 0.941,
-      "brier": 0.2197,
+      "trailing_n": 8,
+      "trailing_wr": 0.625,
+      "trailing_avg_1d": 0.311,
+      "brier": 0.2356,
       "status": "OK"
     },
     "gate_entry_SOXL": {
-      "trailing_n": 7,
-      "trailing_wr": 0.5714,
-      "trailing_avg_1d": -1.659,
-      "brier": 0.245,
+      "trailing_n": 8,
+      "trailing_wr": 0.5,
+      "trailing_avg_1d": -2.747,
+      "brier": 0.2536,
       "status": "OK"
     },
     "gate_entry_TECL": {
