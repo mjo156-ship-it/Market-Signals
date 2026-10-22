@@ -1,6 +1,6 @@
 # Signal Research — 2026-10-22
 
-_Generated 2026-10-22T18:59:30+00:00 · 91 tickers · 6 firing · 9 approaching_
+_Generated 2026-10-22T23:05:18+00:00 · 91 tickers · 6 firing · 10 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -22,6 +22,7 @@ _Generated 2026-10-22T18:59:30+00:00 · 91 tickers · 6 firing · 9 approaching_
 | Distance-from-50DMA z < -2 (long) | EDC | EDC | composer_ready | 5d | 66% | +2.4% | +1.7pp | 61 |
 | 4+ down-day streak (long) | TMV | TMV | composer_ready | 5d | 60% | +1.0% | +0.9pp | 141 |
 | Donchian 52-week breakout (long) | DBC | DBC | composer_ready | 20d | 62% | +1.5% | +1.1pp | 84 |
+| Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 351 |
 | Distance-from-50DMA z < -2 (long) | VT | VT | composer_ready | 5d | 66% | +0.6% | +0.4pp | 96 |
 | Bollinger %B oversold (<0) (long) | NVDA | NVDA | composer_ready | 5d | 60% | +2.3% | +0.2pp | 165 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
