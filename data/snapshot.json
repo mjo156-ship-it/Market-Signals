@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated_utc": "2026-10-26T20:25:19.054954+00:00",
-    "generated_et": "2026-10-26 15:25:19 ET",
+    "generated_utc": "2026-10-26T23:34:00.828756+00:00",
+    "generated_et": "2026-10-26 18:34:00 ET",
     "ticker_count": 59,
     "version": "1.2"
   },
@@ -185,7 +185,7 @@
         "status": "INACTIVE"
       },
       "FNGO": {
-        "rsi10": 32.7,
+        "rsi10": 33.1,
         "below_sma200": false,
         "bear_ema": true,
         "status": "INACTIVE"
@@ -231,8 +231,8 @@
         "supply_shock": false
       },
       "weather": {
-        "current_temp": 56.8,
-        "temp_change_7d": 2.3,
+        "current_temp": 57.2,
+        "temp_change_7d": -0.3,
         "severe_cold": false,
         "is_winter": false
       },
@@ -317,10 +317,10 @@
       "ret_20d": -9.73
     },
     "IWM": {
-      "price": 276.97,
-      "change_pct": 0.44,
-      "rsi10": 48.7,
-      "ema9": 275.87,
+      "price": 276.99,
+      "change_pct": 0.45,
+      "rsi10": 48.8,
+      "ema9": 275.88,
       "ema20": 277.61,
       "ema50": 282.74,
       "ema200": 275.63,
@@ -330,10 +330,10 @@
       "above_sma200": false,
       "vs_sma200": -0.1,
       "vs_sma50": -3.0,
-      "ret_1d": 0.44,
+      "ret_1d": 0.45,
       "ret_5d": 2.1,
       "ret_10d": -0.33,
-      "ret_20d": -1.09
+      "ret_20d": -1.08
     },
     "XLP": {
       "price": 87.96,
@@ -508,7 +508,7 @@
     },
     "CORP": {
       "price": 93.09,
-      "change_pct": 0.08,
+      "change_pct": 0.07,
       "rsi10": 64.1,
       "ema9": 92.7,
       "ema20": 92.52,
@@ -520,7 +520,7 @@
       "above_sma200": false,
       "vs_sma200": -1.2,
       "vs_sma50": 0.1,
-      "ret_1d": 0.08,
+      "ret_1d": 0.07,
       "ret_5d": 0.89,
       "ret_10d": 1.23,
       "ret_20d": 1.54
@@ -906,23 +906,23 @@
       "ret_20d": 9.45
     },
     "FNGO": {
-      "price": 143.55,
-      "change_pct": 0.57,
-      "rsi10": 32.7,
-      "ema9": 149.59,
-      "ema20": 153.49,
+      "price": 143.71,
+      "change_pct": 0.68,
+      "rsi10": 33.1,
+      "ema9": 149.62,
+      "ema20": 153.51,
       "ema50": 152.05,
       "ema200": 134.46,
-      "sma50": 153.69,
+      "sma50": 153.7,
       "sma200": 127.18,
       "ema_cross": "BEAR",
       "above_sma200": true,
-      "vs_sma200": 12.9,
-      "vs_sma50": -6.6,
-      "ret_1d": 0.57,
-      "ret_5d": -6.39,
-      "ret_10d": -12.97,
-      "ret_20d": -8.56
+      "vs_sma200": 13.0,
+      "vs_sma50": -6.5,
+      "ret_1d": 0.68,
+      "ret_5d": -6.28,
+      "ret_10d": -12.87,
+      "ret_20d": -8.46
     },
     "HIBL": {
       "price": 81.85,
@@ -1001,9 +1001,9 @@
       "ret_20d": -46.62
     },
     "EURL": {
-      "price": 41.36,
-      "change_pct": 1.22,
-      "rsi10": 45.0,
+      "price": 41.32,
+      "change_pct": 1.14,
+      "rsi10": 44.8,
       "ema9": 41.6,
       "ema20": 42.16,
       "ema50": 44.08,
@@ -1012,12 +1012,12 @@
       "sma200": 44.87,
       "ema_cross": "BEAR",
       "above_sma200": false,
-      "vs_sma200": -7.8,
-      "vs_sma50": -9.0,
-      "ret_1d": 1.22,
-      "ret_5d": 0.17,
-      "ret_10d": 2.15,
-      "ret_20d": -7.18
+      "vs_sma200": -7.9,
+      "vs_sma50": -9.1,
+      "ret_1d": 1.14,
+      "ret_5d": 0.08,
+      "ret_10d": 2.06,
+      "ret_20d": -7.26
     },
     "INDL": {
       "price": 39.1,
@@ -1039,23 +1039,23 @@
       "ret_20d": -2.66
     },
     "BTC-USD": {
-      "price": 79800.1,
-      "change_pct": -0.28,
-      "rsi10": 36.4,
-      "ema9": 81148.69,
-      "ema20": 81828.83,
-      "ema50": 80726.17,
-      "ema200": 76302.7,
-      "sma50": 81793.72,
-      "sma200": 72985.5,
+      "price": 79925.32,
+      "change_pct": -0.12,
+      "rsi10": 37.0,
+      "ema9": 81173.73,
+      "ema20": 81840.76,
+      "ema50": 80731.08,
+      "ema200": 76303.95,
+      "sma50": 81796.23,
+      "sma200": 72986.13,
       "ema_cross": "BEAR",
       "above_sma200": true,
-      "vs_sma200": 9.3,
-      "vs_sma50": -2.4,
-      "ret_1d": -0.28,
-      "ret_5d": -5.01,
-      "ret_10d": -2.09,
-      "ret_20d": -6.73
+      "vs_sma200": 9.5,
+      "vs_sma50": -2.3,
+      "ret_1d": -0.12,
+      "ret_5d": -4.86,
+      "ret_10d": -1.93,
+      "ret_20d": -6.58
     },
     "AMD": {
       "price": 531.28,
