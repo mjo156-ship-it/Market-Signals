@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-10-26T20:15:46+00:00",
+  "generated_at_utc": "2026-10-26T23:40:25+00:00",
   "data_through": "2026-10-26",
   "universe_size": 91,
   "combinations_evaluated": 1284,
@@ -26,7 +26,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "6-mo momentum +60.6%, rank #4",
+      "today_value": "6-mo momentum +61.0%, rank #4",
       "backtest": {
         "n": 74,
         "win_rate": 0.635,
@@ -3150,7 +3150,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 110.34 vs 52w high 110.34",
+      "today_value": "close 110.33 vs 52w high 110.34",
       "backtest": {
         "n": 384,
         "win_rate": 0.951,
