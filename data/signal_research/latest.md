@@ -1,6 +1,6 @@
 # Signal Research — 2026-10-26
 
-_Generated 2026-10-26T19:36:27+00:00 · 91 tickers · 1 firing · 5 approaching_
+_Generated 2026-10-26T20:15:46+00:00 · 91 tickers · 1 firing · 6 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -14,6 +14,7 @@ _Generated 2026-10-26T19:36:27+00:00 · 91 tickers · 1 firing · 5 approaching_
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Donchian 52-week breakout (long) | DBC | DBC | composer_ready | 20d | 62% | +1.5% | +1.1pp | 84 |
 | Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 352 |
+| Distance-from-50DMA z < -2 (long) | VT | VT | composer_ready | 5d | 66% | +0.6% | +0.4pp | 96 |
 | Donchian 52-week breakout (long) | SHV | SHV | composer_ready | 20d | 95% | +0.2% | +0.1pp | 384 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
 | Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |
