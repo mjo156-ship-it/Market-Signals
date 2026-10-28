@@ -1,20 +1,21 @@
 # Signal Research — 2026-10-28
 
-_Generated 2026-10-28T19:11:09+00:00 · 91 tickers · 1 firing · 6 approaching_
+_Generated 2026-10-28T20:01:29+00:00 · 91 tickers · 2 firing · 6 approaching_
 
 ## Firing today (backtest-gated)
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Rotation: entered top-8 12-mo momentum (long) | SOXL | SOXL | manual_swing | 21d | 63% | +25.5% | +12.2pp | 112 |
 | 4+ down-day streak (long) | XLP | XLP | composer_ready | 5d | 62% | +0.4% | +0.2pp | 138 |
 
 ## Approaching / primed (passed gate, just inside threshold)
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Rotation: entered top-8 12-mo momentum (long) | SOXL | SOXL | manual_swing | 21d | 63% | +25.5% | +12.2pp | 112 |
 | Rotation: entered top-8 12-mo momentum (long) | TQQQ | TQQQ | manual_swing | 21d | 65% | +16.9% | +8.1pp | 115 |
 | Rotation: entered top-8 12-mo momentum (long) | FNGO | FNGO | manual_swing | 21d | 78% | +18.9% | +9.9pp | 68 |
 | Donchian 52-week breakout (long) | DBC | DBC | composer_ready | 20d | 62% | +1.5% | +1.1pp | 84 |
+| Donchian 52-week breakout (long) | DBMF | DBMF | composer_ready | 20d | 67% | +1.5% | +0.7pp | 33 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
 | Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |
