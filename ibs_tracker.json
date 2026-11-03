@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-03T02:05:13.303283",
+  "updated_at": "2026-11-03T20:18:22.593855",
   "gate_state": {
     "SPY": "IN",
     "QQQ": "IN",
@@ -746,10 +746,10 @@
       "own_rsi10": 29.5,
       "breadth": 1,
       "entry_price": 97.55000305175781,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 5.783,
+      "fwd_5d": 3.569,
+      "fwd_10d": -25.355,
+      "matured": true
     },
     {
       "date": "2026-10-22",
@@ -909,9 +909,9 @@
       "status": "OK"
     },
     "conviction_2.0x_single_SOXL": {
-      "trailing_n": 1,
+      "trailing_n": 2,
       "trailing_wr": 1.0,
-      "trailing_avg_1d": 24.659,
+      "trailing_avg_1d": 15.221,
       "brier": 0.1767,
       "status": "OK"
     },
