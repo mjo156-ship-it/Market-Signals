@@ -1,10 +1,12 @@
-# Signal Research — 2026-11-03
+# Signal Research — 2026-11-04
 
-_Generated 2026-11-03T20:45:26+00:00 · 91 tickers · 0 firing · 13 approaching_
+_Generated 2026-11-04T00:30:09+00:00 · 91 tickers · 1 firing · 12 approaching_
 
 ## Firing today (backtest-gated)
 
-_No backtest-gated signals firing today._
+| Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Rotation: entered top-8 12-mo momentum (long) | CURE | CURE | manual_swing | 21d | 61% | +5.2% | +0.2pp | 51 |
 
 ## Approaching / primed (passed gate, just inside threshold)
 
@@ -18,7 +20,6 @@ _No backtest-gated signals firing today._
 | Bollinger %B oversold (<0) (long) | VOO | VOO | composer_ready | 5d | 61% | +0.6% | +0.4pp | 118 |
 | Donchian 52-week breakout (long) | SHV | SHV | composer_ready | 20d | 95% | +0.2% | +0.1pp | 384 |
 | Rotation: entered top-8 3-mo momentum (long) | IAK | IAK | manual_swing | 21d | 64% | +1.1% | +0.3pp | 47 |
-| Rotation: entered top-8 12-mo momentum (long) | CURE | CURE | manual_swing | 21d | 61% | +5.2% | +0.2pp | 51 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
 | Bollinger %B oversold (<0) (long) | BIL | BIL | composer_ready | 5d | 64% | +0.0% | +0.1pp | 70 |
 | Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |
