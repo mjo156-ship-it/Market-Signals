@@ -1,6 +1,6 @@
 # Signal Research — 2026-11-05
 
-_Generated 2026-11-05T20:52:01+00:00 · 91 tickers · 23 firing · 8 approaching_
+_Generated 2026-11-05T21:19:32+00:00 · 91 tickers · 25 firing · 8 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -15,6 +15,7 @@ _Generated 2026-11-05T20:52:01+00:00 · 91 tickers · 23 firing · 8 approaching
 | Capitulation-volume down day (long) | SPY | UPRO | manual_swing | 5d | 65% | +0.8% | +0.5pp | 204 |
 | Capitulation-volume down day (long) | XLV | CURE | manual_swing | 5d | 63% | +0.8% | +0.6pp | 133 |
 | Capitulation-volume down day (long) | XLY | XLY | manual_swing | 5d | 62% | +0.9% | +0.6pp | 141 |
+| Capitulation-volume down day (long) | XLF | FAS | manual_swing | 5d | 62% | +0.8% | +0.6pp | 144 |
 | Capitulation-volume down day (long) | SPLV | SPLV | manual_swing | 5d | 68% | +1.0% | +0.8pp | 72 |
 | Capitulation-volume down day (long) | XLP | XLP | manual_swing | 5d | 68% | +0.7% | +0.5pp | 142 |
 | Capitulation-volume down day (long) | SPMO | SPMO | manual_swing | 5d | 66% | +1.4% | +1.0pp | 38 |
@@ -24,6 +25,7 @@ _Generated 2026-11-05T20:52:01+00:00 · 91 tickers · 23 firing · 8 approaching
 | Bollinger %B oversold (<0) (long) | VOO | VOO | composer_ready | 5d | 61% | +0.6% | +0.4pp | 118 |
 | Distance-from-50DMA z < -2 (long) | SPHB | SPHB | composer_ready | 5d | 60% | +0.8% | +0.4pp | 55 |
 | Bollinger %B oversold (<0) (long) | NVDA | NVDA | composer_ready | 5d | 60% | +2.3% | +0.2pp | 165 |
+| Capitulation-volume down day (long) | QQQE | QQQE | manual_swing | 5d | 64% | +0.7% | +0.3pp | 61 |
 | Bollinger %B overbought (>1) fade (short) | TAIL | short TAIL | composer_ready | 5d | 72% | +0.3% | +0.2pp | 75 |
 | Distance-from-50DMA z < -2 (long) | AVGO | AVGO | composer_ready | 5d | 71% | +1.9% | +0.1pp | 55 |
 | Distance-from-50DMA z > +2.5 fade (short) | TAIL | short TAIL | composer_ready | 5d | 63% | +0.3% | +0.1pp | 38 |
