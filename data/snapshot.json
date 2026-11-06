@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated_utc": "2026-11-06T21:26:28.372660+00:00",
-    "generated_et": "2026-11-06 16:26:28 ET",
+    "generated_utc": "2026-11-06T21:57:19.389171+00:00",
+    "generated_et": "2026-11-06 16:57:19 ET",
     "ticker_count": 59,
     "version": "1.2"
   },
@@ -185,7 +185,7 @@
         "status": "ACTIVE"
       },
       "FNGO": {
-        "rsi10": 28.5,
+        "rsi10": 27.0,
         "below_sma200": true,
         "bear_ema": true,
         "status": "ACTIVE"
@@ -214,7 +214,7 @@
         "gain_7d": -1.9,
         "signal": "ACTIVE",
         "reasoning": [
-          "Winter + RSI 36.3 < 50 + 7d temp drop -17.6\u00b0F \u2192 BUY BOIL"
+          "Winter + RSI 36.3 < 50 + 7d temp drop -18.0\u00b0F \u2192 BUY BOIL"
         ]
       },
       "kold": {
@@ -233,8 +233,8 @@
         "supply_shock": false
       },
       "weather": {
-        "current_temp": 64.0,
-        "temp_change_7d": -17.6,
+        "current_temp": 64.5,
+        "temp_change_7d": -18.0,
         "severe_cold": false,
         "is_winter": true
       },
@@ -265,10 +265,10 @@
   },
   "indicators": {
     "SPY": {
-      "price": 735.36,
-      "change_pct": 0.32,
+      "price": 735.29,
+      "change_pct": 0.31,
       "rsi10": 32.7,
-      "ema9": 752.4,
+      "ema9": 752.39,
       "ema20": 759.59,
       "ema50": 762.16,
       "ema200": 731.23,
@@ -278,10 +278,10 @@
       "above_sma200": true,
       "vs_sma200": 1.1,
       "vs_sma50": -3.9,
-      "ret_1d": 0.32,
-      "ret_5d": -2.69,
-      "ret_10d": -3.24,
-      "ret_20d": -5.55
+      "ret_1d": 0.31,
+      "ret_5d": -2.7,
+      "ret_10d": -3.25,
+      "ret_20d": -5.56
     },
     "QQQ": {
       "price": 656.1,
@@ -322,10 +322,10 @@
       "ret_20d": -23.1
     },
     "IWM": {
-      "price": 273.64,
-      "change_pct": 0.98,
-      "rsi10": 42.3,
-      "ema9": 277.38,
+      "price": 273.67,
+      "change_pct": 0.99,
+      "rsi10": 42.4,
+      "ema9": 277.39,
       "ema20": 278.13,
       "ema50": 281.58,
       "ema200": 276.02,
@@ -335,10 +335,10 @@
       "above_sma200": false,
       "vs_sma200": -1.6,
       "vs_sma50": -2.9,
-      "ret_1d": 0.98,
-      "ret_5d": -2.04,
-      "ret_10d": -0.77,
-      "ret_20d": -1.9
+      "ret_1d": 0.99,
+      "ret_5d": -2.03,
+      "ret_10d": -0.75,
+      "ret_20d": -1.89
     },
     "XLP": {
       "price": 90.08,
@@ -436,11 +436,11 @@
       "ret_20d": -5.32
     },
     "GLD": {
-      "price": 372.58,
-      "change_pct": -0.77,
+      "price": 372.52,
+      "change_pct": -0.79,
       "rsi10": 50.2,
-      "ema9": 369.69,
-      "ema20": 372.72,
+      "ema9": 369.68,
+      "ema20": 372.71,
       "ema50": 380.92,
       "ema200": 390.84,
       "sma50": 384.96,
@@ -449,10 +449,10 @@
       "above_sma200": false,
       "vs_sma200": -9.4,
       "vs_sma50": -3.2,
-      "ret_1d": -0.77,
-      "ret_5d": 4.72,
-      "ret_10d": 1.63,
-      "ret_20d": -3.12
+      "ret_1d": -0.79,
+      "ret_5d": 4.71,
+      "ret_10d": 1.61,
+      "ret_20d": -3.14
     },
     "TLT": {
       "price": 81.92,
@@ -911,23 +911,23 @@
       "ret_20d": 16.13
     },
     "FNGO": {
-      "price": 121.68,
-      "change_pct": 1.85,
-      "rsi10": 28.5,
-      "ema9": 131.99,
-      "ema20": 140.48,
-      "ema50": 146.23,
-      "ema200": 134.43,
-      "sma50": 151.32,
+      "price": 120.72,
+      "change_pct": 1.05,
+      "rsi10": 27.0,
+      "ema9": 131.8,
+      "ema20": 140.39,
+      "ema50": 146.2,
+      "ema200": 134.42,
+      "sma50": 151.3,
       "sma200": 128.16,
       "ema_cross": "BEAR",
       "above_sma200": false,
-      "vs_sma200": -5.1,
-      "vs_sma50": -19.6,
-      "ret_1d": 1.85,
-      "ret_5d": -8.04,
-      "ret_10d": -14.75,
-      "ret_20d": -26.48
+      "vs_sma200": -5.8,
+      "vs_sma50": -20.2,
+      "ret_1d": 1.05,
+      "ret_5d": -8.76,
+      "ret_10d": -15.42,
+      "ret_20d": -27.06
     },
     "HIBL": {
       "price": 62.7,
@@ -1044,23 +1044,23 @@
       "ret_20d": 21.32
     },
     "BTC-USD": {
-      "price": 75703.19,
-      "change_pct": -0.31,
-      "rsi10": 36.5,
-      "ema9": 77711.27,
-      "ema20": 79102.65,
-      "ema50": 79736.85,
-      "ema200": 76490.82,
-      "sma50": 81974.01,
-      "sma200": 73190.59,
+      "price": 75798.68,
+      "change_pct": -0.19,
+      "rsi10": 36.8,
+      "ema9": 77730.37,
+      "ema20": 79111.74,
+      "ema50": 79740.6,
+      "ema200": 76491.77,
+      "sma50": 81975.92,
+      "sma200": 73191.06,
       "ema_cross": "BEAR",
       "above_sma200": true,
-      "vs_sma200": 3.4,
-      "vs_sma50": -7.6,
-      "ret_1d": -0.31,
-      "ret_5d": -3.25,
-      "ret_10d": -6.31,
-      "ret_20d": -6.98
+      "vs_sma200": 3.6,
+      "vs_sma50": -7.5,
+      "ret_1d": -0.19,
+      "ret_5d": -3.13,
+      "ret_10d": -6.2,
+      "ret_20d": -6.86
     },
     "AMD": {
       "price": 449.04,
