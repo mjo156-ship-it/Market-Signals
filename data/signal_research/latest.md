@@ -1,6 +1,6 @@
-# Signal Research — 2026-11-06
+# Signal Research — 2026-11-07
 
-_Generated 2026-11-06T20:41:53+00:00 · 91 tickers · 0 firing · 10 approaching_
+_Generated 2026-11-07T00:02:03+00:00 · 91 tickers · 0 firing · 10 approaching_
 
 ## Firing today (backtest-gated)
 
@@ -12,11 +12,11 @@ _No backtest-gated signals firing today._
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Rotation: entered top-8 12-mo momentum (long) | TMV | TMV | manual_swing | 21d | 67% | +3.7% | +3.5pp | 30 |
 | Distance-from-50DMA z < -2 (long) | EDC | EDC | composer_ready | 5d | 66% | +2.4% | +1.7pp | 61 |
+| Parabolic extension (>25% over 50DMA) fade (short) | VIXY | short VIXY | manual_swing | 10d | 73% | +4.2% | +1.3pp | 26 |
 | Distance-from-50DMA z < -2 (long) | XLE | ERX | composer_ready | 5d | 61% | +1.0% | +0.7pp | 93 |
 | Rotation: entered top-8 12-mo momentum (long) | MSFT | MSFT | manual_swing | 21d | 62% | +4.1% | +0.5pp | 110 |
 | Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.1% | +0.2pp | 354 |
 | Donchian 52-week breakout (long) | SHV | SHV | composer_ready | 20d | 95% | +0.2% | +0.1pp | 385 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
-| Bollinger %B overbought (>1) fade (short) | TAIL | short TAIL | composer_ready | 5d | 71% | +0.3% | +0.1pp | 76 |
 | Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |
 | Bollinger %B oversold (<0) (long) | DBMF | DBMF | composer_ready | 5d | 60% | +0.2% | +0.0pp | 35 |
