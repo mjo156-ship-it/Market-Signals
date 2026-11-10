@@ -1,6 +1,6 @@
 {
-  "generated_at_local": "2026-11-09T23:39:45.149506",
-  "generated_at_utc": "2026-11-09T23:39:45.149516Z",
+  "generated_at_local": "2026-11-10T02:36:54.013534",
+  "generated_at_utc": "2026-11-10T02:36:54.013543Z",
   "mode": "close",
   "summary": {
     "total_alerts": 3,
@@ -225,13 +225,13 @@
       "pct_above_sma200": 5.82
     },
     "BTC-USD": {
-      "price": 75099.88,
-      "rsi10": 36.1,
-      "rsi50": 47.6,
-      "sma200": 73153.84,
-      "sma50": 81617.97,
-      "ema21": 78184.62,
-      "pct_above_sma200": 2.66
+      "price": 74741.89,
+      "rsi10": 34.1,
+      "rsi50": 47.2,
+      "sma200": 73152.05,
+      "sma50": 81610.81,
+      "ema21": 78152.08,
+      "pct_above_sma200": 2.17
     },
     "AMD": {
       "price": 508.58,
@@ -534,10 +534,10 @@
     },
     "breadth": 0,
     "ibs_sma3": {
-      "SPY": 0.3038,
-      "QQQ": 0.3604,
+      "SPY": 0.304,
+      "QQQ": 0.3491,
       "SMH": 0.4415,
-      "XLK": 0.3811
+      "XLK": 0.3812
     },
     "rsi10": {
       "SPY": 46.2,
@@ -549,7 +549,7 @@
     "faltering": {
       "gate_entry_TQQQ": "FALTERING"
     },
-    "as_of": "2026-11-09"
+    "as_of": "2026-11-10"
   },
   "merged_triggers": {
     "selected_branch": "L5_DEFAULT",
