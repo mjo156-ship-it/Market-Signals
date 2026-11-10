@@ -298,6 +298,22 @@ def per_ticker_candidates(df: pd.DataFrame):
 # Run
 # ---------------------------------------------------------------------------
 
+SPLIT_JUMP_MAX = 0.40      # a close-to-close move this large ON a split ex-date is an adjustment error
+EXCLUDED: list = []        # tickers the last _load_panel() left out, with why
+
+
+def split_day_jumps(close: pd.Series, split_dates) -> list:
+    """[(date, return)] for split ex-dates on which the adjusted close moves by
+    more than SPLIT_JUMP_MAX in one session."""
+    ret = close.astype(float).pct_change()
+    out = []
+    for d in split_dates:
+        d = pd.Timestamp(d)
+        if d in ret.index and pd.notna(ret.loc[d]) and abs(ret.loc[d]) > SPLIT_JUMP_MAX:
+            out.append((d, float(ret.loc[d])))
+    return out
+
+
 def _load_panel():
     """Long adjusted frame -> {ticker: df(open,high,low,close,volume) by date}."""
     tickers = ps._resolve_universe(None)
@@ -305,11 +321,24 @@ def _load_panel():
     if long is None or len(long) == 0:
         return {}, None
     long = long.sort_values(["ticker", "date"])
+    acts = ps.read_actions()
+    splits = acts[acts["type"] == "split"] if len(acts) else acts
     by = {}
+    EXCLUDED.clear()
     for t, g in long.groupby("ticker"):
         g = g.set_index("date")[["open", "high", "low", "close", "volume"]]
-        if len(g) >= MIN_HISTORY_BARS:
-            by[t] = g
+        if len(g) < MIN_HISTORY_BARS:
+            continue
+        bad = split_day_jumps(g["close"], splits[splits["ticker"] == t]["date"] if len(splits) else [])
+        if bad:
+            # An adjustment error, not a market move: backtests on this series
+            # would count a phantom return (SOXL "+1631% in 21 days").
+            EXCLUDED.append({"ticker": t, "reason": "price jump on a split date",
+                             "dates": [str(d.date()) for d, _ in bad],
+                             "jump_pct": [round(100 * r, 1) for _, r in bad]})
+            _log(f"[research] EXCLUDED {t}: jump on split date {EXCLUDED[-1]['dates']}")
+            continue
+        by[t] = g
     data_through = long["date"].max()
     return by, data_through
 
@@ -435,6 +464,7 @@ def run_signal_research(write: bool = True) -> dict:
         "generated_at_utc": _now_iso(),
         "data_through": str(data_through.date()),
         "universe_size": len(by),
+        "excluded_tickers": list(EXCLUDED),
         "combinations_evaluated": combinations_evaluated,
         "params": {"min_sample": MIN_SAMPLE, "win_rate_min": WIN_RATE_MIN},
         "summary": {
