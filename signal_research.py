@@ -66,6 +66,31 @@ MIN_SAMPLE = 25          # minimum historical fires to trust a signal
 WIN_RATE_MIN = 0.60      # historical hit-rate floor (for long; symmetric for short)
 MIN_HISTORY_BARS = 300   # skip tickers without enough history to backtest
 
+# Cash-proxy exclusion (added 2026-08-26).
+# ---------------------------------------------------------------------------
+# T-bill / ultra-short instruments (BIL, SHV, and the wider SGOV/USFR/ICSH/JPST
+# class) are monotone yield accruers, not tradeable price series. BIL sat at a
+# 52-week high on 66-77% of all days with a 5-year max drawdown of -0.08%, so
+# "Donchian 52-week breakout" on it fires nearly every day and "wins" nearly
+# always. That produced the only CANDIDATE verdicts the validation battery has
+# ever issued (8 of them, all BIL) on a mean return of +0.26% per 20 trading
+# days -- i.e. the T-bill yield, scored as alpha against a generic ~60%
+# baseline. The huge t-stat came from near-zero variance, not a real effect.
+#
+# Filtering structurally on realized volatility rather than by ticker name so
+# the whole class is covered as new funds appear. Measured over the trailing
+# ~3y on the live 90-ticker universe, the separation is ~7x and unambiguous:
+#     BIL 0.23% | SHV 0.24%  <-- cash proxies
+#     ---- 1.0% floor ----
+#     SHY 1.63% | MNA 4.72% | HYG 5.08% | ... | median 30.1%
+# Nothing legitimate sits near the line, so this is robust to drift. Excluded
+# tickers are reported in the payload (`excluded_tickers`), never dropped
+# silently, and shrinking the universe also shrinks `combinations_evaluated`,
+# which is the multiple-testing denominator every surviving signal is
+# corrected against.
+MIN_ANNUAL_VOL_PCT = 1.0   # annualized stdev floor; below this = cash proxy
+VOL_WINDOW_BARS = 756      # ~3 trading years
+
 # Suggested leveraged execution proxy (display only; backtest uses the base ETF
 # for a longer, cleaner series).
 LEVERAGE_PROXY = {
@@ -298,20 +323,45 @@ def per_ticker_candidates(df: pd.DataFrame):
 # Run
 # ---------------------------------------------------------------------------
 
+def _annualized_vol_pct(close):
+    """Annualized stdev of daily returns over the trailing VOL_WINDOW_BARS, in
+    percent. Returns None if it cannot be computed."""
+    try:
+        r = close.iloc[-VOL_WINDOW_BARS:].pct_change().dropna()
+        if len(r) < 60:
+            return None
+        v = float(r.std()) * (252 ** 0.5) * 100.0
+        return None if v != v else v
+    except Exception:
+        return None
+
+
 def _load_panel():
-    """Long adjusted frame -> {ticker: df(open,high,low,close,volume) by date}."""
+    """Long adjusted frame -> {ticker: df(open,high,low,close,volume) by date}.
+
+    Also drops cash proxies (see MIN_ANNUAL_VOL_PCT). Returns
+    (by, data_through, excluded) where `excluded` is a list of
+    {ticker, ann_vol_pct} so the drop is auditable rather than silent.
+    """
     tickers = ps._resolve_universe(None)
     long = ps.get_prices(tickers, adjusted=True, layout="long")
     if long is None or len(long) == 0:
-        return {}, None
+        return {}, None, []
     long = long.sort_values(["ticker", "date"])
     by = {}
+    excluded = []
     for t, g in long.groupby("ticker"):
         g = g.set_index("date")[["open", "high", "low", "close", "volume"]]
-        if len(g) >= MIN_HISTORY_BARS:
-            by[t] = g
+        if len(g) < MIN_HISTORY_BARS:
+            continue
+        vol = _annualized_vol_pct(g["close"])
+        if vol is not None and vol < MIN_ANNUAL_VOL_PCT:
+            excluded.append({"ticker": t, "ann_vol_pct": round(vol, 3)})
+            continue
+        by[t] = g
+    excluded.sort(key=lambda d: d["ticker"])
     data_through = long["date"].max()
-    return by, data_through
+    return by, data_through, excluded
 
 
 def _result(name, family, mode, direction, ticker, horizon, value, bt) -> dict:
@@ -356,11 +406,15 @@ def _evaluate(name, family, mode, direction, ticker, horizon, entry, approaching
 
 
 def run_signal_research(write: bool = True) -> dict:
-    by, data_through = _load_panel()
+    by, data_through, excluded = _load_panel()
     if not by:
         _log("[research] price store empty — nothing to scan")
         return {"results": [], "data_through": None}
     _log(f"[research] scanning {len(by)} tickers, data through {data_through.date()}")
+    if excluded:
+        _log("[research] excluded as cash proxies "
+             f"(ann vol < {MIN_ANNUAL_VOL_PCT}%): "
+             + ", ".join(f"{e['ticker']} {e['ann_vol_pct']:.2f}%" for e in excluded))
 
     results, watchlist = [], []
 
@@ -436,7 +490,12 @@ def run_signal_research(write: bool = True) -> dict:
         "data_through": str(data_through.date()),
         "universe_size": len(by),
         "combinations_evaluated": combinations_evaluated,
-        "params": {"min_sample": MIN_SAMPLE, "win_rate_min": WIN_RATE_MIN},
+        "params": {"min_sample": MIN_SAMPLE, "win_rate_min": WIN_RATE_MIN,
+                   "min_annual_vol_pct": MIN_ANNUAL_VOL_PCT},
+        # Cash proxies dropped before scanning — reported, never silent. This
+        # also shrinks `combinations_evaluated` above, so M is not spent on
+        # instruments that cannot produce a real signal.
+        "excluded_tickers": excluded,
         "summary": {
             "n_results": len(results),
             "n_watchlist": len(watchlist),
