@@ -298,18 +298,24 @@ def per_ticker_candidates(df: pd.DataFrame):
 # Run
 # ---------------------------------------------------------------------------
 
-SPLIT_JUMP_MAX = 0.40      # a close-to-close move this large ON a split ex-date is an adjustment error
+SPLIT_JUMP_TOL = 0.25      # one-session move within 25% (log) of the split ratio = adjustment error
 EXCLUDED: list = []        # tickers the last _load_panel() left out, with why
 
 
-def split_day_jumps(close: pd.Series, split_dates) -> list:
-    """[(date, return)] for split ex-dates on which the adjusted close moves by
-    more than SPLIT_JUMP_MAX in one session."""
+def split_day_jumps(close: pd.Series, splits) -> list:
+    """[(date, return)] for splits on whose ex-date the adjusted close moves by
+    about the split ratio (or its inverse) in one session: the split was applied
+    twice or not at all. A real crash on an ex-date (UCO, 2020-04-21) does not
+    match the ratio and is left alone. `splits`: frame with date, value."""
+    import math
     ret = close.astype(float).pct_change()
     out = []
-    for d in split_dates:
-        d = pd.Timestamp(d)
-        if d in ret.index and pd.notna(ret.loc[d]) and abs(ret.loc[d]) > SPLIT_JUMP_MAX:
+    for _, a in (splits.iterrows() if splits is not None and len(splits) else []):
+        d, ratio = pd.Timestamp(a["date"]), float(a["value"])
+        if ratio <= 0 or abs(math.log(ratio)) < 0.3 or d not in ret.index or pd.isna(ret.loc[d]):
+            continue
+        move = math.log(1 + float(ret.loc[d])) if ret.loc[d] > -1 else None
+        if move is not None and min(abs(move - math.log(ratio)), abs(move + math.log(ratio))) < SPLIT_JUMP_TOL:
             out.append((d, float(ret.loc[d])))
     return out
 
@@ -329,7 +335,7 @@ def _load_panel():
         g = g.set_index("date")[["open", "high", "low", "close", "volume"]]
         if len(g) < MIN_HISTORY_BARS:
             continue
-        bad = split_day_jumps(g["close"], splits[splits["ticker"] == t]["date"] if len(splits) else [])
+        bad = split_day_jumps(g["close"], splits[splits["ticker"] == t] if len(splits) else None)
         if bad:
             # An adjustment error, not a market move: backtests on this series
             # would count a phantom return (SOXL "+1631% in 21 days").
