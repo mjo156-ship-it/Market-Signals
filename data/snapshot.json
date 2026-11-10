@@ -1,7 +1,7 @@
 {
   "meta": {
-    "generated_utc": "2026-11-09T23:46:01.951274+00:00",
-    "generated_et": "2026-11-09 18:46:01 ET",
+    "generated_utc": "2026-11-10T03:06:54.031708+00:00",
+    "generated_et": "2026-11-09 22:06:54 ET",
     "ticker_count": 59,
     "version": "1.2"
   },
@@ -58,7 +58,7 @@
         "active": false
       },
       "SPY_RSI_lt_CORP_RSI": {
-        "value": -16.4,
+        "value": -16.5,
         "threshold": 0,
         "active": true
       },
@@ -231,8 +231,8 @@
         "supply_shock": false
       },
       "weather": {
-        "current_temp": 51.8,
-        "temp_change_7d": -8.3,
+        "current_temp": 52.6,
+        "temp_change_7d": -9.2,
         "severe_cold": false,
         "is_winter": true
       },
@@ -255,7 +255,7 @@
       }
     },
     "active_alerts": [
-      "\ud83d\udfe2 RISK-ON: SPY RSI(46.2) < CORP RSI(62.6) \u2014 credit leading equity",
+      "\ud83d\udfe2 RISK-ON: SPY RSI(46.2) < CORP RSI(62.7) \u2014 credit leading equity",
       "TECL CONTRARIAN: RSI<40+below SMA200"
     ]
   },
@@ -510,7 +510,7 @@
     "CORP": {
       "price": 93.53,
       "change_pct": 0.04,
-      "rsi10": 62.6,
+      "rsi10": 62.7,
       "ema9": 93.31,
       "ema20": 93.04,
       "ema50": 93.04,
@@ -522,9 +522,9 @@
       "vs_sma200": -0.7,
       "vs_sma50": 0.8,
       "ret_1d": 0.04,
-      "ret_5d": 0.52,
+      "ret_5d": 0.53,
       "ret_10d": 0.47,
-      "ret_20d": 1.7
+      "ret_20d": 1.71
     },
     "TMV": {
       "price": 42.21,
@@ -1040,23 +1040,23 @@
       "ret_20d": 21.97
     },
     "BTC-USD": {
-      "price": 75110.05,
-      "change_pct": 0.7,
-      "rsi10": 36.2,
-      "ema9": 76443.89,
-      "ema20": 78074.62,
-      "ema50": 79218.39,
-      "ema200": 76452.23,
-      "sma50": 81618.17,
-      "sma200": 73153.89,
+      "price": 74673.76,
+      "change_pct": 0.12,
+      "rsi10": 33.7,
+      "ema9": 76356.64,
+      "ema20": 78033.06,
+      "ema50": 79201.28,
+      "ema200": 76450.39,
+      "sma50": 81609.45,
+      "sma200": 73151.71,
       "ema_cross": "BEAR",
       "above_sma200": true,
-      "vs_sma200": 2.7,
-      "vs_sma50": -8.0,
-      "ret_1d": 0.7,
-      "ret_5d": -6.59,
-      "ret_10d": -2.7,
-      "ret_20d": -9.44
+      "vs_sma200": 2.1,
+      "vs_sma50": -8.5,
+      "ret_1d": 0.12,
+      "ret_5d": -7.13,
+      "ret_10d": -3.27,
+      "ret_20d": -9.97
     },
     "AMD": {
       "price": 508.58,
