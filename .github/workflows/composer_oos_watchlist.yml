@@ -19,7 +19,7 @@ on:
 jobs:
   oos-split:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 75   # +52 new symphonies and version-history lookups (2026-11-10)
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

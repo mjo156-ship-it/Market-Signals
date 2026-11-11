@@ -26,7 +26,7 @@ on:
 jobs:
   discover-oos:
     runs-on: ubuntu-latest
-    timeout-minutes: 100
+    timeout-minutes: 150   # ~53 min of backtests + ~30 min of version-history lookups (2026-11-10)
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

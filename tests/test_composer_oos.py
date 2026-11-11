@@ -25,6 +25,12 @@ def test_last_logic_change_ignores_renames_copies_and_resaves():
     same = {k: LOGIC["v4"] for k in LOGIC}
     assert c.last_logic_change_date("s", get=_api(VERS, same)) is None                # re-saves only
     assert c.last_logic_change_date("s", get=_api(VERS, LOGIC), max_walk=2) is None   # change beyond the look-back
+    calls = []
+    def counting(path, params=None):
+        calls.append(path)
+        return _api(VERS, LOGIC)(path)
+    assert c.last_logic_change_date("s", get=counting, after="2026-09-04") is None   # nothing saved after that date
+    assert len(calls) == 1                                                            # and no logic was fetched
 
 
 def test_effective_oos_date_moves_only_forward():

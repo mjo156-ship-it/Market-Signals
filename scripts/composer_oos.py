@@ -187,7 +187,7 @@ def logic_fingerprint(node) -> str:
     return hashlib.sha256(json.dumps(strip(node), sort_keys=True, default=str).encode()).hexdigest()
 
 
-def last_logic_change_date(sym_id: str, get=None, max_walk: int = MAX_VERSION_WALK):
+def last_logic_change_date(sym_id: str, get=None, max_walk: int = MAX_VERSION_WALK, after: str | None = None):
     """ISO date the symphony's CURRENT logic was first saved, when an earlier
     version with DIFFERENT logic exists; else None.
 
@@ -202,6 +202,10 @@ def last_logic_change_date(sym_id: str, get=None, max_walk: int = MAX_VERSION_WA
         vs = sorted([v for v in vs if isinstance(v, dict) and v.get("version_id")],
                     key=lambda v: str(v.get("created_at") or ""), reverse=True)
         if len(vs) < 2:
+            return None
+        # Nothing saved after the date already on file: no later change is possible,
+        # and the logic comparison (one request per version) is skipped.
+        if after and str(vs[0].get("created_at") or "")[:10] <= str(after)[:10]:
             return None
         cur = logic_fingerprint(get(f"/api/v0.1/symphonies/{sym_id}/versions/{vs[0]['version_id']}/score"))
         first_same = vs[0]
@@ -221,7 +225,8 @@ def effective_oos_date(sym_id: str, saved_date: str, lookup=None, max_walk: int 
     later. The backtest always runs the CURRENT logic, so nothing before the
     last logic change is out-of-sample. Use that date when it is later than the
     saved one: source 'version' if it moved the date, else 'seed'."""
-    changed = lookup(sym_id) if lookup else last_logic_change_date(sym_id, max_walk=max_walk)
+    changed = (lookup(sym_id) if lookup
+               else last_logic_change_date(sym_id, max_walk=max_walk, after=saved_date))
     if changed and changed > str(saved_date)[:10]:
         return changed, "version"
     return str(saved_date)[:10], "seed"
