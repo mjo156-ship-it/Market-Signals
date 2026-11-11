@@ -665,15 +665,43 @@ def update_price_store(tickers: Optional[Iterable[str]] = None,
 # Read API (with read-time adjustment)
 # ---------------------------------------------------------------------------
 
+SPLIT_MATCH_TOL = 0.20     # stored jump within 20% (log) of the split ratio = not yet re-based
+
+
+def _split_is_unapplied(df: pd.DataFrame, ex, ratio: float) -> bool:
+    """True when the stored closes still jump by about `ratio` across the
+    split's ex-date, i.e. the rows before it were never re-based. False for a
+    split outside the stored history or one the stored prices already reflect."""
+    import math
+    if ratio <= 0 or abs(math.log(ratio)) < 0.05:
+        return False
+    before = df.loc[df["date"] < ex, "close"]
+    after = df.loc[df["date"] >= ex, "close"]
+    if len(before) == 0 or len(after) == 0:
+        return False
+    b, a = float(before.iloc[-1]), float(after.iloc[0])
+    if b <= 0 or a <= 0:
+        return False
+    return abs(math.log((b / a) / ratio)) < SPLIT_MATCH_TOL
+
+
 def _adjust_one(df: pd.DataFrame, actions: pd.DataFrame) -> pd.DataFrame:
     """
-    Back-adjust a single ticker's raw OHLCV for splits + dividends.
+    Back-adjust a single ticker's stored OHLCV for dividends, and for a split
+    only where the stored series still shows it.
 
-      split_factor[d] = product of split ratios with ex-date > d  (old prices
-                        divided by it; volume multiplied by it)
+    Yahoo's unadjusted "Close" is ALREADY split-adjusted (only dividends are
+    left out), and the store re-pulls full history when a new split appears, so
+    stored prices are on the current split basis. Dividing by the split ratio
+    again halved every pre-split price: XLU read 21.25 the day before its
+    2025-12-05 2:1 split and 42.10 the day after, a phantom +98% day.
+
+      split_factor[d] = product of split ratios with ex-date > d, counting a
+                        split only if the stored close actually jumps by about
+                        that ratio across its ex-date (rows never re-based)
       div_factor[d]   = product of (1 - amt/prev_close) for dividends with
                         ex-date > d
-      adjusted price  = raw * div_factor / split_factor
+      adjusted price  = stored * div_factor / split_factor
     """
     df = df.sort_values("date").reset_index(drop=True)
     dates = df["date"]
@@ -685,7 +713,7 @@ def _adjust_one(df: pd.DataFrame, actions: pd.DataFrame) -> pd.DataFrame:
         splits = actions[actions["type"] == "split"].sort_values("date")
         for _, a in splits.iterrows():
             ex, ratio = pd.Timestamp(a["date"]), float(a["value"])
-            if ratio > 0:
+            if ratio > 0 and _split_is_unapplied(df, ex, ratio):
                 split_factor[dates < ex] *= ratio
         divs = actions[actions["type"] == "dividend"].sort_values("date")
         closes = df["close"].astype(float)
@@ -740,9 +768,10 @@ def get_prices(tickers, start: Optional[str] = None, end: Optional[str] = None,
     Read prices for one or more tickers -- a drop-in replacement for
     ``yf.download(...)`` in backtests.
 
-    adjusted=True  -> O/H/L/C back-adjusted for splits+dividends, volume
-                      split-adjusted (computed at read time from the actions
-                      log). adjusted=False returns the raw stored prints.
+    adjusted=True  -> O/H/L/C back-adjusted for dividends (stored prices are
+                      already on the current split basis; a split is applied
+                      only where the stored series still shows it).
+                      adjusted=False returns the stored prints.
     layout="wide"  -> single ticker: columns Open/High/Low/Close/Volume,
                       DatetimeIndex. Multiple tickers: MultiIndex columns
                       (Field, Ticker) just like yfinance.

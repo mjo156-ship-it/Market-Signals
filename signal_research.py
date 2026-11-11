@@ -298,6 +298,28 @@ def per_ticker_candidates(df: pd.DataFrame):
 # Run
 # ---------------------------------------------------------------------------
 
+SPLIT_JUMP_TOL = 0.25      # one-session move within 25% (log) of the split ratio = adjustment error
+EXCLUDED: list = []        # tickers the last _load_panel() left out, with why
+
+
+def split_day_jumps(close: pd.Series, splits) -> list:
+    """[(date, return)] for splits on whose ex-date the adjusted close moves by
+    about the split ratio (or its inverse) in one session: the split was applied
+    twice or not at all. A real crash on an ex-date (UCO, 2020-04-21) does not
+    match the ratio and is left alone. `splits`: frame with date, value."""
+    import math
+    ret = close.astype(float).pct_change()
+    out = []
+    for _, a in (splits.iterrows() if splits is not None and len(splits) else []):
+        d, ratio = pd.Timestamp(a["date"]), float(a["value"])
+        if ratio <= 0 or abs(math.log(ratio)) < 0.3 or d not in ret.index or pd.isna(ret.loc[d]):
+            continue
+        move = math.log(1 + float(ret.loc[d])) if ret.loc[d] > -1 else None
+        if move is not None and min(abs(move - math.log(ratio)), abs(move + math.log(ratio))) < SPLIT_JUMP_TOL:
+            out.append((d, float(ret.loc[d])))
+    return out
+
+
 def _load_panel():
     """Long adjusted frame -> {ticker: df(open,high,low,close,volume) by date}."""
     tickers = ps._resolve_universe(None)
@@ -305,11 +327,24 @@ def _load_panel():
     if long is None or len(long) == 0:
         return {}, None
     long = long.sort_values(["ticker", "date"])
+    acts = ps.read_actions()
+    splits = acts[acts["type"] == "split"] if len(acts) else acts
     by = {}
+    EXCLUDED.clear()
     for t, g in long.groupby("ticker"):
         g = g.set_index("date")[["open", "high", "low", "close", "volume"]]
-        if len(g) >= MIN_HISTORY_BARS:
-            by[t] = g
+        if len(g) < MIN_HISTORY_BARS:
+            continue
+        bad = split_day_jumps(g["close"], splits[splits["ticker"] == t] if len(splits) else None)
+        if bad:
+            # An adjustment error, not a market move: backtests on this series
+            # would count a phantom return (SOXL "+1631% in 21 days").
+            EXCLUDED.append({"ticker": t, "reason": "price jump on a split date",
+                             "dates": [str(d.date()) for d, _ in bad],
+                             "jump_pct": [round(100 * r, 1) for _, r in bad]})
+            _log(f"[research] EXCLUDED {t}: jump on split date {EXCLUDED[-1]['dates']}")
+            continue
+        by[t] = g
     data_through = long["date"].max()
     return by, data_through
 
@@ -435,6 +470,7 @@ def run_signal_research(write: bool = True) -> dict:
         "generated_at_utc": _now_iso(),
         "data_through": str(data_through.date()),
         "universe_size": len(by),
+        "excluded_tickers": list(EXCLUDED),
         "combinations_evaluated": combinations_evaluated,
         "params": {"min_sample": MIN_SAMPLE, "win_rate_min": WIN_RATE_MIN},
         "summary": {

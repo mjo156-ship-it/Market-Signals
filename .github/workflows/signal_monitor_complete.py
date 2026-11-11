@@ -130,13 +130,28 @@ def rj_compute_base_weights(data, decision_date):
         sma50 = close.rolling(50).mean()
         if pd.notna(sma50.iloc[-1]) and sma50.iloc[-1] > 0:
             below_sma[t] = float(close.iloc[-1] / sma50.iloc[-1] - 1)
-    mom_pick = max(mom60, key=mom60.get) if mom60 else 'SPY'
-    sma_pick = min(below_sma, key=below_sma.get) if below_sma else 'SPY'
+    # A pick is made only when every pool ticker has a valid reading for both
+    # rules. The picks used to default to SPY when a reading was missing (a
+    # blank Yahoo close makes all of them NaN), and two defaults were then
+    # reported as "rules AGREE on SPY".
+    def _ok(d, t):
+        return t in d and d[t] is not None and d[t] == d[t]
+    missing = [t for t in RJ_BASE_POOL if not (_ok(mom60, t) and _ok(below_sma, t))]
+    if missing:
+        return {
+            'mom_pick': None, 'below_sma_pick': None, 'weights': {}, 'gld_weight': 0.40,
+            'rules_agree': False, 'agree_ticker': None,
+            'mom60_values': mom60, 'below_sma_values': below_sma,
+            'unavailable': 'price data missing for ' + ', '.join(missing),
+        }
+    mom_pick = max(RJ_BASE_POOL, key=lambda t: mom60[t])
+    sma_pick = min(RJ_BASE_POOL, key=lambda t: below_sma[t])
     agree = (mom_pick == sma_pick)
     weights = {mom_pick: 0.60} if agree else {mom_pick: 0.30, sma_pick: 0.30}
     return {
         'mom_pick': mom_pick,
         'below_sma_pick': sma_pick,
+        'unavailable': None,
         'weights': weights,
         'gld_weight': 0.40,
         'rules_agree': agree,
@@ -293,6 +308,14 @@ def rj_render_block(state):
 
 def _rj_render_td1(state):
     pb = state['projected_base']
+    if pb.get('unavailable'):
+        subj = "[ACTION REQUIRED] Robot James TD1 - base picks UNAVAILABLE, compute by hand before 3:50 PM"
+        L = [RJ_HEADER_BAR, "ROBOT JAMES - TD1 - BASE PICKS UNAVAILABLE", RJ_HEADER_BAR,
+             f"The base picks could not be computed: {pb['unavailable']}.",
+             "No position is shown rather than a default. Check SPY, QQQ and SMH",
+             "(60-day return; distance below the 50-day average) and set the base by hand.",
+             RJ_HEADER_BAR, ""]
+        return subj, "\n".join(L)
     mom_pick = pb['mom_pick']
     sma_pick = pb['below_sma_pick']
     agree = pb['rules_agree']
@@ -432,7 +455,9 @@ def _rj_render_hold(state):
         else:
             pos = "BASE"
     else:
-        if pb.get('rules_agree'):
+        if pb.get('unavailable'):
+            pos = f"UNAVAILABLE ({pb['unavailable']})"
+        elif pb.get('rules_agree'):
             pos = f"60% {pb.get('agree_ticker')} + 40% GLD"
         elif pb.get('mom_pick') and pb.get('below_sma_pick'):
             pos = f"30% {pb['mom_pick']} + 30% {pb['below_sma_pick']} + 40% GLD"
@@ -569,6 +594,12 @@ def download_data(tickers, period='2y'):
                 # Flatten multi-index columns if present
                 if isinstance(df.columns, pd.MultiIndex):
                     df.columns = df.columns.get_level_values(0)
+                # Yahoo's bar for the latest session can arrive with a blank
+                # close; every indicator reads the last row, so drop it.
+                if 'Close' in df.columns:
+                    df = df[df['Close'].notna()]
+                if len(df) == 0:
+                    continue
                 data[ticker] = df
         except Exception as e:
             print(f"Error downloading {ticker}: {e}")
