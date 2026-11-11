@@ -32,6 +32,7 @@ OUT = os.environ.get("COMPOSER_OOS_WL_PATH", "data/composer_oos_watchlist.jsonl"
 # inline WATCH below. Session-gated like Discover — refresh via
 # scripts/refresh_watchlist_seed.py.
 WL_SEED = os.environ.get("COMPOSER_WATCHLIST_SEED", "data/composer_watchlist_seed.json")
+WL_META = os.environ.get("COMPOSER_WATCHLIST_META", "data/composer_watchlist_meta.json")
 
 
 def _wl_freeze_iso(frz):
@@ -314,6 +315,20 @@ def main(rewrite=False):
     asof = date.today().isoformat()
     history = oos.load_jsonl(OUT)          # prior runs, for run-over-run deltas
     watch = _load_wl_seed() or WATCH
+    # Symphonies created since the last watchlist capture join the scan
+    # automatically (their freeze date is their newest version, set below).
+    auto_ids = set()
+    try:
+        fresh = oos.new_own_symphonies([sid for sid, _d, _n in watch])
+        auto_ids = {r["id"] for r in fresh}
+        watch = list(watch) + [(r["id"], r["created_at"], r["name"]) for r in fresh]
+        print(f"[watchlist] {len(fresh)} symphonies created since the last capture added to the scan",
+              file=sys.stderr)
+        with open(WL_META, "w") as f:
+            json.dump({"as_of": asof, "captured": len(watch) - len(fresh), "auto_added": fresh}, f, indent=1)
+    except Exception as e:
+        print(f"[watchlist] could not list own symphonies ({type(e).__name__}: {str(e)[:80]}); "
+              f"scanning the capture only", file=sys.stderr)
     rows = []
     for i, (sid, oosdate, name) in enumerate(watch, 1):
         time.sleep(0.5)                       # gentle pacing to avoid burst 429s
@@ -326,6 +341,8 @@ def main(rewrite=False):
         if not curve:
             print(f"[{i}/{len(watch)}] {name}: empty curve", file=sys.stderr)
             continue
+        seed_date = oosdate
+        oosdate, oos_src = oos.effective_oos_date(sid, seed_date)
         oos_curve = {d: v for d, v in curve.items() if d >= oosdate}
         ins = _cs({d: v for d, v in curve.items() if d < oosdate})
         out = _cs(oos_curve)
@@ -340,7 +357,8 @@ def main(rewrite=False):
         is_days = ins.get("n_days")
         row = {
             "date": asof, "scope": "oos_split", "sym_id": sid, "name": name,
-            "oos_date": oosdate,
+            "oos_date": oosdate, "oos_date_seed": seed_date, "oos_date_source": oos_src,
+            "wl_source": "auto_own" if sid in auto_ids else "capture",
             "bt_start": min(curve), "bt_end": max(curve),
             "is_days": is_days, "is_years": round(is_days / 252, 1) if is_days else None,
             "oos_days": out.get("n_days"),

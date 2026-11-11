@@ -129,6 +129,104 @@ def live_series(account_uuid: str, sym_id: str) -> dict[str, float]:
     return {_to_date(t): float(v) for t, v in zip(ms, vals) if v is not None}
 
 
+def own_symphonies(max_pages: int = 40) -> list[dict]:
+    """Every symphony the account owns (drafts included): id, name, created_at,
+    is_draft. The one list of symphonies the API key can enumerate."""
+    rows, seen = [], set()
+    for page in range(1, max_pages + 1):
+        d = _get("/api/v0.1/user/symphonies", params={"page": page})
+        got = [r for r in (d.get("symphonies") or []) if r.get("id") and r["id"] not in seen]
+        if not got:
+            break
+        rows += got
+        seen |= {r["id"] for r in got}
+    return rows
+
+
+def new_own_symphonies(captured_ids, own=None) -> list[dict]:
+    """Symphonies you created after the last watchlist capture.
+
+    Composer has no API for the watchlist, so the watched list is a manual
+    capture. Anything created after it never reached the scan (55 symphonies
+    between 2026-08-05 and 2026-11-10). Owner decision 2026-11-10: scan every
+    symphony you create. "After the capture" = created later than the newest of
+    your own symphonies that IS in the capture, so the rule resets itself when
+    the capture is refreshed. Funded "(Buy Copy)" copies are left out: they are
+    live positions, tracked by Lifecycle, of something already watched."""
+    own = own if own is not None else own_symphonies()
+    captured_ids = set(captured_ids)
+    in_capture = [str(r.get("created_at") or "")[:10] for r in own if r["id"] in captured_ids]
+    if not in_capture:
+        return []
+    cutoff = max(in_capture)
+    out = []
+    for r in own:
+        created = str(r.get("created_at") or "")[:10]
+        if (r["id"] not in captured_ids and created > cutoff
+                and "(buy copy)" not in str(r.get("name") or "").lower()):
+            out.append({"id": r["id"], "name": r.get("name") or r["id"], "created_at": created,
+                        "is_draft": bool(r.get("is_draft"))})
+    return sorted(out, key=lambda r: r["created_at"])
+
+
+LOGIC_IGNORE_KEYS = frozenset({"id", "name", "description"})
+MAX_VERSION_WALK = 12
+
+
+def logic_fingerprint(node) -> str:
+    """Hash of a symphony's logic tree with ids, names and descriptions removed,
+    so a rename, a re-save or a copy hashes the same as the logic it came from."""
+    import hashlib
+
+    def strip(x):
+        if isinstance(x, dict):
+            return {k: strip(v) for k, v in sorted(x.items()) if k not in LOGIC_IGNORE_KEYS}
+        if isinstance(x, list):
+            return [strip(v) for v in x]
+        return x
+    return hashlib.sha256(json.dumps(strip(node), sort_keys=True, default=str).encode()).hexdigest()
+
+
+def last_logic_change_date(sym_id: str, get=None, max_walk: int = MAX_VERSION_WALK):
+    """ISO date the symphony's CURRENT logic was first saved, when an earlier
+    version with DIFFERENT logic exists; else None.
+
+    Composer saves a version on every save and on every copy, so the newest
+    version date is not the last logic change: on 2026-11-10 it was later than
+    Composer's own last_semantic_update_at for 13 of 34 funded symphonies, all
+    copies or re-saves. This walks back from the newest version comparing logic
+    fingerprints and reports a date only for a change it can actually see."""
+    get = get or _get
+    try:
+        vs = get(f"/api/v0.1/symphonies/{sym_id}/versions") or []
+        vs = sorted([v for v in vs if isinstance(v, dict) and v.get("version_id")],
+                    key=lambda v: str(v.get("created_at") or ""), reverse=True)
+        if len(vs) < 2:
+            return None
+        cur = logic_fingerprint(get(f"/api/v0.1/symphonies/{sym_id}/versions/{vs[0]['version_id']}/score"))
+        first_same = vs[0]
+        for v in vs[1:max_walk]:
+            fp = logic_fingerprint(get(f"/api/v0.1/symphonies/{sym_id}/versions/{v['version_id']}/score"))
+            if fp != cur:
+                return str(first_same.get("created_at") or "")[:10] or None
+            first_same = v
+        return None
+    except Exception:
+        return None
+
+
+def effective_oos_date(sym_id: str, saved_date: str, lookup=None, max_walk: int = MAX_VERSION_WALK):
+    """(oos_date, source). The saved freeze date comes from a capture of the
+    watchlist / Discover page and goes stale when a symphony's logic is edited
+    later. The backtest always runs the CURRENT logic, so nothing before the
+    last logic change is out-of-sample. Use that date when it is later than the
+    saved one: source 'version' if it moved the date, else 'seed'."""
+    changed = lookup(sym_id) if lookup else last_logic_change_date(sym_id, max_walk=max_walk)
+    if changed and changed > str(saved_date)[:10]:
+        return changed, "version"
+    return str(saved_date)[:10], "seed"
+
+
 def backtest(sym_id: str, start: str, end: str) -> tuple[dict[str, float], dict]:
     """Returns (date -> equity, stats). Backtest endpoint allows 500 req/sec."""
     time.sleep(BACKTEST_THROTTLE)
@@ -350,6 +448,18 @@ def _raw_annualized(curve: dict[str, float]):
     return cagr, sharpe, n
 
 
+def annualized_vol_pct(curve: dict[str, float]):
+    """Annualized volatility of daily returns, in percent (None under 2 returns)."""
+    ds = sorted(curve)
+    vals = [curve[d] for d in ds]
+    rets = [vals[i] / vals[i - 1] - 1 for i in range(1, len(vals)) if vals[i - 1]]
+    if len(rets) < 2:
+        return None
+    mean = sum(rets) / len(rets)
+    sd = (sum((r - mean) ** 2 for r in rets) / (len(rets) - 1)) ** 0.5
+    return sd * 252 ** 0.5 * 100
+
+
 def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
                      is_cagr_pct, cagr_gap_pct, spy: dict | None = None,
                      full_curve: dict | None = None) -> dict:
@@ -402,9 +512,13 @@ def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
     # flagged (low_power) rather than silently dropped. gap_z, however, uses the
     # published (gated) gap, which is None below 1y — you cannot annualize a gap
     # over a sub-year window without it exploding.
-    raw_cagr, raw_sharpe, _ = _raw_annualized(oos_curve)
-    if raw_cagr is not None and raw_sharpe and raw_sharpe > 0:
-        vol = raw_cagr / raw_sharpe
+    # Volatility is the standard deviation of daily returns, annualized. It used
+    # to be backed out as CAGR / Sharpe, which is not volatility (geometric return
+    # over an arithmetic ratio), went negative when the two had opposite signs,
+    # and was skipped for any strategy with a Sharpe at or below zero — so the
+    # worst decayers got no gap z-score and no low-power flag at all.
+    vol = annualized_vol_pct(oos_curve)
+    if vol is not None and vol > 0:
         f["oos_vol_pct"] = round(vol, 2)
         nd = out_stats.get("n_days") or 0
         if nd > 0:
