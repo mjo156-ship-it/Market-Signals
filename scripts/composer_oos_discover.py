@@ -52,6 +52,7 @@ SURVIVAL = os.environ.get("COMPOSER_DISCOVER_SURVIVAL", "data/composer_discover_
 # "Thin" strategies (no meaningful OOS) can be skipped without a backtest. This
 # keeps the run tractable when the seed is the full library. 0 = evaluate all.
 MIN_OOS_DAYS = int(os.environ.get("COMPOSER_DISCOVER_MIN_OOS_DAYS", "0"))
+DISCOVER_VERSION_WALK = int(os.environ.get("COMPOSER_DISCOVER_VERSION_WALK", "4"))
 
 # Candidate read-only Discover endpoints, tried in order if no seed file exists.
 # Siblings of the known watchlist endpoint (trading-api.composer.trade/api/v1/
@@ -314,6 +315,9 @@ def main(rewrite=False):
         if not curve:
             print(f"[{i}/{len(watch)}] {name}: empty curve", file=sys.stderr)
             continue
+        seed_date = oosdate
+        # Other authors' symphonies: look back only a few versions (1,000+ symphonies a run).
+        oosdate, oos_src = oos.effective_oos_date(sid, seed_date, max_walk=DISCOVER_VERSION_WALK)
         oos_curve = {d: v for d, v in curve.items() if d >= oosdate}
         ins = _cs({d: v for d, v in curve.items() if d < oosdate})
         out = _cs(oos_curve)
@@ -328,7 +332,7 @@ def main(rewrite=False):
         is_days = ins.get("n_days")
         row = {
             "date": asof, "scope": "oos_split", "sym_id": sid, "name": name,
-            "oos_date": oosdate,
+            "oos_date": oosdate, "oos_date_seed": seed_date, "oos_date_source": oos_src,
             "bt_start": min(curve), "bt_end": max(curve),
             "is_days": is_days, "is_years": round(is_days / 252, 1) if is_days else None,
             "oos_days": out.get("n_days"),
