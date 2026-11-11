@@ -74,6 +74,53 @@ RJ_GLD = 'GLD'
 RJ_HEADER_BAR = "=" * 70
 
 
+def nyse_holidays(year):
+    """Dates the NYSE is closed in `year` (full-day closures, by rule). Used to
+    project the rest of a month's trading days: counting every weekday made a
+    month with a holiday one day too long ("TD 6 of 21" in November 2026) and
+    put the next decision date a day early when the holiday fell before it."""
+    import datetime as _dt
+
+    def nth(month, weekday, n):                    # n-th weekday of a month (n=-1: last)
+        if n > 0:
+            d = _dt.date(year, month, 1)
+            d += _dt.timedelta(days=(weekday - d.weekday()) % 7 + 7 * (n - 1))
+            return d
+        d = _dt.date(year, month + 1, 1) - _dt.timedelta(days=1) if month < 12 else _dt.date(year, 12, 31)
+        return d - _dt.timedelta(days=(d.weekday() - weekday) % 7)
+
+    def observed(d):                                # Saturday -> Friday, Sunday -> Monday
+        if d.weekday() == 5:
+            return d - _dt.timedelta(days=1)
+        if d.weekday() == 6:
+            return d + _dt.timedelta(days=1)
+        return d
+
+    a, b, c = year % 19, year // 100, year % 100    # Easter (anonymous Gregorian algorithm)
+    d, e = b // 4, b % 4
+    g = (8 * b + 13) // 25
+    h = (19 * a + b - d - g + 15) % 30
+    i, k = c // 4, c % 4
+    l = (32 + 2 * e + 2 * i - h - k) % 7
+    m = (a + 11 * h + 19 * l) // 433
+    easter = _dt.date(year, (h + l - 7 * m + 90) // 25, (h + l - 7 * m + 33 * ((h + l - 7 * m + 90) // 25) + 19) % 32)
+
+    out = {nth(1, 0, 3), nth(2, 0, 3), easter - _dt.timedelta(days=2), nth(5, 0, -1),
+           observed(_dt.date(year, 6, 19)), observed(_dt.date(year, 7, 4)), nth(9, 0, 1),
+           nth(11, 3, 4), observed(_dt.date(year, 12, 25))}
+    ny = _dt.date(year, 1, 1)
+    if ny.weekday() != 5:                           # New Year's on a Saturday is not observed
+        out.add(observed(ny))
+    return out
+
+
+def is_nyse_session(day):
+    """True for a weekday that is not a full-day NYSE holiday."""
+    import datetime as _dt
+    d = day.date() if hasattr(day, 'date') else day
+    return d.weekday() < 5 and d not in nyse_holidays(d.year)
+
+
 def rj_compute_td_info(ref_date, trading_days):
     """Compute TD number info for reference date against calendar of trading days."""
     ref = pd.Timestamp(ref_date).normalize()
@@ -93,7 +140,7 @@ def rj_compute_td_info(ref_date, trading_days):
     if last_known < next_month - pd.Timedelta(days=1):
         scan = last_known + pd.Timedelta(days=1)
         while scan < next_month:
-            if scan.weekday() < 5:
+            if is_nyse_session(scan):
                 all_tds.append(scan)
             scan += pd.Timedelta(days=1)
     all_tds = sorted(set(all_tds))
@@ -2396,6 +2443,7 @@ def main():
             fetch_dry_run_preview,
             parse_dry_run_response,
             format_dry_run_for_email,
+            fetch_composer_book_holdings,
         )
 
         raw = fetch_dry_run_preview()  # account_uuids=None → all accounts on the API key
@@ -2414,8 +2462,14 @@ def main():
                     'symphonies_rebalancing': will_rebalance,
                     'total_pv': round(float(total_pv), 2),
                 }
+                try:
+                    held, book = fetch_composer_book_holdings()
+                except Exception as _e:
+                    print(f"[Composer] holdings unavailable for risk warnings: {_e}")
+                    held, book = {}, None
                 composer_block = format_dry_run_for_email(parsed,
-                                                          total_portfolio_value=total_pv)
+                                                          total_portfolio_value=total_pv,
+                                                          current_holdings=held, book_value=book)
                 print(f"[Composer] dry-run: {len(parsed)} symphonies, "
                       f"{will_rebalance} rebalancing, total_pv=${total_pv:,.0f}")
     except Exception as e:

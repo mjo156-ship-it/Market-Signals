@@ -123,6 +123,26 @@ def list_account_uuids():
     return [a.get('account_uuid') for a in resp['accounts'] if a.get('account_uuid')]
 
 
+def fetch_composer_book_holdings(account_uuids=None):
+    """({ticker: dollars}, book value) across the Composer accounts, from each
+    account's holding-stats — what the concentration warnings measure against.
+    ({}, None) if nothing could be read."""
+    import time as _t
+    uuids = account_uuids or list_account_uuids() or []
+    held, book = {}, 0.0
+    for i, aid in enumerate(uuids):
+        if i:
+            _t.sleep(1.1)                      # Composer rate limit: 1 request / second
+        hs = _composer_get(f"/portfolio/accounts/{aid}/holding-stats")
+        for h in (hs or {}).get('holdings') or []:
+            sym, val = h.get('symbol') or '', float(h.get('notional_value') or 0)
+            if sym:
+                held[sym] = held.get(sym, 0.0) + val
+                book += val
+    return (held, book) if held and book > 0 else ({}, None)
+
+
+
 # ════════════════════════════════════════════════════════════════════
 # DRY-RUN PREVIEW
 # ════════════════════════════════════════════════════════════════════
@@ -335,6 +355,7 @@ LEV_3X = {
     'TSLL', 'TSLT', 'NVDL', 'NVD',
     # Misc 3x
     'HIBL', 'HIBS', 'FNGU', 'FNGD', 'CWEB',
+    'OILU', 'OILD', 'UTSL',
 }
 
 LEV_2X = {
@@ -346,6 +367,10 @@ LEV_2X = {
     'UYG', 'SKF', 'UCC', 'SCC',
     # Misc 2x
     'BITX', 'ETHU',
+    # held or mapped as leveraged elsewhere in the dashboard but missing here (2026-11-09 audit)
+    'ROM', 'SPUU', 'UYM', 'FNGO', 'UGL', 'UST',
+    # single-stock 2x
+    'GGLL', 'MSFL', 'NFXL', 'FBL',
 }
 
 # Map ticker -> set of risk classes it belongs to
@@ -365,16 +390,19 @@ def _risk_classes(ticker):
 THRESHOLDS = {
     'vol':   (5.0, 10.0),   # vol products: warn at 5%, alert at 10%
     'lev3x': (20.0, 30.0),  # 3x leveraged: warn at 20%, alert at 30%
-    'lev2x': (35.0, 50.0),  # 2x leveraged: warn at 35%, alert at 50%
-    'concentration': (25.0, 35.0),  # any single ticker: warn at 25%, alert at 35%
+    'lev2x': (20.0, 35.0),  # 2x leveraged: warn at 20%, alert at 35%
+    'concentration': (20.0, 30.0),  # any single ticker: warn at 20%, alert at 30%
 }
 
 # Within-class aggregate thresholds — sum across all tickers in class
 # Catches "death by a thousand 3x positions" when no single one is huge
 CLASS_AGGREGATE_THRESHOLDS = {
     'vol':   (8.0, 15.0),
-    'lev3x': (40.0, 60.0),
-    'lev2x': (50.0, 70.0),
+    # Owner decision 2026-11-10: 3x funds 20%, 2x funds 25%, single ticker 20%
+    # of the Composer book after the day's trades. At 40% / 50% the leverage
+    # warnings had not fired on any day since June, including 38.8% in 3x funds.
+    'lev3x': (20.0, 30.0),
+    'lev2x': (25.0, 40.0),
 }
 
 
@@ -399,7 +427,22 @@ def compute_target_exposure(parsed_rotations):
     return dict(target)
 
 
-def compute_concentration_warnings(parsed_rotations, total_portfolio_value=None):
+def post_trade_exposure(current_holdings, parsed_rotations):
+    """Dollar exposure per ticker for the WHOLE Composer book after today's trades:
+    what is held now plus each ticker's net notional across all rebalancing
+    symphonies. current_holdings: {ticker: dollars}. Cash ($USD) is left out."""
+    exp = defaultdict(float)
+    for t, v in (current_holdings or {}).items():
+        if t and not str(t).startswith('$'):
+            exp[t] += float(v or 0)
+    for ticker, net, _b, _s in aggregate_net_trade_flow(parsed_rotations):
+        if ticker and not str(ticker).startswith('$'):
+            exp[ticker] += float(net or 0)
+    return {t: v for t, v in exp.items() if v > 0.01}
+
+
+def compute_concentration_warnings(parsed_rotations, total_portfolio_value=None,
+                                   current_holdings=None, book_value=None):
     """
     Detect concentration exceeding risk thresholds.
 
@@ -428,13 +471,20 @@ def compute_concentration_warnings(parsed_rotations, total_portfolio_value=None)
                 ],
             }
     """
-    target = compute_target_exposure(parsed_rotations)
-
-    # Denominator
-    if total_portfolio_value and total_portfolio_value > 0:
+    if current_holdings and book_value and book_value > 0:
+        # The whole Composer book after the trades, as a share of the Composer book.
+        # Without this the numerator was only the symphonies rebalancing today and
+        # the denominator was every account including real estate, so a 3x-leverage
+        # warning needed ~$2M of 3x funds in one day's rotations and never fired.
+        target = post_trade_exposure(current_holdings, parsed_rotations)
+        denom = float(book_value)
+        denom_src = 'composer_book'
+    elif total_portfolio_value and total_portfolio_value > 0:
+        target = compute_target_exposure(parsed_rotations)
         denom = float(total_portfolio_value)
         denom_src = 'portfolio'
     else:
+        target = compute_target_exposure(parsed_rotations)
         denom = sum(r.get('symphony_value', 0) for r in parsed_rotations)
         denom_src = 'rotation_sum'
 
@@ -562,7 +612,8 @@ def format_concentration_warnings(warnings):
 
     denom = warnings.get('denominator', 0)
     denom_src = warnings.get('denominator_source', 'unknown')
-    denom_note = (' (vs total portfolio)' if denom_src == 'portfolio'
+    denom_note = (" (the whole Composer book after today's trades)" if denom_src == 'composer_book'
+                  else ' (vs total portfolio)' if denom_src == 'portfolio'
                   else ' (vs rebalancing-symphony sum — actual % may be lower)')
 
     out = "\n" + "=" * 70 + "\n"
@@ -651,7 +702,8 @@ def format_concentration_warnings(warnings):
 # EMAIL FORMATTING
 # ════════════════════════════════════════════════════════════════════
 def format_dry_run_for_email(parsed_rotations, max_trades_shown=4,
-                              total_portfolio_value=None):
+                              total_portfolio_value=None,
+                              current_holdings=None, book_value=None):
     """
     Format the dry-run preview as plain-text for inclusion in the signal email.
 
@@ -725,7 +777,10 @@ def format_dry_run_for_email(parsed_rotations, max_trades_shown=4,
 
     # Concentration warnings — show prominently BEFORE the net flow table
     # so they catch the eye before the user reads the summary numbers
-    warnings = compute_concentration_warnings(parsed_rotations, total_portfolio_value)
+    # Whole Composer book after today's trades when its holdings are known; the
+    # old calculation (today's rotations over a wider denominator) could not fire.
+    warnings = compute_concentration_warnings(parsed_rotations, total_portfolio_value,
+                                              current_holdings=current_holdings, book_value=book_value)
     out += format_concentration_warnings(warnings)
 
     # Net portfolio flow

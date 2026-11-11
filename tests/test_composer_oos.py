@@ -76,3 +76,17 @@ def test_funding_gate_blocks_only_when_behind_the_market():
     assert g["funding_block"] is True and g["funding_caution"] is False
     assert c.funding_gate(-3.0, with_mkt, {})["funding_block"] is True              # no SPY data: old rule
     assert c.funding_gate(2.0, with_mkt, spy)["funding_block"] is False
+
+
+def test_bear_return_is_cumulative_and_only_annualized_with_a_full_year():
+    import datetime as dt
+    days = [(dt.date(2024, 1, 1) + dt.timedelta(days=i)).isoformat() for i in range(700)]
+    spy = {d: 100.0 - 0.05 * i for i, d in enumerate(days)}            # falling: below its 200-day average
+    curve = {d: 100.0 * (1.001 ** i) for i, d in enumerate(days)}
+    c._SPY_CACHE = None
+    short = {d: curve[d] for d in days[400:480]}                        # 80 bear days
+    f = c.oos_extra_fields(short, c._curve_stats(short), None, None, spy=spy)
+    assert f["oos_bear_days"] >= 60 and f["oos_bear_cum_pct"] is not None and f["oos_bear_cagr_pct"] is None
+    long = {d: curve[d] for d in days[300:700]}                         # 400 bear days
+    f = c.oos_extra_fields(long, c._curve_stats(long), None, None, spy=spy)
+    assert f["oos_bear_cagr_pct"] is not None

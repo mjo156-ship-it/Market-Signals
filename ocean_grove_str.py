@@ -103,6 +103,16 @@ def _envi(name, default):
 LAND_ALLOCATION      = _envf("OG_LAND_ALLOCATION", 0.40)   # non-depreciable
 BUILDING_ALLOCATION  = _envf("OG_BUILDING_ALLOCATION", 0.60)  # depreciable
 BONUS_DEPR_RATE      = _envf("OG_BONUS_DEPR_RATE", 1.00)   # 100% bonus, year 1
+# Bonus depreciation applies to the short-life components a cost-segregation
+# study carves out of the building (5/7/15-year property), not to the building
+# itself. The owner's own study found about 20% eligible. Applying 100% bonus to
+# the whole building showed a $178K year-1 benefit on an $800K listing where
+# roughly $35K is realistic, and made every listing "cash-positive in year 1".
+BONUS_ELIGIBLE_SHARE = _envf("OG_BONUS_ELIGIBLE_SHARE", 0.20)
+# The rest of the building is depreciated straight-line over this many years
+# (27.5 residential rental; a property rented mostly for stays of a week or less
+# may have to use 39 — set OG_BUILDING_LIFE_YEARS).
+BUILDING_LIFE_YEARS  = _envf("OG_BUILDING_LIFE_YEARS", 27.5)
 
 # --- Tax ---
 # Blended federal + NJ marginal rate for a high earner. STR losses are assumed
@@ -497,15 +507,18 @@ def analyze(listing, market=None):
 
     # --- Bonus depreciation (100% of the 60% building basis, in the purchase year) ---
     building_basis = price * BUILDING_ALLOCATION
-    bonus_depreciation = building_basis * BONUS_DEPR_RATE
+    bonus_depreciation = building_basis * BONUS_ELIGIBLE_SHARE * BONUS_DEPR_RATE
+    # What is left of the building after the bonus is depreciated straight-line.
+    straight_line_depr = (building_basis - bonus_depreciation) / BUILDING_LIFE_YEARS if BUILDING_LIFE_YEARS > 0 else 0.0
+    year1_depreciation = bonus_depreciation + straight_line_depr
 
     # --- Year-1 tax (with the depreciation shield) ---
     # Taxable income = NOI - mortgage interest - depreciation. A negative value is
     # a loss; under STR material participation it offsets ordinary income, so the
     # cash benefit = -taxable_income * marginal_rate. Depreciation is non-cash, so
     # after-tax CASH flow = pre-tax cash flow + tax_benefit.
-    taxable_y1_financed = noi - year1_interest - bonus_depreciation
-    taxable_y1_cash     = noi - bonus_depreciation
+    taxable_y1_financed = noi - year1_interest - year1_depreciation
+    taxable_y1_cash     = noi - year1_depreciation
     tax_y1_financed = taxable_y1_financed * MARGINAL_TAX_RATE   # negative => benefit
     tax_y1_cash     = taxable_y1_cash * MARGINAL_TAX_RATE
     aftertax_cf_y1_financed = pretax_cf_financed - tax_y1_financed
@@ -514,8 +527,8 @@ def analyze(listing, market=None):
     # --- Stabilized (year 2+): building basis fully expensed, so NO further
     # depreciation. Interest stays roughly year-1 level early in the amortization,
     # which we use as a representative stabilized figure. ---
-    taxable_stab_financed = noi - year1_interest
-    taxable_stab_cash     = noi
+    taxable_stab_financed = noi - year1_interest - straight_line_depr
+    taxable_stab_cash     = noi - straight_line_depr
     tax_stab_financed = taxable_stab_financed * MARGINAL_TAX_RATE
     tax_stab_cash     = taxable_stab_cash * MARGINAL_TAX_RATE
     aftertax_cf_stab_financed = pretax_cf_financed - tax_stab_financed
@@ -593,6 +606,8 @@ def analyze(listing, market=None):
             "building_basis": round(building_basis),
             "land_basis": round(price * LAND_ALLOCATION),
             "bonus_depreciation_year1": round(bonus_depreciation),
+            "straight_line_depreciation_per_year": round(straight_line_depr),
+            "depreciation_year1": round(year1_depreciation),
         },
         "operating_income": {
             "financed": {
@@ -713,8 +728,36 @@ def compute_changes(listing, prior_map, compared_week):
     return ch
 
 
+def is_rentable(listing):
+    """False for vacant land: nothing to rent, so a short-term-rental model of it
+    is meaningless (6 of 22 listings were land, modelled as rentals)."""
+    pt = str(listing.get("property_type") or "").lower()
+    if any(k in pt for k in ("land", "lot", "vacant")):
+        return False
+    return bool((listing.get("beds") or 0) > 0 or (listing.get("sqft") or 0) > 0)
+
+
+def screen_listings(listings):
+    """(rentable, excluded). Drops vacant land and repeat listings of one address
+    (the first is kept). `excluded` rows carry the reason."""
+    keep, excluded, seen = [], [], set()
+    for l in listings:
+        key = _addr_key(l.get("address"))
+        if not is_rentable(l):
+            excluded.append({"address": l.get("address"), "list_price": l.get("list_price"),
+                             "property_type": l.get("property_type"), "reason": "vacant land"})
+        elif key in seen:
+            excluded.append({"address": l.get("address"), "list_price": l.get("list_price"),
+                             "property_type": l.get("property_type"), "reason": "duplicate listing"})
+        else:
+            seen.add(key)
+            keep.append(l)
+    return keep, excluded
+
+
 def build_report(asof_date, archive=True, history_dir=None):
     listings, source = fetch_listings()
+    listings, excluded = screen_listings(listings)
     market, market_label = resolve_market_revenue()
     analyzed = [analyze(l, market) for l in listings]
 
@@ -791,6 +834,9 @@ def build_report(asof_date, archive=True, history_dir=None):
         "assumptions": {
             "basis_split": {"land": LAND_ALLOCATION, "building": BUILDING_ALLOCATION},
             "bonus_depreciation_rate": BONUS_DEPR_RATE,
+            "bonus_eligible_share_of_building": BONUS_ELIGIBLE_SHARE,
+            "building_life_years": BUILDING_LIFE_YEARS,
+            "modelled_not_listing_data": ["gross STR revenue", "operating expenses", "property tax"],
             "marginal_tax_rate": MARGINAL_TAX_RATE,
             "tax_treatment": "STR losses assumed non-passive (avg stay <=7d + material participation)",
             "financing": {
@@ -813,9 +859,9 @@ def build_report(asof_date, archive=True, history_dir=None):
             "near_breakeven_band": NEAR_BREAKEVEN_BAND,
             "breakeven_definition": (
                 "Three tests are reported. purchase_year = year-1 after-tax operating "
-                "cash flow (financed) >= $0, i.e. break-even net of tax WITH the 100% "
-                "bonus-depreciation benefit (nearly always true — the shield swamps the "
-                "operating loss). sustained = stabilized (yr 2+, no depreciation) after-tax "
+                "cash flow (financed) >= $0, i.e. break-even net of tax WITH bonus "
+                "depreciation on the cost-segregated share of the building. sustained = "
+                "stabilized (yr 2+, straight-line depreciation only) after-tax "
                 "cash flow (financed) >= $0 (the strict self-funding test). "
                 "operating_allcash = stabilized after-tax cash flow >= $0 unlevered. "
                 "break_even_down_pct = equity fraction needed to self-fund annually; "
@@ -831,9 +877,13 @@ def build_report(asof_date, archive=True, history_dir=None):
             "median_list_price": _median([a["list_price"] for a in analyzed]),
             "median_gross_str_revenue": _median([a["str_revenue"]["gross_annual"] for a in analyzed]),
             "median_noi": _median([a["noi"] for a in analyzed]),
+            # Over EVERY listing: one that cannot break even at any down payment
+            # counts as 100%. The median used to cover only the ones that could.
             "median_breakeven_down_pct": _median(
-                [a["breakeven"]["down_payment_pct"] for a in analyzed
-                 if a["breakeven"]["down_payment_pct"] is not None]),
+                [a["breakeven"]["down_payment_pct"] if a["breakeven"]["down_payment_pct"] is not None else 1.0
+                 for a in analyzed]),
+            "cannot_break_even_at_any_down": sum(1 for a in analyzed if a["breakeven"]["down_payment_pct"] is None),
+            "excluded": excluded,
             "compared_to_week": compared_week,
             "new_listings": new_count if compared_week else None,
             "price_drops": drop_count if compared_week else None,
@@ -884,14 +934,15 @@ def render_markdown(report):
     lines.append(f"- **{s['listing_count']}** listings assessed")
     lines.append(f"- **{s['breakeven_operating_allcash']}** can break even on an annual operating basis net of tax when **unlevered** (the asset covers operating costs after tax)")
     lines.append(f"- **{s['breakeven_sustained']}** self-fund every year as **financed** at {int(report['assumptions']['financing']['down_payment_pct']*100)}% down / {_pct(report['assumptions']['financing']['mortgage_rate'])} (strict sustained break-even)")
-    lines.append(f"- **{s['breakeven_purchase_year']}** break even in the **purchase year** net of tax once the 100% bonus-depreciation benefit is applied")
+    lines.append(f"- **{s['breakeven_purchase_year']}** break even in the **purchase year** net of tax, with bonus depreciation on the cost-segregated share of the building")
     lines.append(f"- Median list price **{_money(s['median_list_price'])}** · median gross STR revenue **{_money(s['median_gross_str_revenue'])}** · median NOI **{_money(s['median_noi'])}** · median break-even down payment **{_pct(s['median_breakeven_down_pct'])}**")
     if s.get("compared_to_week"):
         lines.append(f"- **Week over week** (vs. {s['compared_to_week']}): 🆕 **{s['new_listings']}** new · 🔻 **{s['price_drops']}** price drop(s)")
     lines.append("")
-    lines.append("> **Read this first.** In this market, 100% bonus depreciation makes essentially every "
-                 "property cash-positive *in the purchase year* (a one-time tax windfall of 60% of price "
-                 "× your rate). The real question is what happens *after* that. The two columns that "
+    lines.append("> **Read this first.** Bonus depreciation is applied only to the share of the building a "
+                 "cost-segregation study would carve out (see Assumptions), so the purchase-year tax benefit "
+                 "is modest. Revenue, expenses and property tax are model estimates, not listing data. "
+                 "The two columns that "
                  "matter are **stabilized after-tax cash flow** (does it self-fund every year?) and the "
                  "**break-even down payment** (how much equity it takes to get there). Lower list price / "
                  "higher-yield units come closest.")
@@ -954,8 +1005,7 @@ def render_markdown(report):
                      f"({int(report['assumptions']['financing']['down_payment_pct']*100)}% down / "
                      f"{_pct(report['assumptions']['financing']['mortgage_rate'])})._ "
                      "Below are the closest to annual operating break-even — ranked by stabilized "
-                     "after-tax cash flow and the equity needed to self-fund. Every one still breaks "
-                     "even in the **purchase year** on the bonus-depreciation shield.")
+                     "after-tax cash flow and the equity needed to self-fund.")
         lines.append("")
         lines.append("| Property | Type | Bd | List | Stabilized after-tax CF | Break-even down | Yrs funded by yr-1 shield |")
         lines.append("|---|---|--:|--:|--:|--:|--:|")
@@ -1037,7 +1087,8 @@ def render_markdown(report):
     lines.append(f"- **Depreciation basis split:** {int(a['basis_split']['land']*100)}% land / "
                  f"{int(a['basis_split']['building']*100)}% building · "
                  f"**{int(a['bonus_depreciation_rate']*100)}% bonus depreciation** taken in the purchase year "
-                 f"on the building basis. Land is not depreciable.")
+                 f"on **{int(a['bonus_eligible_share_of_building']*100)}%** of the building basis (the cost-segregated share); "
+                 f"the rest is depreciated straight-line over {a['building_life_years']:g} years. Land is not depreciable.")
     lines.append(f"- **Marginal tax rate:** {_pct(a['marginal_tax_rate'])} — {a['tax_treatment']}. "
                  f"The year-1 depreciation loss is assumed usable against ordinary income; the resulting "
                  f"tax reduction is treated as a cash benefit.")
