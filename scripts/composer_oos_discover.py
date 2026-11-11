@@ -261,6 +261,37 @@ def _update_survival(seed_items, asof):
     return reg
 
 
+def _mark_reachability(reachable, unreachable, asof):
+    """Record, per symphony, whether its backtest still runs. The panel's
+    membership is re-stamped from a static seed every run, so last_seen never
+    falls behind and a delisting could not be seen. A symphony Composer no longer
+    serves fails its backtest: `unreachable_since` is the first run that happened
+    and is cleared when a backtest works again."""
+    if not os.path.exists(SURVIVAL):
+        return 0
+    try:
+        with open(SURVIVAL) as f:
+            reg = json.load(f)
+    except Exception:
+        return 0
+    for sid in reachable:
+        if sid in reg:
+            reg[sid].pop("unreachable_since", None)
+            reg[sid]["last_backtest_ok"] = asof
+    for sid in unreachable:
+        if sid in reg:
+            reg[sid].setdefault("unreachable_since", asof)
+    gone = sum(1 for e in reg.values() if e.get("unreachable_since"))
+    try:
+        with open(SURVIVAL, "w") as f:
+            json.dump(reg, f, indent=0, sort_keys=True)
+    except Exception as e:
+        print(f"[discover] could not write survival registry: {e}", file=sys.stderr)
+    print(f"[discover] reachability: {len(reachable)} backtests ran, {len(unreachable)} failed this run, "
+          f"{gone} symphonies currently unreachable")
+    return gone
+
+
 def discover_list():
     return _load_seed() or _auto_fetch()
 
@@ -304,6 +335,7 @@ def main(rewrite=False):
         watch = kept
 
     rows = []
+    reachable, unreachable = set(), set()
     for i, (sid, oosdate, name) in enumerate(watch, 1):
         time.sleep(0.5)
         try:
@@ -311,10 +343,13 @@ def main(rewrite=False):
         except Exception as e:
             print(f"[{i}/{len(watch)}] {name}: FAIL {type(e).__name__}: {str(e)[:80]}",
                   file=sys.stderr)
+            unreachable.add(sid)
             continue
         if not curve:
             print(f"[{i}/{len(watch)}] {name}: empty curve", file=sys.stderr)
+            unreachable.add(sid)
             continue
+        reachable.add(sid)
         seed_date = oosdate
         # Other authors' symphonies: look back only a few versions (1,000+ symphonies a run).
         oosdate, oos_src = oos.effective_oos_date(sid, seed_date, max_walk=DISCOVER_VERSION_WALK)
@@ -351,6 +386,8 @@ def main(rewrite=False):
         rows.append(row)
         print(f"[{i}/{len(watch)}] {name}: OOS {out.get('n_days')}d "
               f"cagr {out.get('cagr_pct')} sharpe {out.get('oos_sharpe')} conf {conf}")
+
+    _mark_reachability(reachable, unreachable, asof)
 
     # P1-4: stamp run-over-run Sharpe deltas, then append (keeping prior runs)
     # with dedup on (sym_id, date). --rewrite restores the old truncate behaviour.

@@ -434,6 +434,9 @@ def _corr_beta(sym_curve: dict[str, float], bench_curve: dict[str, float]):
             round(beta, 3) if beta is not None else None, n)
 
 
+MIN_BEAR_ANNUALIZE_DAYS = 252   # days SPY was below its 200-day average before a bear CAGR is quoted
+
+
 def _raw_annualized(curve: dict[str, float]):
     """UNGATED annualized CAGR% and Sharpe from a curve — used only to size the
     CAGR standard error / low-power flag, where the whole point is to quantify
@@ -482,7 +485,7 @@ def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
          "oos_vol_pct": None, "cagr_se_pct": None, "gap_z": None, "low_power": None,
          "sharpe_lcb": None,
          "oos_spans_bear": None, "oos_worst_20d_pct": None,
-         "oos_bear_cagr_pct": None, "oos_bear_days": None,
+         "oos_bear_cagr_pct": None, "oos_bear_cum_pct": None, "oos_bear_days": None,
          "recent_days": None, "recent_cum_pct": None, "recent_sharpe": None,
          "recent_maxdd_pct": None, "funding_block": None, "funding_caution": None,
          "recent_spy_cum_pct": None, "recent_beta": None, "recent_market_pct": None,
@@ -573,8 +576,12 @@ def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
         cum = 1.0
         for r in brets:
             cum *= (1 + r)
+        # Always the plain cumulative return over those days. Annualized only
+        # with a full year of them: annualizing 60–85 scattered days produced
+        # figures like +106% (and +1,200% on Discover) that nothing supports.
+        f["oos_bear_cum_pct"] = round((cum - 1) * 100, 2)
         yrs = len(brets) / 252.0
-        if yrs > 0 and cum > 0:
+        if len(brets) >= MIN_BEAR_ANNUALIZE_DAYS and cum > 0:
             f["oos_bear_cagr_pct"] = round((cum ** (1 / yrs) - 1) * 100, 2)
 
     # ── P2-9: current-regime funding gate ──
