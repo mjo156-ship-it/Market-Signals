@@ -369,7 +369,9 @@ def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
          "oos_spans_bear": None, "oos_worst_20d_pct": None,
          "oos_bear_cagr_pct": None, "oos_bear_days": None,
          "recent_days": None, "recent_cum_pct": None, "recent_sharpe": None,
-         "recent_maxdd_pct": None, "funding_block": None}
+         "recent_maxdd_pct": None, "funding_block": None, "funding_caution": None,
+         "recent_spy_cum_pct": None, "recent_beta": None, "recent_market_pct": None,
+         "recent_vs_market_pct": None}
     if not oos_curve:
         return f
     ds = sorted(oos_curve)
@@ -473,8 +475,47 @@ def oos_extra_fields(oos_curve: dict[str, float], out_stats: dict,
         f["recent_sharpe"] = rstat.get("sharpe")
         f["recent_maxdd_pct"] = rstat.get("maxdd_pct")
         if rstat.get("cum_pct") is not None:
-            f["funding_block"] = bool(rstat["cum_pct"] < 0)
+            f.update(funding_gate(rstat["cum_pct"], recent, spy, f.get("spy_beta_oos")))
     return f
+
+
+RECENT_BETA_MIN_DAYS = 40      # fewer shared days than this: fall back to the OOS beta
+
+
+def funding_gate(cum_pct, recent_curve, spy, fallback_beta=None):
+    """Block or caution for the current-regime window.
+
+    Owner decision 2026-11-10. A negative ~6-month return used to block funding
+    outright; after one bad week that barred 133 of 225 watchlist rows, most of
+    them only because the market fell. Now:
+
+      funding_block    negative AND worse than SPY's return over the same days
+                       scaled by the symphony's beta (it lost more than its
+                       market exposure explains)
+      funding_caution  negative, but no worse than the market explains
+
+    Beta is fitted on the window itself when there are enough shared days, else
+    the OOS beta, else 1.0. With no SPY data the old rule stands (negative =
+    block), so a missing benchmark never unblocks anything."""
+    out = {"funding_block": bool(cum_pct < 0), "funding_caution": False,
+           "recent_spy_cum_pct": None, "recent_beta": None, "recent_market_pct": None,
+           "recent_vs_market_pct": None}
+    ds = sorted(recent_curve)
+    bench = {d: v for d, v in (spy or {}).items() if ds[0] <= d <= ds[-1]} if ds else {}
+    bstat = _curve_stats(bench) if len(bench) >= 2 else {}
+    if bstat.get("cum_pct") is None:
+        return out
+    _corr, beta, n = _corr_beta(recent_curve, bench)
+    if beta is None or (n or 0) < RECENT_BETA_MIN_DAYS:
+        beta = fallback_beta if fallback_beta is not None else 1.0
+    market = beta * bstat["cum_pct"]
+    out.update({"recent_spy_cum_pct": bstat["cum_pct"], "recent_beta": round(float(beta), 3),
+                "recent_market_pct": round(market, 2),
+                "recent_vs_market_pct": round(cum_pct - market, 2)})
+    if cum_pct < 0:
+        out["funding_block"] = bool(cum_pct < market)
+        out["funding_caution"] = not out["funding_block"]
+    return out
 
 
 # ──────────────────────────────────────────────────────────────────────
