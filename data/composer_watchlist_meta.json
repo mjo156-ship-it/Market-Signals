@@ -1,0 +1,318 @@
+{
+ "as_of": "2026-11-11",
+ "captured": 225,
+ "auto_added": [
+  {
+   "id": "WGnP4VtdAojr4R5XfT9S",
+   "name": "Copy of Volatility Short-Term (SPY RSI + Vixation Strategies) (SVIX VXX BIL)",
+   "created_at": "2026-08-05",
+   "is_draft": true
+  },
+  {
+   "id": "EmG5M0q044MMPJmAh8T4",
+   "name": "Copy of All of the BSCs",
+   "created_at": "2026-08-05",
+   "is_draft": true
+  },
+  {
+   "id": "9BmmWzSRm83HOjXUoMwQ",
+   "name": "Copy of Volatility Short-Term (SPY RSI + Vixation Strategies) (SVIX VXX BIL)",
+   "created_at": "2026-08-05",
+   "is_draft": true
+  },
+  {
+   "id": "q4WT86dBwm7asxkT6d8a",
+   "name": "Copy of All of the BSCs",
+   "created_at": "2026-08-05",
+   "is_draft": true
+  },
+  {
+   "id": "h1tn7o3nHzVA1ybDE78W",
+   "name": "Copy of Volatility Short-Term (SPY RSI + Vixation Strategies) (SVIX VXX BIL)",
+   "created_at": "2026-08-05",
+   "is_draft": true
+  },
+  {
+   "id": "o6ApqR61JAOrw2W0eIHT",
+   "name": "Copy of Conservative - Sector Rotation",
+   "created_at": "2026-08-05",
+   "is_draft": true
+  },
+  {
+   "id": "DC1JkBqfFTQPXlvmUbQH",
+   "name": "Copy of All of the BSCs",
+   "created_at": "2026-08-05",
+   "is_draft": true
+  },
+  {
+   "id": "pyq9se0ZJDdqXFnsdbfN",
+   "name": "Copy of Corp Bond Compares 5/31/2018",
+   "created_at": "2026-08-05",
+   "is_draft": true
+  },
+  {
+   "id": "uYqn3eTeKs8EP8fO291d",
+   "name": "Copy of V1 QLD bot | QLD FTLT",
+   "created_at": "2026-08-05",
+   "is_draft": true
+  },
+  {
+   "id": "4mNceYq5ZCOYY310R2gV",
+   "name": "Top of Tech Distilled (QQQ core, 20% UVXY)",
+   "created_at": "2026-08-09",
+   "is_draft": true
+  },
+  {
+   "id": "MD5usMKeCUksZKqwhInf",
+   "name": "GOLD Jerry Plus Ovaltine 18/30/-.18",
+   "created_at": "2026-08-10",
+   "is_draft": true
+  },
+  {
+   "id": "A9TPiL43ovwjH0gT9uUN",
+   "name": "Tactical Hedge Boost (VolExp OR Credit)2",
+   "created_at": "2026-08-10",
+   "is_draft": true
+  },
+  {
+   "id": "noE3CRtC1UePPdYkupjS",
+   "name": "XLP predicts UPRO 67/30/.9",
+   "created_at": "2026-08-13",
+   "is_draft": true
+  },
+  {
+   "id": "1VDBH6OY0ULqSYqbIHPw",
+   "name": "Risk-On Leverage Gate (63/30/.64)",
+   "created_at": "2026-08-14",
+   "is_draft": true
+  },
+  {
+   "id": "ksBujW7B07HHMgQV1Q2E",
+   "name": "Gas or Gold 13/45/.02",
+   "created_at": "2026-08-15",
+   "is_draft": true
+  },
+  {
+   "id": "cfledLBqTZkrzXsXbIiX",
+   "name": "MF bottom w/ GLD/QQQ/ERG Top 30/17/.19",
+   "created_at": "2026-08-15",
+   "is_draft": true
+  },
+  {
+   "id": "llAs222ilGM6ecIu4waT",
+   "name": "Copy of T2 Compares EQT/COM/EM/BND (44.3% RR, 20.9% MD, 19.7% SD, 2009 BT)",
+   "created_at": "2026-08-15",
+   "is_draft": true
+  },
+  {
+   "id": "LkGEqX0fZezvnkbGAS5k",
+   "name": "Rate-Regime Managed Futures",
+   "created_at": "2026-08-17",
+   "is_draft": true
+  },
+  {
+   "id": "asD99Y0v0xY0cObhYdwp",
+   "name": "D-QLD V6 (fixed defensive: GLD/BTAL/UUP/XLP/XLU) no vix or lev, 30/14",
+   "created_at": "2026-08-20",
+   "is_draft": false
+  },
+  {
+   "id": "8eTs1hsZZuoKRaqtiSX8",
+   "name": "D-QLD V8 (fixed defensive: GLD/BTAL) light vix/lev 50/19/,35",
+   "created_at": "2026-08-20",
+   "is_draft": false
+  },
+  {
+   "id": "POuS2jIKACSexOfR5Xhx",
+   "name": "Real Rate Regime (TIP Ensemble 40/60/90/120)",
+   "created_at": "2026-08-20",
+   "is_draft": true
+  },
+  {
+   "id": "iK5qlQJEuKMkGlygf3VH",
+   "name": "CLSE Dual SMA200 Gate 23/8/.55 to 2022",
+   "created_at": "2026-08-24",
+   "is_draft": true
+  },
+  {
+   "id": "1rAfWJRCHmF0KOI4Ua9I",
+   "name": "Dollar Tide B6 - SPY200 gate + GLD double (3x)",
+   "created_at": "2026-08-26",
+   "is_draft": true
+  },
+  {
+   "id": "3MArKZc73qRXtyyTqCLs",
+   "name": "CTA or Equity",
+   "created_at": "2026-08-26",
+   "is_draft": true
+  },
+  {
+   "id": "Pnu0jfAVRyCR6dSQZJwZ",
+   "name": "New SymphonyA",
+   "created_at": "2026-08-26",
+   "is_draft": true
+  },
+  {
+   "id": "gPMbvOE9IdAOsMENDdqD",
+   "name": "Copy of Scaled In Dip Buys 2x",
+   "created_at": "2026-09-19",
+   "is_draft": true
+  },
+  {
+   "id": "o6o1xQca9VGog5WiY7Ta",
+   "name": "Copy of Beat the Market (since 2002)",
+   "created_at": "2026-09-19",
+   "is_draft": true
+  },
+  {
+   "id": "3J8RjKn46DYk0UUJ9SJf",
+   "name": "Copy of VIX Mid-Term Futures: SPY RSI predicts VIX (3 tickers)",
+   "created_at": "2026-09-19",
+   "is_draft": true
+  },
+  {
+   "id": "fKN63pqwowBQglSjLSnU",
+   "name": "Dip-Buy w/ SPLV Washout Upgrade (test)",
+   "created_at": "2026-09-19",
+   "is_draft": true
+  },
+  {
+   "id": "fqyA3Eediw4MsieMmznJ",
+   "name": "MR vs Momentum Arena (top 3 of 6 per arm, 21d MA-return)",
+   "created_at": "2026-09-25",
+   "is_draft": true
+  },
+  {
+   "id": "VNQuGvQX0zuNZ0lY7XQS",
+   "name": "QLD Trend+Dip / IEF-Gated (N) 32/26/.6",
+   "created_at": "2026-09-25",
+   "is_draft": true
+  },
+  {
+   "id": "gSeYtJKT8OunJF27J2E3",
+   "name": "QQQ Dip Buy 50% QLD (single rung) on SPY/SMA200 base 22/20/.7",
+   "created_at": "2026-09-25",
+   "is_draft": true
+  },
+  {
+   "id": "kstc6J4dBSXPTzDFNcih",
+   "name": "Copy of Neo Pops - SCHD",
+   "created_at": "2026-09-30",
+   "is_draft": true
+  },
+  {
+   "id": "hrdL82pNKMCewocP7MP4",
+   "name": "Copy of SPY_2_Day_RSI - Ganesh",
+   "created_at": "2026-09-30",
+   "is_draft": true
+  },
+  {
+   "id": "HXGBb284MQHa2SnGa8iu",
+   "name": "A - HYGH v TMV + PFIX/SHY (61/11/.23)",
+   "created_at": "2026-10-05",
+   "is_draft": false
+  },
+  {
+   "id": "LBNCduRvVw7g3FNaw79r",
+   "name": "Managed Futures or QQQ (37/17/.42)",
+   "created_at": "2026-10-12",
+   "is_draft": false
+  },
+  {
+   "id": "jAy7FqYufn8pwyo2ZnTo",
+   "name": "Copy of smarter TQQQ - longer backtest period",
+   "created_at": "2026-10-12",
+   "is_draft": true
+  },
+  {
+   "id": "OG6XUn0iOH8QLjPuS0GK",
+   "name": "Copy of V1 | \ud83e\ude96\ud83c\udf46 Operation Eggplant | Deez | DO NOT FOLLOW 12OCT2022",
+   "created_at": "2026-10-12",
+   "is_draft": true
+  },
+  {
+   "id": "IgahGb51lctwW1fx5G9h",
+   "name": "Copy of T2 Compares EQT/COM/EM/BND (44.3% RR, 20.9% MD, 19.7% SD, 2009 BT)",
+   "created_at": "2026-10-14",
+   "is_draft": true
+  },
+  {
+   "id": "tBlaIcDiFooykVa2nPWx",
+   "name": "Copy of Volatility Short-Term (SPY RSI + Vixation Strategies) (SVIX VXX BIL)",
+   "created_at": "2026-10-19",
+   "is_draft": true
+  },
+  {
+   "id": "YoUxHnrAbkkgQIqOYA5I",
+   "name": "MF lagging two (12/12/.0)",
+   "created_at": "2026-10-20",
+   "is_draft": true
+  },
+  {
+   "id": "XuKgteN8Q49FJBan7lbf",
+   "name": "Copy of [Reduced V4] ManuMB BlackSwan Catcher",
+   "created_at": "2026-10-22",
+   "is_draft": true
+  },
+  {
+   "id": "XsLZf9CClWwqn2OlVjiP",
+   "name": "Gasoline Trend v3 (UGA / GLD / TMF / BIL)",
+   "created_at": "2026-10-23",
+   "is_draft": true
+  },
+  {
+   "id": "ggn2p6IuWtB4vBrB3ykI",
+   "name": "Copy of 10d RSI SPY v CORP",
+   "created_at": "2026-10-23",
+   "is_draft": true
+  },
+  {
+   "id": "emnWSS13OA4iSkRMojNW",
+   "name": "Copy of Hold My Cash #1",
+   "created_at": "2026-10-24",
+   "is_draft": true
+  },
+  {
+   "id": "Uyb1ywGtUhf8oqvwwpZf",
+   "name": "Metals Deep-Dip (SLV / PPLT / PALL)",
+   "created_at": "2026-10-24",
+   "is_draft": true
+  },
+  {
+   "id": "towCYx1NSMLpgJiw4wa4",
+   "name": "Gasoline Trend v4 (UGA/GLD overlap 50-50, TMF, BIL)",
+   "created_at": "2026-10-24",
+   "is_draft": true
+  },
+  {
+   "id": "gR3JVMaYfdxpb7BO1fkI",
+   "name": "Copy of Gang Bang",
+   "created_at": "2026-10-26",
+   "is_draft": true
+  },
+  {
+   "id": "HSNpZ8Mj6ttW2tJcJvl3",
+   "name": "Equity or Safety, SPY/CORP (21/15/.2)",
+   "created_at": "2026-10-26",
+   "is_draft": true
+  },
+  {
+   "id": "nUgrHSQktpufy6TYNf6I",
+   "name": "Copy of Long term (tested to end 2008) risk on risk off algo - basic etfs",
+   "created_at": "2026-10-26",
+   "is_draft": true
+  },
+  {
+   "id": "WlaTiMnepxjYLNswpIPq",
+   "name": "Intl Momentum Top 2 (20d)",
+   "created_at": "2026-11-07",
+   "is_draft": true
+  },
+  {
+   "id": "jEYakzwl9OTFU8MCarRZ",
+   "name": "QQQ >150 SMA & RSI<30 (28/22/.7) no lev/vix",
+   "created_at": "2026-11-09",
+   "is_draft": true
+  }
+ ]
+}
