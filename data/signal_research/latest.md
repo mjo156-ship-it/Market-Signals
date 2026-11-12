@@ -1,20 +1,20 @@
 # Signal Research — 2026-11-12
 
-_Generated 2026-11-12T01:52:58+00:00 · 91 tickers · 1 firing · 6 approaching_
+_Generated 2026-11-12T21:09:09+00:00 · 91 tickers · 1 firing · 6 approaching_
 
 ## Firing today (backtest-gated)
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Rotation: entered top-8 12-mo momentum (long) | FAS | FAS | manual_swing | 21d | 65% | +3.3% | +0.4pp | 105 |
+| Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.3% | +0.1pp | 413 |
 
 ## Approaching / primed (passed gate, just inside threshold)
 
 | Signal | Ticker | Instrument | Mode | Horizon | Win% | Avg | Edge | N |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Rotation: entered top-8 12-mo momentum (long) | FNGO | FNGO | manual_swing | 21d | 68% | +7.4% | +3.0pp | 62 |
-| Donchian 52-week breakout (long) | BIL | BIL | composer_ready | 20d | 99% | +0.3% | +0.1pp | 412 |
-| Donchian 52-week breakout (long) | SHV | SHV | composer_ready | 20d | 95% | +0.2% | +0.1pp | 385 |
+| Rotation: entered top-8 12-mo momentum (long) | FNGO | FNGO | manual_swing | 21d | 67% | +7.1% | +2.6pp | 63 |
+| 4+ down-day streak (long) | DRN | DRN | composer_ready | 5d | 60% | +1.0% | +0.4pp | 106 |
+| Donchian 52-week breakout (long) | SHV | SHV | composer_ready | 20d | 95% | +0.2% | +0.1pp | 386 |
 | Donchian 52-week breakout (long) | SHY | SHY | composer_ready | 20d | 71% | +0.3% | +0.1pp | 229 |
 | Rotation: entered top-8 3-mo momentum (long) | IAK | IAK | manual_swing | 21d | 68% | +0.9% | +0.1pp | 47 |
 | Donchian 52-week breakout (long) | MNA | MNA | composer_ready | 20d | 68% | +0.2% | +0.0pp | 47 |

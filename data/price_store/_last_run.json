@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-12T10:03:06.923325",
+  "timestamp": "2026-11-12T21:07:44.769645",
   "ok": [
     "AMD",
     "AMZN",
@@ -95,22 +95,12 @@
   ],
   "failed": [],
   "skipped": [],
-  "actions_detected": [
-    "BIL",
-    "BND",
-    "BOND",
-    "CORP",
-    "HYG",
-    "LQD",
-    "SHV",
-    "SHY",
-    "TLT"
-  ],
-  "quarantined": 11,
-  "rows_written": 46162,
+  "actions_detected": [],
+  "quarantined": 0,
+  "rows_written": 457,
   "coverage": {
     "tickers": 91,
     "latest_date": "2026-11-12",
-    "total_rows": 406449
+    "total_rows": 406539
   }
 }
