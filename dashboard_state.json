@@ -1,6 +1,6 @@
 {
-  "generated_at_local": "2026-11-12T21:40:11.299484",
-  "generated_at_utc": "2026-11-12T21:40:11.299493Z",
+  "generated_at_local": "2026-11-13T00:58:24.484818",
+  "generated_at_utc": "2026-11-13T00:58:24.484825Z",
   "mode": "close",
   "summary": {
     "total_alerts": 4,
@@ -11,7 +11,7 @@
   "alerts": [
     {
       "title": "\ud83d\udfe1 BTC OVERSOLD",
-      "message": "BTC RSI=27.0 < 30 (wait for UVXY < 40 for better signal)",
+      "message": "BTC RSI=26.0 < 30 (wait for UVXY < 40 for better signal)",
       "category": "watch"
     },
     {
@@ -230,13 +230,13 @@
       "pct_above_sma200": 6.29
     },
     "BTC-USD": {
-      "price": 71506.3,
-      "rsi10": 27.0,
-      "rsi50": 44.4,
-      "sma200": 73081.79,
-      "sma50": 80861.09,
-      "ema21": 76901.72,
-      "pct_above_sma200": -2.16
+      "price": 71049.95,
+      "rsi10": 26.0,
+      "rsi50": 44.0,
+      "sma200": 73079.51,
+      "sma50": 80851.96,
+      "ema21": 76860.24,
+      "pct_above_sma200": -2.78
     },
     "AMD": {
       "price": 585.3,
@@ -541,7 +541,7 @@
     "ibs_sma3": {
       "SPY": 0.5689,
       "QQQ": 0.5628,
-      "SMH": 0.5749,
+      "SMH": 0.575,
       "XLK": 0.5683
     },
     "rsi10": {
@@ -554,7 +554,7 @@
     "faltering": {
       "gate_entry_TQQQ": "FALTERING"
     },
-    "as_of": "2026-11-12"
+    "as_of": "2026-11-13"
   },
   "merged_triggers": {
     "selected_branch": "L5_DEFAULT",
