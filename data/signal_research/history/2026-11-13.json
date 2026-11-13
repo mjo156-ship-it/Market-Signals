@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-13T20:41:57+00:00",
+  "generated_at_utc": "2026-11-13T21:07:07+00:00",
   "data_through": "2026-11-13",
   "universe_size": 91,
   "excluded_tickers": [],
@@ -36,7 +36,7 @@
         "median_return": 0.0159,
         "baseline_return": 0.006,
         "baseline_win_rate": 0.5551,
-        "edge": 0.0043,
+        "edge": 0.0042,
         "fired_today": true,
         "events": [
           {
@@ -571,7 +571,7 @@
           }
         ]
       },
-      "score": 0.0443
+      "score": 0.0432
     },
     {
       "family": "volatility_breakout",
@@ -2669,7 +2669,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 110.17 vs 52w high 110.16",
+      "today_value": "close 110.18 vs 52w high 110.16",
       "backtest": {
         "n": 386,
         "win_rate": 0.951,
@@ -4624,7 +4624,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "12-mo momentum +33.7%, rank #10",
+      "today_value": "12-mo momentum +33.9%, rank #10",
       "backtest": {
         "n": 39,
         "win_rate": 0.692,
@@ -4842,7 +4842,7 @@
       "direction": "short",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "%B 0.99",
+      "today_value": "%B 0.98",
       "backtest": {
         "n": 137,
         "win_rate": 0.606,
@@ -6413,7 +6413,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "composer_ready",
-      "today_value": "dist-z -1.79",
+      "today_value": "dist-z -1.76",
       "backtest": {
         "n": 25,
         "win_rate": 0.64,
@@ -6561,7 +6561,7 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 81.18 vs 52w high 81.68",
+      "today_value": "close 81.17 vs 52w high 81.68",
       "backtest": {
         "n": 229,
         "win_rate": 0.712,
@@ -7729,7 +7729,7 @@
       "direction": "long",
       "horizon_days": 21,
       "mode": "manual_swing",
-      "today_value": "3-mo momentum +6.3%, rank #9",
+      "today_value": "3-mo momentum +6.7%, rank #9",
       "backtest": {
         "n": 47,
         "win_rate": 0.681,
@@ -7987,14 +7987,14 @@
       "direction": "long",
       "horizon_days": 20,
       "mode": "composer_ready",
-      "today_value": "close 36.76 vs 52w high 37.19",
+      "today_value": "close 36.78 vs 52w high 37.19",
       "backtest": {
         "n": 47,
         "win_rate": 0.681,
         "avg_return": 0.0023,
         "median_return": 0.0043,
         "baseline_return": 0.0023,
-        "baseline_win_rate": 0.6006,
+        "baseline_win_rate": 0.6009,
         "edge": 0.0001,
         "fired_today": false,
         "events": [
