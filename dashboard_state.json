@@ -1,17 +1,17 @@
 {
-  "generated_at_local": "2026-11-16T23:02:56.382858",
-  "generated_at_utc": "2026-11-16T23:02:56.382866Z",
+  "generated_at_local": "2026-11-16T23:35:42.474684",
+  "generated_at_utc": "2026-11-16T23:35:42.474693Z",
   "mode": "close",
   "summary": {
-    "total_alerts": 7,
-    "buy_count": 3,
+    "total_alerts": 5,
+    "buy_count": 1,
     "exit_count": 0,
     "warning_count": 4
   },
   "alerts": [
     {
       "title": "\ud83d\udfe1 BTC OVERSOLD",
-      "message": "BTC RSI=21.7 < 30 (wait for UVXY < 40 for better signal)",
+      "message": "BTC RSI=21.4 < 30 (wait for UVXY < 40 for better signal)",
       "category": "watch"
     },
     {
@@ -28,16 +28,6 @@
       "title": "\u26a0\ufe0f IBS FALTERING",
       "message": "gate_entry_TQQQ trailing WR 45% vs baseline 59% [lo 54%], n=11 \u2014 investigate/suspend this tier by hand",
       "category": "warning"
-    },
-    {
-      "title": "\ud83d\udfe2 IBS BUY: SPY 1.0x",
-      "message": "Gate IN (SPY IBS 0.35, RSI 39, breadth 0) \u2192 buy SPY at 1.0x base",
-      "category": "buy"
-    },
-    {
-      "title": "\ud83d\udfe2 IBS BUY: TQQQ 1.0x",
-      "message": "Gate IN (QQQ IBS 0.39, RSI 37, breadth 0) \u2192 buy TQQQ at 1.0x base",
-      "category": "buy"
     },
     {
       "title": "\ud83d\udd35 MERGED TRIGGERS: L5_DEFAULT",
@@ -245,13 +235,13 @@
       "pct_above_sma200": 6.49
     },
     "BTC-USD": {
-      "price": 65220.74,
-      "rsi10": 21.7,
-      "rsi50": 40.0,
-      "sma200": 72866.5,
-      "sma50": 79370.31,
-      "ema21": 73320.59,
-      "pct_above_sma200": -10.49
+      "price": 64998.53,
+      "rsi10": 21.4,
+      "rsi50": 39.9,
+      "sma200": 72865.39,
+      "sma50": 79365.87,
+      "ema21": 73300.39,
+      "pct_above_sma200": -10.8
     },
     "AMD": {
       "price": 504.28,
