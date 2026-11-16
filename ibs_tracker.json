@@ -1,14 +1,14 @@
 {
-  "updated_at": "2026-11-14T00:47:02.609358",
+  "updated_at": "2026-11-16T23:02:55.722918",
   "gate_state": {
-    "SPY": "OUT",
-    "QQQ": "OUT",
+    "SPY": "IN",
+    "QQQ": "IN",
     "SMH": "OUT",
     "XLK": "OUT"
   },
   "current_multiplier": {
-    "SPY": 0.0,
-    "TQQQ": 0.0,
+    "SPY": 1.0,
+    "TQQQ": 1.0,
     "SOXL": 0.0,
     "TECL": 0.0
   },
@@ -791,10 +791,10 @@
       "own_rsi10": 34.2,
       "breadth": 2,
       "entry_price": 752.0999755859375,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 0.299,
+      "fwd_5d": 0.078,
+      "fwd_10d": -1.615,
+      "matured": true
     },
     {
       "date": "2026-11-02",
@@ -806,10 +806,10 @@
       "own_rsi10": 28.3,
       "breadth": 2,
       "entry_price": 59.459999084472656,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 1.783,
+      "fwd_5d": -3.212,
+      "fwd_10d": -10.864,
+      "matured": true
     },
     {
       "date": "2026-11-02",
@@ -821,10 +821,10 @@
       "own_rsi10": 28.3,
       "breadth": 2,
       "entry_price": 59.459999084472656,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 1.783,
+      "fwd_5d": -3.212,
+      "fwd_10d": -10.864,
+      "matured": true
     },
     {
       "date": "2026-11-02",
@@ -836,10 +836,10 @@
       "own_rsi10": 31.2,
       "breadth": 2,
       "entry_price": 68.16999816894531,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 7.211,
+      "fwd_5d": -17.609,
+      "fwd_10d": -28.523,
+      "matured": true
     },
     {
       "date": "2026-11-02",
@@ -851,10 +851,10 @@
       "own_rsi10": 28.5,
       "breadth": 2,
       "entry_price": 157.77999877929688,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 3.861,
+      "fwd_5d": -8.562,
+      "fwd_10d": -19.076,
+      "matured": true
     },
     {
       "date": "2026-11-02",
@@ -866,10 +866,10 @@
       "own_rsi10": 28.5,
       "breadth": 2,
       "entry_price": 157.77999877929688,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 3.861,
+      "fwd_5d": -8.562,
+      "fwd_10d": -19.076,
+      "matured": true
     },
     {
       "date": "2026-11-05",
@@ -960,42 +960,72 @@
       "fwd_5d": null,
       "fwd_10d": null,
       "matured": false
+    },
+    {
+      "date": "2026-11-16",
+      "sleeve": "SPY",
+      "underlying": "SPY",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.3528,
+      "own_rsi10": 38.9,
+      "breadth": 0,
+      "entry_price": 739.9500122070312,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
+    },
+    {
+      "date": "2026-11-16",
+      "sleeve": "TQQQ",
+      "underlying": "QQQ",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.3854,
+      "own_rsi10": 36.8,
+      "breadth": 0,
+      "entry_price": 53.029998779296875,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
     }
   ],
   "rolling": {
     "gate_entry_SPY": {
-      "trailing_n": 9,
-      "trailing_wr": 0.5556,
-      "trailing_avg_1d": 0.279,
-      "brier": 0.2515,
-      "status": "OK"
+      "trailing_n": 10,
+      "trailing_wr": 0.6,
+      "trailing_avg_1d": 0.281,
+      "brier": 0.2405,
+      "status": "WATCH"
     },
     "gate_entry_TQQQ": {
-      "trailing_n": 10,
-      "trailing_wr": 0.5,
-      "trailing_avg_1d": 0.494,
-      "brier": 0.258,
+      "trailing_n": 11,
+      "trailing_wr": 0.4545,
+      "trailing_avg_1d": 0.611,
+      "brier": 0.2661,
       "status": "FALTERING"
     },
     "gate_entry_SOXL": {
-      "trailing_n": 9,
-      "trailing_wr": 0.4444,
-      "trailing_avg_1d": -1.857,
-      "brier": 0.2602,
-      "status": "OK"
+      "trailing_n": 10,
+      "trailing_wr": 0.4,
+      "trailing_avg_1d": -0.95,
+      "brier": 0.2655,
+      "status": "FALTERING"
     },
     "gate_entry_TECL": {
-      "trailing_n": 7,
-      "trailing_wr": 0.5714,
-      "trailing_avg_1d": 0.464,
-      "brier": 0.2449,
+      "trailing_n": 8,
+      "trailing_wr": 0.5,
+      "trailing_avg_1d": 0.888,
+      "brier": 0.2546,
       "status": "OK"
     },
     "conviction_1.5x_TQQQ": {
-      "trailing_n": 1,
-      "trailing_wr": 1.0,
-      "trailing_avg_1d": 9.56,
-      "brier": 0.1746,
+      "trailing_n": 2,
+      "trailing_wr": 0.5,
+      "trailing_avg_1d": 5.671,
+      "brier": 0.2567,
       "status": "OK"
     },
     "conviction_2.0x_single_SOXL": {
@@ -1010,6 +1040,13 @@
       "trailing_wr": 0.4,
       "trailing_avg_1d": 7.659,
       "brier": 0.2779,
+      "status": "OK"
+    },
+    "conviction_1.5x_TECL": {
+      "trailing_n": 1,
+      "trailing_wr": 0.0,
+      "trailing_avg_1d": 3.861,
+      "brier": 0.2222,
       "status": "OK"
     }
   },
