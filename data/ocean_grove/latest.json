@@ -2,23 +2,23 @@
   "meta": {
     "report": "Ocean Grove STR Opportunity Report",
     "version": "1.0",
-    "generated_utc": "2026-11-11T15:49:43.989299+00:00",
-    "week_of": "2026-11-09",
-    "asof": "2026-11-11",
+    "generated_utc": "2026-11-16T20:56:59.051043+00:00",
+    "week_of": "2026-11-16",
+    "asof": "2026-11-16",
     "market": "Ocean Grove, NJ (Neptune Township, Monmouth County)",
     "data_source": "rentcast",
     "data_source_note": "Listings resolved from a configured live/file source.",
     "revenue_source": {
       "primary": "seasonal-model",
       "by_basis": {
-        "seasonal-model": 16
+        "seasonal-model": 15
       },
       "provider": null,
       "market_ref": null,
       "as_of": null,
       "note": "STR revenue from the built-in seasonal model. Optionally drop AirDNA MarketMinder figures into data/ocean_grove/airdna_market.json to calibrate to real market data."
     },
-    "listing_count": 16
+    "listing_count": 15
   },
   "assumptions": {
     "basis_split": {
@@ -83,14 +83,14 @@
     "breakeven_definition": "Three tests are reported. purchase_year = year-1 after-tax operating cash flow (financed) >= $0, i.e. break-even net of tax WITH bonus depreciation on the cost-segregated share of the building. sustained = stabilized (yr 2+, straight-line depreciation only) after-tax cash flow (financed) >= $0 (the strict self-funding test). operating_allcash = stabilized after-tax cash flow >= $0 unlevered. break_even_down_pct = equity fraction needed to self-fund annually; horizon_years = years the one-time yr-1 tax windfall keeps the cumulative position non-negative."
   },
   "summary": {
-    "listing_count": 16,
-    "breakeven_purchase_year": 16,
+    "listing_count": 15,
+    "breakeven_purchase_year": 15,
     "breakeven_sustained": 0,
     "breakeven_operating_allcash": 15,
-    "median_list_price": 1095055.5,
-    "median_gross_str_revenue": 87693.0,
-    "median_noi": 16501.5,
-    "median_breakeven_down_pct": 0.77635,
+    "median_list_price": 1079000,
+    "median_gross_str_revenue": 74316,
+    "median_noi": 15067,
+    "median_breakeven_down_pct": 0.724,
     "cannot_break_even_at_any_down": 4,
     "excluded": [
       {
@@ -100,7 +100,7 @@
         "reason": "vacant land"
       },
       {
-        "address": "146 Lawrence Ave, Ocean Grove, NJ 07756",
+        "address": "142 Lawrence Ave, Unit 1, Ocean Grove, NJ 07756",
         "list_price": 799900,
         "property_type": "Land",
         "reason": "vacant land"
@@ -112,7 +112,7 @@
         "reason": "vacant land"
       },
       {
-        "address": "142 Lawrence Ave, Unit 1, Ocean Grove, NJ 07756",
+        "address": "146 Lawrence Ave, Ocean Grove, NJ 07756",
         "list_price": 799900,
         "property_type": "Land",
         "reason": "vacant land"
@@ -130,15 +130,15 @@
         "reason": "vacant land"
       }
     ],
-    "compared_to_week": "2026-11-02",
-    "new_listings": 3,
+    "compared_to_week": "2026-11-09",
+    "new_listings": 1,
     "price_drops": 1
   },
   "listings": [
     {
       "id": "107-Abbott-Ave,-Ocean-Grove,-NJ-07756",
       "address": "107 Abbott Ave, Ocean Grove, NJ 07756",
-      "property_type": "Multi-Family",
+      "property_type": "Single Family",
       "beds": 5,
       "baths": 3,
       "sqft": 1715,
@@ -231,11 +231,11 @@
       "rating": "DEPR_FUNDED_BREAKEVEN",
       "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)",
       "changes": {
-        "compared_to_week": "2026-11-02",
-        "is_new": true,
-        "prior_price": null,
-        "price_change": null,
-        "price_change_pct": null,
+        "compared_to_week": "2026-11-09",
+        "is_new": false,
+        "prior_price": 1079000,
+        "price_change": 0,
+        "price_change_pct": 0.0,
         "price_drop": false
       }
     },
@@ -335,7 +335,111 @@
       "rating": "DEPR_FUNDED_BREAKEVEN",
       "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)",
       "changes": {
-        "compared_to_week": "2026-11-02",
+        "compared_to_week": "2026-11-09",
+        "is_new": false,
+        "prior_price": 869000,
+        "price_change": 0,
+        "price_change_pct": 0.0,
+        "price_drop": false
+      }
+    },
+    {
+      "id": "17-Seaview-Ave,-Apt-5,-Ocean-Grove,-NJ-07756",
+      "address": "17 Seaview Ave, Apt 5, Ocean Grove, NJ 07756",
+      "property_type": "Condo",
+      "beds": 2,
+      "baths": 2,
+      "sqft": 1000,
+      "list_price": 499000,
+      "url": "https://www.rentcast.io/property/17-Seaview-Ave,-Apt-5,-Ocean-Grove,-NJ-07756",
+      "str_revenue": {
+        "gross_annual": 56480,
+        "peak_weekly": 3800,
+        "basis": "seasonal-model",
+        "by_season": {
+          "peak": {
+            "weeks": 11,
+            "weekly_rate": 3800,
+            "occupancy": 0.9,
+            "revenue": 37620
+          },
+          "shoulder": {
+            "weeks": 8,
+            "weekly_rate": 2090,
+            "occupancy": 0.6,
+            "revenue": 10032
+          },
+          "off": {
+            "weeks": 33,
+            "weekly_rate": 1216,
+            "occupancy": 0.22,
+            "revenue": 8828
+          }
+        }
+      },
+      "operating_expenses": {
+        "management": 8472,
+        "platform_fees": 1694,
+        "cleaning_net": 2259,
+        "supplies": 1694,
+        "capex_reserve": 2824,
+        "property_tax": 8932,
+        "insurance": 2994,
+        "maintenance": 4990,
+        "utilities": 4800,
+        "condo_fee": 2004,
+        "ground_lease": 0,
+        "str_license": 750,
+        "total": 41413
+      },
+      "noi": 15067,
+      "financing": {
+        "loan_amount": 374250,
+        "annual_debt_service": 28386,
+        "year1_interest": 24203,
+        "cash_invested": 139720,
+        "down_payment_pct": 0.25,
+        "rate": 0.065
+      },
+      "depreciation": {
+        "building_basis": 299400,
+        "land_basis": 199600,
+        "bonus_depreciation_year1": 59880,
+        "straight_line_depreciation_per_year": 8710,
+        "depreciation_year1": 68590
+      },
+      "operating_income": {
+        "financed": {
+          "pretax_cash_flow": -13319,
+          "year1_tax_benefit": 28759,
+          "aftertax_cash_flow_year1": 15439,
+          "aftertax_cash_flow_stabilized": -6716
+        },
+        "all_cash": {
+          "pretax_cash_flow": 15067,
+          "year1_tax_benefit": 19803,
+          "aftertax_cash_flow_year1": 34870,
+          "aftertax_cash_flow_stabilized": 12715
+        }
+      },
+      "yields": {
+        "cap_rate": 0.0302,
+        "gross_yield": 0.1132,
+        "cash_on_cash": -0.0953
+      },
+      "breakeven": {
+        "down_payment_pct": 0.6336,
+        "horizon_years": 3
+      },
+      "flags": {
+        "breaks_even_purchase_year": true,
+        "breaks_even_sustained": false,
+        "breaks_even_operating_allcash": true
+      },
+      "rating": "NEAR_BREAKEVEN",
+      "rating_label": "\ud83d\udfe1 Near break-even",
+      "changes": {
+        "compared_to_week": "2026-11-09",
         "is_new": true,
         "prior_price": null,
         "price_change": null,
@@ -439,12 +543,12 @@
       "rating": "CASHFLOW_NEGATIVE",
       "rating_label": "\ud83d\udd34 Cash-flow negative",
       "changes": {
-        "compared_to_week": "2026-11-02",
+        "compared_to_week": "2026-11-09",
         "is_new": false,
-        "prior_price": 749000,
-        "price_change": -50000,
-        "price_change_pct": -0.0668,
-        "price_drop": true
+        "prior_price": 699000,
+        "price_change": 0,
+        "price_change_pct": 0.0,
+        "price_drop": false
       }
     },
     {
@@ -543,7 +647,7 @@
       "rating": "DEPR_FUNDED_BREAKEVEN",
       "rating_label": "\ud83d\udfe2 Break-even over hold (depreciation-funded)",
       "changes": {
-        "compared_to_week": "2026-11-02",
+        "compared_to_week": "2026-11-09",
         "is_new": false,
         "prior_price": 1195000,
         "price_change": 0,
@@ -647,7 +751,7 @@
       "rating": "CASHFLOW_NEGATIVE",
       "rating_label": "\ud83d\udd34 Cash-flow negative",
       "changes": {
-        "compared_to_week": "2026-11-02",
+        "compared_to_week": "2026-11-09",
         "is_new": false,
         "prior_price": 600000,
         "price_change": 0,
@@ -662,7 +766,7 @@
       "beds": 1,
       "baths": 1,
       "sqft": 795,
-      "list_price": 485000,
+      "list_price": 449000,
       "url": "https://www.rentcast.io/property/66-Whitefield-Ave,-Apt-125,-Ocean-Grove,-NJ-07756",
       "str_revenue": {
         "gross_annual": 41617,
@@ -695,52 +799,52 @@
         "cleaning_net": 1665,
         "supplies": 1249,
         "capex_reserve": 2081,
-        "property_tax": 8682,
-        "insurance": 2910,
-        "maintenance": 4850,
+        "property_tax": 8037,
+        "insurance": 2694,
+        "maintenance": 4490,
         "utilities": 4800,
         "condo_fee": 3876,
         "ground_lease": 0,
         "str_license": 750,
-        "total": 38355
+        "total": 37134
       },
-      "noi": 3262,
+      "noi": 4483,
       "financing": {
-        "loan_amount": 363750,
-        "annual_debt_service": 27590,
-        "year1_interest": 23524,
-        "cash_invested": 135800,
+        "loan_amount": 336750,
+        "annual_debt_service": 25542,
+        "year1_interest": 21778,
+        "cash_invested": 125720,
         "down_payment_pct": 0.25,
         "rate": 0.065
       },
       "depreciation": {
-        "building_basis": 291000,
-        "land_basis": 194000,
-        "bonus_depreciation_year1": 58200,
-        "straight_line_depreciation_per_year": 8465,
-        "depreciation_year1": 66665
+        "building_basis": 269400,
+        "land_basis": 179600,
+        "bonus_depreciation_year1": 53880,
+        "straight_line_depreciation_per_year": 7837,
+        "depreciation_year1": 61717
       },
       "operating_income": {
         "financed": {
-          "pretax_cash_flow": -24328,
-          "year1_tax_benefit": 32163,
-          "aftertax_cash_flow_year1": 7835,
-          "aftertax_cash_flow_stabilized": -13699
+          "pretax_cash_flow": -21059,
+          "year1_tax_benefit": 29234,
+          "aftertax_cash_flow_year1": 8176,
+          "aftertax_cash_flow_stabilized": -11760
         },
         "all_cash": {
-          "pretax_cash_flow": 3262,
-          "year1_tax_benefit": 23459,
-          "aftertax_cash_flow_year1": 26721,
-          "aftertax_cash_flow_stabilized": 5187
+          "pretax_cash_flow": 4483,
+          "year1_tax_benefit": 21177,
+          "aftertax_cash_flow_year1": 25660,
+          "aftertax_cash_flow_stabilized": 5724
         }
       },
       "yields": {
-        "cap_rate": 0.0067,
-        "gross_yield": 0.0858,
-        "cash_on_cash": -0.1791
+        "cap_rate": 0.01,
+        "gross_yield": 0.0927,
+        "cash_on_cash": -0.1675
       },
       "breakeven": {
-        "down_payment_pct": 0.9184,
+        "down_payment_pct": 0.8788,
         "horizon_years": 1
       },
       "flags": {
@@ -751,12 +855,12 @@
       "rating": "CASHFLOW_NEGATIVE",
       "rating_label": "\ud83d\udd34 Cash-flow negative",
       "changes": {
-        "compared_to_week": "2026-11-02",
+        "compared_to_week": "2026-11-09",
         "is_new": false,
         "prior_price": 485000,
-        "price_change": 0,
-        "price_change_pct": 0.0,
-        "price_drop": false
+        "price_change": -36000,
+        "price_change_pct": -0.0742,
+        "price_drop": true
       }
     },
     {
@@ -855,7 +959,7 @@
       "rating": "CASHFLOW_NEGATIVE",
       "rating_label": "\ud83d\udd34 Cash-flow negative",
       "changes": {
-        "compared_to_week": "2026-11-02",
+        "compared_to_week": "2026-11-09",
         "is_new": false,
         "prior_price": 799000,
         "price_change": 0,
@@ -959,113 +1063,9 @@
       "rating": "CASHFLOW_NEGATIVE",
       "rating_label": "\ud83d\udd34 Cash-flow negative",
       "changes": {
-        "compared_to_week": "2026-11-02",
-        "is_new": true,
-        "prior_price": null,
-        "price_change": null,
-        "price_change_pct": null,
-        "price_drop": false
-      }
-    },
-    {
-      "id": "143-Heck-Ave,-Ocean-Grove,-NJ-07756",
-      "address": "143 Heck Ave, Ocean Grove, NJ 07756",
-      "property_type": "Single Family",
-      "beds": 2,
-      "baths": 1,
-      "sqft": 875,
-      "list_price": 749000,
-      "url": "https://www.rentcast.io/property/143-Heck-Ave,-Ocean-Grove,-NJ-07756",
-      "str_revenue": {
-        "gross_annual": 56480,
-        "peak_weekly": 3800,
-        "basis": "seasonal-model",
-        "by_season": {
-          "peak": {
-            "weeks": 11,
-            "weekly_rate": 3800,
-            "occupancy": 0.9,
-            "revenue": 37620
-          },
-          "shoulder": {
-            "weeks": 8,
-            "weekly_rate": 2090,
-            "occupancy": 0.6,
-            "revenue": 10032
-          },
-          "off": {
-            "weeks": 33,
-            "weekly_rate": 1216,
-            "occupancy": 0.22,
-            "revenue": 8828
-          }
-        }
-      },
-      "operating_expenses": {
-        "management": 8472,
-        "platform_fees": 1694,
-        "cleaning_net": 2259,
-        "supplies": 1694,
-        "capex_reserve": 2824,
-        "property_tax": 13407,
-        "insurance": 4494,
-        "maintenance": 7490,
-        "utilities": 4800,
-        "condo_fee": 0,
-        "ground_lease": 0,
-        "str_license": 750,
-        "total": 47884
-      },
-      "noi": 8596,
-      "financing": {
-        "loan_amount": 561750,
-        "annual_debt_service": 42608,
-        "year1_interest": 36329,
-        "cash_invested": 209720,
-        "down_payment_pct": 0.25,
-        "rate": 0.065
-      },
-      "depreciation": {
-        "building_basis": 449400,
-        "land_basis": 299600,
-        "bonus_depreciation_year1": 89880,
-        "straight_line_depreciation_per_year": 13073,
-        "depreciation_year1": 102953
-      },
-      "operating_income": {
-        "financed": {
-          "pretax_cash_flow": -34012,
-          "year1_tax_benefit": 48354,
-          "aftertax_cash_flow_year1": 14342,
-          "aftertax_cash_flow_stabilized": -18913
-        },
-        "all_cash": {
-          "pretax_cash_flow": 8596,
-          "year1_tax_benefit": 34912,
-          "aftertax_cash_flow_year1": 43508,
-          "aftertax_cash_flow_stabilized": 10253
-        }
-      },
-      "yields": {
-        "cap_rate": 0.0115,
-        "gross_yield": 0.0754,
-        "cash_on_cash": -0.1622
-      },
-      "breakeven": {
-        "down_payment_pct": 0.8607,
-        "horizon_years": 1
-      },
-      "flags": {
-        "breaks_even_purchase_year": true,
-        "breaks_even_sustained": false,
-        "breaks_even_operating_allcash": true
-      },
-      "rating": "CASHFLOW_NEGATIVE",
-      "rating_label": "\ud83d\udd34 Cash-flow negative",
-      "changes": {
-        "compared_to_week": "2026-11-02",
+        "compared_to_week": "2026-11-09",
         "is_new": false,
-        "prior_price": 749000,
+        "prior_price": 799900,
         "price_change": 0,
         "price_change_pct": 0.0,
         "price_drop": false
@@ -1167,7 +1167,7 @@
       "rating": "CASHFLOW_NEGATIVE",
       "rating_label": "\ud83d\udd34 Cash-flow negative",
       "changes": {
-        "compared_to_week": "2026-11-02",
+        "compared_to_week": "2026-11-09",
         "is_new": false,
         "prior_price": 1175000,
         "price_change": 0,
@@ -1271,113 +1271,9 @@
       "rating": "CASHFLOW_NEGATIVE",
       "rating_label": "\ud83d\udd34 Cash-flow negative",
       "changes": {
-        "compared_to_week": "2026-11-02",
+        "compared_to_week": "2026-11-09",
         "is_new": false,
         "prior_price": 1111111,
-        "price_change": 0,
-        "price_change_pct": 0.0,
-        "price_drop": false
-      }
-    },
-    {
-      "id": "103-Central-Ave,-Ocean-Grove,-NJ-07756",
-      "address": "103 Central Ave, Ocean Grove, NJ 07756",
-      "property_type": "Single Family",
-      "beds": 7,
-      "baths": 5,
-      "sqft": 3239,
-      "list_price": 1749000,
-      "url": "https://www.rentcast.io/property/103-Central-Ave,-Ocean-Grove,-NJ-07756",
-      "str_revenue": {
-        "gross_annual": 130796,
-        "peak_weekly": 8800,
-        "basis": "seasonal-model",
-        "by_season": {
-          "peak": {
-            "weeks": 11,
-            "weekly_rate": 8800,
-            "occupancy": 0.9,
-            "revenue": 87120
-          },
-          "shoulder": {
-            "weeks": 8,
-            "weekly_rate": 4840,
-            "occupancy": 0.6,
-            "revenue": 23232
-          },
-          "off": {
-            "weeks": 33,
-            "weekly_rate": 2816,
-            "occupancy": 0.22,
-            "revenue": 20444
-          }
-        }
-      },
-      "operating_expenses": {
-        "management": 19619,
-        "platform_fees": 3924,
-        "cleaning_net": 5232,
-        "supplies": 3924,
-        "capex_reserve": 6540,
-        "property_tax": 31307,
-        "insurance": 10494,
-        "maintenance": 17490,
-        "utilities": 4800,
-        "condo_fee": 0,
-        "ground_lease": 0,
-        "str_license": 750,
-        "total": 104080
-      },
-      "noi": 26716,
-      "financing": {
-        "loan_amount": 1311750,
-        "annual_debt_service": 99494,
-        "year1_interest": 84832,
-        "cash_invested": 489720,
-        "down_payment_pct": 0.25,
-        "rate": 0.065
-      },
-      "depreciation": {
-        "building_basis": 1049400,
-        "land_basis": 699600,
-        "bonus_depreciation_year1": 209880,
-        "straight_line_depreciation_per_year": 30528,
-        "depreciation_year1": 240408
-      },
-      "operating_income": {
-        "financed": {
-          "pretax_cash_flow": -72778,
-          "year1_tax_benefit": 110454,
-          "aftertax_cash_flow_year1": 37676,
-          "aftertax_cash_flow_stabilized": -39980
-        },
-        "all_cash": {
-          "pretax_cash_flow": 26716,
-          "year1_tax_benefit": 79066,
-          "aftertax_cash_flow_year1": 105782,
-          "aftertax_cash_flow_stabilized": 28126
-        }
-      },
-      "yields": {
-        "cap_rate": 0.0153,
-        "gross_yield": 0.0748,
-        "cash_on_cash": -0.1486
-      },
-      "breakeven": {
-        "down_payment_pct": 0.8147,
-        "horizon_years": 1
-      },
-      "flags": {
-        "breaks_even_purchase_year": true,
-        "breaks_even_sustained": false,
-        "breaks_even_operating_allcash": true
-      },
-      "rating": "CASHFLOW_NEGATIVE",
-      "rating_label": "\ud83d\udd34 Cash-flow negative",
-      "changes": {
-        "compared_to_week": "2026-11-02",
-        "is_new": false,
-        "prior_price": 1749000,
         "price_change": 0,
         "price_change_pct": 0.0,
         "price_drop": false
@@ -1479,7 +1375,7 @@
       "rating": "CASHFLOW_NEGATIVE",
       "rating_label": "\ud83d\udd34 Cash-flow negative",
       "changes": {
-        "compared_to_week": "2026-11-02",
+        "compared_to_week": "2026-11-09",
         "is_new": false,
         "prior_price": 1599000,
         "price_change": 0,
@@ -1583,7 +1479,7 @@
       "rating": "CASHFLOW_NEGATIVE",
       "rating_label": "\ud83d\udd34 Cash-flow negative",
       "changes": {
-        "compared_to_week": "2026-11-02",
+        "compared_to_week": "2026-11-09",
         "is_new": false,
         "prior_price": 2500000,
         "price_change": 0,
@@ -1687,7 +1583,7 @@
       "rating": "CASHFLOW_NEGATIVE",
       "rating_label": "\ud83d\udd34 Cash-flow negative",
       "changes": {
-        "compared_to_week": "2026-11-02",
+        "compared_to_week": "2026-11-09",
         "is_new": false,
         "prior_price": 2750000,
         "price_change": 0,
@@ -1699,42 +1595,42 @@
       "id": "26-Lake-Ave,-Ocean-Grove,-NJ-07756",
       "address": "26 Lake Ave, Ocean Grove, NJ 07756",
       "property_type": "Single Family",
-      "beds": 4,
-      "baths": 4,
+      "beds": 5,
+      "baths": 6,
       "sqft": 3448,
       "list_price": 2995000,
       "url": "https://www.rentcast.io/property/26-Lake-Ave,-Ocean-Grove,-NJ-07756",
       "str_revenue": {
-        "gross_annual": 101070,
-        "peak_weekly": 6800,
+        "gross_annual": 130796,
+        "peak_weekly": 8800,
         "basis": "seasonal-model",
         "by_season": {
           "peak": {
             "weeks": 11,
-            "weekly_rate": 6800,
+            "weekly_rate": 8800,
             "occupancy": 0.9,
-            "revenue": 67320
+            "revenue": 87120
           },
           "shoulder": {
             "weeks": 8,
-            "weekly_rate": 3740,
+            "weekly_rate": 4840,
             "occupancy": 0.6,
-            "revenue": 17952
+            "revenue": 23232
           },
           "off": {
             "weeks": 33,
-            "weekly_rate": 2176,
+            "weekly_rate": 2816,
             "occupancy": 0.22,
-            "revenue": 15798
+            "revenue": 20444
           }
         }
       },
       "operating_expenses": {
-        "management": 15160,
-        "platform_fees": 3032,
-        "cleaning_net": 4043,
-        "supplies": 3032,
-        "capex_reserve": 5054,
+        "management": 19619,
+        "platform_fees": 3924,
+        "cleaning_net": 5232,
+        "supplies": 3924,
+        "capex_reserve": 6540,
         "property_tax": 53610,
         "insurance": 17970,
         "maintenance": 29950,
@@ -1742,9 +1638,9 @@
         "condo_fee": 0,
         "ground_lease": 0,
         "str_license": 750,
-        "total": 137401
+        "total": 146319
       },
-      "noi": -36331,
+      "noi": -15523,
       "financing": {
         "loan_amount": 2246250,
         "annual_debt_service": 170374,
@@ -1762,22 +1658,22 @@
       },
       "operating_income": {
         "financed": {
-          "pretax_cash_flow": -206705,
-          "year1_tax_benefit": 219512,
-          "aftertax_cash_flow_year1": 12807,
-          "aftertax_cash_flow_stabilized": -120171
+          "pretax_cash_flow": -185897,
+          "year1_tax_benefit": 211813,
+          "aftertax_cash_flow_year1": 25916,
+          "aftertax_cash_flow_stabilized": -107062
         },
         "all_cash": {
-          "pretax_cash_flow": -36331,
-          "year1_tax_benefit": 165763,
-          "aftertax_cash_flow_year1": 129432,
-          "aftertax_cash_flow_stabilized": -3546
+          "pretax_cash_flow": -15523,
+          "year1_tax_benefit": 158064,
+          "aftertax_cash_flow_year1": 142541,
+          "aftertax_cash_flow_stabilized": 9563
         }
       },
       "yields": {
-        "cap_rate": -0.0121,
-        "gross_yield": 0.0337,
-        "cash_on_cash": -0.2465
+        "cap_rate": -0.0052,
+        "gross_yield": 0.0437,
+        "cash_on_cash": -0.2217
       },
       "breakeven": {
         "down_payment_pct": null,
@@ -1786,12 +1682,12 @@
       "flags": {
         "breaks_even_purchase_year": true,
         "breaks_even_sustained": false,
-        "breaks_even_operating_allcash": false
+        "breaks_even_operating_allcash": true
       },
       "rating": "CASHFLOW_NEGATIVE",
       "rating_label": "\ud83d\udd34 Cash-flow negative",
       "changes": {
-        "compared_to_week": "2026-11-02",
+        "compared_to_week": "2026-11-09",
         "is_new": false,
         "prior_price": 2995000,
         "price_change": 0,
