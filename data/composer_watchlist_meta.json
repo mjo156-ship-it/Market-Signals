@@ -1,5 +1,5 @@
 {
- "as_of": "2026-11-11",
+ "as_of": "2026-11-16",
  "captured": 225,
  "auto_added": [
   {
@@ -312,6 +312,48 @@
    "id": "jEYakzwl9OTFU8MCarRZ",
    "name": "QQQ >150 SMA & RSI<30 (28/22/.7) no lev/vix",
    "created_at": "2026-11-09",
+   "is_draft": true
+  },
+  {
+   "id": "wzI9SXuQkZZ6W65RCznX",
+   "name": "Copy of SFV by SBF - Stop Financial Violence - Insolvency Edition | Deez | 29APR2023",
+   "created_at": "2026-11-12",
+   "is_draft": true
+  },
+  {
+   "id": "DpNM4KXD57YV3m1Wkh0n",
+   "name": "BDRY Gate COPX",
+   "created_at": "2026-11-12",
+   "is_draft": true
+  },
+  {
+   "id": "Xi7DFNPui4vqCHoDgkau",
+   "name": "Copy of Frontrunner.BDRY > Battleship WM74",
+   "created_at": "2026-11-12",
+   "is_draft": true
+  },
+  {
+   "id": "paMd21U7i1TpoDNC3xZW",
+   "name": "Copy of Newish Short End Bond Symphony",
+   "created_at": "2026-11-12",
+   "is_draft": true
+  },
+  {
+   "id": "bJlBXAvkfHsHVQsWJ3Fm",
+   "name": "TMF Dip + ROM Dip (cleaned TMF Momentum)",
+   "created_at": "2026-11-12",
+   "is_draft": true
+  },
+  {
+   "id": "KsbAf0wxugP9PEpUlYR4",
+   "name": "SOXL Dip: RSI(10) SOXL<30 & QQQ<30",
+   "created_at": "2026-11-13",
+   "is_draft": true
+  },
+  {
+   "id": "Ff4IBfbvZdTQKiotTyMq",
+   "name": "MultiDip then Equity or Safety 70/25/.47",
+   "created_at": "2026-11-13",
    "is_draft": true
   }
  ]
