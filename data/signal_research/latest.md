@@ -1,6 +1,6 @@
 # Signal Research — 2026-11-17
 
-_Generated 2026-11-17T21:57:03+00:00 · 91 tickers · 12 firing · 10 approaching_
+_Generated 2026-11-17T22:46:08+00:00 · 91 tickers · 12 firing · 10 approaching_
 
 ## Firing today (backtest-gated)
 
