@@ -1,17 +1,17 @@
 {
-  "generated_at_local": "2026-11-19T21:49:47.204699",
-  "generated_at_utc": "2026-11-19T21:49:47.204710Z",
+  "generated_at_local": "2026-11-19T22:31:04.960503",
+  "generated_at_utc": "2026-11-19T22:31:04.960513Z",
   "mode": "close",
   "summary": {
-    "total_alerts": 7,
-    "buy_count": 3,
+    "total_alerts": 6,
+    "buy_count": 2,
     "exit_count": 0,
     "warning_count": 4
   },
   "alerts": [
     {
       "title": "\ud83d\udfe1 BTC OVERSOLD",
-      "message": "BTC RSI=16.6 < 30 (wait for UVXY < 40 for better signal)",
+      "message": "BTC RSI=17.4 < 30 (wait for UVXY < 40 for better signal)",
       "category": "watch"
     },
     {
@@ -33,11 +33,6 @@
       "title": "\u26a0\ufe0f IBS FALTERING",
       "message": "gate_entry_TQQQ trailing WR 45% vs baseline 59% [lo 54%], n=11 \u2014 investigate/suspend this tier by hand",
       "category": "warning"
-    },
-    {
-      "title": "\ud83d\udfe2 IBS BUY: SOXL 1.0x",
-      "message": "Gate IN (SMH IBS 0.37, RSI 31, breadth 1) \u2192 buy SOXL at 1.0x base",
-      "category": "buy"
     },
     {
       "title": "\ud83d\udd35 MERGED TRIGGERS: L5_DEFAULT",
@@ -245,13 +240,13 @@
       "pct_above_sma200": 8.38
     },
     "BTC-USD": {
-      "price": 61457.78,
-      "rsi10": 16.6,
-      "rsi50": 37.5,
-      "sma200": 72634.5,
-      "sma50": 78136.22,
-      "ema21": 70730.13,
-      "pct_above_sma200": -15.39
+      "price": 62115.45,
+      "rsi10": 17.4,
+      "rsi50": 37.9,
+      "sma200": 72637.79,
+      "sma50": 78149.37,
+      "ema21": 70789.92,
+      "pct_above_sma200": -14.49
     },
     "AMD": {
       "price": 489.19,

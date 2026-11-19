@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-19T21:51:09+00:00",
+  "generated_at_utc": "2026-11-19T22:32:20+00:00",
   "data_through": "2026-11-19",
   "universe_size": 91,
   "excluded_tickers": [],
@@ -2798,7 +2798,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "manual_swing",
-      "today_value": "vol-z 2.99",
+      "today_value": "vol-z 3.05",
       "backtest": {
         "n": 107,
         "win_rate": 0.626,
@@ -6164,7 +6164,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "manual_swing",
-      "today_value": "vol-z 2.02",
+      "today_value": "vol-z 2.04",
       "backtest": {
         "n": 81,
         "win_rate": 0.654,
