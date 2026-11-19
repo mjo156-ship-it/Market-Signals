@@ -1,18 +1,18 @@
 {
-  "updated_at": "2026-11-19T01:47:34.165149",
+  "updated_at": "2026-11-19T21:49:46.306385",
   "gate_state": {
     "SPY": "IN",
     "QQQ": "IN",
-    "SMH": "OUT",
+    "SMH": "IN",
     "XLK": "OUT"
   },
   "current_multiplier": {
     "SPY": 1.0,
     "TQQQ": 1.0,
-    "SOXL": 0.0,
+    "SOXL": 1.0,
     "TECL": 0.0
   },
-  "breadth_today": 0,
+  "breadth_today": 1,
   "baseline": {
     "gate_entry_SPY": {
       "n": 478,
@@ -881,10 +881,10 @@
       "own_rsi10": 24.3,
       "breadth": 3,
       "entry_price": 51.19499969482422,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 3.477,
+      "fwd_5d": 18.595,
+      "fwd_10d": -2.943,
+      "matured": true
     },
     {
       "date": "2026-11-05",
@@ -896,10 +896,10 @@
       "own_rsi10": 22.8,
       "breadth": 3,
       "entry_price": 43.619998931884766,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 12.429,
+      "fwd_5d": 60.288,
+      "fwd_10d": 10.789,
+      "matured": true
     },
     {
       "date": "2026-11-05",
@@ -911,10 +911,10 @@
       "own_rsi10": 22.3,
       "breadth": 3,
       "entry_price": 127.31639862060547,
-      "fwd_1d": null,
-      "fwd_5d": null,
-      "fwd_10d": null,
-      "matured": false
+      "fwd_1d": 4.195,
+      "fwd_5d": 21.078,
+      "fwd_10d": -5.009,
+      "matured": true
     },
     {
       "date": "2026-11-06",
@@ -990,6 +990,21 @@
       "fwd_5d": null,
       "fwd_10d": null,
       "matured": false
+    },
+    {
+      "date": "2026-11-19",
+      "sleeve": "SOXL",
+      "underlying": "SMH",
+      "signal_type": "gate_entry",
+      "multiplier": 1.0,
+      "ibs_sma3": 0.3702,
+      "own_rsi10": 30.9,
+      "breadth": 1,
+      "entry_price": 45.29999923706055,
+      "fwd_1d": null,
+      "fwd_5d": null,
+      "fwd_10d": null,
+      "matured": false
     }
   ],
   "rolling": {
@@ -1036,10 +1051,10 @@
       "status": "OK"
     },
     "conviction_2.0x_breadth": {
-      "trailing_n": 5,
-      "trailing_wr": 0.4,
-      "trailing_avg_1d": 7.659,
-      "brier": 0.2779,
+      "trailing_n": 8,
+      "trailing_wr": 0.625,
+      "trailing_avg_1d": 7.299,
+      "brier": 0.2353,
       "status": "OK"
     },
     "conviction_1.5x_TECL": {
