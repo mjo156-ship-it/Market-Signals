@@ -1,17 +1,17 @@
 {
-  "generated_at_local": "2026-11-20T21:32:53.767120",
-  "generated_at_utc": "2026-11-20T21:32:53.767128Z",
+  "generated_at_local": "2026-11-20T22:02:59.497504",
+  "generated_at_utc": "2026-11-20T22:02:59.497511Z",
   "mode": "close",
   "summary": {
-    "total_alerts": 9,
-    "buy_count": 3,
+    "total_alerts": 6,
+    "buy_count": 2,
     "exit_count": 0,
-    "warning_count": 6
+    "warning_count": 4
   },
   "alerts": [
     {
       "title": "\ud83d\udfe1 BTC OVERSOLD",
-      "message": "BTC RSI=13.5 < 30 (wait for UVXY < 40 for better signal)",
+      "message": "BTC RSI=13.8 < 30 (wait for UVXY < 40 for better signal)",
       "category": "watch"
     },
     {
@@ -33,21 +33,6 @@
       "title": "\u26a0\ufe0f IBS FALTERING",
       "message": "gate_entry_TQQQ trailing WR 45% vs baseline 59% [lo 54%], n=11 \u2014 investigate/suspend this tier by hand",
       "category": "warning"
-    },
-    {
-      "title": "\ud83d\udfe1 IBS RESIZE \u2191: TQQQ",
-      "message": "1.0x \u2192 2.0x (QQQ IBS 0.25, RSI 23, breadth 4)",
-      "category": "watch"
-    },
-    {
-      "title": "\ud83d\udfe1 IBS RESIZE \u2191: SOXL",
-      "message": "1.0x \u2192 2.0x (SMH IBS 0.16, RSI 22, breadth 4)",
-      "category": "watch"
-    },
-    {
-      "title": "\ud83d\udfe2 IBS BUY: TECL 2.0x",
-      "message": "Gate IN (XLK IBS 0.23, RSI 22, breadth 4) \u2192 buy TECL at 2.0x base",
-      "category": "buy"
     },
     {
       "title": "\ud83d\udd35 MERGED TRIGGERS: L5_DEFAULT",
@@ -255,13 +240,13 @@
       "pct_above_sma200": 12.41
     },
     "BTC-USD": {
-      "price": 58518.78,
-      "rsi10": 13.5,
-      "rsi50": 35.6,
-      "sma200": 72530.17,
-      "sma50": 77618.41,
-      "ema21": 69656.71,
-      "pct_above_sma200": -19.32
+      "price": 58922.67,
+      "rsi10": 13.8,
+      "rsi50": 35.9,
+      "sma200": 72532.19,
+      "sma50": 77626.49,
+      "ema21": 69693.42,
+      "pct_above_sma200": -18.76
     },
     "AMD": {
       "price": 424.39,

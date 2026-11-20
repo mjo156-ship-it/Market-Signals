@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-20T21:34:18+00:00",
+  "generated_at_utc": "2026-11-20T22:04:00+00:00",
   "data_through": "2026-11-20",
   "universe_size": 91,
   "excluded_tickers": [],
@@ -3043,7 +3043,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "manual_swing",
-      "today_value": "vol-z 4.03",
+      "today_value": "vol-z 4.40",
       "backtest": {
         "n": 205,
         "win_rate": 0.654,
@@ -4091,7 +4091,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "manual_swing",
-      "today_value": "vol-z 2.50",
+      "today_value": "vol-z 2.51",
       "backtest": {
         "n": 40,
         "win_rate": 0.65,
@@ -4314,7 +4314,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "manual_swing",
-      "today_value": "vol-z 3.08",
+      "today_value": "vol-z 3.11",
       "backtest": {
         "n": 73,
         "win_rate": 0.685,
@@ -4702,7 +4702,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "manual_swing",
-      "today_value": "vol-z 3.57",
+      "today_value": "vol-z 3.64",
       "backtest": {
         "n": 65,
         "win_rate": 0.615,
@@ -5050,7 +5050,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "manual_swing",
-      "today_value": "vol-z 3.17",
+      "today_value": "vol-z 3.23",
       "backtest": {
         "n": 145,
         "win_rate": 0.621,
