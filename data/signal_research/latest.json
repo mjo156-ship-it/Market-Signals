@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-11-21T01:12:43+00:00",
-  "data_through": "2026-11-21",
+  "generated_at_utc": "2026-11-24T01:15:44+00:00",
+  "data_through": "2026-11-24",
   "universe_size": 91,
   "excluded_tickers": [],
   "combinations_evaluated": 1284,
@@ -1727,7 +1727,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "manual_swing",
-      "today_value": "vol-z 3.19",
+      "today_value": "vol-z 3.20",
       "backtest": {
         "n": 36,
         "win_rate": 0.611,
@@ -3043,7 +3043,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "manual_swing",
-      "today_value": "vol-z 4.40",
+      "today_value": "vol-z 4.46",
       "backtest": {
         "n": 205,
         "win_rate": 0.654,
@@ -4091,7 +4091,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "manual_swing",
-      "today_value": "vol-z 2.51",
+      "today_value": "vol-z 2.52",
       "backtest": {
         "n": 40,
         "win_rate": 0.65,
@@ -4314,7 +4314,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "manual_swing",
-      "today_value": "vol-z 3.11",
+      "today_value": "vol-z 3.12",
       "backtest": {
         "n": 73,
         "win_rate": 0.685,
@@ -4702,7 +4702,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "manual_swing",
-      "today_value": "vol-z 3.64",
+      "today_value": "vol-z 3.65",
       "backtest": {
         "n": 65,
         "win_rate": 0.615,
@@ -5050,7 +5050,7 @@
       "direction": "long",
       "horizon_days": 5,
       "mode": "manual_swing",
-      "today_value": "vol-z 3.23",
+      "today_value": "vol-z 3.29",
       "backtest": {
         "n": 145,
         "win_rate": 0.621,
