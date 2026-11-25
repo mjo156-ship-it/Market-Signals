@@ -1,6 +1,6 @@
 {
-  "generated_at_local": "2026-11-24T23:42:17.848924",
-  "generated_at_utc": "2026-11-24T23:42:17.848929Z",
+  "generated_at_local": "2026-11-25T03:26:25.922574",
+  "generated_at_utc": "2026-11-25T03:26:25.922582Z",
   "mode": "close",
   "summary": {
     "total_alerts": 5,
@@ -11,7 +11,7 @@
   "alerts": [
     {
       "title": "\ud83d\udfe1 BTC OVERSOLD",
-      "message": "BTC RSI=24.0 < 30 (wait for UVXY < 40 for better signal)",
+      "message": "BTC RSI=23.5 < 30 (wait for UVXY < 40 for better signal)",
       "category": "watch"
     },
     {
@@ -31,7 +31,7 @@
     },
     {
       "title": "\ud83d\udd35 MERGED TRIGGERS: L5_DEFAULT",
-      "message": "Resolved branch: L5_DEFAULT -> target CTA + KMLM (50/50)\n   (Composer executes this symphony automatically at 3:45 PM ET \u2014\n    this alert is state observation only, not a trade instruction.)\n\nBranch state (top-down, first match wins):\n   -      L1  LABU RSI=57.5 (needs <25)\n   -      L2A SPY 718.78/SMA200 730.62 | UPRO 117.92/SMA200 134.40 | UPRO SMA25 136.11\n   -      L2B QQQ 638.10/SMA200 682.42 | TQQQ 46.19/SMA200 65.44 | TQQQ SMA20 56.18\n   -      L2C GDXJ RSI=32.6 (needs <21)\n   -      L3  CPER 32.50/EMA9 34.54 | SPY 718.78/EMA9 725.72 | COPX 57.58/EMA9 62.29\n   -      L4  SPHB RSI=38.5 (needs >77) / XLP RSI=60.0 (needs <40)  [vestigial leg]\n          L5  default rotation by RSI(14): CTA 29.6, KMLM 35.8, DBMF 42.4, MNA 53.2 -> bottom-2",
+      "message": "Resolved branch: L5_DEFAULT -> target CTA + KMLM (50/50)\n   (Composer executes this symphony automatically at 3:45 PM ET \u2014\n    this alert is state observation only, not a trade instruction.)\n\nBranch state (top-down, first match wins):\n   -      L1  LABU RSI=57.5 (needs <25)\n   -      L2A SPY 718.78/SMA200 730.62 | UPRO 117.92/SMA200 134.40 | UPRO SMA25 136.11\n   -      L2B QQQ 638.10/SMA200 682.42 | TQQQ 46.19/SMA200 65.44 | TQQQ SMA20 56.18\n   -      L2C GDXJ RSI=32.6 (needs <21)\n   -      L3  CPER 32.50/EMA9 34.54 | SPY 718.78/EMA9 725.72 | COPX 57.58/EMA9 62.29\n   -      L4  SPHB RSI=38.5 (needs >77) / XLP RSI=60.0 (needs <40)  [vestigial leg]\n          L5  default rotation by RSI(14): CTA 31.3, KMLM 35.8, DBMF 42.4, MNA 53.2 -> bottom-2",
       "category": "watch"
     }
   ],
@@ -223,7 +223,7 @@
       "sma200": 44.5,
       "sma50": 42.39,
       "ema21": 41.15,
-      "pct_above_sma200": -14.69
+      "pct_above_sma200": -14.7
     },
     "INDL": {
       "price": 49.72,
@@ -235,13 +235,13 @@
       "pct_above_sma200": 11.47
     },
     "BTC-USD": {
-      "price": 59744.73,
-      "rsi10": 24.0,
-      "rsi50": 37.4,
-      "sma200": 72129.87,
-      "sma50": 75637.7,
-      "ema21": 66783.66,
-      "pct_above_sma200": -17.17
+      "price": 59433.16,
+      "rsi10": 23.5,
+      "rsi50": 37.2,
+      "sma200": 72128.32,
+      "sma50": 75631.47,
+      "ema21": 66755.33,
+      "pct_above_sma200": -17.6
     },
     "AMD": {
       "price": 413.27,
@@ -470,12 +470,12 @@
     },
     "CTA": {
       "price": 25.13,
-      "rsi10": 27.0,
-      "rsi50": 42.5,
-      "sma200": 28.27,
-      "sma50": 28.44,
-      "ema21": 26.83,
-      "pct_above_sma200": -11.1
+      "rsi10": 29.5,
+      "rsi50": 42.9,
+      "sma200": 28.12,
+      "sma50": 28.29,
+      "ema21": 26.7,
+      "pct_above_sma200": -10.63
     },
     "DBMF": {
       "price": 31.58,
@@ -544,10 +544,10 @@
     },
     "breadth": 0,
     "ibs_sma3": {
-      "SPY": 0.4865,
-      "QQQ": 0.4023,
-      "SMH": 0.3169,
-      "XLK": 0.3761
+      "SPY": 0.4862,
+      "QQQ": 0.3517,
+      "SMH": 0.3172,
+      "XLK": 0.3755
     },
     "rsi10": {
       "SPY": 40.6,
@@ -561,7 +561,7 @@
       "gate_entry_TQQQ": "FALTERING",
       "gate_entry_SOXL": "FALTERING"
     },
-    "as_of": "2026-11-24"
+    "as_of": "2026-11-25"
   },
   "merged_triggers": {
     "selected_branch": "L5_DEFAULT",
@@ -624,7 +624,7 @@
     "default_rotation_ranking": [
       {
         "ticker": "CTA",
-        "rsi14": 29.556
+        "rsi14": 31.2651
       },
       {
         "ticker": "KMLM",
