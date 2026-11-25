@@ -1,17 +1,17 @@
 {
-  "generated_at_local": "2026-11-25T22:47:30.302665",
-  "generated_at_utc": "2026-11-25T22:47:30.302675Z",
+  "generated_at_local": "2026-11-25T23:25:40.250475",
+  "generated_at_utc": "2026-11-25T23:25:40.250483Z",
   "mode": "close",
   "summary": {
-    "total_alerts": 9,
+    "total_alerts": 5,
     "buy_count": 1,
-    "exit_count": 4,
+    "exit_count": 0,
     "warning_count": 4
   },
   "alerts": [
     {
       "title": "\ud83d\udfe1 BTC OVERSOLD",
-      "message": "BTC RSI=26.2 < 30 (wait for UVXY < 40 for better signal)",
+      "message": "BTC RSI=26.4 < 30 (wait for UVXY < 40 for better signal)",
       "category": "watch"
     },
     {
@@ -28,26 +28,6 @@
       "title": "\u26a0\ufe0f IBS FALTERING",
       "message": "gate_entry_TQQQ trailing WR 45% vs baseline 59% [lo 54%], n=11 \u2014 investigate/suspend this tier by hand",
       "category": "warning"
-    },
-    {
-      "title": "\ud83d\udd34 IBS EXIT: SPY",
-      "message": "Gate OUT (SPY IBS 0.76, RSI 40, breadth 0) \u2192 sell SPY, go flat",
-      "category": "exit"
-    },
-    {
-      "title": "\ud83d\udd34 IBS EXIT: TQQQ",
-      "message": "Gate OUT (QQQ IBS 0.65, RSI 39, breadth 0) \u2192 sell TQQQ, go flat",
-      "category": "exit"
-    },
-    {
-      "title": "\ud83d\udd34 IBS EXIT: SOXL",
-      "message": "Gate OUT (SMH IBS 0.62, RSI 37, breadth 0) \u2192 sell SOXL, go flat",
-      "category": "exit"
-    },
-    {
-      "title": "\ud83d\udd34 IBS EXIT: TECL",
-      "message": "Gate OUT (XLK IBS 0.67, RSI 37, breadth 0) \u2192 sell TECL, go flat",
-      "category": "exit"
     },
     {
       "title": "\ud83d\udd35 MERGED TRIGGERS: L5_DEFAULT",
@@ -255,13 +235,13 @@
       "pct_above_sma200": 13.53
     },
     "BTC-USD": {
-      "price": 60119.48,
-      "rsi10": 26.2,
+      "price": 60138.72,
+      "rsi10": 26.4,
       "rsi50": 37.8,
-      "sma200": 72027.17,
-      "sma50": 75129.0,
-      "ema21": 66178.07,
-      "pct_above_sma200": -16.53
+      "sma200": 72027.26,
+      "sma50": 75129.38,
+      "ema21": 66179.82,
+      "pct_above_sma200": -16.51
     },
     "AMD": {
       "price": 406.03,
