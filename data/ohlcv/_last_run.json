@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-11-25T04:04:09.636222+00:00",
+  "timestamp": "2026-11-26T03:28:17.793637+00:00",
   "mode": "append",
   "succeeded": [
     "AMD",
@@ -96,14 +96,7 @@
   ],
   "skipped": [],
   "failed": [],
-  "warnings": [
-    {
-      "ticker": "BTC-USD",
-      "yf_close": 59161.7188,
-      "snapshot_price": 59536.34,
-      "pct_diff": 0.629
-    }
-  ],
+  "warnings": [],
   "counts": {
     "total": 91,
     "ok": 91,
