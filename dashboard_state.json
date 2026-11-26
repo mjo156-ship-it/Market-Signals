@@ -1,19 +1,14 @@
 {
-  "generated_at_local": "2026-11-25T23:25:40.250475",
-  "generated_at_utc": "2026-11-25T23:25:40.250483Z",
+  "generated_at_local": "2026-11-26T02:42:47.027758",
+  "generated_at_utc": "2026-11-26T02:42:47.027768Z",
   "mode": "close",
   "summary": {
-    "total_alerts": 5,
+    "total_alerts": 4,
     "buy_count": 1,
     "exit_count": 0,
-    "warning_count": 4
+    "warning_count": 3
   },
   "alerts": [
-    {
-      "title": "\ud83d\udfe1 BTC OVERSOLD",
-      "message": "BTC RSI=26.4 < 30 (wait for UVXY < 40 for better signal)",
-      "category": "watch"
-    },
     {
       "title": "\ud83d\udfe2 Z-SCORE QQQ_RSP FIRED",
       "message": "QQQ/RSP detrended z = -3.33\u03c3 \u2264 -1.5\u03c3\n   \u2192 Long TQQQ 20d (vs QQQ default): +11.47pp edge, MDD -52% | n=35 ep\n   \u2192 Hold 20 trading days from entry, then return to QQQ default\n   \u2192 Last fire: 2026-11-25 (0d ago)",
@@ -223,7 +218,7 @@
       "sma200": 44.45,
       "sma50": 42.26,
       "ema21": 40.88,
-      "pct_above_sma200": -14.07
+      "pct_above_sma200": -14.06
     },
     "INDL": {
       "price": 50.61,
@@ -235,13 +230,13 @@
       "pct_above_sma200": 13.53
     },
     "BTC-USD": {
-      "price": 60138.72,
-      "rsi10": 26.4,
-      "rsi50": 37.8,
-      "sma200": 72027.26,
-      "sma50": 75129.38,
-      "ema21": 66179.82,
-      "pct_above_sma200": -16.51
+      "price": 60901.78,
+      "rsi10": 30.5,
+      "rsi50": 38.7,
+      "sma200": 72031.08,
+      "sma50": 75144.64,
+      "ema21": 66249.19,
+      "pct_above_sma200": -15.45
     },
     "AMD": {
       "price": 406.03,
@@ -546,8 +541,8 @@
     "ibs_sma3": {
       "SPY": 0.7621,
       "QQQ": 0.6533,
-      "SMH": 0.6193,
-      "XLK": 0.6726
+      "SMH": 0.6189,
+      "XLK": 0.6724
     },
     "rsi10": {
       "SPY": 39.8,
@@ -561,7 +556,7 @@
       "gate_entry_TQQQ": "FALTERING",
       "gate_entry_SOXL": "FALTERING"
     },
-    "as_of": "2026-11-25"
+    "as_of": "2026-11-26"
   },
   "merged_triggers": {
     "selected_branch": "L5_DEFAULT",
