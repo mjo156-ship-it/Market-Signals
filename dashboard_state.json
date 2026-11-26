@@ -1,14 +1,19 @@
 {
-  "generated_at_local": "2026-11-26T02:42:47.027758",
-  "generated_at_utc": "2026-11-26T02:42:47.027768Z",
+  "generated_at_local": "2026-11-26T22:36:48.982927",
+  "generated_at_utc": "2026-11-26T22:36:48.982934Z",
   "mode": "close",
   "summary": {
-    "total_alerts": 4,
+    "total_alerts": 5,
     "buy_count": 1,
     "exit_count": 0,
-    "warning_count": 3
+    "warning_count": 4
   },
   "alerts": [
+    {
+      "title": "\ud83d\udfe1 BTC OVERSOLD",
+      "message": "BTC RSI=28.4 < 30 (wait for UVXY < 40 for better signal)",
+      "category": "watch"
+    },
     {
       "title": "\ud83d\udfe2 Z-SCORE QQQ_RSP FIRED",
       "message": "QQQ/RSP detrended z = -3.33\u03c3 \u2264 -1.5\u03c3\n   \u2192 Long TQQQ 20d (vs QQQ default): +11.47pp edge, MDD -52% | n=35 ep\n   \u2192 Hold 20 trading days from entry, then return to QQQ default\n   \u2192 Last fire: 2026-11-25 (0d ago)",
@@ -230,13 +235,13 @@
       "pct_above_sma200": 13.53
     },
     "BTC-USD": {
-      "price": 60901.78,
-      "rsi10": 30.5,
-      "rsi50": 38.7,
-      "sma200": 72031.08,
-      "sma50": 75144.64,
-      "ema21": 66249.19,
-      "pct_above_sma200": -15.45
+      "price": 60483.57,
+      "rsi10": 28.4,
+      "rsi50": 38.2,
+      "sma200": 71920.18,
+      "sma50": 74678.32,
+      "ema21": 65681.77,
+      "pct_above_sma200": -15.9
     },
     "AMD": {
       "price": 406.03,
